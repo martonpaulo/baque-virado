@@ -1,0 +1,230 @@
+// Wires the reel together: one render function for a position on the timeline, a live loop,
+// playback, controls, and the `window.baque` API the video exporter drives.
+
+import { createPlayer, createSampleBank, filesFor, renderShowWav } from './audio.js';
+import { backgroundAt, createBackground } from './background.js';
+import { bindKeyboard, createSceneChips, createSoundPickers, initialChoices } from './controls.js';
+import { COPY } from './copy.js';
+import { createLanes } from './lanes.js';
+import { BAQUE_ORDER, BAR_SECONDS, BPM, STEPS_PER_BAR } from './music.js';
+import { createReadout } from './readout.js';
+import { createScope, SCOPE_RADIUS } from './scope.js';
+import { recentHits, SCENES, sceneAt, sceneIndexAt, TOTAL_BARS, TOTAL_SECONDS } from './show.js';
+import { createTitle } from './title.js';
+import { formatClock, formatPrecise, pad2 } from './util.js';
+
+const $ = id => document.getElementById(id);
+const DESKTOP_QUERY = '(min-width: 900px)'; // also where styles.css switches to the side panels
+const DESKTOP = window.matchMedia(DESKTOP_QUERY).matches;
+const AUDIO_LEAD_IN = 0.03; // seconds of silence before the first hit in the offline render
+const MIN_VISUAL_SPEED = 0.55; // slowest background speed, as a multiple of real time
+const SCOPE_VIEWBOX_RADIUS = 135; // half the wheel SVG's viewBox width (SVG units)
+const MAX_DPR = 2; // canvases never render above 2× device pixels
+const LIVE_MAX_STEP = 0.1; // seconds; a longer frame gap (tab hidden) advances the visuals this much only
+const END_EPSILON = 1e-6; // bars; keeps the last position inside the final bar
+const REWIND_AT_END = 0.01; // bars from the end where Play starts over
+const SCENE_RESTART_BARS = 0.5; // bars into a scene before ← restarts it instead of going back
+const RECENT_HITS_WINDOW = 1.2; // seconds of hits the background reacts to
+const EXPORT_JUMP = 0.25; // seconds; a bigger jump between exported frames resets the clock
+const MS_PER_SECOND = 1000;
+// Shader resolution relative to the canvas: full for export, lighter on phones.
+const EXPORT_SHADER_SCALE = 1,
+  DESKTOP_SHADER_SCALE = 0.5,
+  PHONE_SHADER_SCALE = 0.35;
+
+const stage = $('stage');
+const scope = createScope($('scope'));
+const readout = createReadout($('read'));
+const title = createTitle($('head'));
+const background = createBackground($('fx'), $('bg'));
+const lanes = createLanes($('lanes'));
+
+// ---------- sizes ----------
+function measure() {
+  const dpr = Math.min(MAX_DPR, window.devicePixelRatio || 1);
+  const box = stage.getBoundingClientRect(),
+    wheel = $('scopeBox').getBoundingClientRect();
+  background.resize({
+    width: Math.round(box.width * dpr),
+    height: Math.round(box.height * dpr),
+    dpr,
+    centreX: (wheel.left - box.left + wheel.width / 2) * dpr,
+    centreY: (wheel.top - box.top + wheel.height / 2) * dpr,
+    scopeRadius: (wheel.width / 2) * dpr * (SCOPE_RADIUS / SCOPE_VIEWBOX_RADIUS),
+  });
+  lanes.resize(dpr);
+  clock.reset();
+}
+
+// ---------- visual clock ----------
+// Live: wall time, so the background keeps moving while paused (the motion is the content, so it
+// ignores reduce-motion). Export: derived from the position only, so every frame is reproducible.
+const speedOf = scene => Math.max(MIN_VISUAL_SPEED, scene.fx.speed);
+const clock = {
+  exporting: false,
+  lastPosition: null,
+  lastWall: null,
+  liveTime: 0,
+  reset() {
+    this.lastPosition = null;
+  },
+  tick(position, params) {
+    if (this.exporting) {
+      const step = this.lastPosition === null ? 1 : (position - this.lastPosition) * BAR_SECONDS;
+      this.lastPosition = position;
+      let time = 0;
+      for (const scene of SCENES) {
+        const bars = Math.min(scene.bars, Math.max(0, position - scene.start));
+        time += bars * BAR_SECONDS * speedOf(scene);
+        if (position < scene.start + scene.bars) break;
+      }
+      return { time, step };
+    }
+    const now = performance.now() / MS_PER_SECOND,
+      step = this.lastWall === null ? 0 : Math.min(LIVE_MAX_STEP, now - this.lastWall);
+    this.lastWall = now;
+    this.liveTime += step * Math.max(MIN_VISUAL_SPEED, params.speed);
+    return { time: this.liveTime, step };
+  },
+};
+
+// ---------- one frame ----------
+let position = 0,
+  currentScene = null,
+  currentBar = -1;
+const sceneChips = createSceneChips($('chips'), scene => seek(scene.start));
+
+function render(at, force = false) {
+  const p = Math.max(0, Math.min(TOTAL_BARS - END_EPSILON, at));
+  const bar = Math.floor(p),
+    scene = sceneAt(bar),
+    barInScene = bar - scene.start,
+    sixteenth = (p - bar) * STEPS_PER_BAR,
+    seconds = p * BAR_SECONDS;
+  if (scene !== currentScene) {
+    currentScene = scene;
+    title.build(scene);
+    readout.build(scene);
+    sceneChips.setCurrent(SCENES.indexOf(scene));
+  }
+  if (bar !== currentBar || force) {
+    currentBar = bar;
+    scope.build(scene, barInScene);
+    readout.onBar(scene, barInScene);
+  }
+  readout.update(sixteenth, barInScene);
+  scope.update(p, scene, barInScene);
+  title.update(p, scene);
+  $('hSec').textContent = `[${scene.section}] ${COPY.sections[scene.section]}`;
+  $('hBar').textContent = COPY.hud.bar(pad2(bar + 1), TOTAL_BARS);
+  $('hStep').textContent = COPY.hud.step(pad2(Math.floor(sixteenth) + 1));
+  $('hTime').textContent = formatPrecise(seconds);
+  $('clock').textContent = `${formatClock(seconds)} / ${formatClock(TOTAL_SECONDS)}`;
+  const params = backgroundAt(p);
+  background.draw(p, params, recentHits(p, RECENT_HITS_WINDOW), clock.tick(p, params), scope.shapes);
+  lanes.draw(p);
+}
+
+// ---------- playback ----------
+const choice = initialChoices(DESKTOP);
+const bank = createSampleBank();
+bank.prefetch(filesFor(choice));
+const player = createPlayer(bank, choice);
+const playButton = $('play');
+
+async function play() {
+  if (!player.playing && position >= TOTAL_BARS - REWIND_AT_END) position = 0;
+  playButton.disabled = true;
+  playButton.textContent = COPY.controls.loading;
+  try {
+    await player.start(position);
+  } catch {
+    playButton.disabled = false;
+    playButton.textContent = COPY.controls.loadFailed;
+    return;
+  }
+  playButton.disabled = false;
+  playButton.textContent = COPY.controls.pause;
+}
+function pause() {
+  const stoppedAt = player.stop();
+  if (stoppedAt !== null) position = Math.max(0, stoppedAt);
+  playButton.textContent = COPY.controls.play;
+}
+const toggle = () => (player.playing ? pause() : play());
+function seek(to) {
+  const wasPlaying = player.playing;
+  if (wasPlaying) pause();
+  position = to;
+  currentBar = -1;
+  clock.reset();
+  render(position);
+  if (wasPlaying) play();
+}
+const stepScene = direction => {
+  const index = sceneIndexAt(Math.floor(position));
+  const target = direction > 0 ? index + 1 : position - SCENES[index].start > SCENE_RESTART_BARS ? index : index - 1;
+  seek(SCENES[Math.max(0, Math.min(SCENES.length - 1, target))].start);
+};
+
+playButton.textContent = COPY.controls.play;
+playButton.addEventListener('click', toggle);
+bindKeyboard({ toggle, previousScene: () => stepScene(-1), nextScene: () => stepScene(1) });
+if (DESKTOP) {
+  createSoundPickers([$('soundsLeft'), $('soundsRight')], choice, async sound => {
+    bank.prefetch(filesFor(choice));
+    if (player.playing) {
+      await player.refresh();
+      return;
+    }
+    const [sceneId, offset] = sound.preview;
+    seek(SCENES.find(scene => scene.id === sceneId).start + offset);
+    play();
+  });
+}
+$('hBpm').textContent = BPM;
+$('facts').textContent = COPY.controls.facts(BAQUE_ORDER.length, TOTAL_BARS, formatClock(TOTAL_SECONDS));
+
+// ---------- loop ----------
+function loop() {
+  if (clock.exporting) return;
+  if (player.playing) {
+    position = player.position();
+    if (position >= TOTAL_BARS) {
+      pause();
+      position = TOTAL_BARS - END_EPSILON;
+    }
+  }
+  render(position);
+  requestAnimationFrame(loop);
+}
+
+// ---------- video exporter API ----------
+window.baque = {
+  render(at) {
+    if (!clock.exporting) {
+      clock.exporting = true;
+      background.setShaderScale(EXPORT_SHADER_SCALE);
+      measure();
+    }
+    if (clock.lastPosition !== null && Math.abs(at - clock.lastPosition) * BAR_SECONDS > EXPORT_JUMP) clock.reset();
+    position = at;
+    currentBar = -1;
+    render(at, true);
+  },
+  renderAudio: () => renderShowWav(bank, choice, AUDIO_LEAD_IN),
+  TOTAL: TOTAL_BARS,
+  BAR: BAR_SECONDS,
+  audioOffset: AUDIO_LEAD_IN,
+};
+
+background.setShaderScale(DESKTOP ? DESKTOP_SHADER_SCALE : PHONE_SHADER_SCALE);
+new ResizeObserver(() => {
+  measure();
+  title.fit();
+  render(position, true);
+}).observe(stage);
+document.fonts?.ready.then(() => title.fit());
+measure();
+render(0, true);
+requestAnimationFrame(loop);

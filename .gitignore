@@ -1,0 +1,9 @@
+# dependencies and local tooling
+node_modules/
+.scratch/
+.DS_Store
+
+# generated media (the exporter writes video and a lossless WAV)
+*.mp4
+*.wav
+!sounds/*.wav

@@ -1,0 +1,72 @@
+# Baque virado
+
+An interactive, animated explainer of maracatu de baque virado, the drum music of Recife, played
+with real one-shot drum samples. It walks through the instruments, the measured swing, the
+offbeat and the seven baques, then ends on the unison virada. The interface is in Brazilian
+Portuguese.
+
+Live: <https://baquevirado.martonpaulo.com>
+
+## Run locally
+
+There is no build step: the page is plain HTML, CSS and ES modules.
+
+```sh
+python3 -m http.server 8000
+```
+
+Then open <http://localhost:8000>. A server is needed because the modules and the sounds are fetched.
+
+Sounds load on demand: a phone downloads only the default sounds (11 files); the alternative
+sounds a desktop viewer can pick are fetched when chosen.
+
+## Project structure
+
+- `index.html`, `styles.css` - the page and its layout.
+- `src/music.js` - tempo, voices, the measured swing and every rhythmic pattern (`barHits`).
+- `src/show.js` - the scenes, the 54-bar timeline and what sounds at any moment.
+- `src/audio.js` - sound choices, the lazy sample bank, the live player and the offline WAV render.
+- `src/copy.js` - every word the viewer reads (Brazilian Portuguese).
+- `src/util.js` - small helpers, including the deterministic `hash` that seeds per-hit variation.
+- `src/theme.js` - the shared colour palette and fonts.
+- `src/score.js` - one-line percussion notation as an SVG string.
+- `src/scope.js` - the rhythm wheel.
+- `src/readout.js` - the numeric readouts of each scene.
+- `src/title.js` - scene titles and labels.
+- `src/background.js` - the animated WebGL background.
+- `src/lanes.js` - the per-voice hit lanes.
+- `src/controls.js` - play, pause, scene and sound controls.
+- `src/main.js` - wires everything together and exposes `window.baque` for the exporter.
+- `sounds/` - the WAV samples (see [CREDITS.md](CREDITS.md)).
+- `tests/` - unit tests of the DOM-free modules.
+- `tools/export-video.mjs` - the vertical video exporter.
+
+## Tests
+
+```sh
+npm ci
+npm test
+```
+
+The tests use `node:test` and cover the timeline, the special bars, the patterns, the sound files
+and the pinned `hash` values.
+
+## Video export
+
+Renders the page to a 1080x1920, 30 fps H.264 MP4 with the offline-rendered audio (AAC 320k).
+It needs Google Chrome for Testing, `ffmpeg` and `python3`.
+
+```sh
+npm run export -- index.html out/baque-virado.mp4
+npm run export -- index.html out/clip.mp4 --from 10 --to 25 --loudnorm
+```
+
+- `--from` / `--to` - the segment to export, in seconds.
+- `--loudnorm` - two-pass loudness normalisation to -14 LUFS, true peak -1.5 dBTP.
+
+## Sources
+
+- Alfaia hand patterns: the pattern table published at
+  [lansdownsoftware.com](https://lansdownsoftware.com).
+- Swing: the median offset of each sixteenth, measured on a workshop recording by Batuk Nagô.
+- Sounds: Freesound, public domain (CC0); authors in [CREDITS.md](CREDITS.md).
