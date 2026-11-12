@@ -1,0 +1,31 @@
+name: Bug report
+description: Report something in O Baque Virado that does not work as expected.
+title: "bug: "
+labels: ["type: bug"]
+body:
+  - type: textarea
+    id: description
+    attributes:
+      label: What happened?
+      description: What you did, what you expected, and what happened instead.
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Open the page and press Tocar.
+        2. Jump to the Martelo scene.
+        3. Observe…
+    validations:
+      required: true
+
+  - type: input
+    id: device
+    attributes:
+      label: Device and browser
+      placeholder: phone or computer, browser and its version
+    validations:
+      required: true

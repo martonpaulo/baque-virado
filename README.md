@@ -1,4 +1,4 @@
-# Baque virado
+# O Baque Virado
 
 An interactive, animated explainer of maracatu de baque virado, the drum music of Recife, played
 with real one-shot drum samples. It walks through the instruments, the measured swing, the
@@ -12,10 +12,11 @@ Live: <https://baquevirado.martonpaulo.com>
 There is no build step: the page is plain HTML, CSS and ES modules.
 
 ```sh
-python3 -m http.server 8000
+pnpm install
+pnpm serve
 ```
 
-Then open <http://localhost:8000>. A server is needed because the modules and the sounds are fetched.
+Then open <http://127.0.0.1:8000>. A server is needed because the modules and the sounds are fetched.
 
 Sounds load on demand: a phone downloads only the default sounds (11 files); the alternative
 sounds a desktop viewer can pick are fetched when chosen.
@@ -39,16 +40,18 @@ sounds a desktop viewer can pick are fetched when chosen.
 - `src/main.js` - wires everything together and exposes `window.baque` for the exporter.
 - `sounds/` - the WAV samples (see [CREDITS.md](CREDITS.md)).
 - `tests/` - unit tests of the DOM-free modules.
+- `tools/static-server.mjs` - the local static server (`pnpm serve`).
 - `tools/export-video.mjs` - the vertical video exporter.
 
 ## Tests
 
 ```sh
-npm ci
-npm test
+pnpm test
+pnpm validate
 ```
 
-The tests use `node:test` and cover the timeline, the special bars, the patterns, the sound files
+`pnpm validate` runs exactly what CI runs: Biome, the tests, `scripts/text_check.py` and
+`scripts/dry_check.py`. The tests use `node:test` and cover the timeline, the special bars, the patterns, the sound files
 and the pinned `hash` values.
 
 ## Video export
@@ -57,8 +60,8 @@ Renders the page to a 1080x1920, 30 fps H.264 MP4 with the offline-rendered audi
 It needs Google Chrome for Testing, `ffmpeg` and `python3`.
 
 ```sh
-npm run export -- index.html out/baque-virado.mp4
-npm run export -- index.html out/clip.mp4 --from 10 --to 25 --loudnorm
+pnpm export index.html out/baque-virado.mp4
+pnpm export index.html out/clip.mp4 --from 10 --to 25 --loudnorm
 ```
 
 - `--from` / `--to` - the segment to export, in seconds.

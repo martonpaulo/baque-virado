@@ -68,3 +68,9 @@ on 2026-11-12.
   (YouTube `hxW-td9bNsg`), in `src/music.js`.
 - Patterns: the alfaia hand table at lansdownsoftware.com; not yet checked by a batuqueiro.
 - No screenshots, user figures or quotes exist yet.
+
+## Accepted evidence gaps
+
+- Accessibility: no automated accessibility test runs; the markup and `src/controls.js` are the
+  evidence (labelled stage, `aria-pressed` and `aria-current` chips, focus outlines, reduced
+  motion). Accepted by the owner on 2026-11-13 for a single static page.
