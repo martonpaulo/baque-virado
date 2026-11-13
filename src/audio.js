@@ -146,6 +146,9 @@ function scheduleStep(context, buffers, destination, step, time, choice) {
 /** The sample files one set of choices needs (mobile downloads only these). */
 export const filesFor = choice => [...SOUND_CHOICES.flatMap(c => c.files(choice[c.id])), ...FIXED_FILES];
 
+// The page fetches AAC at 96 kbps (#3); `tools/encode-sounds.mjs` makes each one from its WAV master.
+export const SOUND_EXTENSION = '.m4a';
+
 /** Fetches samples on demand and decodes them once per audio context. */
 export function createSampleBank(baseUrl = 'sounds/') {
   const downloads = new Map(),
@@ -154,7 +157,7 @@ export function createSampleBank(baseUrl = 'sounds/') {
   const fetchSample = async name => {
     for (let attempt = 1; ; attempt++) {
       try {
-        const response = await fetch(`${baseUrl}${name}.wav`);
+        const response = await fetch(`${baseUrl}${name}${SOUND_EXTENSION}`);
         if (!response.ok) throw new Error(`missing sound: ${name} (${response.status})`);
         return await response.arrayBuffer();
       } catch (error) {

@@ -19,6 +19,7 @@ const CONTENT_TYPES = {
   '.md': 'text/markdown; charset=utf-8',
   '.svg': 'image/svg+xml',
   '.wav': 'audio/wav',
+  '.m4a': 'audio/mp4',
 };
 
 /** True when `file` is `base` or inside it (a sibling such as `<base>-private` is outside). */

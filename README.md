@@ -18,7 +18,7 @@ pnpm serve
 
 Then open <http://127.0.0.1:8000>. A server is needed because the modules and the sounds are fetched.
 
-Sounds load on demand: a phone downloads only the default sounds (11 files); the alternative
+Sounds load on demand: a phone downloads only the default sounds (11 AAC files, about 92 KB); the alternative
 sounds a desktop viewer can pick are fetched when chosen.
 
 ## Project structure
@@ -38,7 +38,8 @@ sounds a desktop viewer can pick are fetched when chosen.
 - `src/lanes.js` - the per-voice hit lanes.
 - `src/controls.js` - play, pause, scene and sound controls.
 - `src/main.js` - wires everything together and exposes `window.baque` for the exporter.
-- `sounds/` - the WAV samples (see [CREDITS.md](CREDITS.md)).
+- `sounds/` - the samples: WAV masters and the AAC (`.m4a`) files the page fetches (see [CREDITS.md](CREDITS.md)).
+- `tools/encode-sounds.mjs` - encodes each WAV to AAC at 96 kbps (`node tools/encode-sounds.mjs`, needs `ffmpeg`).
 - `tests/` - unit tests of the DOM-free modules.
 - `tools/static-server.mjs` - the local static server (`pnpm serve`).
 - `tools/export-video.mjs` - the vertical video exporter.
