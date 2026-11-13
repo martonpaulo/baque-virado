@@ -16,6 +16,7 @@ import { formatClock, formatPrecise, pad2 } from './util.js';
 const $ = id => document.getElementById(id);
 const DESKTOP_QUERY = '(min-width: 900px)'; // also where styles.css switches to the side panels
 const DESKTOP = window.matchMedia(DESKTOP_QUERY).matches;
+const REDUCED_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)');
 const AUDIO_LEAD_IN = 0.03; // seconds of silence before the first hit in the offline render
 const MIN_VISUAL_SPEED = 0.55; // slowest background speed, as a multiple of real time
 const SCOPE_VIEWBOX_RADIUS = 135; // half the wheel SVG's viewBox width (SVG units)
@@ -57,8 +58,8 @@ function measure() {
 }
 
 // ---------- visual clock ----------
-// Live: wall time, so the background keeps moving while paused (the motion is the content, so it
-// ignores reduce-motion). Export: derived from the position only, so every frame is reproducible.
+// Live: wall time, so the background keeps moving while paused, unless the viewer asks for reduced
+// motion (then Pause stops it). Export: derived from the position only, so every frame is reproducible.
 const speedOf = scene => Math.max(MIN_VISUAL_SPEED, scene.fx.speed);
 const clock = {
   exporting: false,
@@ -100,7 +101,7 @@ function render(at, force = false) {
   const params = backgroundAt(p);
   const drawBackground = () => background.draw(p, params, recentHits(p, RECENT_HITS_WINDOW), clock.tick(p, params), scope.shapes);
   if (p === renderedAt && !force) {
-    drawBackground(); // paused: only the background moves, the rest is already on screen
+    if (!REDUCED_MOTION.matches) drawBackground(); // paused: only the background moves
     return;
   }
   renderedAt = p;

@@ -228,7 +228,16 @@ body {
   line-height: 1;
 }
 .stats.small b {
-  font-size: 8cqw;
+  font-size: 7cqw;
+}
+/* a baque scene (stats + score) must fit its box: if it overflowed, the centred column would spill
+   up into the wheel and cover its "9" label */
+.read:has(> .score) {
+  gap: 0.4cqw;
+}
+.read > .score {
+  width: 76%;
+  align-self: center;
 }
 .stats b small {
   font-size: 5cqw;

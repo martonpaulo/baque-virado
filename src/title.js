@@ -30,6 +30,8 @@ const JITTER = 2.4; // cqw, peak-to-peak horizontal shake at full glitch
 const SKEW = 6; // degrees at full glitch
 const GLITCH_FADE = 0.25; // opacity lost at full glitch
 
+const REDUCED_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)');
+
 const scramble = (text, revealed, position, salt) =>
   [...text]
     .map((ch, i) =>
@@ -93,7 +95,8 @@ export function createTitle(head) {
     const split = (SPLIT_REST + glitch * SPLIT_GLITCH).toFixed(2),
       jitter = glitch ? ((hash(Math.floor(position * GLYPH_RATE)) - 0.5) * JITTER * glitch).toFixed(2) : 0;
     titleEl.style.textShadow = `-${split}cqw 0 0 ${TINTS.titleSplitLeft}, ${split}cqw 0 0 ${TINTS.titleSplitRight}`;
-    titleEl.style.transform = glitch ? `translateX(${jitter}cqw) skewX(${(-glitch * SKEW).toFixed(1)}deg)` : '';
+    // reduced motion keeps the letter scramble and the fade, without the shake and skew
+    titleEl.style.transform = glitch && !REDUCED_MOTION.matches ? `translateX(${jitter}cqw) skewX(${(-glitch * SKEW).toFixed(1)}deg)` : '';
     titleEl.style.opacity = (1 - glitch * GLITCH_FADE).toFixed(2);
   }
 
