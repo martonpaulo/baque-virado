@@ -32,3 +32,16 @@ test('the hits of a bar are computed once and cannot be changed by a caller', as
   assert.equal(hitsInBar(21), first);
   assert.ok(Object.isFrozen(first) && Object.isFrozen(first[0]));
 });
+
+test('every sounding hit comes from the bar timeline the wheel draws', async () => {
+  const { barTimeline, hitsInBar, TOTAL_BARS } = await import('../src/show.js');
+  for (let bar = 0; bar < TOTAL_BARS; bar++) {
+    const { playing, voices } = barTimeline(bar);
+    const expected = playing.flatMap(voice => voices[voice].map(entry => [voice, entry.hit, bar + entry.position / 16]));
+    assert.deepEqual(
+      hitsInBar(bar).map(h => [h.voice, h.hit, h.at]),
+      expected,
+      `bar ${bar}`,
+    );
+  }
+});

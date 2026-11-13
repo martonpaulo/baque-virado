@@ -1,6 +1,6 @@
 // The order of the show: scenes, sections, the timeline and what sounds at any moment.
 // Positions on the timeline are measured in bars (a float: 7.25 = a quarter into bar 8).
-import { ALFAIA_HANDS, ALFAIA_WITH_STICK, BAR_SECONDS, barHits, INSTRUMENTS, swingOffset, VOICE_ORDER } from './music.js';
+import { ALFAIA_HANDS, ALFAIA_WITH_STICK, BAR_SECONDS, barHits, INSTRUMENTS, STEPS_PER_BAR, swingOffset, VOICE_ORDER } from './music.js';
 import { smooth } from './util.js';
 
 const always = value => () => value;
@@ -122,21 +122,41 @@ export function blendAt(position, width) {
 }
 
 /**
- * Every hit of one bar of the show, with its swung time (`at`) and grid time (`grid`), in bars.
- * Pure in `bar`, so each bar is computed once and shared (frozen: callers never change it).
+ * The one source of hit timing: every voice's hits in one bar, playing or not, each with its swing
+ * offset in sixteenths (`swing`) and swung position (`position` = step + swing). Audio, the wheel and
+ * the lanes all read it. Pure in `bar`, so it is computed once per bar and frozen.
  */
-const hitsCache = new Map();
-export function hitsInBar(bar) {
-  if (bar < 0 || bar >= TOTAL_BARS) return [];
-  if (!hitsCache.has(bar)) {
+const timelineCache = new Map();
+export function barTimeline(bar) {
+  if (!timelineCache.has(bar)) {
     const scene = sceneAt(bar),
       barInScene = bar - scene.start,
       hits = barHits(scene, barInScene),
       swingOn = scene.swing(barInScene),
+      voices = {};
+    for (const voice of VOICE_ORDER) {
+      voices[voice] = Object.freeze(
+        hits[voice].map(h => {
+          const swing = swingOffset(voice, h.step, swingOn);
+          return Object.freeze({ hit: h, swing, position: h.step + swing });
+        }),
+      );
+    }
+    timelineCache.set(bar, Object.freeze({ scene, barInScene, playing: Object.freeze(scene.voices(barInScene)), voices: Object.freeze(voices) }));
+  }
+  return timelineCache.get(bar);
+}
+
+/** Every hit that sounds in one bar, with its swung time (`at`) and grid time (`grid`), in bars. */
+const hitsCache = new Map();
+export function hitsInBar(bar) {
+  if (bar < 0 || bar >= TOTAL_BARS) return [];
+  if (!hitsCache.has(bar)) {
+    const { playing, voices } = barTimeline(bar),
       out = [];
-    for (const voice of scene.voices(barInScene)) {
-      for (const h of hits[voice])
-        out.push(Object.freeze({ voice, hit: h, at: bar + (h.step + swingOffset(voice, h.step, swingOn)) / 16, grid: bar + h.step / 16 }));
+    for (const voice of playing) {
+      for (const { hit, swing, position } of voices[voice])
+        out.push(Object.freeze({ voice, hit, swing, at: bar + position / STEPS_PER_BAR, grid: bar + hit.step / STEPS_PER_BAR }));
     }
     hitsCache.set(bar, Object.freeze(out));
   }

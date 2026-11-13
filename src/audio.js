@@ -1,7 +1,7 @@
 // Sound: real one-shot recordings (public domain), scheduled sample-accurately with Web Audio.
 // The same scheduler drives live playback and the offline render used by the video exporter.
-import { BAR_SECONDS, BEAT_SECONDS, barHits, STEPS_PER_BAR, swingOffset, VOICE_ORDER } from './music.js';
-import { sceneAt, TOTAL_BARS } from './show.js';
+import { BAR_SECONDS, BEAT_SECONDS, STEPS_PER_BAR, VOICE_ORDER } from './music.js';
+import { barTimeline, hitsInBar, TOTAL_BARS } from './show.js';
 import { hash } from './util.js';
 
 // Sounds the viewer can swap on desktop. `files(option)` lists the samples of one option.
@@ -129,28 +129,13 @@ function playSample(context, buffers, name, time, gain, rate, destination, varia
 /** Schedule every hit of one sixteenth of the show (`step` counts from the start) at `time`. */
 function scheduleStep(context, buffers, destination, step, time, choice) {
   const bar = Math.floor(step / STEPS_PER_BAR),
-    scene = sceneAt(bar),
-    barInScene = bar - scene.start,
-    sixteenth = step % STEPS_PER_BAR;
-  const hits = barHits(scene, barInScene),
-    swingOn = scene.swing(barInScene);
-  for (const voice of scene.voices(barInScene)) {
-    for (const h of hits[voice]) {
-      if (h.step !== sixteenth) continue;
-      const variation = hash(step * 8 + VOICE_SEED[voice]);
-      const sample = SAMPLE_FOR[voice](choice, h.velocity * (scene.gain[voice] || 1), h.tone, variation);
-      if (sample)
-        playSample(
-          context,
-          buffers,
-          sample[0],
-          time + (swingOffset(voice, sixteenth, swingOn) / 4) * BEAT_SECONDS,
-          sample[1],
-          sample[2],
-          destination,
-          variation,
-        );
-    }
+    sixteenth = step % STEPS_PER_BAR,
+    { scene } = barTimeline(bar);
+  for (const { voice, hit, swing } of hitsInBar(bar)) {
+    if (hit.step !== sixteenth) continue;
+    const variation = hash(step * 8 + VOICE_SEED[voice]);
+    const sample = SAMPLE_FOR[voice](choice, hit.velocity * (scene.gain[voice] || 1), hit.tone, variation);
+    if (sample) playSample(context, buffers, sample[0], time + (swing / 4) * BEAT_SECONDS, sample[1], sample[2], destination, variation);
   }
 }
 

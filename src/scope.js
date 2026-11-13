@@ -2,8 +2,8 @@
 // a sweeping hand and the labels in its centre.
 
 import { COPY } from './copy.js';
-import { BAR_SECONDS, barHits, INSTRUMENTS, isAlfaia, isOffbeat, STEPS_PER_BAR, swingOffset, VOICE_ORDER, VOICES } from './music.js';
-import { recentHits } from './show.js';
+import { BAR_SECONDS, INSTRUMENTS, isAlfaia, isOffbeat, STEPS_PER_BAR, VOICE_ORDER, VOICES } from './music.js';
+import { barTimeline, recentHits } from './show.js';
 import { COLORS, MONO_FONT, TINTS } from './theme.js';
 import { fixed2, pad2, polylinePath, svgElement } from './util.js';
 
@@ -194,14 +194,13 @@ export function createScope(svg) {
     shapeLayer.textContent = '';
     dots = [];
     shapes = [];
-    const hits = barHits(scene, barInScene),
-      active = new Set(scene.voices(barInScene)),
-      swingOn = scene.swing(barInScene);
+    const { voices, playing } = barTimeline(scene.start + barInScene),
+      active = new Set(playing);
     for (const voice of SHAPE_VOICES) {
       // the shape each rhythm draws on its ring, grown hit by hit
-      if (!active.has(voice) || hits[voice].length < 2) continue;
+      if (!active.has(voice) || voices[voice].length < 2) continue;
       const { ring, color } = VOICES[voice];
-      const positions = hits[voice].map(h => h.step + swingOffset(voice, h.step, swingOn));
+      const positions = voices[voice].map(entry => entry.position);
       const points = positions.map(p => pointAt(ring, p));
       svgElement(
         'path',
@@ -234,9 +233,8 @@ export function createScope(svg) {
       const { ring, size, color } = VOICES[voice];
       if (!ring) continue;
       const on = active.has(voice);
-      for (const h of hits[voice]) {
-        const position = h.step + swingOffset(voice, h.step, swingOn),
-          [x, y] = pointAt(ring, position);
+      for (const { hit: h, position } of voices[voice]) {
+        const [x, y] = pointAt(ring, position);
         const radius = size * (voice === 'agogo' && h.tone === 'high' ? AGOGO_HIGH_SCALE : 1) * (DOT_VELOCITY_FLOOR + DOT_VELOCITY_SPAN * h.velocity);
         if (on && isAlfaia(voice) && isOffbeat(h.step))
           svgElement(
