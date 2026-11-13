@@ -4,14 +4,15 @@ import { BAR_SECONDS, BEAT_SECONDS, STEPS_PER_BAR, VOICE_ORDER } from './music.j
 import { barTimeline, hitsInBar, TOTAL_BARS } from './show.js';
 import { hash } from './util.js';
 
-// Sounds the viewer can swap on desktop. `files(option)` lists the samples of one option.
+// Sounds the viewer can swap on desktop. `files(option)` lists the samples of one option, and
+// `preview` the hits ([voice, tone]) a pick plays while the show is paused.
 // The first-listed default is the version chosen by ear for the show.
 export const SOUND_CHOICES = [
   {
     id: 'alfaia',
     label: 'alfaia',
     defaultOption: 'deep-click',
-    preview: ['marcacao', 0],
+    preview: [['main']],
     files: o => [`alfaia-${o}-main`, `alfaia-${o}-answer`],
     options: [
       ['deep', 'alfaia grave'],
@@ -28,7 +29,7 @@ export const SOUND_CHOICES = [
     id: 'ganza',
     label: 'ganzá',
     defaultOption: 'rice',
-    preview: ['ensemble', 3],
+    preview: [['ganza']],
     files: o => [`ganza-${o}`],
     options: [
       ['rice', 'ganzá de arroz'],
@@ -41,7 +42,7 @@ export const SOUND_CHOICES = [
     id: 'agbe',
     label: 'agbê',
     defaultOption: 'maracatu',
-    preview: ['ensemble', 2],
+    preview: [['agbe']],
     files: o => [`agbe-${o}`],
     options: [
       ['soft-shekere', 'xequerê suave'],
@@ -54,7 +55,7 @@ export const SOUND_CHOICES = [
     id: 'whistle',
     label: 'apito',
     defaultOption: 'gym',
-    preview: ['opening', 0],
+    preview: [['whistle', 'long']],
     files: o => ['long', 'short', 'trill'].map(kind => `whistle-${o}-${kind}`),
     options: [
       ['referee', 'apito de juiz'],
@@ -67,7 +68,10 @@ export const SOUND_CHOICES = [
     id: 'agogo',
     label: 'agogô',
     defaultOption: 'short-bell',
-    preview: ['agogo', 0],
+    preview: [
+      ['agogo', 'low'],
+      ['agogo', 'high'],
+    ],
     files: o => [`agogo-${o}`],
     options: [
       ['big-bell', 'sino grande'],
@@ -187,6 +191,12 @@ export function createSampleBank(baseUrl = 'sounds/') {
   };
 }
 
+// A sound picked while paused is previewed in place (#5).
+const PREVIEW_GAP = BEAT_SECONDS / 2; // seconds between the hits of one preview (an eighth note)
+const PREVIEW_RING_MS = 1500; // a preview's last hit rings this long before the context may sleep
+const NEUTRAL_VARIATION = 0.5; // a preview plays each sample at its own pitch and level
+const MS_PER_SECOND = 1000;
+
 /**
  * Live playback with a look-ahead scheduler. `choice` maps each SOUND_CHOICES id to an option; the
  * caller changes it only after `prepare(next)` has decoded the new samples, so no hit goes silent.
@@ -206,7 +216,14 @@ export function createPlayer(bank, choice) {
   let playing = false,
     startTime = 0,
     startBar = 0,
-    nextStep = 0;
+    nextStep = 0,
+    awakeUntil = 0; // performance.now() until which a preview still sounds
+  /** Let the audio thread sleep after `ms`, unless the show or a preview is sounding by then. */
+  const sleepLater = (ms, then = () => {}) =>
+    setTimeout(() => {
+      then();
+      if (!playing && performance.now() >= awakeUntil) context.suspend();
+    }, ms);
   const stepTime = step => startTime + (step / STEPS_PER_BAR - startBar) * BAR_SECONDS;
   function tick() {
     const horizon = context.currentTime + LOOKAHEAD;
@@ -266,11 +283,23 @@ export function createPlayer(bank, choice) {
       clearInterval(timer);
       const fading = bus;
       fading.gain.setTargetAtTime(0, context.currentTime, FADE_SECONDS);
-      setTimeout(() => {
-        fading.disconnect();
-        if (!playing) context.suspend();
-      }, RELEASE_MS);
+      sleepLater(RELEASE_MS, () => fading.disconnect());
       return at;
+    },
+    /**
+     * Play `hits` ([voice, tone] pairs) of the choices `next` once, without starting the show: a
+     * sound picked while paused is heard where the viewer is. Rejects when the samples did not load.
+     */
+    async preview(next, hits) {
+      await this.prepare(next);
+      const start = context.currentTime + START_DELAY;
+      hits.forEach(([voice, tone], i) => {
+        const [name, gain, rate] = SAMPLE_FOR[voice](next, 1, tone, NEUTRAL_VARIATION);
+        playSample(context, buffers, name, start + i * PREVIEW_GAP, gain, rate, master, NEUTRAL_VARIATION);
+      });
+      const ringMs = (START_DELAY + hits.length * PREVIEW_GAP) * MS_PER_SECOND + PREVIEW_RING_MS;
+      awakeUntil = Math.max(awakeUntil, performance.now() + ringMs);
+      sleepLater(ringMs);
     },
   };
 }

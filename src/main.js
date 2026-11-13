@@ -192,15 +192,11 @@ if (DESKTOP) {
       if (starting) return false; // the show is still loading: ignore the click
       const next = { ...choice, [sound.id]: option };
       bank.prefetch(filesFor(next));
-      if (player.playing) {
-        await player.prepare(next); // decode first: the instrument never drops out mid-show
-        choice[sound.id] = option;
-        return;
-      }
+      // Decode first, so the instrument never drops out mid-show and a failed load keeps the old
+      // sound. Paused, the pick is heard in place: no seek, no Play (#5).
+      if (player.playing) await player.prepare(next);
+      else await player.preview(next, sound.preview);
       choice[sound.id] = option;
-      const [sceneId, offset] = sound.preview;
-      seek(SCENES.find(scene => scene.id === sceneId).start + offset);
-      play();
     },
     choice,
   );
