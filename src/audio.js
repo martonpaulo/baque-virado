@@ -202,12 +202,18 @@ export function createSampleBank(baseUrl = 'sounds/') {
   };
 }
 
-/** Live playback with a look-ahead scheduler. `choice` maps each SOUND_CHOICES id to an option. */
+/**
+ * Live playback with a look-ahead scheduler. `choice` maps each SOUND_CHOICES id to an option; the
+ * caller changes it only after `prepare(next)` has decoded the new samples, so no hit goes silent.
+ */
 export function createPlayer(bank, choice) {
   const LOOKAHEAD = 0.15,
     TICK_MS = 25,
-    START_DELAY = 0.12;
+    START_DELAY = 0.12,
+    FADE_SECONDS = 0.02,
+    RELEASE_MS = 400;
   let context = null,
+    loading = null,
     buffers = null,
     master = null,
     bus = null,
@@ -224,32 +230,40 @@ export function createPlayer(bank, choice) {
       nextStep++;
     }
   }
+  /** One audio context for the visit; concurrent callers share the same creation. */
+  function open() {
+    if (!loading) {
+      loading = (async () => {
+        const fresh = new (window.AudioContext || window.webkitAudioContext)();
+        try {
+          buffers = await bank.load(fresh, filesFor(choice));
+        } catch (error) {
+          fresh.close();
+          loading = null;
+          throw error;
+        }
+        context = fresh;
+        master = masterChain(context);
+      })();
+    }
+    return loading;
+  }
   return {
     get playing() {
       return playing;
     },
-    /** Current position in bars (only meaningful while playing). */
-    position: () => startBar + (context.currentTime - (context.outputLatency || 0) - startTime) / BAR_SECONDS,
-    async load() {
-      if (context) return;
-      const fresh = new (window.AudioContext || window.webkitAudioContext)();
-      try {
-        buffers = await bank.load(fresh, filesFor(choice));
-      } catch (error) {
-        fresh.close();
-        throw error;
-      }
-      context = fresh;
-      master = masterChain(context);
-    },
-    /** Make sure the samples of the current choices are decoded (after a sound change). */
-    async refresh() {
-      if (context) await bank.load(context, filesFor(choice));
-    },
-    async start(fromBar) {
-      await this.load();
-      await this.refresh();
+    /** Current position in bars (only meaningful while playing); never before the bar it started at. */
+    position: () => Math.max(startBar, startBar + (context.currentTime - (context.outputLatency || 0) - startTime) / BAR_SECONDS),
+    /** Decode the samples of `next` (default: the current choices) and wake the audio context. */
+    async prepare(next = choice) {
+      await open();
+      await bank.load(context, filesFor(next));
       await context.resume();
+    },
+    /** Start at `fromBar`. Call after `prepare()` has resolved. */
+    start(fromBar) {
+      clearInterval(timer);
+      context.resume(); // a stop's delayed suspend may have landed after prepare()
       bus = context.createGain();
       bus.connect(master);
       startBar = fromBar;
@@ -259,15 +273,18 @@ export function createPlayer(bank, choice) {
       tick();
       timer = setInterval(tick, TICK_MS);
     },
-    /** Stops and returns the position it stopped at. */
+    /** Stops and returns the position it stopped at. The context sleeps once the fade ends. */
     stop() {
       if (!playing) return null;
       const at = this.position();
       playing = false;
       clearInterval(timer);
       const fading = bus;
-      fading.gain.setTargetAtTime(0, context.currentTime, 0.02);
-      setTimeout(() => fading.disconnect(), 400);
+      fading.gain.setTargetAtTime(0, context.currentTime, FADE_SECONDS);
+      setTimeout(() => {
+        fading.disconnect();
+        if (!playing) context.suspend();
+      }, RELEASE_MS);
       return at;
     },
   };

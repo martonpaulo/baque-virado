@@ -114,7 +114,7 @@ function render(at, force = false) {
   }
   readout.update(sixteenth, barInScene);
   scope.update(p, scene, barInScene);
-  title.update(p, scene);
+  title.update(p, scene, !player.playing && !clock.exporting);
   $('hSec').textContent = `[${scene.section}] ${COPY.sections[scene.section]}`;
   $('hBar').textContent = COPY.hud.bar(pad2(bar + 1), TOTAL_BARS);
   $('hStep').textContent = COPY.hud.step(pad2(Math.floor(sixteenth) + 1));
@@ -132,18 +132,24 @@ bank.prefetch(filesFor(choice));
 const player = createPlayer(bank, choice);
 const playButton = $('play');
 
+let starting = false; // samples are loading: a second Play, Pause or sound pick waits for it
+
 async function play() {
-  if (!player.playing && position >= TOTAL_BARS - REWIND_AT_END) position = 0;
+  if (starting || player.playing) return;
+  if (position >= TOTAL_BARS - REWIND_AT_END) position = 0;
+  starting = true;
   playButton.disabled = true;
   playButton.textContent = COPY.controls.loading;
   try {
-    await player.start(position);
+    await player.prepare();
   } catch {
-    playButton.disabled = false;
     playButton.textContent = COPY.controls.loadFailed;
     return;
+  } finally {
+    starting = false;
+    playButton.disabled = false;
   }
-  playButton.disabled = false;
+  player.start(position); // the position read now, so a scene picked while loading is kept
   playButton.textContent = COPY.controls.pause;
 }
 function pause() {
@@ -169,18 +175,26 @@ const stepScene = direction => {
 
 playButton.textContent = COPY.controls.play;
 playButton.addEventListener('click', toggle);
-bindKeyboard({ toggle, previousScene: () => stepScene(-1), nextScene: () => stepScene(1) });
+bindKeyboard({ toggle, previousScene: () => stepScene(-1), nextScene: () => stepScene(1) }, playButton);
 if (DESKTOP) {
-  createSoundPickers([$('soundsLeft'), $('soundsRight')], choice, async sound => {
-    bank.prefetch(filesFor(choice));
-    if (player.playing) {
-      await player.refresh();
-      return;
-    }
-    const [sceneId, offset] = sound.preview;
-    seek(SCENES.find(scene => scene.id === sceneId).start + offset);
-    play();
-  });
+  createSoundPickers(
+    [$('soundsLeft'), $('soundsRight')],
+    async (sound, option) => {
+      if (starting) return false; // the show is still loading: ignore the click
+      const next = { ...choice, [sound.id]: option };
+      bank.prefetch(filesFor(next));
+      if (player.playing) {
+        await player.prepare(next); // decode first: the instrument never drops out mid-show
+        choice[sound.id] = option;
+        return;
+      }
+      choice[sound.id] = option;
+      const [sceneId, offset] = sound.preview;
+      seek(SCENES.find(scene => scene.id === sceneId).start + offset);
+      play();
+    },
+    choice,
+  );
 }
 $('hBpm').textContent = BPM;
 $('facts').textContent = COPY.controls.facts(BAQUE_ORDER.length, TOTAL_BARS, formatClock(TOTAL_SECONDS));

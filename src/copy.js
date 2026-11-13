@@ -1,4 +1,7 @@
 // Every word the viewer reads. The interface is in Brazilian Portuguese; the code is in English.
+const FEMININE_INSTRUMENTS = new Set(['alfaia']);
+const of = instrument => (FEMININE_INSTRUMENTS.has(instrument) ? 'da' : 'do'); // "som da alfaia", "som do apito"
+
 export const COPY = {
   sections: { A: 'abertura', B: 'instrumentos', C: 'tempo', D: 'baques', E: 'final' },
   scenes: {
@@ -83,8 +86,9 @@ export const COPY = {
     pause: '❚❚ Pausar',
     loading: 'Carregando…',
     loadFailed: 'Som não carregou · tentar de novo',
-    soundOf: label => `som do ${label}:`,
-    soundGroup: label => `Som do ${label}`,
+    soundOf: label => `som ${of(label)} ${label}:`,
+    soundGroup: label => `Som ${of(label)} ${label}`,
+    soundFailed: label => `som ${of(label)} ${label}: não carregou, tente de novo`,
     facts: (baques, bars, length) => `maracatu de baque virado · ${baques} baques · 7 instrumentos · ${bars} compassos · ${length}`,
   },
 };

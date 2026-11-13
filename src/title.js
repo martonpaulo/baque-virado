@@ -1,5 +1,5 @@
 // Scene title and eyebrow. The old title dissolves into glyphs, the new one decodes letter by
-// letter — a pure function of the position, so the video export matches playback.
+// letter — a pure function of the position, so the video export matches playback. Paused, it rests.
 
 import { COPY } from './copy.js';
 import { SCENES } from './show.js';
@@ -64,7 +64,8 @@ export function createTitle(head) {
     fit();
   }
 
-  function update(position, scene) {
+  /** `settled`: the show is paused (live), so the title rests fully decoded instead of mid-glitch. */
+  function update(position, scene, settled = false) {
     if (!titleEl) return;
     const { eyebrow, title } = COPY.scenes[scene.id],
       index = SCENES.indexOf(scene);
@@ -75,12 +76,12 @@ export function createTitle(head) {
     let shownTitle = full,
       shownEyebrow = eyebrow,
       glitch = 0;
-    if (index > 0 && sinceStart < DECODE_BARS) {
+    if (!settled && index > 0 && sinceStart < DECODE_BARS) {
       const u = sinceStart / DECODE_BARS;
       shownTitle = scramble(full, Math.max(0, Math.floor(u * (length + DECODE_LEAD)) - DECODE_LEAD), position, DECODE_SALT);
       shownEyebrow = eyebrow.slice(0, Math.floor(Math.min(1, u * EYEBROW_SPEED) * eyebrow.length));
       glitch = 1 - u;
-    } else if (index < SCENES.length - 1 && untilEnd < DISSOLVE_BARS) {
+    } else if (!settled && index < SCENES.length - 1 && untilEnd < DISSOLVE_BARS) {
       const u = 1 - untilEnd / DISSOLVE_BARS;
       shownTitle = scramble(full, Math.ceil((1 - u) * length), position, DISSOLVE_SALT);
       shownEyebrow = eyebrow.slice(0, Math.ceil((1 - u) * eyebrow.length));
