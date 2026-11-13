@@ -16,7 +16,8 @@
 - Product copy: Brazilian Portuguese only; dynamic copy lives in `src/copy.js`, static copy in `index.html`; no localization.
 - Branch policy: work directly on `main`; a branch only when the owner asks.
 - Commit policy: the agent commits each verified change, signed, Conventional Commits.
-- Push policy: automatic: push to `main` after the local `pnpm validate` passes.
+- Push policy: automatic: push to `main` after the local `pnpm validate` passes. A cloud session pushes `main` too, only for a `runs: cloud` issue whose gates all ran there (the owner's choice, 2026-11-13: «continuar o trabalho em nuvem e terminar tudo por lá»).
+- Cloud setup command: `bash scripts/cloud-setup.sh` (a cloud run's start).
 - Product versioning: none; the site is continuously deployed and `build.txt` carries the deployed commit.
 - Merge policy: merge commit
 - Commit subject: a commit made for an issue ends with `(#<issue number>)`, never the pull request's.
