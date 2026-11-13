@@ -91,19 +91,26 @@ test('the page loads with no error and exposes the exporter contract', async () 
   await page.close();
 });
 
+// The frame is read in the same task as the render: every canvas (the WebGL one through a 2D copy,
+// before the compositor presents and clears it) and the stage's markup. A compositor screenshot is
+// not used here: under load, headless Chromium can capture a stale WebGL frame (#15).
 test('render(p) from cold gives the same frame twice', async () => {
   const frames = [];
   for (let run = 0; run < 2; run++) {
     const { page, errors } = await openPage(DESKTOP);
-    await page.evaluate(async position => {
+    const frame = await page.evaluate(position => {
       window.baque.render(position);
-      await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
-      // CSS animations (the readout's fade) run on wall time; the exporter steps them with its own
-      // virtual clock, so the frame it captures is the one after they end.
-      for (const animation of document.getAnimations()) animation.finish();
+      const pixels = id => {
+        const source = document.getElementById(id),
+          copy = document.createElement('canvas');
+        copy.width = source.width;
+        copy.height = source.height;
+        copy.getContext('2d').drawImage(source, 0, 0);
+        return copy.toDataURL();
+      };
+      return ['fx', 'bg', 'lanes'].map(pixels).join('|') + document.querySelector('.inner').innerHTML;
     }, DETERMINISM_POSITION);
-    const image = await (await page.$('#stage')).screenshot();
-    frames.push(createHash('sha256').update(image).digest('hex'));
+    frames.push(createHash('sha256').update(frame).digest('hex'));
     assert.deepEqual(errors, []);
     await page.close();
   }
@@ -307,4 +314,37 @@ test('the colour key fits on one line and the lanes name the alfaia hands', asyn
     assert.deepEqual(errors, []);
     await page.close();
   }
+});
+
+// #15: a resize blip (0x0, then the same size) during an export must not re-measure: that clears
+// the canvases and drops the background trail.
+test('a resize blip during an export leaves the background unchanged', async () => {
+  const { page, errors } = await openPage(DESKTOP);
+  const [before, after] = await page.evaluate(async () => {
+    const frame = () => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+    const step = 1 / 30 / window.baque.BAR;
+    for (let i = 0; i < 30; i++) window.baque.render(20 + i * step); // a trail builds up
+    const bg = document.getElementById('bg');
+    const snapshot = bg.toDataURL();
+    const stage = document.getElementById('stage');
+    stage.style.display = 'none';
+    await frame();
+    stage.style.display = '';
+    await frame();
+    return [snapshot, bg.toDataURL()];
+  });
+  assert.ok(before === after, 'the background canvas changed after the blip');
+  assert.deepEqual(errors, []);
+  await page.close();
+});
+
+test('a real stage resize still re-measures the canvases', async () => {
+  const { page, errors } = await openPage(DESKTOP);
+  const width = () => page.evaluate(() => document.getElementById('bg').width);
+  const before = await width();
+  await page.setViewport({ width: 1440, height: 700 });
+  await page.waitForFunction(previous => document.getElementById('bg').width !== previous, {}, before);
+  assert.ok((await width()) < before);
+  assert.deepEqual(errors, []);
+  await page.close();
 });

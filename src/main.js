@@ -42,6 +42,8 @@ const lanes = createLanes($('lanes'));
 const key = createKey($('key'));
 
 // ---------- sizes ----------
+let measuredSize = ''; // the stage size the canvases were last sized for
+const sizeKey = (width, height) => `${width.toFixed(2)}x${height.toFixed(2)}`;
 function measure() {
   const device = window.devicePixelRatio || 1,
     dpr = Math.min(MAX_DPR, device);
@@ -50,6 +52,7 @@ function measure() {
   const feedback = clock.exporting ? dpr : device * FEEDBACK_DEVICE_SCALE;
   const box = stage.getBoundingClientRect(),
     wheel = $('scopeBox').getBoundingClientRect();
+  measuredSize = sizeKey(box.width, box.height);
   background.resize({
     width: Math.round(box.width * feedback),
     height: Math.round(box.height * feedback),
@@ -251,7 +254,11 @@ window.baque = {
 };
 
 background.setShaderScale(DESKTOP ? DESKTOP_SHADER_SCALE : PHONE_SHADER_SCALE);
-new ResizeObserver(() => {
+// Resizing a canvas clears it, so only a real new size re-measures: a stage that blips to 0x0 and
+// back (a hidden page, a screenshot under load) keeps its canvases and the export its trail (#15).
+new ResizeObserver(([entry]) => {
+  const { width, height } = entry.contentRect;
+  if (!width || !height || sizeKey(width, height) === measuredSize) return;
   measure();
   title.fit();
   render(position, true);
