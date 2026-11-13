@@ -13,3 +13,5 @@ trimmed, mixed or retuned.
 - Whistles: juliojunior77, SpliceSound, strongbot, Rosa-Orenes256, LudwigMueller
 
 Alfaia patterns: the table at lansdownsoftware.com. Swing measured on a Batuk Nagô workshop recording.
+
+The score renderer (`src/score.js`) is original to this project, written in 2026-11.

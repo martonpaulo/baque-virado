@@ -1,8 +1,8 @@
 /*
  * score.js - one-line percussion notation as an SVG string.
- * ES module, no dependencies. Exports renderScore(opts).
+ * ES module, no dependencies. Written for this project in 2026-11 (no third-party code).
  *
- * svg({ bars: [{ main: [], answer: [], stick: [] }, ...],
+ * renderScore({ bars: [{ main: [], answer: [], stick: [] }, ...],
  *       colors: { ink, main, answer, stick, dim },
  *       timeSig: bool, repeat: null|number, accentOffbeats: bool, height: 60 })
  *   -> { markup, slotX, width, height }

@@ -179,5 +179,6 @@ Lead with the outcome, in the output shape, and include:
 - Keep `VOICE_ORDER` (`src/music.js`) and `hash` (`src/util.js`) stable: they seed the per-hit
   sound variation, and `tests/` pins their values.
 - Phones (`max-width: 899px`) never show sound choices and fetch only the default samples.
-- Sound and image depend only on the show position, so `tools/export-video.mjs` matches playback.
+- Sound, notes, score, wheel and lanes depend only on the show position; the background also on the
+  frames before it (`docs/product.md`, Constraints).
 - Dynamic copy lives in `src/copy.js`, colours in `src/theme.js` mirrored by `styles.css`.
