@@ -1,6 +1,6 @@
 // The order of the show: scenes, sections, the timeline and what sounds at any moment.
 // Positions on the timeline are measured in bars (a float: 7.25 = a quarter into bar 8).
-import { ALFAIA_HANDS, ALFAIA_WITH_STICK, BAR_SECONDS, barHits, INSTRUMENTS, STEPS_PER_BAR, swingOffset, VOICE_ORDER } from './music.js';
+import { ALFAIA_HANDS, ALFAIA_WITH_STICK, BAQUE_ORDER, BAR_SECONDS, barHits, INSTRUMENTS, STEPS_PER_BAR, swingOffset, VOICE_ORDER } from './music.js';
 import { smooth } from './util.js';
 
 const always = value => () => value;
@@ -13,7 +13,12 @@ const ENSEMBLE_ENTRY = ['agogo', 'caixa', 'agbe', 'ganza', 'answer', 'main'];
 /** A baque scene: four bars, the last one a virada. */
 const baque = (id, extra) => ({ id, pattern: id, section: 'D', bars: 4, mode: breakOnBar(3), lanes: ALFAIA_HANDS, named: true, ...extra });
 
-// fx: how the background behaves (feedback zoom/rotation/hue/persistence, kaleidoscope mirrors, warp, speed, palette)
+const BAQUE_EXTRAS = {
+  imale: { mode: bar => (bar === 3 ? 'cut' : 'normal') }, // ends on a cut, not a virada
+  trovao: { lanes: ALFAIA_WITH_STICK },
+  parada: { mode: normal, lanes: ALFAIA_WITH_STICK }, // two bars that already end in a break
+};
+
 const SCENE_LIST = [
   {
     id: 'opening',
@@ -21,7 +26,6 @@ const SCENE_LIST = [
     bars: 5,
     mode: bar => ['call', 'roll'][bar] || 'normal',
     lanes: ['whistle', 'caixa', ...ALFAIA_HANDS],
-    fx: { zoom: 0.9, rot: 0.15, hue: 70, keep: 0.93, seg: 16, warp: 1.0, speed: 0.7, pal: 0 },
   },
   {
     id: 'ensemble',
@@ -29,7 +33,6 @@ const SCENE_LIST = [
     bars: 6,
     voices: bar => ENSEMBLE_ENTRY.slice(0, bar + 1),
     lanes: INSTRUMENTS,
-    fx: { zoom: 0.5, rot: 0.06, hue: 35, keep: 0.9, seg: 7, warp: 0.8, speed: 0.5, pal: 0.15 },
   },
   {
     id: 'agogo',
@@ -39,7 +42,6 @@ const SCENE_LIST = [
     gain: { caixa: 0.32 },
     swing: always(false),
     lanes: ['agogo', 'caixa'],
-    fx: { zoom: 0.25, rot: -0.5, hue: 90, keep: 0.94, seg: 10, warp: 0.6, speed: 0.6, pal: 0.4 },
   },
   {
     id: 'swing',
@@ -48,7 +50,6 @@ const SCENE_LIST = [
     voices: always(['main', 'answer', 'caixa', 'agbe', 'ganza', 'agogo']),
     swing: bar => bar >= 2,
     lanes: ['caixa', ...ALFAIA_HANDS],
-    fx: { zoom: 0.08, rot: 0, hue: 15, keep: 0.8, seg: 4, warp: 0.45, speed: 0.3, pal: 0.6 },
   },
   {
     id: 'offbeat',
@@ -57,26 +58,14 @@ const SCENE_LIST = [
     voices: always([...ALFAIA_HANDS, 'agogo', 'caixa']),
     gain: { caixa: 0.45 },
     lanes: [...ALFAIA_HANDS, 'agogo'],
-    fx: { zoom: 0.8, rot: 0.22, hue: 120, keep: 0.93, seg: 12, warp: 1.2, speed: 0.9, pal: 0.3 },
   },
-  baque('marcacao', { fx: { zoom: 1.0, rot: -0.14, hue: 80, keep: 0.93, seg: 5, warp: 1.1, speed: 0.9, pal: 0.25 } }),
-  baque('arrasto', { fx: { zoom: 0.9, rot: 0.12, hue: 70, keep: 0.93, seg: 7, warp: 1.0, speed: 0.9, pal: 0.15 } }),
-  baque('imale', { mode: bar => (bar === 3 ? 'cut' : 'normal'), fx: { zoom: 0.8, rot: 0.18, hue: 60, keep: 0.93, seg: 7, warp: 1.0, speed: 0.8, pal: 0.1 } }),
-  baque('martelo', { fx: { zoom: 1.6, rot: 0.35, hue: 150, keep: 0.95, seg: 8, warp: 1.5, speed: 1.4, pal: 0.5 } }),
-  baque('trovao', { lanes: ALFAIA_WITH_STICK, fx: { zoom: 1.2, rot: -0.3, hue: 130, keep: 0.94, seg: 5, warp: 1.3, speed: 1.1, pal: 0.6 } }),
-  baque('afoxe', { fx: { zoom: 0.7, rot: 0.1, hue: 90, keep: 0.93, seg: 6, warp: 1.1, speed: 0.8, pal: 0.35 } }),
-  baque('parada', {
-    mode: normal,
-    lanes: ALFAIA_WITH_STICK,
-    fx: { zoom: 0.6, rot: -0.25, hue: 110, keep: 0.93, strobe: 1, seg: 15, warp: 1.2, speed: 1.0, pal: 0.75 },
-  }),
+  ...BAQUE_ORDER.map(id => baque(id, BAQUE_EXTRAS[id])),
   {
     id: 'summary',
     section: 'E',
     bars: 3,
     lanes: ALFAIA_HANDS,
     named: true,
-    fx: { zoom: 0.8, rot: 0.12, hue: 60, keep: 0.93, seg: 16, warp: 1.0, speed: 0.8, pal: 0.9 },
   },
   {
     id: 'finale',
@@ -85,7 +74,6 @@ const SCENE_LIST = [
     mode: bar => (bar < 2 ? 'break' : 'cut'),
     lanes: [...ALFAIA_HANDS, 'whistle'],
     isEnd: true,
-    fx: { zoom: 1.4, rot: 0.3, hue: 160, keep: 0.95, seg: 16, warp: 1.4, speed: 1.2, pal: 0.05 },
   },
 ];
 

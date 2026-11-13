@@ -45,3 +45,12 @@ test('every sounding hit comes from the bar timeline the wheel draws', async () 
     );
   }
 });
+
+test('the baque scenes follow BAQUE_ORDER', async () => {
+  const { SCENES } = await import('../src/show.js');
+  const { BAQUE_ORDER } = await import('../src/music.js');
+  assert.deepEqual(
+    SCENES.filter(scene => scene.section === 'D').map(scene => scene.id),
+    BAQUE_ORDER,
+  );
+});

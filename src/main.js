@@ -2,7 +2,7 @@
 // playback, controls, and the `window.baque` API the video exporter drives.
 
 import { createPlayer, createSampleBank, filesFor, renderShowWav } from './audio.js';
-import { backgroundAt, createBackground } from './background.js';
+import { backgroundAt, createBackground, SCENE_LOOKS } from './background.js';
 import { bindKeyboard, createSceneChips, createSoundPickers, initialChoices } from './controls.js';
 import { COPY } from './copy.js';
 import { createLanes } from './lanes.js';
@@ -60,7 +60,7 @@ function measure() {
 // ---------- visual clock ----------
 // Live: wall time, so the background keeps moving while paused, unless the viewer asks for reduced
 // motion (then Pause stops it). Export: derived from the position only, so every frame is reproducible.
-const speedOf = scene => Math.max(MIN_VISUAL_SPEED, scene.fx.speed);
+const speedOf = scene => Math.max(MIN_VISUAL_SPEED, SCENE_LOOKS[scene.id].speed);
 const clock = {
   exporting: false,
   lastPosition: null,

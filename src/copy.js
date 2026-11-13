@@ -1,25 +1,28 @@
 // Every word the viewer reads. The interface is in Brazilian Portuguese; the code is in English.
-import { INSTRUMENT_COUNT } from './music.js';
+import { AGOGO_STEPS, BAQUE_ORDER, BEAT_STEPS, countFromOne, INSTRUMENT_COUNT, OFFBEAT_STEPS, PATTERNS, STEPS_PER_BAR } from './music.js';
 
 const FEMININE_INSTRUMENTS = new Set(['alfaia']);
 const of = instrument => (FEMININE_INSTRUMENTS.has(instrument) ? 'da' : 'do'); // "som da alfaia", "som do apito"
+
+// Musical facts in the copy are derived from the patterns, so the text cannot drift from the sound.
+const baqueNumber = id => `baque ${BAQUE_ORDER.indexOf(id) + 1}/${BAQUE_ORDER.length}`;
 
 export const COPY = {
   sections: { A: 'abertura', B: 'instrumentos', C: 'tempo', D: 'baques', E: 'final' },
   scenes: {
     opening: { chip: 'Abertura', eyebrow: 'maracatu de baque virado', title: 'Baque virado' },
     ensemble: { chip: 'Orquestra', eyebrow: `${INSTRUMENT_COUNT} instrumentos`, title: 'Orquestra' },
-    agogo: { chip: 'Agogô', eyebrow: '10 batidas em 16', title: 'Agogô' },
+    agogo: { chip: 'Agogô', eyebrow: `${AGOGO_STEPS.length} batidas em ${STEPS_PER_BAR}`, title: 'Agogô' },
     swing: { chip: 'Balanço', eyebrow: 'desvio em milissegundos', title: 'Balanço' },
-    offbeat: { chip: 'Contratempo', eyebrow: '4 cabeças · 12 contratempos', title: 'Contratempo' },
-    marcacao: { chip: 'Marcação', eyebrow: 'baque 1/7 · luanda', title: 'Marcação' },
-    arrasto: { chip: 'Arrasto', eyebrow: 'baque 2/7', title: 'Arrasto' },
-    imale: { chip: 'Imalê', eyebrow: 'baque 3/7', title: 'Imalê' },
-    martelo: { chip: 'Martelo', eyebrow: 'baque 4/7', title: 'Martelo' },
-    trovao: { chip: 'Trovão', eyebrow: 'baque 5/7', title: 'Trovão' },
-    afoxe: { chip: 'Afoxé', eyebrow: 'baque 6/7', title: 'Afoxé' },
-    parada: { chip: 'Parada', eyebrow: 'baque 7/7 · 2 compassos', title: 'Parada' },
-    summary: { chip: 'Resumo', eyebrow: 'resumo', title: '7 baques' },
+    offbeat: { chip: 'Contratempo', eyebrow: `${BEAT_STEPS.length} cabeças · ${OFFBEAT_STEPS.length} contratempos`, title: 'Contratempo' },
+    marcacao: { chip: 'Marcação', eyebrow: `${baqueNumber('marcacao')} · luanda`, title: 'Marcação' },
+    arrasto: { chip: 'Arrasto', eyebrow: baqueNumber('arrasto'), title: 'Arrasto' },
+    imale: { chip: 'Imalê', eyebrow: baqueNumber('imale'), title: 'Imalê' },
+    martelo: { chip: 'Martelo', eyebrow: baqueNumber('martelo'), title: 'Martelo' },
+    trovao: { chip: 'Trovão', eyebrow: baqueNumber('trovao'), title: 'Trovão' },
+    afoxe: { chip: 'Afoxé', eyebrow: baqueNumber('afoxe'), title: 'Afoxé' },
+    parada: { chip: 'Parada', eyebrow: `${baqueNumber('parada')} · ${PATTERNS.parada.bars} compassos`, title: 'Parada' },
+    summary: { chip: 'Resumo', eyebrow: 'resumo', title: `${BAQUE_ORDER.length} baques` },
     finale: { chip: 'Final', eyebrow: '', title: 'Fim' },
   },
   patterns: {
@@ -35,7 +38,7 @@ export const COPY = {
   voices: { main: 'principal', answer: 'resposta', stick: 'baqueta', caixa: 'caixa', agbe: 'agbê', ganza: 'ganzá', agogo: 'agogô', whistle: 'apito' },
   hud: {
     bar: (n, total) => `comp ${n}/${total}`,
-    step: n => `semicolcheia ${n}/16`,
+    step: n => `semicolcheia ${n}/${STEPS_PER_BAR}`,
   },
   centre: {
     beat: n => `TEMPO ${n}/4`,
@@ -49,7 +52,7 @@ export const COPY = {
   },
   read: {
     cycle: '1 ciclo',
-    cycleValue: seconds => `16 semicolcheias = ${seconds} s`,
+    cycleValue: seconds => `${STEPS_PER_BAR} semicolcheias = ${seconds} s`,
     sixteenth: '1 semicolcheia',
     milliseconds: ms => `${ms} ms`,
     voicesBaques: 'vozes · baques',
@@ -67,7 +70,7 @@ export const COPY = {
     sixteenthHeader: 'semicolcheia',
     caixa: 'caixa',
     nth: n => `${n}ª`,
-    beatHeads: 'cabeças do tempo · 1 5 9 13',
+    beatHeads: `cabeças do tempo · ${countFromOne(BEAT_STEPS, ' ')}`,
     offbeatSixteenths: 'semicolcheias de contratempo',
     answerOnBeat: 'resposta na cabeça',
     mainOffbeat: 'principal no contratempo',

@@ -41,6 +41,10 @@ export const ALFAIA_WITH_STICK = ['main', 'answer', 'stick'];
 
 export const isAlfaia = voice => voice === 'main' || voice === 'answer';
 export const isOffbeat = step => step % 4 !== 0;
+export const BEAT_STEPS = SIXTEENTHS.filter(step => !isOffbeat(step)); // the heads of the four beats
+export const OFFBEAT_STEPS = SIXTEENTHS.filter(isOffbeat);
+/** Sixteenths as musicians count them, from 1. */
+export const countFromOne = (steps, separator) => steps.map(step => step + 1).join(separator);
 
 /** How far a hit moves off the grid, in sixteenths, when swing is on. */
 export function swingOffset(voice, step, swingOn) {

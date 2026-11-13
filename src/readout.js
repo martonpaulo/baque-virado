@@ -7,10 +7,13 @@ import {
   allAlfaiaSteps,
   BAQUE_ORDER,
   BAR_SECONDS,
+  BEAT_STEPS,
   barHits,
+  countFromOne,
   INSTRUMENTS,
   isAlfaia,
   isOffbeat,
+  OFFBEAT_STEPS,
   PATTERNS,
   SIXTEENTHS,
   STEPS_PER_BAR,
@@ -26,10 +29,12 @@ import { replayFade } from './util.js';
 const T = COPY.read;
 
 const MS_PER_SECOND = 1000;
-const BEAT_HEADS = 4,
-  OFFBEAT_SIXTEENTHS = 12; // sixteenths on and off the beat in one bar
-const ANSWER_ON_BEAT_STEPS = '9 · 13'; // sixteenths where the answer hand lands on the beat
-const MAIN_OFFBEAT_STEPS = '10 · 14'; // sixteenths where the main hand plays contratempo
+// The marcação, the first baque, shows where each hand falls against the beat.
+const ANSWER_ON_BEAT_STEPS = countFromOne(
+  PATTERNS.marcacao.answer.filter(step => !isOffbeat(step)),
+  ' · ',
+);
+const MAIN_OFFBEAT_STEPS = countFromOne(PATTERNS.marcacao.main.filter(isOffbeat), ' · ');
 const METER_PERCENT_PER_MS = 2.4; // swing meter: bar width (% of its half) per millisecond
 const SCORE_HEIGHT = 60; // score height passed to renderScore (score units)
 const TWO_BAR_REPEATS = 2,
@@ -74,7 +79,7 @@ const LAYOUTS = {
     );
   },
   offbeat: () =>
-    stats('two', stat(BEAT_HEADS, T.beatHeads, COLORS.fg), stat(OFFBEAT_SIXTEENTHS, T.offbeatSixteenths, COLORS.ember)) +
+    stats('two', stat(BEAT_STEPS.length, T.beatHeads, COLORS.fg), stat(OFFBEAT_STEPS.length, T.offbeatSixteenths, COLORS.ember)) +
     row(label(T.answerOnBeat, COLORS.ember), ANSWER_ON_BEAT_STEPS) +
     row(label(T.mainOffbeat, COLORS.amber), MAIN_OFFBEAT_STEPS),
   // the row draws the first bar; the count is the whole pattern, as the baque's own scene shows it

@@ -9,6 +9,25 @@ import { boneAlpha, COLORS, fgAlpha, TINTS, voidAlpha } from './theme.js';
 const CROSSFADE_BARS = 1.5; // ≈3 s, centred on each scene boundary
 const FEEDBACK_KEYS = ['zoom', 'rot', 'hue', 'keep', 'speed'];
 
+// How the background behaves in each scene: feedback zoom, rotation, hue and persistence (keep),
+// kaleidoscope mirrors (seg), warp, speed, palette (pal), and an optional strobe.
+export const SCENE_LOOKS = {
+  opening: { zoom: 0.9, rot: 0.15, hue: 70, keep: 0.93, seg: 16, warp: 1.0, speed: 0.7, pal: 0 },
+  ensemble: { zoom: 0.5, rot: 0.06, hue: 35, keep: 0.9, seg: 7, warp: 0.8, speed: 0.5, pal: 0.15 },
+  agogo: { zoom: 0.25, rot: -0.5, hue: 90, keep: 0.94, seg: 10, warp: 0.6, speed: 0.6, pal: 0.4 },
+  swing: { zoom: 0.08, rot: 0, hue: 15, keep: 0.8, seg: 4, warp: 0.45, speed: 0.3, pal: 0.6 },
+  offbeat: { zoom: 0.8, rot: 0.22, hue: 120, keep: 0.93, seg: 12, warp: 1.2, speed: 0.9, pal: 0.3 },
+  marcacao: { zoom: 1.0, rot: -0.14, hue: 80, keep: 0.93, seg: 5, warp: 1.1, speed: 0.9, pal: 0.25 },
+  arrasto: { zoom: 0.9, rot: 0.12, hue: 70, keep: 0.93, seg: 7, warp: 1.0, speed: 0.9, pal: 0.15 },
+  imale: { zoom: 0.8, rot: 0.18, hue: 60, keep: 0.93, seg: 7, warp: 1.0, speed: 0.8, pal: 0.1 },
+  martelo: { zoom: 1.6, rot: 0.35, hue: 150, keep: 0.95, seg: 8, warp: 1.5, speed: 1.4, pal: 0.5 },
+  trovao: { zoom: 1.2, rot: -0.3, hue: 130, keep: 0.94, seg: 5, warp: 1.3, speed: 1.1, pal: 0.6 },
+  afoxe: { zoom: 0.7, rot: 0.1, hue: 90, keep: 0.93, seg: 6, warp: 1.1, speed: 0.8, pal: 0.35 },
+  parada: { zoom: 0.6, rot: -0.25, hue: 110, keep: 0.93, strobe: 1, seg: 15, warp: 1.2, speed: 1.0, pal: 0.75 },
+  summary: { zoom: 0.8, rot: 0.12, hue: 60, keep: 0.93, seg: 16, warp: 1.0, speed: 0.8, pal: 0.9 },
+  finale: { zoom: 1.4, rot: 0.3, hue: 160, keep: 0.95, seg: 16, warp: 1.4, speed: 1.2, pal: 0.05 },
+};
+
 // Hit energy fed to the shader (ages in seconds).
 const BOOM_ATTACK = 0.035; // alfaia/stick boom rise time constant
 const BOOM_DECAY = 0.25; // alfaia/stick boom fall time constant
@@ -71,8 +90,10 @@ const VIGNETTE_STOPS = [
 /** Background parameters at a position: both scenes' looks plus the mix between them. */
 export function backgroundAt(position) {
   const { from, to, amount, scene } = blendAt(position, CROSSFADE_BARS);
-  const params = { from: from.fx, to: to.fx, mix: amount, strobe: scene.fx.strobe || 0, sceneId: scene.id };
-  for (const key of FEEDBACK_KEYS) params[key] = from.fx[key] + (to.fx[key] - from.fx[key]) * amount;
+  const a = SCENE_LOOKS[from.id],
+    b = SCENE_LOOKS[to.id];
+  const params = { from: a, to: b, mix: amount, strobe: SCENE_LOOKS[scene.id].strobe || 0, sceneId: scene.id };
+  for (const key of FEEDBACK_KEYS) params[key] = a[key] + (b[key] - a[key]) * amount;
   return params;
 }
 
