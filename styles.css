@@ -136,9 +136,7 @@ body {
   white-space: nowrap;
   transform-origin: left center;
   min-height: 0.9em;
-  text-shadow:
-    -0.45cqw 0 0 var(--split-pink),
-    0.45cqw 0 0 var(--split-cyan);
+  /* its chromatic split is drawn by src/title.js every frame, from TINTS */
 }
 
 .scope {

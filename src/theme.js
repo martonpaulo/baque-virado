@@ -30,7 +30,7 @@ export const boneAlpha = rgbaOf(COLORS.bone);
 const iceAlpha = rgbaOf(COLORS.ice),
   magentaAlpha = rgbaOf(COLORS.magenta);
 
-/** Fixed translucent colours, spelled as the canvas, SVG and CSS have always received them. */
+/** Fixed translucent colours for the canvas, SVG and inline styles (styles.css keeps its own --split-* for the brand heading). */
 export const TINTS = {
   scopeFace: voidAlpha('.72'), // the wheel's dark disc behind the scale
   swingRing: iceAlpha('.16'), // the swung ring set of the moiré
