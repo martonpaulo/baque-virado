@@ -11,8 +11,9 @@ import path from 'node:path';
 import puppeteer from 'puppeteer-core';
 import { startStaticServer } from './static-server.mjs';
 
-const CHROME = '/Applications/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing';
-const FFMPEG = '/opt/homebrew/bin/ffmpeg';
+// Override with CHROME_PATH and FFMPEG_PATH on another machine.
+const CHROME = process.env.CHROME_PATH || '/Applications/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing';
+const FFMPEG = process.env.FFMPEG_PATH || 'ffmpeg';
 const FPS = 30,
   WIDTH = 1080,
   HEIGHT = 1920;
@@ -22,6 +23,7 @@ const USAGE = 'usage: node tools/export-video.mjs <page.html> <out.mp4> [--from 
 const VIEWPORT = { width: WIDTH + 120, height: HEIGHT + 150, deviceScaleFactor: 1 };
 // Streaming loudness target: integrated -14 LUFS, true peak -1.5 dBTP, loudness range 11 LU.
 const LOUDNESS = 'I=-14:TP=-1.5:LRA=11';
+const WARM_UP_SECONDS = 4;
 
 const nextFrame = () => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
 
@@ -157,6 +159,7 @@ async function main() {
     browser = await puppeteer.launch({
       executablePath: CHROME,
       headless: true,
+      protocolTimeout: 0, // rendering the whole show's audio takes minutes; the default 180 s cuts it off
       defaultViewport: VIEWPORT,
       // WebGL for the background through a software GPU, so it works headless on any machine
       args: [
@@ -258,14 +261,16 @@ async function main() {
       encoder.on('error', reject);
       encoder.on('close', code => (code === 0 ? resolve() : reject(new Error(`ffmpeg exited with code ${code}`))));
     });
+    encoderDone.catch(() => {}); // handled by the await below; this keeps an early exit from crashing Node
     encoder.stdin.on('error', () => {}); // surfaced through encoderDone
 
     const renderAt = (seconds, bars) => {
       window.baque.render(bars);
       window.__exportStep(seconds);
     };
-    // Warm-up: play 1 s before --from without capturing, so CSS fades and transitions are mid-flight as in real playback.
-    for (let i = Math.max(0, firstFrame - FPS); i < firstFrame; i++) await page.evaluate(renderAt, i / FPS, i / FPS / BAR);
+    // Warm-up: play WARM_UP_SECONDS before --from without capturing, so fades and the background's
+    // feedback trail (it keeps about half of itself per second) look as they do in a full export.
+    for (let i = Math.max(0, firstFrame - WARM_UP_SECONDS * FPS); i < firstFrame; i++) await page.evaluate(renderAt, i / FPS, i / FPS / BAR);
 
     const cdp = await page.createCDPSession();
     const captureStartedAt = Date.now();

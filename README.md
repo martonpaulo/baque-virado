@@ -57,7 +57,8 @@ and the pinned `hash` values.
 ## Video export
 
 Renders the page to a 1080x1920, 30 fps H.264 MP4 with the offline-rendered audio (AAC 320k).
-It needs Google Chrome for Testing, `ffmpeg` and `python3`.
+It needs Google Chrome for Testing and `ffmpeg`; set `CHROME_PATH` and `FFMPEG_PATH` when they are
+not at the macOS defaults.
 
 ```sh
 pnpm export index.html out/baque-virado.mp4

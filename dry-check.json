@@ -1,62 +1,75 @@
 {
-  "magicValues": {
-    "folders": ["src", "tools"],
-    "exclude": ["src/score.js"],
-    "counts": {
-      "src/audio.js": {
-        "number": 43
-      },
-      "src/background.js": {
-        "number": 12
-      },
-      "src/lanes.js": {
-        "number": 11
-      },
-      "src/main.js": {
-        "number": 2
-      },
-      "src/music.js": {
-        "number": 33
-      },
-      "src/readout.js": {
-        "number": 6
-      },
-      "src/scope.js": {
-        "number": 18
-      },
-      "src/show.js": {
-        "number": 2
-      },
-      "src/theme.js": {
-        "colour": 1,
-        "number": 2
-      },
-      "src/title.js": {
-        "number": 5
-      },
-      "src/util.js": {
-        "number": 8
-      },
-      "tools/export-video.mjs": {
-        "number": 14
-      },
-      "tools/static-server.mjs": {
-        "number": 4,
-        "url": 2
-      }
-    },
-    "accepted": {}
+ "magicValues": {
+  "folders": [
+   "src",
+   "tools"
+  ],
+  "exclude": [
+   "src/score.js"
+  ],
+  "counts": {
+   "src/audio.js": {
+    "number": 43
+   },
+   "src/background.js": {
+    "number": 12
+   },
+   "src/lanes.js": {
+    "number": 11
+   },
+   "src/main.js": {
+    "number": 2
+   },
+   "src/music.js": {
+    "number": 33
+   },
+   "src/readout.js": {
+    "number": 6
+   },
+   "src/scope.js": {
+    "number": 18
+   },
+   "src/show.js": {
+    "number": 2
+   },
+   "src/theme.js": {
+    "colour": 1,
+    "number": 2
+   },
+   "src/title.js": {
+    "number": 5
+   },
+   "src/util.js": {
+    "number": 8
+   },
+   "tools/export-video.mjs": {
+    "number": 14
+   },
+   "tools/static-server.mjs": {
+    "number": 3,
+    "url": 2
+   }
   },
-  "duplicates": {
-    "depth": 1,
-    "exclude": ["node_modules/**", "sounds/**"],
-    "counts": {},
-    "identical": {}
-  },
-  "documents": {
-    "files": ["*.md", "docs/**/*.md"],
-    "exclude": ["node_modules/**"],
-    "budgets": {},
-    "repeated": {}
-  }
+  "accepted": {}
+ },
+ "duplicates": {
+  "depth": 1,
+  "exclude": [
+   "node_modules/**",
+   "sounds/**"
+  ],
+  "counts": {},
+  "identical": {}
+ },
+ "documents": {
+  "files": [
+   "*.md",
+   "docs/**/*.md"
+  ],
+  "exclude": [
+   "node_modules/**"
+  ],
+  "budgets": {},
+  "repeated": {}
+ }
 }
