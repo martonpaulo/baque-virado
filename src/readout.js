@@ -8,6 +8,7 @@ import {
   BAQUE_ORDER,
   BAR_SECONDS,
   barHits,
+  INSTRUMENTS,
   isAlfaia,
   isOffbeat,
   PATTERNS,
@@ -24,7 +25,6 @@ import { replayFade } from './util.js';
 
 const T = COPY.read;
 
-const INSTRUMENT_COUNT = 7; // alfaia (main, answer, stick), caixa, agbê, ganzá, agogô
 const MS_PER_SECOND = 1000;
 const BEAT_HEADS = 4,
   OFFBEAT_SIXTEENTHS = 12; // sixteenths on and off the beat in one bar
@@ -56,7 +56,7 @@ const LAYOUTS = {
   opening: () =>
     row(label(T.cycle), T.cycleValue(BAR_SECONDS.toFixed(2).replace('.', ','))) +
     row(label(T.sixteenth), T.milliseconds(Math.round((BAR_SECONDS / STEPS_PER_BAR) * MS_PER_SECOND))) +
-    row(label(T.voicesBaques), `${INSTRUMENT_COUNT} · ${BAQUE_ORDER.length}`),
+    row(label(T.voicesBaques), `${INSTRUMENTS.length} · ${BAQUE_ORDER.length}`),
   ensemble: () => `<div data-entry></div>`,
   agogo: () =>
     `<div class="notation">${label(T.low)}<span class="seq" style="color:${COLORS.acid}">${sequence(AGOGO.low, '●')}</span><span class="n">${AGOGO.low.length}</span>
@@ -92,7 +92,7 @@ const LAYOUTS = {
     `</div>` +
     row(label(T.sameInAll), T.sameInAllValue),
   finale: () =>
-    stats('', stat(BAQUE_ORDER.length, T.baques, COLORS.amber), stat(INSTRUMENT_COUNT, T.voices, COLORS.ember), stat(TOTAL_BARS, T.bars, COLORS.fg)) +
+    stats('', stat(BAQUE_ORDER.length, T.baques, COLORS.amber), stat(INSTRUMENTS.length, T.voices, COLORS.ember), stat(TOTAL_BARS, T.bars, COLORS.fg)) +
     row(label(T.breaksAndCut), T.mestreWhistle),
 };
 

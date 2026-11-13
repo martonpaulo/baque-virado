@@ -19,20 +19,23 @@ export const SWING = {
 export const swingMilliseconds = group => SWING[group].map(beats => Math.round(beats * BEAT_SECONDS * 1000));
 
 // ring/size: where and how big the voice sits on the wheel (0 = not drawn). swing: which group it follows.
+// instrument: the instrument the voice belongs to (the alfaia has three voices: two hands and the stick).
 export const VOICES = {
-  main: { ring: 98, size: 5.6, swing: 'low', color: COLORS.amber },
-  answer: { ring: 87, size: 4.8, swing: 'low', color: COLORS.ember },
-  stick: { ring: 87, size: 4.2, swing: 'low', color: COLORS.bone },
-  caixa: { ring: 75, size: 3.2, swing: 'high', color: COLORS.ice },
-  agbe: { ring: 65, size: 3.2, swing: 'high', color: COLORS.magenta },
-  ganza: { ring: 56, size: 2.6, swing: 'high', color: COLORS.violet },
-  agogo: { ring: 45, size: 4.4, swing: null, color: COLORS.acid },
-  whistle: { ring: 0, size: 0, swing: null, color: COLORS.white },
+  main: { instrument: 'alfaia', ring: 98, size: 5.6, swing: 'low', color: COLORS.amber },
+  answer: { instrument: 'alfaia', ring: 87, size: 4.8, swing: 'low', color: COLORS.ember },
+  stick: { instrument: 'alfaia', ring: 87, size: 4.2, swing: 'low', color: COLORS.bone },
+  caixa: { instrument: 'caixa', ring: 75, size: 3.2, swing: 'high', color: COLORS.ice },
+  agbe: { instrument: 'agbe', ring: 65, size: 3.2, swing: 'high', color: COLORS.magenta },
+  ganza: { instrument: 'ganza', ring: 56, size: 2.6, swing: 'high', color: COLORS.violet },
+  agogo: { instrument: 'agogo', ring: 45, size: 4.4, swing: null, color: COLORS.acid },
+  whistle: { instrument: 'whistle', ring: 0, size: 0, swing: null, color: COLORS.white },
 };
 
 // The order also seeds the per-hit variation of the sound: keep it stable.
 export const VOICE_ORDER = Object.keys(VOICES);
-export const INSTRUMENTS = VOICE_ORDER.filter(voice => voice !== 'whistle');
+export const INSTRUMENTS = VOICE_ORDER.filter(voice => voice !== 'whistle'); // every voice that is drumming
+/** Distinct instruments that drum (the whistle only calls): alfaia, caixa, agbê, ganzá, agogô. */
+export const INSTRUMENT_COUNT = new Set(INSTRUMENTS.map(voice => VOICES[voice].instrument)).size;
 export const ALFAIA_HANDS = ['main', 'answer'];
 export const ALFAIA_WITH_STICK = ['main', 'answer', 'stick'];
 

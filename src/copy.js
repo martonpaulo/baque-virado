@@ -1,4 +1,6 @@
 // Every word the viewer reads. The interface is in Brazilian Portuguese; the code is in English.
+import { INSTRUMENT_COUNT } from './music.js';
+
 const FEMININE_INSTRUMENTS = new Set(['alfaia']);
 const of = instrument => (FEMININE_INSTRUMENTS.has(instrument) ? 'da' : 'do'); // "som da alfaia", "som do apito"
 
@@ -6,7 +8,7 @@ export const COPY = {
   sections: { A: 'abertura', B: 'instrumentos', C: 'tempo', D: 'baques', E: 'final' },
   scenes: {
     opening: { chip: 'Abertura', eyebrow: 'maracatu de baque virado', title: 'Baque virado' },
-    ensemble: { chip: 'Orquestra', eyebrow: '7 instrumentos', title: 'Orquestra' },
+    ensemble: { chip: 'Orquestra', eyebrow: `${INSTRUMENT_COUNT} instrumentos`, title: 'Orquestra' },
     agogo: { chip: 'Agogô', eyebrow: '10 batidas em 16', title: 'Agogô' },
     swing: { chip: 'Balanço', eyebrow: 'desvio em milissegundos', title: 'Balanço' },
     offbeat: { chip: 'Contratempo', eyebrow: '4 cabeças · 12 contratempos', title: 'Contratempo' },
@@ -89,6 +91,6 @@ export const COPY = {
     soundOf: label => `som ${of(label)} ${label}:`,
     soundGroup: label => `Som ${of(label)} ${label}`,
     soundFailed: label => `som ${of(label)} ${label}: não carregou, tente de novo`,
-    facts: (baques, bars, length) => `maracatu de baque virado · ${baques} baques · 7 instrumentos · ${bars} compassos · ${length}`,
+    facts: (baques, bars, length) => `maracatu de baque virado · ${baques} baques · ${INSTRUMENT_COUNT} instrumentos · ${bars} compassos · ${length}`,
   },
 };

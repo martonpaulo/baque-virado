@@ -52,3 +52,12 @@ test('parada spans two bars, with stick hits on 4, 8 and 12 of the second', () =
   assert.deepEqual(steps(patternHits('parada', 0).stick), []);
   assert.deepEqual(steps(patternHits('parada', 1).stick), [4, 8, 12]);
 });
+
+test('the page counts five drumming instruments, not their seven voices', async () => {
+  const { INSTRUMENT_COUNT, INSTRUMENTS } = await import('../src/music.js');
+  const { COPY } = await import('../src/copy.js');
+  assert.equal(INSTRUMENT_COUNT, 5);
+  assert.equal(INSTRUMENTS.length, 7);
+  assert.match(COPY.scenes.ensemble.eyebrow, /^5 instrumentos$/);
+  assert.match(COPY.controls.facts(7, 54, '1:52'), / 5 instrumentos /);
+});
