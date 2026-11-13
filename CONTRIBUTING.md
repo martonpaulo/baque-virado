@@ -22,13 +22,13 @@ pnpm validate
 
 ## Commands
 
-| Command | What it does |
-| :--- | :--- |
-| `pnpm serve` | Serves the site at <http://127.0.0.1:8000>. |
+| Command         | What it does                                                                |
+| :-------------- | :-------------------------------------------------------------------------- |
+| `pnpm serve`    | Serves the site at <http://127.0.0.1:8000>.                                 |
 | `pnpm validate` | Runs the full gate, as CI does: Biome, the tests and the repository checks. |
-| `pnpm test` | Runs the unit tests. |
-| `pnpm format` | Formats the code with Biome. |
-| `pnpm export` | Renders the show to an MP4 (see the README). |
+| `pnpm test`     | Runs the unit tests.                                                        |
+| `pnpm format`   | Formats the code with Biome.                                                |
+| `pnpm export`   | Renders the show to an MP4 (see the README).                                |
 
 ## Commits
 

@@ -30,13 +30,13 @@ rehearsal or from videos of whole bands, where the parts cannot be told apart.
 
 ## What it will never do
 
-| Non-goal | Reason | Reopens when |
-| :--- | :--- | :--- |
-| Present one nação's baques as the canonical version | Each nação plays its own; the patterns come from one published hand table | A mestre or nação provides patterns to credit |
-| Be an editor or sequencer | The job is to understand a performance, not to compose one | Never, by the owner's choice |
-| Generate video in the page | The page stays light on phones; video is made offline by `tools/export-video.mjs` | Never, by the owner's choice |
-| Offer sound choices on phones | Phones download only the default samples, so the page loads on mobile data | Never, by the owner's choice |
-| Translate the interface | The audience is Brazilian; the copy is pt-BR only | Readers outside Brazil ask for it |
+| Non-goal                                            | Reason                                                                            | Reopens when                                  |
+| :-------------------------------------------------- | :-------------------------------------------------------------------------------- | :-------------------------------------------- |
+| Present one nação's baques as the canonical version | Each nação plays its own; the patterns come from one published hand table         | A mestre or nação provides patterns to credit |
+| Be an editor or sequencer                           | The job is to understand a performance, not to compose one                        | Never, by the owner's choice                  |
+| Generate video in the page                          | The page stays light on phones; video is made offline by `tools/export-video.mjs` | Never, by the owner's choice                  |
+| Offer sound choices on phones                       | Phones download only the default samples, so the page loads on mobile data        | Never, by the owner's choice                  |
+| Translate the interface                             | The audience is Brazilian; the copy is pt-BR only                                 | Readers outside Brazil ask for it             |
 
 ## How you know it worked
 
@@ -52,10 +52,10 @@ and the page plays smoothly to the end on a recent iPhone and an Android phone.
 
 ## Limits the owner set
 
-| Limit | Value | Owned by | Decision | Status |
-| :--- | :--- | :--- | :--- | :--- |
-| Samples a phone downloads | the 11 default files | `tests/sounds.test.js` | owner, 2026-11-13 | current |
-| Title transition | ≈0.12 s out, ≈0.25 s in | `src/title.js` | owner, 2026-11-12 | current |
+| Limit                     | Value                   | Owned by               | Decision          | Status  |
+| :------------------------ | :---------------------- | :--------------------- | :---------------- | :------ |
+| Samples a phone downloads | the 11 default files    | `tests/sounds.test.js` | owner, 2026-11-13 | current |
+| Title transition          | ≈0.12 s out, ≈0.25 s in | `src/title.js`         | owner, 2026-11-12 | current |
 
 ## Alternatives considered
 
