@@ -8,7 +8,7 @@ const of = instrument => (FEMININE_INSTRUMENTS.has(instrument) ? 'da' : 'do'); /
 const baqueNumber = id => `baque ${BAQUE_ORDER.indexOf(id) + 1}/${BAQUE_ORDER.length}`;
 
 export const COPY = {
-  sections: { A: 'abertura', B: 'instrumentos', C: 'tempo', D: 'baques', E: 'final' },
+  sections: { A: 'abertura', B: 'instrumentos', C: 'tempo', D: 'baques', E: 'fechamento' },
   scenes: {
     opening: { chip: 'Abertura', eyebrow: 'maracatu de baque virado', title: 'Baque virado' },
     ensemble: { chip: 'Orquestra', eyebrow: `${INSTRUMENT_COUNT} instrumentos`, title: 'Orquestra' },
