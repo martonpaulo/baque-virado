@@ -4,7 +4,7 @@
 import { COPY } from './copy.js';
 import { BAR_SECONDS, INSTRUMENTS, isAlfaia, isOffbeat, STEPS_PER_BAR, VOICE_ORDER, VOICES } from './music.js';
 import { barTimeline, recentHits } from './show.js';
-import { COLORS, MONO_FONT, TINTS } from './theme.js';
+import { COLORS, MONO_FONT, ROLES, TINTS } from './theme.js';
 import { fixed2, pad2, polylinePath, setAttr, setText, svgElement } from './util.js';
 
 // Radii, in SVG units of the viewBox, which spans -VIEWBOX_RADIUS..VIEWBOX_RADIUS on both axes.
@@ -187,7 +187,7 @@ export function createScope(svg) {
   fermata.style.opacity = 0;
   svgElement('path', { d: FERMATA_ARC, fill: 'none', stroke: COLORS.fg, 'stroke-width': FERMATA_WIDTH, 'stroke-linecap': 'round' }, fermata);
   svgElement('circle', { cx: 0, cy: FERMATA_DOT_Y, r: FERMATA_DOT_RADIUS, fill: COLORS.fg }, fermata);
-  const cue = centreText(CUE_Y, SMALL_TEXT_SIZE, { fill: COLORS.amber, 'letter-spacing': SMALL_TEXT_SPACING });
+  const cue = centreText(CUE_Y, SMALL_TEXT_SIZE, { fill: ROLES.accent, 'letter-spacing': SMALL_TEXT_SPACING });
 
   let dots = [],
     shapes = [];
@@ -299,7 +299,7 @@ export function createScope(svg) {
                     : '';
     const loud = offbeat || whistle || mode !== 'normal';
     setText(cue, text);
-    setAttr(cue, 'fill', loud ? COLORS.fg : COLORS.amber);
+    setAttr(cue, 'fill', loud ? COLORS.fg : ROLES.accent);
     setAttr(cue, 'font-weight', loud ? 700 : 400);
   }
 

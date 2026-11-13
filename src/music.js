@@ -1,6 +1,6 @@
 // What is played: tempo, voices, the measured swing and every rhythmic pattern.
 // Positions are sixteenths of a 4/4 bar (0–15); a two-bar pattern uses 0–31.
-import { COLORS } from './theme.js';
+import { COLORS, ROLES } from './theme.js';
 
 export const BPM = 115;
 export const BEAT_SECONDS = 60 / BPM;
@@ -21,8 +21,8 @@ export const swingMilliseconds = group => SWING[group].map(beats => Math.round(b
 // ring/size: where and how big the voice sits on the wheel (0 = not drawn). swing: which group it follows.
 // instrument: the instrument the voice belongs to (the alfaia has three voices: two hands and the stick).
 export const VOICES = {
-  main: { instrument: 'alfaia', ring: 98, size: 5.6, swing: 'low', color: COLORS.amber },
-  answer: { instrument: 'alfaia', ring: 87, size: 4.8, swing: 'low', color: COLORS.ember },
+  main: { instrument: 'alfaia', ring: 98, size: 5.6, swing: 'low', color: ROLES.mainHand },
+  answer: { instrument: 'alfaia', ring: 87, size: 4.8, swing: 'low', color: ROLES.answerHand },
   stick: { instrument: 'alfaia', ring: 87, size: 4.2, swing: 'low', color: COLORS.bone },
   caixa: { instrument: 'caixa', ring: 75, size: 3.2, swing: 'high', color: COLORS.ice },
   agbe: { instrument: 'agbe', ring: 65, size: 3.2, swing: 'high', color: COLORS.magenta },

@@ -23,7 +23,7 @@ import {
 } from './music.js';
 import { renderScore } from './score.js';
 import { TOTAL_BARS } from './show.js';
-import { COLORS, fgAlpha } from './theme.js';
+import { COLORS, fgAlpha, ROLES } from './theme.js';
 import { replayFade } from './util.js';
 
 const T = COPY.read;
@@ -73,15 +73,15 @@ const LAYOUTS = {
       low = swingMilliseconds('low');
     return (
       `<div class="row"><span class="k" data-listening></span>${label(T.msLegend)}</div>
-      <div class="notation" style="grid-template-columns:19cqw 1fr 9cqw 1fr 9cqw;gap:.2cqw 1.6cqw">${label(T.sixteenthHeader)}${label(T.caixa, COLORS.ice)}<span></span>${label(T.alfaia, COLORS.amber)}<span></span>` +
-      [0, 1, 2, 3].map(i => label(T.nth(i + 1)) + swingMeter(high[i], COLORS.ice) + swingMeter(low[i], COLORS.amber)).join('') +
+      <div class="notation" style="grid-template-columns:19cqw 1fr 9cqw 1fr 9cqw;gap:.2cqw 1.6cqw">${label(T.sixteenthHeader)}${label(T.caixa, COLORS.ice)}<span></span>${label(T.alfaia, ROLES.mainHand)}<span></span>` +
+      [0, 1, 2, 3].map(i => label(T.nth(i + 1)) + swingMeter(high[i], COLORS.ice) + swingMeter(low[i], ROLES.mainHand)).join('') +
       `</div>`
     );
   },
   offbeat: () =>
-    stats('two', stat(BEAT_STEPS.length, T.beatHeads, COLORS.fg), stat(OFFBEAT_STEPS.length, T.offbeatSixteenths, COLORS.ember)) +
-    row(label(T.answerOnBeat, COLORS.ember), ANSWER_ON_BEAT_STEPS) +
-    row(label(T.mainOffbeat, COLORS.amber), MAIN_OFFBEAT_STEPS),
+    stats('two', stat(BEAT_STEPS.length, T.beatHeads, COLORS.fg), stat(OFFBEAT_STEPS.length, T.offbeatSixteenths, ROLES.answerHand)) +
+    row(label(T.answerOnBeat, ROLES.answerHand), ANSWER_ON_BEAT_STEPS) +
+    row(label(T.mainOffbeat, ROLES.mainHand), MAIN_OFFBEAT_STEPS),
   // the row draws the first bar; the count is the whole pattern, as the baque's own scene shows it
   summary: () =>
     `<div class="notation tight">` +
@@ -90,7 +90,7 @@ const LAYOUTS = {
         answer = stepsOfBar(PATTERNS[id].answer, 0);
       const marks = SIXTEENTHS.map(
         step =>
-          (main.includes(step) ? `<b style="color:${COLORS.amber}">●</b>` : answer.includes(step) ? `<b style="color:${COLORS.ember}">●</b>` : '·') +
+          (main.includes(step) ? `<b style="color:${ROLES.mainHand}">●</b>` : answer.includes(step) ? `<b style="color:${ROLES.answerHand}">●</b>` : '·') +
           beatSeparator(step),
       ).join('');
       return `${label(COPY.patterns[id])}<span class="seq">${marks}</span><span class="n">${T.hits(PATTERNS[id].main.length + PATTERNS[id].answer.length)}</span>`;
@@ -98,7 +98,7 @@ const LAYOUTS = {
     `</div>` +
     row(label(T.sameInAll), T.sameInAllValue),
   finale: () =>
-    stats('', stat(BAQUE_ORDER.length, T.baques, COLORS.amber), stat(INSTRUMENTS.length, T.voices, COLORS.ember), stat(TOTAL_BARS, T.bars, COLORS.fg)) +
+    stats('', stat(BAQUE_ORDER.length, T.baques, ROLES.accent), stat(INSTRUMENTS.length, T.voices, COLORS.ember), stat(TOTAL_BARS, T.bars, COLORS.fg)) +
     row(label(T.breaksAndCut), T.mestreWhistle),
 };
 
@@ -109,13 +109,13 @@ function baqueLayout(scene) {
     bars = pattern.bars || 1;
   const markup = stats(
     'small',
-    stat(pattern.main.length, T.hitsMain, COLORS.amber),
-    stat(pattern.answer.length, T.hitsAnswer, COLORS.ember),
+    stat(pattern.main.length, T.hitsMain, ROLES.mainHand),
+    stat(pattern.answer.length, T.hitsAnswer, ROLES.answerHand),
     stat(`${offbeats}<small>/${all.length}</small>`, T.onOffbeat, COLORS.fg),
   );
   const score = renderScore({
     bars: [...Array(bars).keys()].map(n => ({ main: stepsOfBar(pattern.main, n), answer: stepsOfBar(pattern.answer, n), stick: stepsOfBar(pattern.stick, n) })),
-    colors: { ink: COLORS.fg, main: COLORS.amber, answer: COLORS.ember, stick: COLORS.bone, dim: fgAlpha(0.45) },
+    colors: { ink: COLORS.fg, main: ROLES.mainHand, answer: ROLES.answerHand, stick: COLORS.bone, dim: fgAlpha(0.45) },
     timeSig: true,
     repeat: bars === 2 ? TWO_BAR_REPEATS : ONE_BAR_REPEATS,
     accentOffbeats: true,
@@ -150,7 +150,7 @@ export function createReadout(element) {
       if (listening) {
         const swingOn = scene.swing(barInScene);
         listening.textContent = swingOn ? T.listeningSwing : T.listeningGrid;
-        listening.style.color = swingOn ? COLORS.amber : '';
+        listening.style.color = swingOn ? ROLES.accent : '';
       }
     },
     /** Move the score cursor to the current sixteenth (second bar of a two-bar cycle when needed). */

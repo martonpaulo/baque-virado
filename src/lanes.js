@@ -4,7 +4,7 @@
 import { COPY } from './copy.js';
 import { BAR_SECONDS, isAlfaia, isOffbeat, STEPS_PER_BAR, VOICE_ORDER, VOICES } from './music.js';
 import { barTimeline, blendAt, hitsInBar, sceneAt } from './show.js';
-import { CANVAS_MONO_FONT, COLORS, fgAlpha } from './theme.js';
+import { COLORS, fgAlpha, MONO_FONT } from './theme.js';
 import { lerp } from './util.js';
 
 const MORPH_BARS = 0.5; // ≈1 s, centred on the scene boundary
@@ -177,7 +177,7 @@ export function createLanes(canvas) {
 
     ctx.clearRect(0, 0, width, height);
     const fontSize = Math.round(Math.min(lerp(layoutFrom.rowHeight, layoutTo.rowHeight, amount) * LABEL_SIZE, height * LABEL_MAX_SIZE));
-    ctx.font = `${fontSize}px ${CANVAS_MONO_FONT}`;
+    ctx.font = `${fontSize}px ${MONO_FONT}`;
     ctx.textBaseline = 'middle';
     drawGrid(start, toX, plotLeft, plotRight, sixteenthWidth, top, bottom);
 

@@ -26,19 +26,52 @@
 }
 :root {
   color-scheme: dark;
+  /* Palette: one owner, src/theme.js COLORS; tests/styles.test.js keeps these equal to it. */
   --void: #07060b;
-  --line: rgba(232, 226, 255, 0.16);
-  --dim: rgba(232, 226, 255, 0.55);
   --fg: #ece8ff;
-  --amber: #ffc53d; /* alfaia, main hand */
-  --ember: #ff5a36; /* alfaia, answer hand */
-  --ice: #3fd7ff; /* caixa */
-  --magenta: #ff4fa3; /* agbê */
-  --split-pink: rgba(255, 79, 163, 0.75);
-  --split-cyan: rgba(63, 215, 255, 0.75);
+  --amber: #ffc53d;
+  --ember: #ff5a36;
+  --ice: #3fd7ff;
+  --magenta: #ff4fa3;
+  /* translucent colours, built from the palette's channels */
+  --line: rgba(236, 232, 255, 0.16); /* fg */
+  --dim: rgba(236, 232, 255, 0.55); /* fg */
+  --split-pink: rgba(255, 79, 163, 0.75); /* magenta */
+  --split-cyan: rgba(63, 215, 255, 0.75); /* ice */
+  /* roles point at the palette (src/theme.js ROLES) */
+  --accent: var(--amber);
+  --main-hand: var(--amber);
+  --answer-hand: var(--ember);
   --f-display: "Space Grotesk", "Helvetica Neue", Arial, sans-serif;
   --f-mono: "JetBrains Mono", ui-monospace, Menlo, monospace;
-  --gutter: 16px;
+  /* Controls (outside the stage): rem, so they follow the reader's text size; the values in use. */
+  --space-1: 0.125rem; /* 2px */
+  --space-2: 0.25rem; /* 4px */
+  --space-3: 0.375rem; /* 6px */
+  --space-4: 0.5rem; /* 8px */
+  --space-5: 0.625rem; /* 10px */
+  --space-6: 0.75rem; /* 12px */
+  --space-7: 0.875rem; /* 14px */
+  --space-8: 1rem; /* 16px */
+  --space-9: 1.125rem; /* 18px */
+  --space-10: 1.5rem; /* 24px */
+  --space-11: 2.5rem; /* 40px */
+  --chip-padding: 0.3125rem 0.6875rem; /* 5px 11px */
+  --text-xs: 0.6875rem; /* 11px */
+  --text-s: 0.75rem; /* 12px */
+  --text-m: 0.8125rem; /* 13px */
+  --text-l: 0.875rem; /* 14px */
+  --text-display: 2.75rem; /* 44px */
+  --radius-pill: 6.1875rem; /* 99px */
+  --radius-stage: 0.75rem; /* 12px */
+  --play-min-width: 8.125rem; /* 130px */
+  /* Stage text: five steps in cqw (percent of the stage width), so the reel scales as one picture. */
+  --stage-label: 2.2cqw;
+  --stage-text: 2.6cqw;
+  --stage-figure-s: 7cqw;
+  --stage-figure: 11cqw;
+  --stage-title: 13cqw;
+  --gutter: var(--space-8);
   --controls-height: 190px; /* room kept under the stage on phones */
   --desktop-side: 340px;
   --label-floor: 0px; /* phones raise it: see the phone block at the end */
@@ -61,7 +94,7 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 14px;
+  gap: var(--space-7);
 }
 
 /* ---------- stage ---------- */
@@ -74,7 +107,7 @@ body {
   aspect-ratio: 9 / 16;
   container-type: inline-size;
   background: var(--void);
-  border-radius: 12px;
+  border-radius: var(--radius-stage);
   overflow: hidden;
   isolation: isolate;
 }
@@ -119,7 +152,7 @@ body {
   justify-content: space-between;
   gap: 2cqw;
   font-family: var(--f-mono);
-  font-size: max(2.3cqw, var(--label-floor));
+  font-size: max(var(--stage-label), var(--label-floor));
   letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--dim);
@@ -144,15 +177,15 @@ body {
 .eyebrow {
   min-height: 1.2em;
   font-family: var(--f-mono);
-  font-size: max(2.5cqw, var(--label-floor));
+  font-size: max(var(--stage-text), var(--label-floor));
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: var(--amber);
+  color: var(--accent);
 }
 .title {
   font-family: var(--f-display);
   font-weight: 700;
-  font-size: 13cqw;
+  font-size: var(--stage-title);
   line-height: 0.9;
   letter-spacing: -0.02em;
   text-transform: uppercase;
@@ -187,18 +220,18 @@ body {
   justify-content: center;
   gap: 1.4cqw;
   font-family: var(--f-mono);
-  font-size: 2.6cqw;
+  font-size: var(--stage-text);
 }
 .read .k {
   color: var(--dim);
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  font-size: max(2.2cqw, var(--label-floor));
+  font-size: max(var(--stage-label), var(--label-floor));
 }
 .read .big {
   font-family: var(--f-display);
   font-weight: 700;
-  font-size: 9cqw;
+  font-size: var(--stage-figure);
   line-height: 1;
   text-transform: uppercase;
 }
@@ -217,22 +250,24 @@ body {
 .notation .seq {
   letter-spacing: 0.12em;
   white-space: nowrap;
-  font-size: 2.9cqw;
+  font-size: var(--stage-text);
 }
 .notation .n {
   text-align: right;
   color: var(--dim);
-  font-size: max(2.2cqw, var(--label-floor));
+  font-size: max(var(--stage-label), var(--label-floor));
 }
 .notation.tight {
+  grid-template-columns: auto 1fr auto; /* the counts and baque names keep one line */
   gap: 0.1cqw 2cqw;
+  line-height: 1.15;
 }
 .notation.tight .seq {
-  font-size: 2.5cqw;
+  font-size: var(--stage-text);
 }
 .notation.tight .k,
 .notation.tight .n {
-  font-size: max(2cqw, var(--label-floor));
+  font-size: max(var(--stage-label), var(--label-floor));
 }
 .stats {
   display: grid;
@@ -247,11 +282,11 @@ body {
   display: block;
   font-family: var(--f-display);
   font-weight: 700;
-  font-size: 11cqw;
+  font-size: var(--stage-figure);
   line-height: 1;
 }
 .stats.small b {
-  font-size: 7cqw;
+  font-size: var(--stage-figure-s);
 }
 .score {
   position: relative;
@@ -267,7 +302,7 @@ body {
   align-self: center;
 }
 .stats b small {
-  font-size: 5cqw;
+  font-size: 0.7em; /* the denominator, below its figure */
   opacity: 0.6;
 }
 .score svg {
@@ -317,7 +352,7 @@ body {
   min-height: 1.3em;
   margin: 0.8cqw 0 0;
   font-family: var(--f-mono);
-  font-size: max(2.2cqw, var(--label-floor));
+  font-size: max(var(--stage-label), var(--label-floor));
   line-height: 1.3;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -335,7 +370,7 @@ body {
   width: min(100%, 720px);
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: var(--space-6);
   align-items: center;
   font-family: var(--f-mono);
 }
@@ -356,22 +391,22 @@ body {
   margin: 0;
   font-family: var(--f-display);
   font-weight: 700;
-  font-size: 44px;
+  font-size: var(--text-display);
   line-height: 0.95;
   letter-spacing: -0.02em;
   text-transform: uppercase;
   text-shadow:
-    -2px 0 0 var(--split-pink),
-    2px 0 0 var(--split-cyan);
+    calc(-1 * var(--space-1)) 0 0 var(--split-pink),
+    var(--space-1) 0 0 var(--split-cyan);
 }
 .brand p {
-  margin: 8px 0 0;
-  font-size: 13px;
+  margin: var(--space-4) 0 0;
+  font-size: var(--text-m);
   color: var(--dim);
 }
 .trow {
   display: flex;
-  gap: 10px;
+  gap: var(--space-5);
   align-items: center;
   flex-wrap: wrap;
   justify-content: center;
@@ -382,14 +417,14 @@ button {
   cursor: pointer;
 }
 #play {
-  background: var(--amber);
+  background: var(--accent);
   color: var(--void);
   border: 0;
-  border-radius: 99px;
-  padding: 10px 24px;
+  border-radius: var(--radius-pill);
+  padding: var(--space-5) var(--space-10);
   font-weight: 700;
-  font-size: 14px;
-  min-width: 130px;
+  font-size: var(--text-l);
+  min-width: var(--play-min-width);
 }
 #play:disabled {
   opacity: 0.6;
@@ -398,26 +433,26 @@ button {
 #play:focus-visible,
 .chip:focus-visible,
 a:focus-visible {
-  outline: 2px solid var(--fg);
-  outline-offset: 2px;
+  outline: var(--space-1) solid var(--fg);
+  outline-offset: var(--space-1);
 }
 #clock {
-  font-size: 13px;
+  font-size: var(--text-m);
   color: var(--dim);
   font-variant-numeric: tabular-nums;
 }
 .chips {
   display: flex;
-  gap: 6px;
+  gap: var(--space-3);
   flex-wrap: wrap;
   justify-content: center;
 }
 .chip {
   background: transparent;
   border: 1px solid var(--line);
-  border-radius: 99px;
-  padding: 5px 11px;
-  font-size: 12px;
+  border-radius: var(--radius-pill);
+  padding: var(--chip-padding);
+  font-size: var(--text-s);
   color: var(--dim);
 }
 .chip:hover {
@@ -426,24 +461,24 @@ a:focus-visible {
 }
 .chip[aria-current="true"],
 .chip[aria-pressed="true"] {
-  border-color: var(--amber);
-  color: var(--amber);
+  border-color: var(--accent);
+  color: var(--accent);
 }
 .lbl {
-  font-size: 12px;
+  font-size: var(--text-s);
   color: var(--dim);
   margin: 0;
 }
 .sound {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: var(--space-3);
 }
 .foot {
-  font-size: 11px;
+  font-size: var(--text-xs);
   color: var(--dim);
   display: flex;
-  gap: 14px;
+  gap: var(--space-7);
   flex-wrap: wrap;
   justify-content: center;
   margin: 0;
@@ -458,7 +493,7 @@ a:focus-visible {
     flex-direction: row;
     justify-content: center;
     align-items: flex-start;
-    gap: 40px;
+    gap: var(--space-11);
     height: 100%;
   }
   .stage {
@@ -470,13 +505,13 @@ a:focus-visible {
   .side {
     width: var(--desktop-side);
     align-items: flex-start;
-    gap: 18px;
+    gap: var(--space-9);
     max-height: 100%;
     overflow-y: auto;
-    padding-top: 8px;
+    padding-top: var(--space-4);
     /* room for the focus ring, which the scroll box would clip, without moving the controls */
-    padding-left: 4px;
-    margin-left: -4px;
+    padding-left: var(--space-2);
+    margin-left: calc(-1 * var(--space-2));
   }
   .side.left {
     order: 1;
@@ -498,7 +533,7 @@ a:focus-visible {
   .sounds {
     display: flex;
     flex-direction: column;
-    gap: 16px;
+    gap: var(--space-8);
   }
   .trow,
   .chips,
@@ -529,10 +564,6 @@ a:focus-visible {
   .key {
     gap: 1.2cqw;
     letter-spacing: 0;
-  }
-  .notation.tight {
-    grid-template-columns: auto 1fr auto;
-    line-height: 1.15;
   }
   /* a dark scrim keeps the numbers readable over the bright background; the inline padding is
      taken back by the negative margin, so the text keeps its width */
