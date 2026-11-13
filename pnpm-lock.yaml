@@ -11,6 +11,9 @@ importers:
       '@biomejs/biome':
         specifier: 2.6.7
         version: 2.6.7
+      '@puppeteer/browsers':
+        specifier: 3.2.7
+        version: 3.2.7
       puppeteer-core:
         specifier: ^25.17.0
         version: 25.17.0

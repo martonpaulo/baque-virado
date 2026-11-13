@@ -40,6 +40,20 @@ jobs:
         run: |
           git fetch --quiet origin main
           if [ "$(git rev-parse origin/main)" = "$(git rev-parse HEAD)" ]; then echo "current=true" >> "$GITHUB_OUTPUT"; else echo "A newer commit is on main; its own run deploys it."; fi
+      # A manual deploy has no Validate run behind it, so it runs the same gate first (#9).
+      - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
+        if: steps.tip.outputs.current == 'true' && github.event_name == 'workflow_dispatch'
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        if: steps.tip.outputs.current == 'true' && github.event_name == 'workflow_dispatch'
+        with:
+          node-version: 24
+          cache: pnpm
+      - name: Validate before a manual deploy
+        if: steps.tip.outputs.current == 'true' && github.event_name == 'workflow_dispatch'
+        run: |
+          pnpm install --frozen-lockfile
+          node tools/install-browser.mjs
+          pnpm validate
       - name: Build the site (only what the browser loads, plus the deployed commit)
         if: steps.tip.outputs.current == 'true'
         run: |

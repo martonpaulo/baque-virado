@@ -19,4 +19,6 @@ jobs:
           node-version: 24
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+      # the browser tests run in the pinned Chrome headless shell (tests/support/pinned-browser.js)
+      - run: node tools/install-browser.mjs
       - run: pnpm validate

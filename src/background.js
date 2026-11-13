@@ -318,7 +318,7 @@ export function createBackground(fxCanvas, feedbackCanvas) {
 
   /** One frame. `clock` = { time, step } (seconds); `shapes` are the wheel's partly drawn shapes. */
   function draw(position, params, recent, clock, shapes) {
-    if (!geometry) return;
+    if (!geometry?.width || !geometry.height) return; // not laid out, or hidden: a 0-px canvas cannot be drawn
     const { width, height, centreX, centreY } = geometry;
     if (kaleidoscope) kaleidoscope.draw({ centreX: centreX * shaderScale, centreY: centreY * shaderScale, time: clock.time, params, ...hitEnergy(recent) });
     ctx.clearRect(0, 0, width, height);

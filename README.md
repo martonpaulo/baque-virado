@@ -40,7 +40,7 @@ sounds a desktop viewer can pick are fetched when chosen.
 - `src/main.js` - wires everything together and exposes `window.baque` for the exporter.
 - `sounds/` - the samples: WAV masters and the AAC (`.m4a`) files the page fetches (see [CREDITS.md](CREDITS.md)).
 - `tools/encode-sounds.mjs` - encodes each WAV to AAC at 96 kbps (`node tools/encode-sounds.mjs`, needs `ffmpeg`).
-- `tests/` - unit tests of the DOM-free modules.
+- `tests/` - unit tests of the DOM-free modules, and browser tests of the page in headless Chromium (`tests/page.test.js`, `tests/sounds-decode.test.js`).
 - `tools/static-server.mjs` - the local static server (`pnpm serve`).
 - `tools/export-video.mjs` - the vertical video exporter.
 
@@ -53,7 +53,9 @@ pnpm validate
 
 `pnpm validate` runs exactly what CI runs: Biome, the tests, `scripts/text_check.py` and
 `scripts/dry_check.py`. The tests use `node:test` and cover the timeline, the special bars, the patterns, the sound files
-and the pinned `hash` values.
+and the pinned `hash` values. The browser tests load the page in headless Chromium: `CHROME_PATH`
+if set, else the pinned Chrome headless shell that `node tools/install-browser.mjs` downloads to
+`.scratch/browsers` (CI does this), else a Chrome or Chromium found on the machine.
 
 ## Video export
 

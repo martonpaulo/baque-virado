@@ -13,6 +13,7 @@
   },
   "devDependencies": {
     "@biomejs/biome": "2.6.7",
+    "@puppeteer/browsers": "3.2.7",
     "puppeteer-core": "^25.17.0"
   },
   "packageManager": "pnpm@11.7.0"
