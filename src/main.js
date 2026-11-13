@@ -5,7 +5,7 @@ import { createPlayer, createSampleBank, filesFor, renderShowWav } from './audio
 import { backgroundAt, createBackground, SCENE_LOOKS } from './background.js';
 import { bindKeyboard, createSceneChips, createSoundPickers, initialChoices } from './controls.js';
 import { COPY } from './copy.js';
-import { createLanes } from './lanes.js';
+import { createKey, createLanes } from './lanes.js';
 import { BAQUE_ORDER, BAR_SECONDS, BPM, STEPS_PER_BAR } from './music.js';
 import { createReadout } from './readout.js';
 import { createScope, SCOPE_GEOMETRY } from './scope.js';
@@ -39,6 +39,7 @@ const readout = createReadout($('read'));
 const title = createTitle($('head'));
 const background = createBackground($('fx'), $('bg'));
 const lanes = createLanes($('lanes'));
+const key = createKey($('key'));
 
 // ---------- sizes ----------
 function measure() {
@@ -126,6 +127,7 @@ function render(at, force = false) {
     currentBar = bar;
     scope.build(scene, barInScene);
     readout.onBar(scene, barInScene);
+    key.update(bar);
   }
   readout.update(sixteenth, barInScene);
   shapes = scope.update(p, scene, barInScene);

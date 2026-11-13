@@ -13,6 +13,8 @@ const PHONES = [
   { width: 375, height: 812 },
 ];
 const DESKTOP = { width: 1440, height: 900 };
+const COPY_ALFAIA = COPY.read.alfaia.toUpperCase(),
+  COPY_PRINCIPAL = COPY.voices.main.toUpperCase();
 const LABEL_FLOOR_PX = 11; // #4
 const SOUND_DELAY_MS = 600; // holds every sample back, so Space lands while they decode
 const DETERMINISM_POSITION = 20.3; // bars: a baque scene, wheel, score and background all busy
@@ -272,4 +274,37 @@ test('the exporter rebuilds the wheel only on a new bar or after a jump', async 
   assert.equal(rebuilds, 0);
   assert.deepEqual(errors, []);
   await page.close();
+});
+
+// #12: the key fits its one line in every bar, the stage keeps its size, and the lanes name the
+// hands as the alfaia's.
+test('the colour key fits on one line and the lanes name the alfaia hands', async () => {
+  for (const viewport of [{ width: 320, height: 568 }, ...PHONES, DESKTOP]) {
+    const { page, errors } = await openPage(viewport);
+    await page.evaluate(() => {
+      window.__labels = [];
+      const fillText = CanvasRenderingContext2D.prototype.fillText;
+      CanvasRenderingContext2D.prototype.fillText = function (text, ...rest) {
+        if (this.canvas.id === 'lanes') window.__labels.push(text);
+        return fillText.call(this, text, ...rest);
+      };
+    });
+    const problems = await page.evaluate(async total => {
+      const found = [];
+      for (let bar = 0; bar < total; bar++) {
+        window.baque.render(bar + 0.5);
+        const key = document.getElementById('key'),
+          inner = document.querySelector('.inner');
+        if (key.scrollWidth > key.clientWidth) found.push(`bar ${bar}: the key overflows (${key.textContent})`);
+        if (inner.scrollHeight > inner.clientHeight) found.push(`bar ${bar}: the stage content overflows`);
+      }
+      return found;
+    }, SCENES.at(-1).start + SCENES.at(-1).bars);
+    assert.deepEqual(problems, [], `${viewport.width}x${viewport.height}`);
+    const labels = await page.evaluate(() => window.__labels);
+    const principal = labels.indexOf(COPY_PRINCIPAL);
+    assert.ok(principal > 0 && labels[principal - 1] === COPY_ALFAIA, 'ALFAIA is drawn over PRINCIPAL');
+    assert.deepEqual(errors, []);
+    await page.close();
+  }
 });

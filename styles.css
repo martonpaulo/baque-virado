@@ -304,12 +304,30 @@ body {
   position: relative;
   height: 37cqw;
   flex: none;
+  display: flex;
+  flex-direction: column;
   border-top: 1px solid var(--line);
 }
+/* names the wheel's dot colours the lanes do not show as rows (#12); one line, so the canvas keeps
+   its height from scene to scene */
+.key {
+  flex: none;
+  display: flex;
+  gap: 1.6cqw;
+  min-height: 1.3em;
+  margin: 0.8cqw 0 0;
+  font-family: var(--f-mono);
+  font-size: max(2.2cqw, var(--label-floor));
+  line-height: 1.3;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
 .lanes canvas {
-  inset: 0;
+  position: relative;
+  flex: 1 1 0;
+  min-height: 0;
   width: 100%;
-  height: 100%;
 }
 
 /* ---------- controls (outside the reel) ---------- */
@@ -507,6 +525,10 @@ a:focus-visible {
   }
   .lanes {
     height: 30cqw;
+  }
+  .key {
+    gap: 1.2cqw;
+    letter-spacing: 0;
   }
   .notation.tight {
     grid-template-columns: auto 1fr auto;

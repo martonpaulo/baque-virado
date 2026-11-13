@@ -2,8 +2,8 @@
 // Rows change with the scene and morph into the next scene's rows.
 
 import { COPY } from './copy.js';
-import { BAR_SECONDS, isAlfaia, isOffbeat, STEPS_PER_BAR, VOICES } from './music.js';
-import { blendAt, hitsInBar } from './show.js';
+import { BAR_SECONDS, isAlfaia, isOffbeat, STEPS_PER_BAR, VOICE_ORDER, VOICES } from './music.js';
+import { barTimeline, blendAt, hitsInBar, sceneAt } from './show.js';
 import { CANVAS_MONO_FONT, COLORS, fgAlpha } from './theme.js';
 import { lerp } from './util.js';
 
@@ -47,8 +47,9 @@ const OUTLINE_GAP = 2; // CSS px between block and outline
 const LABEL_SIZE = 0.32; // font size as a fraction of the row height...
 const LABEL_MAX_SIZE = 0.07; // ...capped at this fraction of the canvas height
 const HIDDEN_ALPHA = 0.01; // rows fainter than this are skipped
-const MUTED_LABEL_ALPHA = 0.25,
+const MUTED_LABEL_ALPHA = 0.45, // a silent voice keeps its colour, fainter, so it stays named (#12)
   COUNT_ALPHA = 0.55;
+const INSTRUMENT_LINE = 0.6; // an alfaia hand's label: "ALFAIA" over the hand, this many font sizes up and down
 const NO_COUNT = '—'; // count shown for a silent voice
 const PLAYHEAD_WIDTH = 1.6; // CSS px
 const PLAYHEAD_OVERHANG = 4; // CSS px above and below the rows
@@ -74,6 +75,36 @@ function morphRows(from, to, amount) {
           : { y: b.y + (1 - amount) * b.height * ROW_DRIFT, height: b.height, alpha: amount, reveal: amount }; // entering: rises, wipes in
   }
   return rows;
+}
+
+/**
+ * The voices the wheel draws in `bar` that the lanes do not name as a row: the key above the lanes
+ * names them in their colours, so every dot colour has a name on the stage (#12).
+ */
+export function keyVoices(bar) {
+  const { voices } = barTimeline(bar),
+    rows = new Set(sceneAt(bar).lanes);
+  return VOICE_ORDER.filter(voice => VOICES[voice].ring && voices[voice].length > 0 && !rows.has(voice));
+}
+
+/** The key line: one `● name` per voice from `keyVoices`, in the voice's colour. */
+export function createKey(element) {
+  let shown = null;
+  return {
+    update(bar) {
+      const voices = keyVoices(bar),
+        id = voices.join();
+      if (id === shown) return;
+      shown = id;
+      element.textContent = '';
+      for (const voice of voices) {
+        const item = document.createElement('span');
+        item.style.color = VOICES[voice].color;
+        item.textContent = `● ${COPY.voices[voice]}`;
+        element.appendChild(item);
+      }
+    },
+  };
 }
 
 export function createLanes(canvas) {
@@ -145,7 +176,8 @@ export function createLanes(canvas) {
       toX = bars => plotLeft + ((bars - start) / WINDOW_BARS) * plotWidth;
 
     ctx.clearRect(0, 0, width, height);
-    ctx.font = `${Math.round(Math.min(lerp(layoutFrom.rowHeight, layoutTo.rowHeight, amount) * LABEL_SIZE, height * LABEL_MAX_SIZE))}px ${CANVAS_MONO_FONT}`;
+    const fontSize = Math.round(Math.min(lerp(layoutFrom.rowHeight, layoutTo.rowHeight, amount) * LABEL_SIZE, height * LABEL_MAX_SIZE));
+    ctx.font = `${fontSize}px ${CANVAS_MONO_FONT}`;
     ctx.textBaseline = 'middle';
     drawGrid(start, toX, plotLeft, plotRight, sixteenthWidth, top, bottom);
 
@@ -163,10 +195,16 @@ export function createLanes(canvas) {
     for (const voice in rows) {
       const row = rows[voice];
       if (row.alpha < HIDDEN_ALPHA) continue;
-      ctx.globalAlpha = row.alpha;
-      ctx.fillStyle = active.has(voice) ? VOICES[voice].color : fgAlpha(MUTED_LABEL_ALPHA);
+      ctx.globalAlpha = row.alpha * (active.has(voice) ? 1 : MUTED_LABEL_ALPHA);
+      ctx.fillStyle = VOICES[voice].color;
       ctx.textAlign = 'left';
-      ctx.fillText(COPY.voices[voice].toUpperCase(), 0, row.y);
+      if (isAlfaia(voice)) {
+        // the hands are the alfaia's: name the instrument over the hand (#12)
+        const shift = fontSize * INSTRUMENT_LINE;
+        ctx.fillText(COPY.read.alfaia.toUpperCase(), 0, row.y - shift);
+        ctx.fillText(COPY.voices[voice].toUpperCase(), 0, row.y + shift);
+      } else ctx.fillText(COPY.voices[voice].toUpperCase(), 0, row.y);
+      ctx.globalAlpha = row.alpha;
       ctx.textAlign = 'right';
       ctx.fillStyle = fgAlpha(COUNT_ALPHA);
       ctx.fillText(active.has(voice) ? String(counts[voice] || 0) : NO_COUNT, width, row.y);
