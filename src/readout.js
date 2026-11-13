@@ -77,6 +77,7 @@ const LAYOUTS = {
     stats('two', stat(BEAT_HEADS, T.beatHeads, COLORS.fg), stat(OFFBEAT_SIXTEENTHS, T.offbeatSixteenths, COLORS.ember)) +
     row(label(T.answerOnBeat, COLORS.ember), ANSWER_ON_BEAT_STEPS) +
     row(label(T.mainOffbeat, COLORS.amber), MAIN_OFFBEAT_STEPS),
+  // the row draws the first bar; the count is the whole pattern, as the baque's own scene shows it
   summary: () =>
     `<div class="notation tight">` +
     BAQUE_ORDER.map(id => {
@@ -87,7 +88,7 @@ const LAYOUTS = {
           (main.includes(step) ? `<b style="color:${COLORS.amber}">●</b>` : answer.includes(step) ? `<b style="color:${COLORS.ember}">●</b>` : '·') +
           beatSeparator(step),
       ).join('');
-      return `${label(COPY.patterns[id])}<span class="seq">${marks}</span><span class="n">${T.hits(main.length + answer.length)}</span>`;
+      return `${label(COPY.patterns[id])}<span class="seq">${marks}</span><span class="n">${T.hits(PATTERNS[id].main.length + PATTERNS[id].answer.length)}</span>`;
     }).join('') +
     `</div>` +
     row(label(T.sameInAll), T.sameInAllValue),

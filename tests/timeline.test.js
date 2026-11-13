@@ -25,3 +25,10 @@ test('every scene id and every section has copy', () => {
     assert.ok(COPY.sections[scene.section], `no copy for section ${scene.section}`);
   }
 });
+
+test('the hits of a bar are computed once and cannot be changed by a caller', async () => {
+  const { hitsInBar } = await import('../src/show.js');
+  const first = hitsInBar(21);
+  assert.equal(hitsInBar(21), first);
+  assert.ok(Object.isFrozen(first) && Object.isFrozen(first[0]));
+});

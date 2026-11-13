@@ -112,7 +112,7 @@ const FRAGMENT_SHADER = `precision highp float;
 const UNIFORMS = ['uRes', 'uC', 'uT', 'uBoom', 'uCrack', 'uSegA', 'uWarpA', 'uPalA', 'uSegB', 'uWarpB', 'uPalB', 'uMix'];
 
 function createKaleidoscope(canvas) {
-  const gl = canvas.getContext('webgl', { antialias: false, preserveDrawingBuffer: true });
+  const gl = canvas.getContext('webgl', { antialias: false, preserveDrawingBuffer: false });
   if (!gl) return null;
   const compile = (type, source) => {
     const shader = gl.createShader(type);

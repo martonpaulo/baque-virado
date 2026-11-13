@@ -91,11 +91,19 @@ const clock = {
 // ---------- one frame ----------
 let position = 0,
   currentScene = null,
-  currentBar = -1;
+  currentBar = -1,
+  renderedAt = null; // the position the foreground was last drawn at
 const sceneChips = createSceneChips($('chips'), scene => seek(scene.start));
 
 function render(at, force = false) {
   const p = Math.max(0, Math.min(TOTAL_BARS - END_EPSILON, at));
+  const params = backgroundAt(p);
+  const drawBackground = () => background.draw(p, params, recentHits(p, RECENT_HITS_WINDOW), clock.tick(p, params), scope.shapes);
+  if (p === renderedAt && !force) {
+    drawBackground(); // paused: only the background moves, the rest is already on screen
+    return;
+  }
+  renderedAt = p;
   const bar = Math.floor(p),
     scene = sceneAt(bar),
     barInScene = bar - scene.start,
@@ -120,8 +128,7 @@ function render(at, force = false) {
   $('hStep').textContent = COPY.hud.step(pad2(Math.floor(sixteenth) + 1));
   $('hTime').textContent = formatPrecise(seconds);
   $('clock').textContent = `${formatClock(seconds)} / ${formatClock(TOTAL_SECONDS)}`;
-  const params = backgroundAt(p);
-  background.draw(p, params, recentHits(p, RECENT_HITS_WINDOW), clock.tick(p, params), scope.shapes);
+  drawBackground();
   lanes.draw(p);
 }
 
@@ -155,6 +162,7 @@ async function play() {
 function pause() {
   const stoppedAt = player.stop();
   if (stoppedAt !== null) position = Math.max(0, stoppedAt);
+  renderedAt = null; // redraw once: the title settles
   playButton.textContent = COPY.controls.play;
 }
 const toggle = () => (player.playing ? pause() : play());

@@ -121,18 +121,26 @@ export function blendAt(position, width) {
   return { from: scene, to: scene, amount: 0, scene };
 }
 
-/** Every hit of one bar of the show, with its swung time (`at`) and grid time (`grid`), in bars. */
+/**
+ * Every hit of one bar of the show, with its swung time (`at`) and grid time (`grid`), in bars.
+ * Pure in `bar`, so each bar is computed once and shared (frozen: callers never change it).
+ */
+const hitsCache = new Map();
 export function hitsInBar(bar) {
   if (bar < 0 || bar >= TOTAL_BARS) return [];
-  const scene = sceneAt(bar),
-    barInScene = bar - scene.start,
-    hits = barHits(scene, barInScene),
-    swingOn = scene.swing(barInScene),
-    out = [];
-  for (const voice of scene.voices(barInScene)) {
-    for (const h of hits[voice]) out.push({ voice, hit: h, at: bar + (h.step + swingOffset(voice, h.step, swingOn)) / 16, grid: bar + h.step / 16 });
+  if (!hitsCache.has(bar)) {
+    const scene = sceneAt(bar),
+      barInScene = bar - scene.start,
+      hits = barHits(scene, barInScene),
+      swingOn = scene.swing(barInScene),
+      out = [];
+    for (const voice of scene.voices(barInScene)) {
+      for (const h of hits[voice])
+        out.push(Object.freeze({ voice, hit: h, at: bar + (h.step + swingOffset(voice, h.step, swingOn)) / 16, grid: bar + h.step / 16 }));
+    }
+    hitsCache.set(bar, Object.freeze(out));
   }
-  return out;
+  return hitsCache.get(bar);
 }
 
 /** Hits that sounded within the last `windowSeconds` before `position`, with their age `age` in seconds. */
