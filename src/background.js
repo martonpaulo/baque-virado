@@ -10,6 +10,7 @@ import { blendAt, sceneAt } from './show.js';
 import { boneAlpha, COLORS, fgAlpha, TINTS, voidAlpha } from './theme.js';
 
 const CROSSFADE_BARS = 1.5; // ≈3 s, centred on each scene boundary
+const NEARER_HALF = 0.5; // a settled crossfade at or past this mix shows the scene being entered
 const FEEDBACK_KEYS = ['zoom', 'rot', 'hue', 'keep', 'speed'];
 
 // How the background behaves in each scene: feedback zoom, rotation, hue and persistence (keep),
@@ -43,6 +44,9 @@ const INITIAL_SHADER_SCALE = 0.5; // shader resolution before main.js sets it
 const FEEDBACK_FPS = 30; // frame rate the `keep` factor was tuned at
 const KEEP_EXPONENT = 0.32; // softens `keep`: alpha = keep ^ (frames × this)
 const FEEDBACK_SATURATE = 1.06; // saturation boost per feedback pass
+// The hue and saturation filter costs a full-canvas filter pass, so live it runs once every this
+// many feedback frames, catching up on the frames in between (#8). The export filters every frame.
+const LIVE_FILTER_INTERVAL = 3;
 const FEEDBACK_MAX_STEP = 0.25; // seconds; a longer gap skips the feedback (seek, first frame)
 const FULL_CIRCLE = 7; // radians; any end angle past 2π closes an arc
 
@@ -90,9 +94,19 @@ const VIGNETTE_STOPS = [
   [1, 0.95],
 ]; // [stop, background alpha], top to bottom
 
-/** Background parameters at a position: both scenes' looks plus the mix between them. */
-export function backgroundAt(position) {
-  const { from, to, amount, scene } = blendAt(position, CROSSFADE_BARS);
+/**
+ * Background parameters at a position: both scenes' looks plus the mix between them. `settled` (the
+ * show is paused) drops the crossfade for the nearer look, so the shader computes one look per pixel
+ * instead of two while the viewer rests on a scene start (#8).
+ */
+export function backgroundAt(position, settled = false) {
+  const blend = blendAt(position, CROSSFADE_BARS),
+    { scene } = blend;
+  let { from, to, amount } = blend;
+  if (settled && amount > 0) {
+    from = to = amount >= NEARER_HALF ? to : from;
+    amount = 0;
+  }
   const a = SCENE_LOOKS[from.id],
     b = SCENE_LOOKS[to.id];
   const params = { from: a, to: b, mix: amount, strobe: SCENE_LOOKS[scene.id].strobe || 0, sceneId: scene.id };
@@ -202,21 +216,36 @@ export function createBackground(fxCanvas, feedbackCanvas) {
     previousCtx = previous.getContext('2d');
   let geometry = null,
     shaderScale = INITIAL_SHADER_SCALE,
-    hasFrame = false;
+    filterInterval = LIVE_FILTER_INTERVAL,
+    hasFrame = false,
+    pendingHue = 0, // degrees of hue rotation owed since the filter last ran
+    pendingPasses = 0;
+  // shader pixels per feedback-canvas pixel: the shader keeps its own resolution, set in CSS pixels
+  const fxRatio = () => ((geometry.shaderPixelRatio || geometry.dpr) / geometry.dpr) * shaderScale;
 
+  /**
+   * `next`: the feedback canvas size and the wheel's centre and radius in its pixels; `dpr` is its
+   * pixels per CSS pixel, `shaderPixelRatio` the shader's pixels per CSS pixel before `shaderScale`.
+   */
   function resize(next) {
     geometry = next;
     feedbackCanvas.width = previous.width = next.width;
     feedbackCanvas.height = previous.height = next.height;
-    if (kaleidoscope) kaleidoscope.resize(Math.round(next.width * shaderScale), Math.round(next.height * shaderScale));
+    if (kaleidoscope) kaleidoscope.resize(Math.round(next.width * fxRatio()), Math.round(next.height * fxRatio()));
     hasFrame = false;
+    pendingHue = pendingPasses = 0;
   }
 
   function drawFeedback(params, step) {
     const { centreX, centreY } = geometry;
     ctx.save();
     ctx.globalAlpha = params.keep ** (step * FEEDBACK_FPS * KEEP_EXPONENT);
-    ctx.filter = `hue-rotate(${(params.hue * step).toFixed(2)}deg) saturate(${FEEDBACK_SATURATE})`;
+    pendingHue += params.hue * step;
+    pendingPasses++;
+    if (pendingPasses >= filterInterval) {
+      ctx.filter = `hue-rotate(${pendingHue.toFixed(2)}deg) saturate(${(FEEDBACK_SATURATE ** pendingPasses).toFixed(4)})`;
+      pendingHue = pendingPasses = 0;
+    }
     const zoom = 1 + params.zoom * step;
     ctx.translate(centreX, centreY);
     ctx.rotate(params.rot * step);
@@ -293,23 +322,28 @@ export function createBackground(fxCanvas, feedbackCanvas) {
       swingOn = scene.swing(Math.floor(position) - scene.start);
     const count = MOIRE_RINGS,
       spacing = (Math.hypot(width, height) / count) * MOIRE_SPACING;
+    const swungX = centreX + SWING_WOBBLE_X * dpr * Math.sin(time * SWING_WOBBLE_RATE),
+      swungY = centreY + SWING_OFFSET_Y * dpr;
+    // a ring wider than the farthest corner is wholly outside the canvas: stop there (#8)
+    const farthestCorner = (x, y) => Math.hypot(Math.max(x, width - x), Math.max(y, height - y));
+    const farthest = farthestCorner(centreX, centreY),
+      swungFarthest = farthestCorner(swungX, swungY);
     ctx.save();
     ctx.lineWidth = dpr;
     for (let i = 1; i < count; i++) {
-      ctx.strokeStyle = fgAlpha(MOIRE_ALPHA);
-      ctx.beginPath();
-      ctx.arc(centreX, centreY, scopeRadius + i * spacing, 0, FULL_CIRCLE);
-      ctx.stroke();
-      if (swingOn) {
+      const straightInside = scopeRadius + i * spacing - dpr / 2 <= farthest,
+        swungInside = swingOn && scopeRadius + i * spacing * SWING_SPACING - dpr / 2 <= swungFarthest;
+      if (!straightInside && !swungInside) break;
+      if (straightInside) {
+        ctx.strokeStyle = fgAlpha(MOIRE_ALPHA);
+        ctx.beginPath();
+        ctx.arc(centreX, centreY, scopeRadius + i * spacing, 0, FULL_CIRCLE);
+        ctx.stroke();
+      }
+      if (swungInside) {
         ctx.strokeStyle = TINTS.swingRing;
         ctx.beginPath();
-        ctx.arc(
-          centreX + SWING_WOBBLE_X * dpr * Math.sin(time * SWING_WOBBLE_RATE),
-          centreY + SWING_OFFSET_Y * dpr,
-          scopeRadius + i * spacing * SWING_SPACING,
-          0,
-          FULL_CIRCLE,
-        );
+        ctx.arc(swungX, swungY, scopeRadius + i * spacing * SWING_SPACING, 0, FULL_CIRCLE);
         ctx.stroke();
       }
     }
@@ -320,7 +354,7 @@ export function createBackground(fxCanvas, feedbackCanvas) {
   function draw(position, params, recent, clock, shapes) {
     if (!geometry?.width || !geometry.height) return; // not laid out, or hidden: a 0-px canvas cannot be drawn
     const { width, height, centreX, centreY } = geometry;
-    if (kaleidoscope) kaleidoscope.draw({ centreX: centreX * shaderScale, centreY: centreY * shaderScale, time: clock.time, params, ...hitEnergy(recent) });
+    if (kaleidoscope) kaleidoscope.draw({ centreX: centreX * fxRatio(), centreY: centreY * fxRatio(), time: clock.time, params, ...hitEnergy(recent) });
     ctx.clearRect(0, 0, width, height);
     if (clock.step > 0 && clock.step < FEEDBACK_MAX_STEP && hasFrame) drawFeedback(params, clock.step);
     drawEmissions(recent, shapes, clock.time);
@@ -348,6 +382,10 @@ export function createBackground(fxCanvas, feedbackCanvas) {
     setShaderScale(scale) {
       shaderScale = scale;
       if (geometry) resize(geometry);
+    },
+    /** The export filters the feedback every frame, so its frames stay as they were. */
+    filterEveryFrame() {
+      filterInterval = 1;
     },
   };
 }

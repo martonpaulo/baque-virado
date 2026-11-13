@@ -20,6 +20,7 @@ const REDUCED_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)');
 const AUDIO_LEAD_IN = 0.03; // seconds of silence before the first hit in the offline render
 const MIN_VISUAL_SPEED = 0.55; // slowest background speed, as a multiple of real time
 const MAX_DPR = 2; // canvases never render above 2× device pixels
+const FEEDBACK_DEVICE_SCALE = 0.5; // live, the feedback canvases render at half the device resolution (#8)
 const LIVE_MAX_STEP = 0.1; // seconds; a longer frame gap (tab hidden) advances the visuals this much only
 const END_EPSILON = 1e-6; // bars; keeps the last position inside the final bar
 const REWIND_AT_END = 0.01; // bars from the end where Play starts over
@@ -41,16 +42,21 @@ const lanes = createLanes($('lanes'));
 
 // ---------- sizes ----------
 function measure() {
-  const dpr = Math.min(MAX_DPR, window.devicePixelRatio || 1);
+  const device = window.devicePixelRatio || 1,
+    dpr = Math.min(MAX_DPR, device);
+  // The feedback tunnel is soft, so live it renders at half the device resolution and CSS scales it
+  // up; the export keeps full resolution, so its frames do not change.
+  const feedback = clock.exporting ? dpr : device * FEEDBACK_DEVICE_SCALE;
   const box = stage.getBoundingClientRect(),
     wheel = $('scopeBox').getBoundingClientRect();
   background.resize({
-    width: Math.round(box.width * dpr),
-    height: Math.round(box.height * dpr),
-    dpr,
-    centreX: (wheel.left - box.left + wheel.width / 2) * dpr,
-    centreY: (wheel.top - box.top + wheel.height / 2) * dpr,
-    scopeRadius: (wheel.width / 2) * dpr * (SCOPE_GEOMETRY.radius / SCOPE_GEOMETRY.viewBoxRadius),
+    width: Math.round(box.width * feedback),
+    height: Math.round(box.height * feedback),
+    dpr: feedback,
+    shaderPixelRatio: dpr,
+    centreX: (wheel.left - box.left + wheel.width / 2) * feedback,
+    centreY: (wheel.top - box.top + wheel.height / 2) * feedback,
+    scopeRadius: (wheel.width / 2) * feedback * (SCOPE_GEOMETRY.radius / SCOPE_GEOMETRY.viewBoxRadius),
   });
   lanes.resize(dpr);
   clock.reset();
@@ -98,7 +104,7 @@ const sceneChips = createSceneChips($('chips'), scene => seek(scene.start));
 
 function render(at, force = false) {
   const p = Math.max(0, Math.min(TOTAL_BARS - END_EPSILON, at));
-  const params = backgroundAt(p);
+  const params = backgroundAt(p, !player.playing && !clock.exporting);
   const drawBackground = () => background.draw(p, params, recentHits(p, RECENT_HITS_WINDOW), clock.tick(p, params), shapes);
   if (p === renderedAt && !force) {
     if (!REDUCED_MOTION.matches) drawBackground(); // paused: only the background moves
@@ -224,12 +230,17 @@ window.baque = {
     if (!clock.exporting) {
       clock.exporting = true;
       background.setShaderScale(EXPORT_SHADER_SCALE);
+      background.filterEveryFrame();
       measure();
     }
-    if (clock.lastPosition !== null && Math.abs(at - clock.lastPosition) * BAR_SECONDS > EXPORT_JUMP) clock.reset();
+    const jumped = clock.lastPosition === null || Math.abs(at - clock.lastPosition) * BAR_SECONDS > EXPORT_JUMP;
+    if (jumped) {
+      clock.reset();
+      currentBar = -1; // the wheel is rebuilt on a new bar or after a jump only (#8)
+    }
     position = at;
-    currentBar = -1;
-    render(at, true);
+    renderedAt = null;
+    render(at);
   },
   renderAudio: () => renderShowWav(bank, choice, AUDIO_LEAD_IN),
   TOTAL: TOTAL_BARS,

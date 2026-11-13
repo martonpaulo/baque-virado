@@ -199,3 +199,79 @@ test('a stage of zero size draws nothing and throws nothing', async () => {
   assert.deepEqual(errors, []);
   await page.close();
 });
+
+// #8: the feedback tunnel renders at half the device resolution on a 3x phone, and its hue filter
+// runs at most every third frame.
+test('the feedback canvases are at most half the device resolution, filtered every third frame', async () => {
+  const phone = { width: 390, height: 844, deviceScaleFactor: 3 };
+  const page = await session.browser.newPage();
+  await page.evaluateOnNewDocument(() => {
+    window.__filters = 0;
+    const descriptor = Object.getOwnPropertyDescriptor(CanvasRenderingContext2D.prototype, 'filter');
+    Object.defineProperty(CanvasRenderingContext2D.prototype, 'filter', {
+      get: descriptor.get,
+      set(value) {
+        if (value !== 'none') window.__filters++;
+        descriptor.set.call(this, value);
+      },
+    });
+  });
+  await page.setViewport(phone);
+  await page.goto(session.server.url, { waitUntil: 'load' });
+  await page.waitForFunction(() => window.baque);
+  const sizes = await page.evaluate(() => {
+    const stage = document.getElementById('stage').getBoundingClientRect();
+    return { bg: document.getElementById('bg').width, stage: stage.width };
+  });
+  assert.ok(sizes.bg <= Math.ceil(sizes.stage * phone.deviceScaleFactor * 0.5), JSON.stringify(sizes));
+  const counted = await page.evaluate(async () => {
+    const before = window.__filters;
+    for (let i = 0; i < 30; i++) await new Promise(resolve => requestAnimationFrame(resolve));
+    return window.__filters - before;
+  });
+  assert.ok(counted <= 11, `${counted} filter assignments in 30 frames`);
+  await page.close();
+});
+
+test('the swing moiré strokes no ring wholly outside the canvas', async () => {
+  const { page, errors } = await openPage(PHONES[0]);
+  await page.evaluate(() => {
+    window.__outside = [];
+    const arc = CanvasRenderingContext2D.prototype.arc;
+    CanvasRenderingContext2D.prototype.arc = function (x, y, radius, ...rest) {
+      const { width, height } = this.canvas;
+      const farthest = Math.hypot(Math.max(x, width - x), Math.max(y, height - y));
+      if (radius - this.lineWidth / 2 > farthest)
+        window.__outside.push(`${this.canvas.id} r${Math.round(radius)} at ${Math.round(x)},${Math.round(y)} in ${width}x${height} lw${this.lineWidth}`);
+      return arc.call(this, x, y, radius, ...rest);
+    };
+  });
+  const swing = SCENES.find(scene => scene.id === 'swing');
+  for (let frame = 0; frame < 10; frame++) await showScene(page, 'swing', swing.bars - 1 + frame / 30);
+  assert.deepEqual(await page.evaluate(() => window.__outside), []);
+  assert.deepEqual(errors, []);
+  await page.close();
+});
+
+test('the exporter rebuilds the wheel only on a new bar or after a jump', async () => {
+  const { page, errors } = await openPage(DESKTOP);
+  // A rebuild replaces the wheel's dots and shapes, so the nodes drawn at the bar's start disconnect.
+  const rebuilds = await page.evaluate(async () => {
+    const step = 1 / 30 / window.baque.BAR; // one exported frame, in bars
+    window.baque.render(20); // the jump into export mode
+    let nodes = [...document.querySelectorAll('#scope circle, #scope path')];
+    let count = 0;
+    for (let frame = 1; frame < 20; frame++) {
+      window.baque.render(20 + frame * step); // still bar 20
+      await Promise.resolve();
+      if (nodes.some(node => !node.isConnected)) {
+        count++;
+        nodes = [...document.querySelectorAll('#scope circle, #scope path')];
+      }
+    }
+    return count;
+  });
+  assert.equal(rebuilds, 0);
+  assert.deepEqual(errors, []);
+  await page.close();
+});

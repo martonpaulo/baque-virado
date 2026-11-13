@@ -21,3 +21,9 @@ test('stage labels keep the phone font-size floor', () => {
   assert.match(phone, /--label-floor: 11px;/);
   assert.match(rule(':root'), /--label-floor: 0px;/);
 });
+
+// #8: the phone toolbar resizes the dynamic viewport; the stage must follow the small one.
+test('the stage is sized from the small viewport height', () => {
+  assert.match(rule('.stage'), /100svh/);
+  assert.doesNotMatch(css, /100dvh/);
+});

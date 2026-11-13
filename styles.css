@@ -46,7 +46,7 @@ body {
 .stage {
   position: relative;
   flex: none;
-  width: min(100%, calc((100dvh - var(--controls-height)) * 9 / 16));
+  width: min(100%, calc((100svh - var(--controls-height)) * 9 / 16)); /* svh: a phone toolbar sliding in and out does not resize the stage (#8) */
   min-width: min(100%, 300px);
   max-width: 100%;
   aspect-ratio: 9 / 16;
