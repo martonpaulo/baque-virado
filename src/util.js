@@ -63,3 +63,15 @@ export function chipButton(label, onClick) {
   button.addEventListener('click', onClick);
   return button;
 }
+
+/** Set an element's text only when it differs, so a per-frame update causes no needless DOM work. */
+export const setText = (element, text) => {
+  const value = String(text);
+  if (element.textContent !== value) element.textContent = value;
+};
+
+/** Set an attribute only when it differs. */
+export const setAttr = (element, name, value) => {
+  const text = String(value);
+  if (element.getAttribute(name) !== text) element.setAttribute(name, text);
+};

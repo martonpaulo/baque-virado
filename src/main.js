@@ -8,10 +8,10 @@ import { COPY } from './copy.js';
 import { createLanes } from './lanes.js';
 import { BAQUE_ORDER, BAR_SECONDS, BPM, STEPS_PER_BAR } from './music.js';
 import { createReadout } from './readout.js';
-import { createScope, SCOPE_RADIUS } from './scope.js';
+import { createScope, SCOPE_GEOMETRY } from './scope.js';
 import { recentHits, SCENES, sceneAt, sceneIndexAt, TOTAL_BARS, TOTAL_SECONDS } from './show.js';
 import { createTitle } from './title.js';
-import { formatClock, formatPrecise, pad2 } from './util.js';
+import { formatClock, formatPrecise, pad2, setText } from './util.js';
 
 const $ = id => document.getElementById(id);
 const DESKTOP_QUERY = '(min-width: 900px)'; // also where styles.css switches to the side panels
@@ -19,7 +19,6 @@ const DESKTOP = window.matchMedia(DESKTOP_QUERY).matches;
 const REDUCED_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)');
 const AUDIO_LEAD_IN = 0.03; // seconds of silence before the first hit in the offline render
 const MIN_VISUAL_SPEED = 0.55; // slowest background speed, as a multiple of real time
-const SCOPE_VIEWBOX_RADIUS = 135; // half the wheel SVG's viewBox width (SVG units)
 const MAX_DPR = 2; // canvases never render above 2× device pixels
 const LIVE_MAX_STEP = 0.1; // seconds; a longer frame gap (tab hidden) advances the visuals this much only
 const END_EPSILON = 1e-6; // bars; keeps the last position inside the final bar
@@ -51,7 +50,7 @@ function measure() {
     dpr,
     centreX: (wheel.left - box.left + wheel.width / 2) * dpr,
     centreY: (wheel.top - box.top + wheel.height / 2) * dpr,
-    scopeRadius: (wheel.width / 2) * dpr * (SCOPE_RADIUS / SCOPE_VIEWBOX_RADIUS),
+    scopeRadius: (wheel.width / 2) * dpr * (SCOPE_GEOMETRY.radius / SCOPE_GEOMETRY.viewBoxRadius),
   });
   lanes.resize(dpr);
   clock.reset();
@@ -93,13 +92,14 @@ const clock = {
 let position = 0,
   currentScene = null,
   currentBar = -1,
-  renderedAt = null; // the position the foreground was last drawn at
+  renderedAt = null, // the position the foreground was last drawn at
+  shapes = []; // the wheel's partly drawn shapes, which the background echoes
 const sceneChips = createSceneChips($('chips'), scene => seek(scene.start));
 
 function render(at, force = false) {
   const p = Math.max(0, Math.min(TOTAL_BARS - END_EPSILON, at));
   const params = backgroundAt(p);
-  const drawBackground = () => background.draw(p, params, recentHits(p, RECENT_HITS_WINDOW), clock.tick(p, params), scope.shapes);
+  const drawBackground = () => background.draw(p, params, recentHits(p, RECENT_HITS_WINDOW), clock.tick(p, params), shapes);
   if (p === renderedAt && !force) {
     if (!REDUCED_MOTION.matches) drawBackground(); // paused: only the background moves
     return;
@@ -122,13 +122,13 @@ function render(at, force = false) {
     readout.onBar(scene, barInScene);
   }
   readout.update(sixteenth, barInScene);
-  scope.update(p, scene, barInScene);
+  shapes = scope.update(p, scene, barInScene);
   title.update(p, scene, !player.playing && !clock.exporting);
-  $('hSec').textContent = `[${scene.section}] ${COPY.sections[scene.section]}`;
-  $('hBar').textContent = COPY.hud.bar(pad2(bar + 1), TOTAL_BARS);
-  $('hStep').textContent = COPY.hud.step(pad2(Math.floor(sixteenth) + 1));
-  $('hTime').textContent = formatPrecise(seconds);
-  $('clock').textContent = `${formatClock(seconds)} / ${formatClock(TOTAL_SECONDS)}`;
+  setText($('hSec'), `[${scene.section}] ${COPY.sections[scene.section]}`);
+  setText($('hBar'), COPY.hud.bar(pad2(bar + 1), TOTAL_BARS));
+  setText($('hStep'), COPY.hud.step(pad2(Math.floor(sixteenth) + 1)));
+  setText($('hTime'), formatPrecise(seconds));
+  setText($('clock'), `${formatClock(seconds)} / ${formatClock(TOTAL_SECONDS)}`);
   drawBackground();
   lanes.draw(p);
 }

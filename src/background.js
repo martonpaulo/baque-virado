@@ -2,7 +2,10 @@
 // that the rhythm's shapes and the hits keep feeding.
 
 import { isAlfaia, STEPS_PER_BAR, VOICES } from './music.js';
-import { angleOf, SCOPE_RADIUS } from './scope.js';
+import { SCOPE_GEOMETRY } from './scope.js';
+
+const { angleOf, radius: SCOPE_RADIUS } = SCOPE_GEOMETRY;
+
 import { blendAt, sceneAt } from './show.js';
 import { boneAlpha, COLORS, fgAlpha, TINTS, voidAlpha } from './theme.js';
 

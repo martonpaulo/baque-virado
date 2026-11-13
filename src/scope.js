@@ -5,9 +5,10 @@ import { COPY } from './copy.js';
 import { BAR_SECONDS, INSTRUMENTS, isAlfaia, isOffbeat, STEPS_PER_BAR, VOICE_ORDER, VOICES } from './music.js';
 import { barTimeline, recentHits } from './show.js';
 import { COLORS, MONO_FONT, TINTS } from './theme.js';
-import { fixed2, pad2, polylinePath, svgElement } from './util.js';
+import { fixed2, pad2, polylinePath, setAttr, setText, svgElement } from './util.js';
 
-// Radii, in SVG units of the -135..135 viewBox.
+// Radii, in SVG units of the viewBox, which spans -VIEWBOX_RADIUS..VIEWBOX_RADIUS on both axes.
+const VIEWBOX_RADIUS = 135;
 const OUTER = 112; // the graduated scale
 const FACE_RADIUS = 104; // dark disc behind the scale; also where sixteenth ticks start
 const MINOR_TICK_INNER = 108.5; // where the 64th-of-a-bar ticks start
@@ -93,7 +94,8 @@ const MUTED_DOT_FILL_OPACITY = 0.5;
 const angleOf = sixteenth => (sixteenth / STEPS_PER_BAR) * Math.PI * 2 - Math.PI / 2;
 const pointAt = (radius, sixteenth) => [radius * Math.cos(angleOf(sixteenth)), radius * Math.sin(angleOf(sixteenth))];
 
-export { angleOf, OUTER as SCOPE_RADIUS };
+/** The wheel's geometry, for the background that draws around it. */
+export const SCOPE_GEOMETRY = Object.freeze({ radius: OUTER, viewBoxRadius: VIEWBOX_RADIUS, angleOf });
 
 function drawScale(svg) {
   const g = svgElement('g', {}, svg);
@@ -164,6 +166,8 @@ function drawScale(svg) {
 }
 
 export function createScope(svg) {
+  const side = 2 * VIEWBOX_RADIUS;
+  svg.setAttribute('viewBox', `${-VIEWBOX_RADIUS} ${-VIEWBOX_RADIUS} ${side} ${side}`);
   drawScale(svg);
   const shapeLayer = svgElement('g', {}, svg);
   const trail = svgElement('path', { fill: 'url(#trailGradient)', opacity: TRAIL_OPACITY }, svg);
@@ -294,24 +298,24 @@ export function createScope(svg) {
                     ? COPY.patterns[scene.pattern].toUpperCase()
                     : '';
     const loud = offbeat || whistle || mode !== 'normal';
-    cue.textContent = text;
-    cue.setAttribute('fill', loud ? COLORS.fg : COLORS.amber);
-    cue.setAttribute('font-weight', loud ? 700 : 400);
+    setText(cue, text);
+    setAttr(cue, 'fill', loud ? COLORS.fg : COLORS.amber);
+    setAttr(cue, 'font-weight', loud ? 700 : 400);
   }
 
-  /** Per-frame update at `position` (bars). */
+  /** Per-frame update at `position` (bars); returns the partly drawn shapes. */
   function update(position, scene, barInScene) {
     const inBar = position - Math.floor(position),
       sixteenth = inBar * STEPS_PER_BAR;
-    hand.setAttribute('transform', `rotate(${(inBar * 360).toFixed(2)})`);
+    setAttr(hand, 'transform', `rotate(${(inBar * 360).toFixed(2)})`);
     const from = angleOf(sixteenth - TRAIL_SIXTEENTHS),
       to = angleOf(sixteenth); // trailing sector behind the hand
     trail.setAttribute(
       'd',
       `M0 0 L${fixed2(Math.cos(from) * OUTER)} ${fixed2(Math.sin(from) * OUTER)} A${OUTER} ${OUTER} 0 0 1 ${fixed2(Math.cos(to) * OUTER)} ${fixed2(Math.sin(to) * OUTER)} Z`,
     );
-    stepNumber.textContent = pad2(Math.floor(sixteenth) + 1);
-    beatLabel.textContent = COPY.centre.beat(Math.floor(inBar * BEATS_PER_BAR) + 1);
+    setText(stepNumber, pad2(Math.floor(sixteenth) + 1));
+    setText(beatLabel, COPY.centre.beat(Math.floor(inBar * BEATS_PER_BAR) + 1));
     centreCue(position, scene, scene.mode(barInScene), inBar);
     for (const shape of shapes) {
       // grow the shape hit by hit; it closes at the end of the cycle
@@ -329,21 +333,26 @@ export function createScope(svg) {
         drawn.push([a[0] + (b[0] - a[0]) * u, a[1] + (b[1] - a[1]) * u]);
       }
       shape.drawn = drawn;
-      shape.line.setAttribute('d', polylinePath(drawn));
+      setAttr(shape.line, 'd', polylinePath(drawn));
     }
     for (const dot of dots) {
       const age = ((sixteenth - dot.position) / STEPS_PER_BAR) * BAR_SECONDS,
         flash = dot.on && age >= 0 && age < FLASH_WINDOW ? Math.exp(-age / FLASH_DECAY) : 0;
-      dot.element.setAttribute('r', (dot.radius * (1 + FLASH_GROWTH * flash)).toFixed(2));
-      dot.element.style.opacity = dot.on ? (DOT_REST_OPACITY + DOT_FLASH_OPACITY * flash).toFixed(3) : MUTED_DOT_FILL_OPACITY;
+      const r = (dot.radius * (1 + FLASH_GROWTH * flash)).toFixed(2),
+        opacity = dot.on ? (DOT_REST_OPACITY + DOT_FLASH_OPACITY * flash).toFixed(3) : String(MUTED_DOT_FILL_OPACITY);
+      // write only what changed: most dots rest most of the time
+      if (dot.r !== r) {
+        dot.r = r;
+        dot.element.setAttribute('r', r);
+      }
+      if (dot.opacity !== opacity) {
+        dot.opacity = opacity;
+        dot.element.style.opacity = opacity;
+      }
     }
+    return shapes;
   }
 
-  return {
-    build,
-    update,
-    get shapes() {
-      return shapes;
-    },
-  };
+  /** Per-frame update; returns the shapes as drawn so far, for the background. */
+  return { build, update };
 }
