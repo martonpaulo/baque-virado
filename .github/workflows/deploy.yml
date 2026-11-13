@@ -44,7 +44,7 @@ jobs:
         if: steps.tip.outputs.current == 'true'
         run: |
           mkdir _site
-          cp -R index.html styles.css src sounds CNAME .nojekyll _site/
+          cp -R index.html 404.html styles.css src sounds social.png apple-touch-icon.png CNAME .nojekyll _site/
           echo "${{ github.event.workflow_run.head_sha || github.sha }}" > _site/build.txt
       - uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6.0.0
         if: steps.tip.outputs.current == 'true'

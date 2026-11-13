@@ -291,11 +291,19 @@ body {
   align-items: center;
   font-family: var(--f-mono);
 }
-.brand,
 .sounds,
 .keys {
   display: none;
-} /* phones: no sound choices, no brand block */
+} /* phones: no sound choices */
+.brand {
+  /* phones: hidden from view but kept as the page's heading for screen readers */
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
 .brand h1 {
   margin: 0;
   font-family: var(--f-display);
@@ -418,6 +426,9 @@ a:focus-visible {
     max-height: 100%;
     overflow-y: auto;
     padding-top: 8px;
+    /* room for the focus ring, which the scroll box would clip, without moving the controls */
+    padding-left: 4px;
+    margin-left: -4px;
   }
   .side.left {
     order: 1;
@@ -425,7 +436,14 @@ a:focus-visible {
   .side.right {
     order: 3;
   }
-  .brand,
+  .brand {
+    position: static;
+    width: auto;
+    height: auto;
+    overflow: visible;
+    clip-path: none;
+    white-space: normal;
+  }
   .keys {
     display: block;
   }

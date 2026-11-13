@@ -15,3 +15,11 @@ test('hash keeps its pinned values', () => {
   assert.equal(hash(0), 0.8587904749438167);
   assert.equal(hash(12345), 0.18747909599915147);
 });
+
+test('index.html preloads every module of src/', async () => {
+  const { readFileSync, readdirSync } = await import('node:fs');
+  const html = readFileSync(new URL('../index.html', import.meta.url), 'utf8');
+  const modules = readdirSync(new URL('../src/', import.meta.url)).filter(name => name.endsWith('.js') && name !== 'main.js');
+  const missing = modules.filter(name => !html.includes(`<link rel="modulepreload" href="src/${name}">`));
+  assert.deepEqual(missing, []);
+});
