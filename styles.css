@@ -19,6 +19,7 @@
   --gutter: 16px;
   --controls-height: 190px; /* room kept under the stage on phones */
   --desktop-side: 340px;
+  --label-floor: 0px; /* phones raise it: see the phone block at the end */
 }
 html,
 body {
@@ -96,7 +97,7 @@ body {
   justify-content: space-between;
   gap: 2cqw;
   font-family: var(--f-mono);
-  font-size: 2.3cqw;
+  font-size: max(2.3cqw, var(--label-floor));
   letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--dim);
@@ -121,7 +122,7 @@ body {
 .eyebrow {
   min-height: 1.2em;
   font-family: var(--f-mono);
-  font-size: 2.5cqw;
+  font-size: max(2.5cqw, var(--label-floor));
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--amber);
@@ -170,7 +171,7 @@ body {
   color: var(--dim);
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  font-size: 2.2cqw;
+  font-size: max(2.2cqw, var(--label-floor));
 }
 .read .big {
   font-family: var(--f-display);
@@ -199,7 +200,7 @@ body {
 .notation .n {
   text-align: right;
   color: var(--dim);
-  font-size: 2.2cqw;
+  font-size: max(2.2cqw, var(--label-floor));
 }
 .notation.tight {
   gap: 0.1cqw 2cqw;
@@ -209,7 +210,7 @@ body {
 }
 .notation.tight .k,
 .notation.tight .n {
-  font-size: 2cqw;
+  font-size: max(2cqw, var(--label-floor));
 }
 .stats {
   display: grid;
@@ -230,6 +231,10 @@ body {
 .stats.small b {
   font-size: 7cqw;
 }
+.score {
+  position: relative;
+  width: 100%;
+}
 /* a baque scene (stats + score) must fit its box: if it overflowed, the centred column would spill
    up into the wheel and cover its "9" label */
 .read:has(> .score) {
@@ -242,10 +247,6 @@ body {
 .stats b small {
   font-size: 5cqw;
   opacity: 0.6;
-}
-.score {
-  position: relative;
-  width: 100%;
 }
 .score svg {
   width: 100%;
@@ -463,6 +464,39 @@ a:focus-visible {
   .chips,
   .foot {
     justify-content: flex-start;
+  }
+}
+/* ---------- phones: stage labels never render below 11 px (#4) ----------
+   A phone stage is 300 to 400 px wide, where the cqw sizes fall to 6 to 8 px. The larger labels
+   need room, so the wheel and the lanes give up a little height; desktop and the 1080 px export
+   keep the sizes above. */
+@media (max-width: 899px) {
+  :root {
+    --label-floor: 11px;
+  }
+  .inner {
+    gap: 1.4cqw;
+  }
+  .hud {
+    letter-spacing: 0.02em;
+  }
+  .scope {
+    width: 64cqw;
+  }
+  .lanes {
+    height: 30cqw;
+  }
+  .notation.tight {
+    grid-template-columns: auto 1fr auto;
+    line-height: 1.15;
+  }
+  /* a dark scrim keeps the numbers readable over the bright background; the inline padding is
+     taken back by the negative margin, so the text keeps its width */
+  .read {
+    background: rgba(7, 6, 11, 0.55);
+    border-radius: 2cqw;
+    padding-inline: 2.4cqw;
+    margin-inline: -2.4cqw;
   }
 }
 @media (prefers-reduced-motion: reduce) {

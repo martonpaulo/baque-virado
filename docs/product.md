@@ -52,10 +52,11 @@ and the page plays smoothly to the end on a recent iPhone and an Android phone.
 
 ## Limits the owner set
 
-| Limit                     | Value                   | Owned by               | Decision          | Status  |
-| :------------------------ | :---------------------- | :--------------------- | :---------------- | :------ |
-| Samples a phone downloads | the 11 default files    | `tests/sounds.test.js` | owner, 2026-11-13 | current |
-| Title transition          | ≈0.12 s out, ≈0.25 s in | `src/title.js`         | owner, 2026-11-12 | current |
+| Limit                      | Value                   | Owned by                     | Decision                                                                      | Status  |
+| :------------------------- | :---------------------- | :--------------------------- | :---------------------------------------------------------------------------- | :------ |
+| Samples a phone downloads  | the 11 default files    | `tests/sounds.test.js`       | owner, 2026-11-13                                                             | current |
+| Title transition           | ≈0.12 s out, ≈0.25 s in | `src/title.js`               | owner, 2026-11-12                                                             | current |
+| Stage label size on phones | at least 11 px          | `styles.css` `--label-floor` | owner, 2026-11-13, [#4](https://github.com/martonpaulo/baque-virado/issues/4) | current |
 
 ## Alternatives considered
 
