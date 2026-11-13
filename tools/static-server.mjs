@@ -20,6 +20,7 @@ const CONTENT_TYPES = {
   '.svg': 'image/svg+xml',
   '.wav': 'audio/wav',
   '.m4a': 'audio/mp4',
+  '.woff2': 'font/woff2',
 };
 
 /** True when `file` is `base` or inside it (a sibling such as `<base>-private` is outside). */

@@ -38,6 +38,7 @@ sounds a desktop viewer can pick are fetched when chosen.
 - `src/lanes.js` - the per-voice hit lanes.
 - `src/controls.js` - play, pause, scene and sound controls.
 - `src/main.js` - wires everything together and exposes `window.baque` for the exporter.
+- `fonts/` - Space Grotesk and JetBrains Mono (Latin subsets, SIL Open Font License; see [CREDITS.md](CREDITS.md)).
 - `sounds/` - the samples: WAV masters and the AAC (`.m4a`) files the page fetches (see [CREDITS.md](CREDITS.md)).
 - `tools/encode-sounds.mjs` - encodes each WAV to AAC at 96 kbps (`node tools/encode-sounds.mjs`, needs `ffmpeg`).
 - `tests/` - unit tests of the DOM-free modules, and browser tests of the page in headless Chromium (`tests/page.test.js`, `tests/sounds-decode.test.js`).

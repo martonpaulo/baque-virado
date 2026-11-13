@@ -15,3 +15,11 @@ trimmed, mixed or retuned.
 Alfaia patterns: the table at lansdownsoftware.com. Swing measured on a Batuk Nagô workshop recording.
 
 The score renderer (`src/score.js`) is original to this project, written in 2026-11.
+
+## Fonts
+
+Space Grotesk (Copyright 2020 The Space Grotesk Project Authors) and JetBrains Mono (Copyright 2020
+The JetBrains Mono Project Authors) are served from `fonts/` under the SIL Open Font License 1.1:
+[`fonts/OFL-space-grotesk.txt`](fonts/OFL-space-grotesk.txt) and
+[`fonts/OFL-jetbrains-mono.txt`](fonts/OFL-jetbrains-mono.txt). The files are the Latin subsets of the
+variable fonts, as packaged by Fontsource 5.3.0.

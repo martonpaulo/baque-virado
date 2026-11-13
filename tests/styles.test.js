@@ -27,3 +27,13 @@ test('the stage is sized from the small viewport height', () => {
   assert.match(rule('.stage'), /100svh/);
   assert.doesNotMatch(css, /100dvh/);
 });
+
+// #11: the fonts are served from the site; no page asks another origin for them.
+test('no page loads a font from Google', () => {
+  for (const file of ['../index.html', '../404.html', '../styles.css']) {
+    assert.doesNotMatch(readFileSync(new URL(file, import.meta.url), 'utf8'), /fonts\.(googleapis|gstatic)\.com/, file);
+  }
+  assert.match(css, /src: url\("fonts\/space-grotesk-latin\.woff2"\)/);
+  assert.match(css, /src: url\("fonts\/jetbrains-mono-latin\.woff2"\)/);
+  assert.equal((css.match(/font-display: swap;/g) || []).length, 2);
+});

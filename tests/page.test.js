@@ -50,11 +50,6 @@ async function openPage(viewport, { delaySounds = false } = {}) {
   await page.setRequestInterception(true);
   page.on('request', async request => {
     const url = request.url();
-    // Until the fonts are served from the site (#11), the Google Fonts stylesheet gets an empty answer.
-    if (url.startsWith('https://fonts.googleapis.com/')) {
-      await request.respond({ status: 200, contentType: 'text/css', body: '' });
-      return;
-    }
     if (!url.startsWith(session.server.url)) {
       errors.push(`request off the site: ${url}`);
       await request.abort();
@@ -87,6 +82,9 @@ test('the page loads with no error and exposes the exporter contract', async () 
   );
   assert.deepEqual(contract, { render: 'function', renderAudio: 'function', TOTAL: 'number', BAR: 'number', audioOffset: 'number' });
   for (const scene of SCENES) await showScene(page, scene.id);
+  // #11: both fonts come from the site and load (any request off the site is an error above)
+  const fonts = await page.evaluate(() => [...document.fonts].filter(font => font.status === 'loaded').map(font => font.family.replaceAll('"', '')));
+  assert.deepEqual([...new Set(fonts)].sort(), ['JetBrains Mono', 'Space Grotesk']);
   assert.deepEqual(errors, []);
   await page.close();
 });
