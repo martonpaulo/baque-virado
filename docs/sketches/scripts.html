@@ -1,0 +1,309 @@
+<!doctype html>
+<html lang="pt-BR">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Roteiros</title>
+<style>
+:root{color-scheme:dark}
+body{margin:0;background:#07060b;color:#ece8ff;font:14px/1.45 system-ui,sans-serif;padding:24px 16px 80px}
+main{max-width:1500px;margin:0 auto}
+h1{font-size:26px;margin:0 0 4px}
+.sub{color:#a9a3c2;margin:0 0 18px;max-width:900px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:16px;align-items:start}
+section{background:#131119;border:1px solid #2a2635;border-radius:12px;padding:14px}
+h2{font-size:19px;margin:0}
+.meta{color:#ffc53d;font-size:12px;margin:4px 0}
+
+.feel{color:#ff9dc6;font-size:13px;margin:2px 0}
+.ref{color:#a9a3c2;font-size:12px;margin-bottom:8px}
+button.play{background:#ffc53d;color:#07060b;border:0;border-radius:99px;padding:7px 14px;font:700 13px system-ui;cursor:pointer;margin:4px 0 8px}
+button.play.on{background:#ff5a36}
+ol{list-style:none;margin:0;padding:0}
+li{border-top:1px solid #221f2c;padding:7px 4px;border-radius:6px;cursor:pointer}
+li:hover{background:#1a1722}
+li.now{background:#ffc53d22;outline:1px solid #ffc53d}
+.sc{display:flex;gap:8px;align-items:baseline}
+.sc b{color:#ffc53d;min-width:18px}
+.sc span{margin-left:auto;color:#a9a3c2;font-size:12px;white-space:nowrap}
+li p{margin:2px 0 0 26px;color:#c9c4dd;font-size:13px}
+li p.t{color:#8fd3a8}
+</style>
+<main>
+<h1>Roteiros</h1>
+<p class="sub">Som sintetizado, só como esboço. Clique numa cena para ouvir só ela. Sem som: confira se a aba não está silenciada.</p>
+<div class="grid"><div id="marCard"><section data-key="roteiro_maracatu" style="border-color:#3ddc84"><h2>Maracatu de baque virado <span style="font-size:12px;color:#3ddc84">já no site</span></h2><div class="feel">Força e solenidade da nação</div><div class="meta">115 BPM · 4/4, Roda de 16 pontos · 14 cenas · 1:52</div><div class="ref">O show real, para comparar</div><button class="play" id="marPlay">▶ Ouvir o show</button><div id="marFrame"></div><ol><li style="cursor:default"><div class="sc"><b>1</b><strong>Abertura</strong><span>5 comp. · 10s</span></div><p>Apito do mestre e rufo da caixa</p></li><li style="cursor:default"><div class="sc"><b>2</b><strong>Orquestra</strong><span>6 comp. · 13s</span></div><p>Os instrumentos entram um a um</p></li><li style="cursor:default"><div class="sc"><b>3</b><strong>Agogô</strong><span>2 comp. · 4s</span></div><p>Agogô e caixa</p></li><li style="cursor:default"><div class="sc"><b>4</b><strong>Balanço</strong><span>4 comp. · 8s</span></div><p>Reto, depois com o balanço medido</p></li><li style="cursor:default"><div class="sc"><b>5</b><strong>Contratempo</strong><span>3 comp. · 6s</span></div><p>Cabeça e contratempo das alfaias</p></li><li style="cursor:default"><div class="sc"><b>6</b><strong>Marcação</strong><span>4 comp. · 8s</span></div><p>Baque 1 de 7</p></li><li style="cursor:default"><div class="sc"><b>7</b><strong>Arrasto</strong><span>4 comp. · 8s</span></div><p>Baque 2 de 7</p></li><li style="cursor:default"><div class="sc"><b>8</b><strong>Imalê</strong><span>4 comp. · 8s</span></div><p>Baque 3 de 7</p></li><li style="cursor:default"><div class="sc"><b>9</b><strong>Martelo</strong><span>4 comp. · 8s</span></div><p>Baque 4 de 7</p></li><li style="cursor:default"><div class="sc"><b>10</b><strong>Trovão</strong><span>4 comp. · 8s</span></div><p>Baque 5 de 7</p></li><li style="cursor:default"><div class="sc"><b>11</b><strong>Afoxé</strong><span>4 comp. · 8s</span></div><p>Baque 6 de 7</p></li><li style="cursor:default"><div class="sc"><b>12</b><strong>Parada</strong><span>2 comp. · 4s</span></div><p>Baque 7 de 7</p></li><li style="cursor:default"><div class="sc"><b>13</b><strong>Resumo</strong><span>3 comp. · 6s</span></div><p>Os 7 baques lado a lado</p></li><li style="cursor:default"><div class="sc"><b>14</b><strong>Final</strong><span>3 comp. · 6s</span></div><p>Viradas e corte</p></li></ol></section></div></div><div class="grid" id="grid" style="margin-top:16px"></div>
+</main>
+<script>
+// ---------- sketch synths: rough stand-ins for each instrument ----------
+let ac = null, master = null, delay = null;
+function audio() {
+  if (ac) return ac;
+  ac = new AudioContext();
+  const comp = ac.createDynamicsCompressor();
+  comp.threshold.value = -18; comp.ratio.value = 4;
+  master = ac.createGain(); master.gain.value = 0.8;
+  master.connect(comp).connect(ac.destination);
+  delay = ac.createDelay(2); const fb = ac.createGain(); fb.gain.value = 0.45; const dg = ac.createGain(); dg.gain.value = 0.5;
+  delay.connect(fb).connect(delay); delay.connect(dg).connect(master);
+  return ac;
+}
+const noiseBuf = () => { const b = ac.createBuffer(1, ac.sampleRate * 0.6, ac.sampleRate), x = b.getChannelData(0); for (let i = 0; i < x.length; i++) x[i] = Math.random() * 2 - 1; return b; };
+let NB = null;
+function out(node, send) { node.connect(master); if (send) { const g = ac.createGain(); g.gain.value = send; node.connect(g).connect(delay); } }
+function env(g, t, v, a, d) { g.gain.setValueAtTime(0.0001, t); g.gain.linearRampToValueAtTime(v, t + a); g.gain.exponentialRampToValueAtTime(0.0001, t + a + d); }
+function drum(t, f0, f1, dec, v, send) { const o = ac.createOscillator(), g = ac.createGain(); o.frequency.setValueAtTime(f0, t); o.frequency.exponentialRampToValueAtTime(f1, t + dec * 0.6); env(g, t, v, 0.002, dec); o.connect(g); out(g, send); o.start(t); o.stop(t + dec + 0.05); }
+function noise(t, type, f, q, dec, v, send) { NB = NB || noiseBuf(); const s = ac.createBufferSource(); s.buffer = NB; const fl = ac.createBiquadFilter(); fl.type = type; fl.frequency.value = f; fl.Q.value = q; const g = ac.createGain(); env(g, t, v, 0.001, dec); s.connect(fl).connect(g); out(g, send); s.start(t); s.stop(t + dec + 0.05); }
+function tone(t, freq, len, v, o = {}) {
+  const g = ac.createGain(); const f = ac.createBiquadFilter(); f.type = 'lowpass'; f.frequency.value = o.cut || 3000; f.Q.value = o.q || 0.7;
+  g.gain.setValueAtTime(0.0001, t); g.gain.linearRampToValueAtTime(v, t + (o.att || 0.01)); g.gain.setValueAtTime(v, t + Math.max(0.02, len - 0.04)); g.gain.exponentialRampToValueAtTime(0.0001, t + len + (o.rel || 0.05));
+  let chain = f;
+  if (o.dist) { const ws = ac.createWaveShaper(), c = new Float32Array(256); for (let i = 0; i < 256; i++) { const x = i / 128 - 1; c[i] = Math.tanh(o.dist * x); } ws.curve = c; f.connect(ws); chain = ws; }
+  chain.connect(g); out(g, o.send);
+  for (const d of (o.det || [0])) {
+    const osc = ac.createOscillator(); osc.type = o.wave || 'sawtooth'; osc.frequency.setValueAtTime(freq, t); osc.detune.value = d;
+    if (o.glideTo) osc.frequency.exponentialRampToValueAtTime(o.glideTo, t + len);
+    if (o.vib) { const l = ac.createOscillator(), lg = ac.createGain(); l.frequency.value = 5.5; lg.gain.value = o.vib; l.connect(lg).connect(osc.frequency); l.start(t); l.stop(t + len + 0.1); }
+    osc.connect(f); osc.start(t); osc.stop(t + len + (o.rel || 0.05) + 0.05);
+  }
+}
+const N = n => 440 * 2 ** ((n - 69) / 12);
+const NOTE = s => { const m = /^([A-G])(b|#)?(\d)$/.exec(s); return 12 * (+m[3] + 1) + { C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11 }[m[1]] + (m[2] === '#' ? 1 : m[2] === 'b' ? -1 : 0); };
+const chord = (t, notes, len, v, o) => notes.forEach(n => tone(t, N(NOTE(n)), len, v / notes.length * 1.6, o));
+
+// instrument voices: (time, velocity 0..1, note or chord, step length in seconds)
+const V = {
+  surdo: (t, v) => drum(t, 95, 48, 0.5, 0.9 * v),
+  caixa: (t, v) => { noise(t, 'bandpass', 2600, 0.8, 0.09, 0.45 * v); drum(t, 220, 180, 0.05, 0.15 * v); },
+  pandeiro: (t, v) => { noise(t, 'highpass', 6000, 1, 0.07, 0.35 * v); drum(t, 180, 120, 0.08, 0.2 * v); },
+  tuba: (t, v, n, s) => tone(t, N(NOTE(n)), s * 1.6, 0.35 * v, { cut: 700, wave: 'sawtooth' }),
+  brass: (t, v, n, s) => chord(t, [].concat(n), s * 0.7, 0.32 * v, { cut: 2600, det: [-6, 6], att: 0.015 }),
+  brassLong: (t, v, n, s) => chord(t, [].concat(n), s * 7, 0.32 * v, { cut: 2200, det: [-8, 8], att: 0.06 }),
+  sax: (t, v, n, s) => tone(t, N(NOTE(n)), s * 0.9, 0.22 * v, { cut: 1800, det: [-4, 4], vib: 3 }),
+  alfaia: (t, v, n, s, x) => drum(t, 82, 52, 0.45, 0.9 * v, x && x.send),
+  alfaiaHi: (t, v, n, s, x) => drum(t, 140, 95, 0.22, 0.6 * v, x && x.send),
+  bass: (t, v, n, s, x) => tone(t, N(NOTE(n)), s * 2.5, 0.35 * v, { cut: 600, dist: 2, send: x && x.send }),
+  guitar: (t, v, n, s) => chord(t, [n, NOTE(n) + 7 > 0 ? n : n], s * 1.5, 0.26 * v, { cut: 2400, dist: 6, det: [-7, 7] }),
+  ganza: (t, v) => noise(t, 'highpass', 7000, 0.8, 0.05, 0.28 * v),
+  sampler: (t, v, n, s) => { noise(t, 'bandpass', 900, 0.4, s * 14, 0.08 * v, 0.6); },
+  palmas: (t, v) => { for (const d of [0, 0.008, 0.016]) noise(t + d, 'bandpass', 1500, 1.2, 0.07, 0.35 * v); },
+  agogo: (t, v, n) => { const f = n === 'hi' ? 1240 : 880; tone(t, f, 0.12, 0.18 * v, { wave: 'sine', cut: 8000 }); tone(t, f * 2.7, 0.08, 0.05 * v, { wave: 'sine', cut: 9000 }); },
+  agbe: (t, v) => noise(t, 'bandpass', 4500, 0.6, 0.08, 0.25 * v),
+  kick: (t, v) => drum(t, 140, 45, 0.3, 1 * v),
+  snare: (t, v) => { noise(t, 'bandpass', 1800, 0.7, 0.14, 0.5 * v); drum(t, 200, 160, 0.08, 0.25 * v); },
+  hat: (t, v) => noise(t, 'highpass', 8000, 0.7, 0.04, 0.22 * v),
+  keys: (t, v, n, s) => chord(t, [].concat(n), s * 0.8, 0.22 * v, { wave: 'square', cut: 2400 }),
+  pad: (t, v, n, s) => chord(t, [].concat(n), s * 15, 0.16 * v, { cut: 1600, det: [-10, 10], att: 0.2, rel: 0.3 }),
+  lead: (t, v, n, s) => tone(t, N(NOTE(n)), s * 1.7, 0.2 * v, { wave: 'square', cut: 3200, vib: 4 }),
+  tom: (t, v, n) => drum(t, n, n * 0.6, 0.18, 0.7 * v),
+  lata: (t, v) => { noise(t, 'bandpass', 3600, 6, 0.12, 0.6 * v); tone(t, 760, 0.06, 0.12 * v, { wave: 'square', cut: 6000 }); },
+  hat32: (t, v, n, s) => { V.hat(t, v); V.hat(t + s / 2, v * 0.7); },
+  b808: (t, v, n, s) => tone(t, N(NOTE(n)), s * 3.5, 0.5 * v, { wave: 'sine', cut: 400, glideTo: N(NOTE(n)) * 0.8 }),
+  leadSoft: (t, v, n, s) => tone(t, N(NOTE(n)), s * 1.6, 0.2 * v, { wave: 'sine', cut: 6000, vib: 6, att: 0.03 }),
+  piano: (t, v, n, s) => chord(t, [].concat(n), s * 1.2, 0.2 * v, { wave: 'triangle', cut: 3000 }),
+  tri: (t, v, n) => tone(t, 4200, n === 'o' ? 0.3 : 0.05, (n === 'o' ? 0.16 : 0.07) * v, { wave: 'triangle', cut: 12000 }),
+  zab: (t, v) => drum(t, 110, 50, 0.32, 0.95 * v),
+  bacalhau: (t, v) => noise(t, 'bandpass', 2400, 3, 0.04, 0.5 * v),
+  sanfona: (t, v, n, s) => chord(t, [].concat(n), s * 0.9, 0.24 * v, { cut: 2200, det: [-9, 0, 9] }),
+  sanfonaMel: (t, v, n, s) => tone(t, N(NOTE(n)), s * 1.8, 0.2 * v, { cut: 2400, det: [-9, 9] }),
+  cavaco: (t, v, n, s) => chord(t, [].concat(n), s * 0.5, 0.18 * v, { wave: 'triangle', cut: 3500 }),
+  rabeca: (t, v, n, s) => tone(t, N(NOTE(n)), s * 1.8, 0.16 * v, { cut: 2800, vib: 7, att: 0.04 }),
+};
+
+// a track: voice + pattern per bar ("X" strong, "x" soft, "." rest) + notes cycled over the hits
+const T = (voice, bars, notes, extra) => ({ voice, bars: [].concat(bars), notes: notes || [], extra });
+
+// ---------- the six shows ----------
+const SHOWS = [
+ { key: 'frevo', name: 'Frevo', bpm: 140, steps: 8, beats: 2,
+   tracks: {
+    surdo: T('surdo', 'x...X...'),
+    caixa: T('caixa', 'xXxxxXxX'),
+    pandeiro: T('pandeiro', 'Xx.xXx.x'),
+    tuba: T('tuba', 'X.X.X.X.', ['F2','A2','C3','A2','C2','E2','G2','C3','F2','A2','C3','A2','C2','G2','E2','C2']),
+    metais: T('brass', ['X.X.XX..','X..X.X..','X.X.XX..','X...X...'], [['A4','C5'],['C5','F5'],['F5','A5'],['E5','G5'],['D5','F5'],['C5','E5'],['A4','C5'],['G4','Bb4'],['Bb4','D5'],['E5','G5'],['D5','F5'],['C5','E5'],['F4','A4']]),
+    sax: T('sax', ['........','..X.X.XX','........','..X.X.X.'], ['F4','G4','A4','C5','A4','G4','F4']),
+    ventania: T('sax', 'XXXXXXXX', ['F4','G4','A4','Bb4','C5','D5','E5','F5','E5','D5','C5','Bb4','A4','G4','F4','E4']),
+    bamba: T('brass', '......X.', [['C5','F5']]),
+    abafo: T('brassLong', 'X.......', [['F4','A4','C5'],['E4','G4','C5']]),
+   },
+   scenes: [
+    ['Chamada', 4, ['caixa', 'metais'], 'roll'], ['Surdo', 8, ['surdo']], ['Caixa', 8, ['surdo', 'caixa']], ['Pandeiro', 8, ['surdo', 'caixa', 'pandeiro']],
+    ['Tuba', 8, ['surdo', 'caixa', 'pandeiro', 'tuba']], ['Metais', 16, ['surdo', 'caixa', 'pandeiro', 'tuba', 'metais']],
+    ['Lá e cá', 16, ['surdo', 'caixa', 'pandeiro', 'tuba', 'metais', 'sax']], ['Ventania', 8, ['surdo', 'caixa', 'pandeiro', 'tuba', 'ventania']],
+    ['Bambeando', 8, ['surdo', 'caixa', 'pandeiro', 'tuba', 'bamba']], ['Fotografia', 4, ['surdo', 'caixa', 'pandeiro', 'tuba', 'metais'], 'stop'],
+    ['Abafo', 8, ['surdo', 'caixa', 'pandeiro', 'abafo']], ['Final', 8, ['surdo', 'caixa', 'pandeiro', 'tuba', 'metais', 'sax'], 'end'],
+   ] },
+
+ { key: 'mangue', name: 'Manguebeat', bpm: 108, steps: 16, beats: 4,
+   tracks: {
+    sampler: T('sampler', 'X...............'),
+    alfaia: T('alfaia', 'X..X..X...X..X..'),
+    resposta: T('alfaiaHi', '....X.......X..x'),
+    caixa: T('caixa', '..x...X.x.x...X.', [], { send: 0.25 }),
+    baixo: T('bass', 'X..X..X...X..X..', ['D2','D2','F2','D2','D2','C2','D2','A1']),
+    guitarra: T('guitar', 'X.XX..X.X..X.X..', ['D3','D3','F3','G3','A3','G3','F3','D3']),
+    coco: T('ganza', 'xxXxxxXxxxXxxxXx'),
+    alfaiaDub: T('alfaia', 'X......X..X.....', [], { send: 0.6 }),
+    baixoDub: T('bass', 'X.....X...X.....', ['D2','F2','C2'], { send: 0.5 }),
+   },
+   scenes: [
+    ['Antena', 2, ['sampler']], ['Alfaias', 4, ['alfaia']], ['Mãos', 4, ['alfaia', 'resposta']], ['Caixa', 4, ['alfaia', 'resposta', 'caixa']],
+    ['Baixo', 4, ['alfaia', 'resposta', 'caixa', 'baixo']], ['Guitarra', 4, ['alfaia', 'resposta', 'caixa', 'baixo', 'guitarra']],
+    ['Coco', 4, ['alfaia', 'resposta', 'caixa', 'baixo', 'guitarra', 'coco']], ['Dub', 4, ['alfaiaDub', 'baixoDub', 'sampler']],
+    ['Retorno', 4, ['alfaia', 'resposta', 'caixa', 'baixo', 'sampler', 'coco']], ['Parada', 2, ['alfaia', 'resposta', 'caixa', 'baixo', 'guitarra'], 'stop'],
+    ['Tudo', 8, ['alfaia', 'resposta', 'caixa', 'baixo', 'guitarra', 'coco', 'sampler']], ['Eco final', 4, ['alfaiaDub'], 'fade'],
+   ] },
+
+ { key: 'coco', name: 'Coco da Xambá', bpm: 132, steps: 8, beats: 2,
+   tracks: {
+    grave: T('alfaia', 'X...X...'),
+    pele2: T('alfaiaHi', '.x.x.x.x'),
+    ganza: T('ganza', 'xxXxxxXx'),
+    pandeiro: T('pandeiro', 'X.xX.xX.'),
+    palmas: T('palmas', '..X...X.'),
+    agogo: T('agogo', 'X..X..X.', ['hi', 'lo', 'lo']),
+    agbe: T('agbe', 'x.Xx.xX.'),
+    caixa: T('caixa', 'xxXxxxXx'),
+    frases: T('alfaia', ['X...X...', 'X..XX...', 'X.XXX..X', 'XXX.XX.X']),
+    vertigem: T('alfaiaHi', 'XxXxXxXx'),
+   },
+   scenes: [
+    ['Chamada', 4, ['grave'], 'roll'], ['Pele grave', 8, ['grave']], ['Segunda pele', 8, ['grave', 'pele2']], ['Ganzá', 8, ['grave', 'pele2', 'ganza']],
+    ['Pandeiro', 8, ['grave', 'pele2', 'ganza', 'pandeiro']], ['Palmas', 8, ['grave', 'pele2', 'ganza', 'pandeiro', 'palmas']],
+    ['Agogô e agbê', 8, ['grave', 'pele2', 'ganza', 'pandeiro', 'palmas', 'agogo', 'agbe']], ['Caixa', 8, ['grave', 'pele2', 'ganza', 'pandeiro', 'palmas', 'agogo', 'agbe', 'caixa']],
+    ['Frases', 16, ['frases', 'ganza', 'pandeiro', 'palmas', 'agogo', 'agbe', 'caixa']], ['Vertigem', 16, ['frases', 'vertigem', 'ganza', 'pandeiro', 'palmas', 'agogo', 'agbe', 'caixa']],
+    ['Rufo', 4, ['grave'], 'roll'], ['Final', 8, ['grave', 'pele2', 'ganza', 'pandeiro', 'palmas', 'agogo', 'agbe', 'caixa'], 'end'],
+   ] },
+
+ { key: 'brega', name: 'Brega romântico', bpm: 140, steps: 16, beats: 4,
+   tracks: {
+    gancho: T('lead', ['X...X.X.X.......', 'X.X.X...X.......'], ['E5','C5','B4','A4','C5','B4','G4','A4']),
+    kick: T('kick', 'X.......X......x'),
+    snare: T('snare', '....X.......X...'),
+    hat: T('hat', '..X...X...X...X.'),
+    baixo: T('bass', 'X.....X.X.....X.', ['A1','A1','E2','A1','F1','F1','C2','F1','C2','C2','G2','C2','G1','G1','D2','G1']),
+    pad: T('pad', 'X...............', [['A3','C4','E4'],['F3','A3','C4'],['C4','E4','G4'],['G3','B3','D4']]),
+    stabs: T('keys', '..X...X...X...X.', [['A3','C4','E4'],['F3','A3','C4'],['C4','E4','G4'],['G3','B3','D4']].flatMap(c => [c, c, c, c])),
+    guitarra: T('lead', ['X.....X.X...X...', 'X...X.......X...'], ['C5','B4','A4','E4','F4','E4','D4','C4']),
+    virada: T('tom', 'XXXXXXXXXXXXXXXX', [260, 240, 220, 200, 185, 170, 155, 140, 130, 120, 110, 100, 95, 90, 85, 80]),
+    vinheta: T('brass', '..X.X.......X.X.', [['E4','A4'],['C4','F4'],['E4','G4'],['D4','G4']]),
+   },
+   scenes: [
+    ['Gancho', 4, ['gancho']], ['Xacumbum', 4, ['kick', 'snare', 'hat']], ['Baixo', 4, ['kick', 'snare', 'hat', 'baixo']], ['Harmonia', 4, ['kick', 'snare', 'hat', 'baixo', 'pad', 'stabs']],
+    ['Guitarra', 8, ['kick', 'snare', 'hat', 'baixo', 'pad', 'guitarra']], ['Virada', 1, ['virada']], ['Refrão', 8, ['kick', 'snare', 'hat', 'baixo', 'pad', 'stabs', 'gancho']],
+    ['Parada', 2, ['kick', 'snare', 'hat', 'baixo', 'pad'], 'stop'], ['Vinheta', 4, ['kick', 'snare', 'hat', 'baixo', 'stabs', 'vinheta']],
+    ['Refrão final', 8, ['kick', 'snare', 'hat', 'baixo', 'pad', 'stabs', 'gancho', 'guitarra']], ['Coda', 4, ['gancho', 'kick', 'snare', 'hat', 'baixo'], 'end'],
+   ] },
+
+ { key: 'bfunk', name: 'Brega funk', bpm: 85, steps: 16, beats: 4, shownBpm: '170 (meio tempo)',
+   tracks: {
+    tema: T('leadSoft', ['X.X.XX..X..X.X..', 'X.X.XX..X.X.....'], ['A5','C6','B5','A5','E5','G5','A5','A5','C6','B5','A5','G5','E5']),
+    kick: T('kick', 'X.....x.X.....x.'),
+    lata: T('lata', '...X..X....X..X.'),
+    hats: T('hat32', 'xxxxxxxxxxxxxxxx'),
+    grave: T('b808', 'X.......X.......', ['A1','A1','F1','G1']),
+    piano: T('piano', 'X.......X.......', [['A3','C4','E4'],['A3','C4','E4'],['F3','A3','C4'],['G3','B3','D4']]),
+    tamborzao: T('snare', 'X..X..X...X..X..'),
+    tkick: T('kick', 'X..X......X..X..'),
+    frevo: T('brass', 'X...............', [['A4','C5','E5']]),
+    passinho: T('kick', 'X.x...x.X.x...x.'),
+   },
+   scenes: [
+    ['Tema', 2, ['tema']], ['Bumbo', 2, ['kick']], ['Lata', 4, ['kick', 'lata']], ['Chimbais', 2, ['kick', 'lata', 'hats']],
+    ['Grave', 4, ['kick', 'lata', 'hats', 'grave']], ['Batida completa', 4, ['kick', 'lata', 'hats', 'grave', 'tema', 'piano']],
+    ['Contra o funk carioca', 2, ['tkick', 'tamborzao']], ['Quebra', 2, ['tema', 'hats'], 'stop'],
+    ['Drop', 4, ['kick', 'lata', 'hats', 'grave', 'tema', 'piano', 'frevo']], ['Passinho', 4, ['passinho', 'lata', 'hats', 'grave', 'tema']],
+    ['Final', 4, ['kick', 'lata', 'hats', 'grave', 'tema'], 'end'],
+   ] },
+
+ { key: 'forro', name: 'Forró pé-de-serra', bpm: 120, steps: 8, beats: 2,
+   tracks: {
+    tri: T('tri', 'xxOxxxOx'.replace(/O/g, 'X'), ['c', 'c', 'o', 'c', 'c', 'c', 'o', 'c']),
+    zab: T('zab', 'X..X....'),
+    bac: T('bacalhau', '..x...x.'),
+    sanfona: T('sanfona', 'X.X.X.X.', [['G3','B3','D4'],['F3','A3','C4'],['C4','Eb4','G4'],['G3','B3','D4']].flatMap(c => [c, c, c, c])),
+    melodia: T('sanfonaMel', ['X.X.X.X.', 'X...X.X.', 'X.X.XX..', 'X.......'], ['D5','F5','E5','D5','C5','Bb4','A4','G4','F4','G4','A4','Bb4','G4']),
+    baixo: T('bass', 'X...X...', ['G2','D2','G2','D2','C2','G2','D2','A2']),
+    cavaco: T('cavaco', '..X...X.', [['G4','B4','D5'],['C5','E5','G5'],['D5','F5','A5'],['G4','B4','D5']].flatMap(c => [c, c])),
+    rabeca: T('rabeca', ['X.X.X.X.', 'X...X.X.', 'X.X.XX..', 'X.......'], ['D5','F5','E5','D5','C5','Bb4','A4','G4','F4','G4','A4','Bb4','G4']),
+    fole: T('sanfona', 'X..X..X.', [['G3','B3','D4']]),
+    baiao: T('zab', 'X..X..X.'),
+   },
+   scenes: [
+    ['Triângulo', 8, ['tri']], ['Zabumba', 8, ['tri', 'zab']], ['Bacalhau', 8, ['tri', 'zab', 'bac']], ['O trio', 4, ['tri', 'zab', 'bac', 'sanfona']],
+    ['Sanfona', 16, ['tri', 'zab', 'bac', 'melodia']], ['Baixo e cavaquinho', 8, ['tri', 'zab', 'bac', 'sanfona', 'baixo', 'cavaco']],
+    ['Rabeca e bandolim', 16, ['tri', 'zab', 'bac', 'baixo', 'cavaco', 'melodia', 'rabeca']], ['Jogo de fole', 8, ['tri', 'zab', 'bac', 'baixo', 'fole']],
+    ['Baião', 12, ['tri', 'baiao', 'bac', 'baixo', 'cavaco', 'melodia']], ['Breque', 2, ['tri', 'zab', 'bac', 'baixo'], 'stop'],
+    ['Final', 8, ['tri', 'zab', 'bac', 'baixo', 'cavaco', 'sanfona', 'melodia', 'rabeca'], 'end'],
+   ] },
+];
+
+const FEEL = { frevo: 'Euforia de carnaval, com a fúria do abafo', mangue: 'Raiva e peso da periferia, em tom menor', coco: 'Transe e devoção do terreiro', brega: 'Saudade e dor de amor, em tom menor', bfunk: 'Sensualidade e provocação', forro: 'Saudade do sertão no meio da festa' };
+// plain names: the words used in Pernambuco, in music and in the sources
+const LABELS = {"frevo": [["Introdução", "Rufo de caixa e ataque da orquestra"], ["Surdo", "Surdo com acento no tempo 2"], ["Caixa", "Caixa em semicolcheias"], ["Pandeiro", "Pandeiro em semicolcheias"], ["Tuba", "Tuba em colcheias, baixo da harmonia"], ["Metais", "Trompetes e trombones na melodia"], ["Lá e cá", "Metais e palhetas em pergunta e resposta"], ["Ventania", "Palhetas em semicolcheias"], ["Bambeando", "Antecipação na última colcheia do compasso"], ["Fotografia", "Parada da orquestra"], ["Abafo", "Notas longas dos metais em fortíssimo"], ["Final", "Rufo e ataque final"]], "mangue": [["Introdução", "Sampler e eco"], ["Alfaias", "Alfaias em uníssono"], ["Mãos", "Mão principal e resposta"], ["Caixa", "Caixa com eco"], ["Baixo", "Baixo dobrando a mão principal"], ["Guitarra", "Riff de guitarra distorcida"], ["Coco", "Ganzá em levada de coco"], ["Dub", "Baixo e alfaia com eco"], ["Retorno", "Entrada das camadas"], ["Corte", "Parada da banda"], ["Banda completa", "Todos os instrumentos"], ["Final", "Eco até o silêncio"]], "coco": [["Introdução", "Rufo de alfaia"], ["Alfaia", "Pele grave nos tempos"], ["Duas peles", "Segunda pele no contratempo"], ["Ganzá", "Ganzá em semicolcheias"], ["Pandeiro", "Pandeiro"], ["Palmas", "Palmas no contratempo"], ["Agogô e abê", "Agogô e abê"], ["Caixa", "Caixa"], ["Frases", "Frases de alfaia em sequência"], ["Toque", "Mais notas na alfaia, no mesmo andamento"], ["Rufo", "Rufo final de alfaia"], ["Final", "Corte"]], "brega": [["Introdução", "Teclado com o tema"], ["Base", "Bumbo, caixa e chimbal no contratempo"], ["Baixo", "Baixo com o bumbo"], ["Teclado", "Cordas e acordes no contratempo"], ["Guitarra", "Melodia em terças"], ["Virada", "Virada de tons"], ["Refrão", "Teclado com o tema, banda completa"], ["Breque", "Pausa de um compasso"], ["Vinheta", "Metais respondem à guitarra"], ["Refrão final", "Teclado e guitarra juntos"], ["Final", "Tema e acorde final"]], "bfunk": [["Tema", "Tema no sintetizador"], ["Bumbo", "Bumbo no 1 e no 3 do meio tempo"], ["Lata", "Lata em 3+3+2"], ["Chimbal", "Chimbal em semicolcheias e rolos"], ["Grave", "Grave 808 com glissando"], ["Beat", "Beat completo com piano"], ["Tamborzão", "Batida do funk carioca, para comparar"], ["Quebra", "Tema e chimbal, depois pausa"], ["Drop", "Beat completo com metais"], ["Passinho", "Variação do bumbo"], ["Final", "Tema e corte"]], "forro": [["Triângulo", "Fechado, aberto no contratempo"], ["Zabumba", "Pele grave"], ["Bacalhau", "Bacalhau no contratempo"], ["Trio", "Sanfona em acordes"], ["Sanfona", "Melodia na sanfona"], ["Baixo e cavaquinho", "Baixo e cavaquinho"], ["Rabeca e bandolim", "Melodia dobrada"], ["Fole", "Acentos de fole em 3+3+2"], ["Baião", "Levada de baião na zabumba"], ["Breque", "Parada"], ["Final", "Banda completa e acorde final"]]};
+for (const show of SHOWS) { show.info = []; LABELS[show.key].forEach(([name, what], i) => { show.scenes[i][0] = name; show.info[i] = [what]; }); }
+// ---------- scheduling ----------
+const stepLen = show => 60 / show.bpm / 4;
+const sceneSeconds = (show, bars) => bars * show.steps * stepLen(show);
+function scheduleScene(show, scene, t0) {
+  const [, bars, on, mode] = scene, s = stepLen(show), count = {};
+  for (let bar = 0; bar < bars; bar++) {
+    const last = bar === bars - 1;
+    for (const key of on) {
+      const tr = show.tracks[key], pat = tr.bars[bar % tr.bars.length];
+      for (let i = 0; i < show.steps; i++) {
+        const c = pat[i]; if (!c || c === '.') continue;
+        if (mode === 'stop' && last && i > 0) continue;
+        if (mode === 'fade' && bar > 0) continue;
+        const k = count[key] = (count[key] || 0) + 1;
+        const note = tr.notes.length ? tr.notes[(k - 1) % tr.notes.length] : undefined;
+        const v = (c === 'X' ? 1 : 0.6) * (mode === 'fade' ? 1 - bar / bars : 1);
+        V[tr.voice](t0 + (bar * show.steps + i) * s, v, note, s, tr.extra);
+      }
+    }
+    if (mode === 'roll' && last) for (let i = 0; i < show.steps * 2; i++) V.caixa(t0 + (bar * show.steps) * s + i * s / 2, 0.4 + 0.6 * i / (show.steps * 2));
+  }
+  if (mode === 'end') { const t = t0 + bars * show.steps * s; V.surdo(t, 1); V.kick(t, 1); }
+  return bars * show.steps * s;
+}
+let timers = [], playing = null;
+function stop() { timers.forEach(clearTimeout); timers = []; if (ac) { ac.close(); ac = null; NB = null; } document.querySelectorAll('li.now').forEach(l => l.classList.remove('now')); document.querySelectorAll('button.play.on').forEach(b => { b.classList.remove('on'); b.textContent = '▶ Ouvir o show'; }); playing = null; }
+async function play(show, from = 0, only = false) {
+  stop(); audio();
+  await ac.resume(); // some browsers (Brave) start an audio context suspended, even on a click
+  const sec = document.querySelector(`section[data-key="roteiro_${show.key}"]`), items = sec.querySelectorAll('li'), btn = sec.querySelector('button.play');
+  btn.classList.add('on'); btn.textContent = '■ Parar'; playing = show.key;
+  let t = ac.currentTime + 0.15; const start = t;
+  const list = only ? [from] : show.scenes.map((_, i) => i).slice(from);
+  for (const i of list) {
+    const at = t; const len = scheduleScene(show, show.scenes[i], at);
+    timers.push(setTimeout(() => { items.forEach(l => l.classList.remove('now')); items[i].classList.add('now'); }, (at - ac.currentTime) * 1000));
+    t += len;
+  }
+  timers.push(setTimeout(stop, (t - start + 1.2) * 1000));
+}
+
+// ---------- page ----------
+const fmt = x => `${Math.floor(x / 60)}:${String(Math.round(x % 60)).padStart(2, '0')}`;
+document.getElementById('grid').innerHTML = SHOWS.map(show => {
+  const total = show.scenes.reduce((a, sc) => a + sceneSeconds(show, sc[1]), 0);
+  const meter = show.beats === 2 ? '2/4, Roda de 8 pontos' : '4/4, Roda de 16 pontos';
+  const rows = show.scenes.map((sc, i) => `<li data-i="${i}"><div class="sc"><b>${i + 1}</b><strong>${sc[0]}</strong><span>${sc[1]} comp. · ${Math.round(sceneSeconds(show, sc[1]))}s ▶</span></div><p>${show.info[i][0]}</p></li>`).join('');
+  return `<section data-key="roteiro_${show.key}"><h2>${show.name}</h2><div class="feel">${FEEL[show.key]}</div><div class="meta">${show.shownBpm || show.bpm} BPM · ${meter} · ${show.scenes.length} cenas · ${fmt(total)}</div><button class="play">▶ Ouvir o show</button><ol>${rows}</ol></section>`;
+}).join('');
+for (const show of SHOWS) {
+  const sec = document.querySelector(`section[data-key="roteiro_${show.key}"]`);
+  sec.querySelector('button.play').addEventListener('click', () => playing === show.key ? stop() : play(show));
+  sec.querySelectorAll('li').forEach(li => li.addEventListener('click', () => play(show, +li.dataset.i, true)));
+}
+
+// the real maracatu show, from the local site (pnpm serve) or the live one
+document.getElementById('marPlay').addEventListener('click', e => {
+  const box = document.getElementById('marFrame');
+  if (box.firstChild) { box.textContent = ''; e.target.textContent = '▶ Ouvir o show'; return; }
+  stop();
+  box.innerHTML = '<iframe src="https://baquevirado.martonpaulo.com/" style="width:100%;height:560px;border:0;border-radius:8px;margin-bottom:8px" allow="autoplay"></iframe><p style="font-size:12px;color:#a9a3c2;margin:0 0 8px">Toque na tela do show para tocar.</p>';
+  e.target.textContent = '■ Fechar';
+});
+</script>
+</html>

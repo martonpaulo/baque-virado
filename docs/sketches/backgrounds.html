@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="pt-BR">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Fundos</title>
+<style>
+:root{color-scheme:dark}
+body{margin:0;background:#07060b;color:#ece8ff;font:14px/1.45 system-ui,sans-serif;padding:24px 16px 60px}
+main{max-width:1500px;margin:0 auto}
+h1{font-size:26px;margin:0 0 4px}
+.sub{color:#a9a3c2;margin:0 0 18px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px}
+figure{margin:0;background:#131119;border:1px solid #2a2635;border-radius:12px;padding:10px}
+canvas{width:100%;aspect-ratio:393/852;display:block;border-radius:8px;background:#000}
+figcaption{margin-top:8px}
+figcaption b{display:block;font-size:15px}
+figcaption span{color:#a9a3c2;font-size:12px}
+</style>
+<main>
+<h1>Fundos</h1>
+<p class="sub">Esboço do fundo de cada ritmo, todos saindo da roda central, pulsando no andamento e nas batidas dele. Sem som.</p>
+<div class="grid" id="grid"></div>
+</main>
+<script>
+// each sketch: bpm, steps per bar, the steps that pulse, and a draw(ctx, w, h, time, pulse, bar, step) function
+const TAU = Math.PI * 2;
+const rnd = (a, b) => a + Math.random() * (b - a);
+const WHEEL_Y = 0.42; // the wheel's centre on the site's stage, as a share of its height
+function wheel(c, cx, cy, w, color) { c.strokeStyle = color; c.lineWidth = 1.5; c.beginPath(); c.arc(cx, cy, w * 0.12, 0, TAU); c.stroke(); for (let k = 0; k < 16; k++) { const a = k / 16 * TAU - Math.PI / 2; c.beginPath(); c.moveTo(cx + Math.cos(a) * w * 0.105, cy + Math.sin(a) * w * 0.105); c.lineTo(cx + Math.cos(a) * w * 0.12, cy + Math.sin(a) * w * 0.12); c.stroke(); } }
+const SKETCHES = [
+ { key: 'coco', name: 'Coco da Xambá', feel: 'Transe e devoção do terreiro', bpm: 132, steps: 8, hits: [0, 4], accent: [0],
+   init(w, h) { return { rings: [] }; },
+   draw(c, w, h, t, p, s, step, hit) {
+     c.fillStyle = 'rgba(28,14,8,0.2)'; c.fillRect(0, 0, w, h);
+     const cx = w / 2, cy = h * WHEEL_Y;
+     if (hit) s.rings.push({ r: w * 0.12, life: 1, a: rnd(0, TAU), dir: Math.random() < 0.5 ? 1 : -1 });
+     for (const g of s.rings) { g.a += 0.01 * g.dir; c.strokeStyle = `hsla(${24 + (1 - g.life) * 20},65%,${35 + g.life * 25}%,${g.life})`; c.lineWidth = 2; c.beginPath(); for (let k = 0; k <= 8; k++) { const a = g.a + k / 8 * TAU; k ? c.lineTo(cx + Math.cos(a) * g.r, cy + Math.sin(a) * g.r) : c.moveTo(cx + Math.cos(a) * g.r, cy + Math.sin(a) * g.r); } c.stroke(); g.r += 0.9; g.life -= 0.006; }
+     s.rings = s.rings.filter(g => g.life > 0);
+     wheel(c, cx, cy, w, `rgba(232,170,90,${0.5 + p * 0.5})`);
+   } },
+ { key: 'bfunk', name: 'Brega funk', feel: 'Sensualidade e provocação', bpm: 85, steps: 16, hits: [3, 6, 11, 14], accent: [0, 8],
+   init(w, h) { return { rays: [] }; },
+   draw(c, w, h, t, p, s, step, hit) {
+     c.fillStyle = 'rgba(6,2,12,0.3)'; c.fillRect(0, 0, w, h);
+     const cx = w / 2, cy = h * WHEEL_Y;
+     if (hit) { const a0 = rnd(0, TAU); for (let i = 0; i < 5; i++) s.rays.push({ a: a0 + i * TAU / 5, life: 1, hue: i % 2 ? 320 : 185 }); }
+     for (const r of s.rays) { c.strokeStyle = `hsla(${r.hue},100%,60%,${r.life})`; c.lineWidth = 3 * r.life + 1; const r0 = (1 - r.life) * w * 0.9; c.beginPath(); c.moveTo(cx + Math.cos(r.a) * r0, cy + Math.sin(r.a) * r0); c.lineTo(cx + Math.cos(r.a) * (r0 + w * 0.25), cy + Math.sin(r.a) * (r0 + w * 0.25)); c.stroke(); r.life -= 0.05; }
+     s.rays = s.rays.filter(r => r.life > 0);
+     const pulse = Math.max(0, 1 - ((t * this.bpm / 60) % 4) / 4);
+     for (let k = 0; k < 3; k++) { c.strokeStyle = `rgba(255,40,160,${0.15 + 0.35 * pulse})`; c.lineWidth = 2; c.beginPath(); c.arc(cx, cy, w * (0.12 + k * 0.1) * (1 + pulse * 0.08), 0, TAU); c.stroke(); }
+     const g = c.createRadialGradient(cx, cy, 0, cx, cy, w * 0.8); g.addColorStop(0, `rgba(255,40,160,${0.22 * pulse + 0.05})`); g.addColorStop(1, 'rgba(0,0,0,0)'); c.fillStyle = g; c.fillRect(0, 0, w, h);
+     wheel(c, cx, cy, w, 'rgba(255,90,190,0.6)');
+   } },
+ { key: 'mangue', name: 'Manguebeat', feel: 'Raiva e peso, em tom menor', bpm: 108, steps: 16, hits: [0, 3, 6, 10, 13], accent: [0],
+   init(w, h) { return { rings: [] }; },
+   draw(c, w, h, t, p, s, step, hit) {
+     c.fillStyle = 'rgba(30,26,22,0.07)'; c.fillRect(0, 0, w, h);
+     const cx = w / 2, cy = h * WHEEL_Y;
+     if (hit) s.rings.push({ r: w * 0.05, life: 1, wob: rnd(0, TAU) });
+     for (const g of s.rings) { c.strokeStyle = `rgba(${150 + 60 * g.life},${70 + 20 * g.life},35,${g.life})`; c.lineWidth = 3; c.beginPath(); for (let k = 0; k <= 40; k++) { const a = k / 40 * TAU, rr = g.r * (1 + 0.06 * Math.sin(a * 5 + g.wob)); k ? c.lineTo(cx + Math.cos(a) * rr, cy + Math.sin(a) * rr) : c.moveTo(cx + Math.cos(a) * rr, cy + Math.sin(a) * rr); } c.stroke(); g.r += 1.6; g.life -= 0.008; }
+     s.rings = s.rings.filter(g => g.life > 0);
+     const img = c.getImageData(0, 0, w, h), d = img.data;
+     for (let i = 0; i < d.length; i += 4 * 7) { const n = (Math.random() - 0.5) * 40; d[i] += n; d[i + 1] += n; d[i + 2] += n; }
+     c.putImageData(img, 0, 0);
+     c.fillStyle = `rgba(200,200,190,${0.25 + p * 0.5})`; c.beginPath(); c.arc(cx, cy, 4 + p * 5, 0, TAU); c.fill();
+     wheel(c, cx, cy, w, 'rgba(210,200,190,0.5)');
+   } },
+ { key: 'forro', name: 'Forró pé-de-serra', feel: 'Saudade do sertão no meio da festa', bpm: 120, steps: 8, hits: [0, 3, 6], accent: [0],
+   init(w, h) { return { dust: Array.from({ length: 160 }, () => ({ a: rnd(0, TAU), r: rnd(0, 1), v: rnd(0.002, 0.006), s: rnd(0.5, 2) })) }; },
+   draw(c, w, h, t, p, s) {
+     const cx = w / 2, cy = h * WHEEL_Y;
+     const g = c.createRadialGradient(cx, cy, 0, cx, cy, h * 0.6); g.addColorStop(0, '#d9822b'); g.addColorStop(0.45, '#7a3a10'); g.addColorStop(1, '#1e0b04'); c.fillStyle = g; c.fillRect(0, 0, w, h);
+     const open = 0.75 + 0.25 * Math.sin(t * this.bpm / 60 * Math.PI / 2) + p * 0.1, folds = 24;
+     c.strokeStyle = 'rgba(40,12,4,0.8)'; c.lineWidth = 2;
+     c.beginPath(); for (let k = 0; k <= folds; k++) { const a = k / folds * TAU, rr = w * 0.3 * open * (k % 2 ? 1 : 0.86); k ? c.lineTo(cx + Math.cos(a) * rr, cy + Math.sin(a) * rr) : c.moveTo(cx + Math.cos(a) * rr, cy + Math.sin(a) * rr); } c.stroke();
+     for (let k = 0; k < folds; k += 2) { const a = k / folds * TAU; c.beginPath(); c.moveTo(cx + Math.cos(a) * w * 0.1, cy + Math.sin(a) * w * 0.1); c.lineTo(cx + Math.cos(a) * w * 0.26 * open, cy + Math.sin(a) * w * 0.26 * open); c.stroke(); }
+     c.fillStyle = `rgba(255,200,110,${0.85 + p * 0.15})`; c.beginPath(); c.arc(cx, cy, w * 0.09 * (1 + p * 0.1), 0, TAU); c.fill();
+     for (const d of s.dust) { d.r += d.v * (1 + p); if (d.r > 1) { d.r = 0; d.a = rnd(0, TAU); } const rr = (0.12 + d.r) * w * 0.9; c.fillStyle = `rgba(255,220,160,${0.25 + p * 0.3})`; c.fillRect(cx + Math.cos(d.a) * rr, cy + Math.sin(d.a) * rr, d.s, d.s); }
+     wheel(c, cx, cy, w, 'rgba(60,20,6,0.8)');
+   } },
+ { key: 'brega', name: 'Brega romântico', feel: 'Saudade e dor de amor', bpm: 140, steps: 16, hits: [0, 8], accent: [0],
+   init(w, h) { return { b: Array.from({ length: 22 }, (_, i) => ({ a: rnd(0, TAU), r: rnd(0.15, 0.8), size: rnd(14, 50), v: rnd(0.0008, 0.003) * (i % 2 ? 1 : -1), al: rnd(0.06, 0.2) })) }; },
+   draw(c, w, h, t, p, s) {
+     const cx = w / 2, cy = h * WHEEL_Y;
+     const g = c.createRadialGradient(cx, cy, 0, cx, cy, h * 0.6); g.addColorStop(0, '#4a0e2e'); g.addColorStop(1, '#14040e'); c.fillStyle = g; c.fillRect(0, 0, w, h);
+     for (const b of s.b) { b.a += b.v; b.r += Math.abs(b.v) * 0.6; if (b.r > 1.1) { b.r = 0.12; b.a = rnd(0, TAU); } const x = cx + Math.cos(b.a) * b.r * w * 0.8, y = cy + Math.sin(b.a) * b.r * w * 0.8; const gg = c.createRadialGradient(x, y, 0, x, y, b.size); gg.addColorStop(0, `rgba(255,120,170,${b.al + p * 0.05})`); gg.addColorStop(1, 'rgba(255,120,170,0)'); c.fillStyle = gg; c.beginPath(); c.arc(x, y, b.size, 0, TAU); c.fill(); }
+     const heart = c.createRadialGradient(cx, cy, 0, cx, cy, w * 0.25); heart.addColorStop(0, `rgba(255,170,200,${0.12 + p * 0.12})`); heart.addColorStop(1, 'rgba(255,170,200,0)'); c.fillStyle = heart; c.fillRect(0, 0, w, h);
+     wheel(c, cx, cy, w, 'rgba(255,170,200,0.45)');
+   } },
+ { key: 'frevo', name: 'Frevo', feel: 'Euforia de carnaval, com a fúria do abafo', bpm: 140, steps: 8, hits: [0, 2, 4, 6], accent: [4],
+   init(w, h) { return { conf: [] }; },
+   draw(c, w, h, t, p, s, step, hit) {
+     c.fillStyle = 'rgba(10,6,20,0.3)'; c.fillRect(0, 0, w, h);
+     const cx = w / 2, cy = h * 0.45, cols = ['#e5262d', '#f7c52b', '#1fa64a', '#1f6fd6', '#f7f7f7', '#e5262d', '#f7c52b', '#1fa64a'];
+     for (let ring = 0; ring < 2; ring++) { const n = ring ? 10 : 6, R = w * (ring ? 0.36 : 0.2), spin = t * (ring ? -0.9 : 1.4); for (let i = 0; i < n; i++) { const a = spin + i / n * TAU, x = cx + Math.cos(a) * R, y = cy + Math.sin(a) * R, r = w * (ring ? 0.05 : 0.07) * (1 + p * 0.25); for (let k = 0; k < 8; k++) { c.fillStyle = cols[k]; c.beginPath(); c.moveTo(x, y); c.arc(x, y, r, t * 6 + k / 8 * TAU, t * 6 + (k + 1) / 8 * TAU); c.fill(); } } }
+     if (hit) for (let i = 0; i < 18; i++) { const a = rnd(0, TAU); s.conf.push({ x: cx, y: cy, vx: Math.cos(a) * rnd(1.5, 4), vy: Math.sin(a) * rnd(1.5, 4), c: cols[i % 4], life: 1 }); }
+     for (const f of s.conf) { f.x += f.vx; f.y += f.vy; f.life -= 0.015; c.fillStyle = f.c; c.globalAlpha = f.life; c.fillRect(f.x, f.y, 3, 5); }
+     c.globalAlpha = 1; s.conf = s.conf.filter(f => f.life > 0);
+     wheel(c, cx, cy, w, 'rgba(255,255,255,0.6)');
+   } },
+];
+const grid = document.getElementById('grid');
+grid.innerHTML = SKETCHES.map(k => `<figure><canvas data-k="${k.key}"></canvas><figcaption><b>${k.name}</b><span>${k.feel} · ${k.bpm} BPM</span></figcaption></figure>`).join('');
+const live = SKETCHES.map(k => { const cv = grid.querySelector(`canvas[data-k="${k.key}"]`); cv.width = 240; cv.height = Math.round(240 * 852 / 393); return { k, c: cv.getContext('2d', { willReadFrequently: true }), w: cv.width, h: cv.height, s: k.init(cv.width, cv.height), last: -1 }; });
+const t0 = performance.now();
+function frame(now) {
+  const t = (now - t0) / 1000;
+  for (const L of live) {
+    const sixteenth = t * L.k.bpm / 60 * 4, step = Math.floor(sixteenth) % L.k.steps, frac = sixteenth % 1;
+    const hit = step !== L.last && L.k.hits.includes(step); L.last = step;
+    const p = L.k.hits.includes(step) ? Math.max(0, 1 - frac * 1.5) * (L.k.accent.includes(step) ? 1 : 0.6) : 0;
+    L.k.draw(L.c, L.w, L.h, t, p, L.s, step, hit);
+  }
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+</script>
+</html>
