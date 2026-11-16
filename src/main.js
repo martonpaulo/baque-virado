@@ -6,7 +6,7 @@ import { backgroundAt, createBackground, SCENE_LOOKS } from './background.js';
 import { bindKeyboard, createSceneList, createSoundPickers, initialChoices } from './controls.js';
 import { COPY } from './copy.js';
 import { createKey, createLanes } from './lanes.js';
-import { BAQUE_ORDER, BAR_SECONDS, BPM, STEPS_PER_BAR } from './music.js';
+import { BAR_SECONDS, BPM, STEPS_PER_BAR } from './music.js';
 import { createReadout } from './readout.js';
 import { createScope, SCOPE_GEOMETRY } from './scope.js';
 import { recentHits, SCENES, sceneAt, sceneIndexAt, TOTAL_BARS, TOTAL_SECONDS } from './show.js';
@@ -139,7 +139,9 @@ function render(at, force = false) {
   setText($('hBar'), COPY.hud.bar(pad2(bar + 1), TOTAL_BARS));
   setText($('hStep'), COPY.hud.step(pad2(Math.floor(sixteenth) + 1)));
   setText($('hTime'), formatPrecise(seconds));
-  setText($('clock'), `${formatClock(seconds)} / ${formatClock(TOTAL_SECONDS)}`);
+  const time = `${formatClock(seconds)} / ${formatClock(TOTAL_SECONDS)}`;
+  setText($('clock'), time);
+  setText($('tapTime'), time);
   drawBackground();
   lanes.draw(p);
 }
@@ -149,7 +151,16 @@ const choice = initialChoices(DESKTOP);
 const bank = createSampleBank();
 bank.prefetch(filesFor(choice));
 const player = createPlayer(bank, choice);
-const playButton = $('play');
+const playButton = $('play'),
+  tapButton = $('tap');
+/** One playback state on both buttons: Play beside the stage, and the stage itself on phones. */
+function showState(state) {
+  const text = COPY.controls[state];
+  playButton.textContent = text;
+  setText($('tapLabel'), text);
+  tapButton.dataset.state = state;
+  tapButton.setAttribute('aria-label', text); // its text hides while playing
+}
 
 let starting = false; // samples are loading: a second Play, Pause or sound pick waits for it
 
@@ -158,24 +169,24 @@ async function play() {
   if (position >= TOTAL_BARS - REWIND_AT_END) position = 0;
   starting = true;
   playButton.disabled = true;
-  playButton.textContent = COPY.controls.loading;
+  showState('loading');
   try {
     await player.prepare();
   } catch {
-    playButton.textContent = COPY.controls.loadFailed;
+    showState('loadFailed');
     return;
   } finally {
     starting = false;
     playButton.disabled = false;
   }
   player.start(position); // the position read now, so a scene picked while loading is kept
-  playButton.textContent = COPY.controls.pause;
+  showState('pause');
 }
 function pause() {
   const stoppedAt = player.stop();
   if (stoppedAt !== null) position = Math.max(0, stoppedAt);
   renderedAt = null; // redraw once: the title settles
-  playButton.textContent = COPY.controls.play;
+  showState('play');
 }
 const toggle = () => (player.playing ? pause() : play());
 function seek(to) {
@@ -193,8 +204,9 @@ const stepScene = direction => {
   seek(SCENES[Math.max(0, Math.min(SCENES.length - 1, target))].start);
 };
 
-playButton.textContent = COPY.controls.play;
+showState('play');
 playButton.addEventListener('click', toggle);
+tapButton.addEventListener('click', toggle);
 bindKeyboard({ toggle, previousScene: () => stepScene(-1), nextScene: () => stepScene(1) }, playButton);
 if (DESKTOP) {
   createSoundPickers(
@@ -213,7 +225,6 @@ if (DESKTOP) {
   );
 }
 $('hBpm').textContent = BPM;
-$('facts').textContent = COPY.controls.facts(BAQUE_ORDER.length, TOTAL_BARS, formatClock(TOTAL_SECONDS));
 
 // ---------- loop ----------
 function loop() {

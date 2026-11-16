@@ -72,13 +72,17 @@
   --stage-figure: 11cqw;
   --stage-title: 13cqw;
   --gutter: var(--space-8);
-  --controls-height: 190px; /* room kept under the stage on phones */
+  --controls-height: 0px; /* phones: nothing under the stage; it is its own Play button */
   --desktop-side: 340px;
+  --side-min: 12rem; /* 192px: the longest sound option, «chocalho de platinela», on one line */
   --label-floor: 0px; /* phones raise it: see the phone block at the end */
 }
 html,
 body {
   height: 100%;
+  /* the page never scrolls or bounces: every view fits the window, and only a side column scrolls */
+  overflow: hidden;
+  overscroll-behavior: none;
 }
 body {
   margin: 0;
@@ -448,6 +452,7 @@ a:focus-visible {
   justify-content: center;
 }
 .chip {
+  white-space: nowrap;
   background: transparent;
   border: 1px solid var(--line);
   border-radius: var(--radius-pill);
@@ -458,6 +463,10 @@ a:focus-visible {
 .chip:hover {
   border-color: var(--dim);
   color: var(--fg);
+}
+.tap {
+  display: none; /* phones only: see the phone block */
+  touch-action: manipulation; /* no double-tap zoom */
 }
 .chip[aria-current="true"],
 .chip[aria-pressed="true"] {
@@ -478,7 +487,12 @@ a:focus-visible {
   padding-top: var(--space-8);
   border-top: 1px solid var(--line);
 }
-.block-title {
+.block:first-child {
+  padding-top: 0;
+  border-top: 0;
+}
+.block-title,
+.sound > .lbl {
   margin: 0;
   font-family: var(--f-mono);
   font-size: var(--text-s);
@@ -486,12 +500,6 @@ a:focus-visible {
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--fg);
-}
-.block-title span {
-  font-weight: 400;
-  letter-spacing: 0.04em;
-  text-transform: none;
-  color: var(--dim);
 }
 /* the timeline: one rail, one row per scene in show order, the current one lit */
 .timeline {
@@ -512,10 +520,10 @@ a:focus-visible {
 .step {
   position: relative;
   display: flex;
-  gap: var(--space-7);
+  gap: var(--space-4);
   align-items: baseline;
   width: 100%;
-  padding: var(--space-1) 0 var(--space-1) var(--space-10);
+  padding: var(--space-1) 0 var(--space-1) var(--space-9);
   background: none;
   border: 0;
   border-radius: var(--space-2);
@@ -562,12 +570,10 @@ a:focus-visible {
   flex-direction: column;
   gap: var(--space-3);
 }
-.sound > .lbl {
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  font-size: var(--text-xs);
-}
 .foot {
+  width: 100%;
+  padding-top: var(--space-8);
+  border-top: 1px solid var(--line); /* the same rule that opens the timeline above */
   font-size: var(--text-xs);
   color: var(--dim);
   display: flex;
@@ -589,18 +595,22 @@ a:focus-visible {
     gap: var(--space-11);
     height: 100%;
   }
+  /* the reel fills the height, unless the columns beside it would fall under --side-min: then it
+     narrows, so the page never grows wider than the window */
   .stage {
     order: 2;
-    width: auto;
-    height: 100%;
+    width: min(calc((100svh - 2 * var(--gutter)) * 9 / 16), calc(100vw - 2 * var(--gutter) - 2 * var(--side-min) - 2 * var(--space-11)));
     min-width: 0;
   }
   .side {
-    width: var(--desktop-side);
+    flex: 0 1 var(--desktop-side);
+    min-width: var(--side-min);
     align-items: flex-start;
     gap: var(--space-9);
     max-height: 100%;
+    overflow-x: hidden;
     overflow-y: auto;
+    scrollbar-width: none; /* the columns fit; a very short window still scrolls, without a bar */
     padding-top: var(--space-4);
     /* room for the focus ring, which the scroll box would clip, without moving the controls */
     padding-left: var(--space-2);
@@ -627,12 +637,30 @@ a:focus-visible {
   .sounds {
     display: flex;
     flex-direction: column;
-    gap: var(--space-8);
+    gap: var(--space-10);
   }
   .trow,
-  .chips,
-  .foot {
+  .chips {
     justify-content: flex-start;
+  }
+  .foot {
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+  /* the right column hugs the right edge */
+  .side.right,
+  .side.right .sound {
+    align-items: flex-end;
+    text-align: right;
+  }
+  .side.right .chips {
+    justify-content: flex-end;
+  }
+  .side.right {
+    padding-left: 0;
+    margin-left: 0;
+    padding-right: var(--space-2); /* room for the focus ring */
+    margin-right: calc(-1 * var(--space-2));
   }
 }
 /* ---------- phones: stage labels never render below 11 px (#4) ----------
@@ -642,6 +670,55 @@ a:focus-visible {
 @media (max-width: 899px) {
   :root {
     --label-floor: 11px;
+  }
+  /* phones show the stage alone: a tap anywhere plays or pauses, and a paused stage shows the time */
+  .side > :not(.brand) {
+    display: none;
+  }
+  .wrap {
+    gap: 0;
+  }
+  .tap {
+    position: absolute;
+    inset: 0;
+    z-index: 5;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-5);
+    padding: 0;
+    border: 0;
+    border-radius: inherit;
+    background: rgba(7, 6, 11, 0.55); /* void */
+    font-family: var(--f-mono);
+    -webkit-tap-highlight-color: transparent;
+    transition: background-color 0.2s ease-out;
+  }
+  .tap-label {
+    background: var(--accent);
+    color: var(--void);
+    border-radius: var(--radius-pill);
+    padding: var(--space-5) var(--space-10);
+    font-weight: 700;
+    font-size: var(--text-l);
+    min-width: var(--play-min-width);
+    box-sizing: border-box;
+  }
+  .tap-time {
+    font-size: var(--text-m);
+    color: var(--fg);
+    font-variant-numeric: tabular-nums;
+  }
+  .tap[data-state="pause"] {
+    background: transparent;
+  }
+  .tap[data-state="pause"] > * {
+    visibility: hidden;
+  }
+  .tap:focus-visible {
+    outline: var(--space-1) solid var(--fg);
+    outline-offset: calc(-1 * var(--space-1));
   }
   .inner {
     gap: 1.4cqw;

@@ -51,24 +51,24 @@
       <section class="read" id="read"></section>
       <div class="lanes"><p class="key" id="key"></p><canvas id="lanes"></canvas></div>
     </div>
+    <!-- phones: the whole stage is the Play and Pause button -->
+    <button class="tap" id="tap" type="button"><span class="tap-label" id="tapLabel"></span><span class="tap-time" id="tapTime"></span></button>
   </section>
 
   <aside class="side left">
-    <header class="brand"><h1>O Baque<br>Virado</h1><p id="facts"></p></header>
+    <header class="brand"><h1>O Baque<br>Virado</h1><p>maracatu de baque virado</p></header>
     <div class="trow"><button id="play" type="button"></button><span id="clock"></span></div>
     <nav class="block" aria-labelledby="scenesTitle">
       <h2 class="block-title" id="scenesTitle">Roteiro</h2>
       <ol class="timeline" id="scenes"></ol>
     </nav>
+    <p class="foot"><a href="https://github.com/martonpaulo/baque-virado#readme">sobre o projeto</a></p>
   </aside>
 
   <aside class="side right">
-    <section class="block" aria-labelledby="soundsTitle">
-      <h2 class="block-title" id="soundsTitle">Sons <span>· um por instrumento</span></h2>
+    <section class="block" aria-label="Sons">
       <div class="sounds" id="sounds"></div>
     </section>
-    <p class="lbl keys">espaço: tocar / pausar · ← →: cena</p>
-    <p class="foot"><a href="https://github.com/martonpaulo/baque-virado">código</a><a href="https://github.com/martonpaulo/baque-virado/blob/main/CREDITS.md">créditos dos sons</a></p>
   </aside>
 </div>
 </body>

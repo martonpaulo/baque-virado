@@ -27,7 +27,8 @@ rehearsal or from videos of whole bands, where the parts cannot be told apart.
   percussion score with a moving cursor.
 - Plays the swing measured on a real workshop recording, and shows the straight grid next to it.
 - On desktop, lists the scenes as one timeline to jump through and lets the viewer swap each
-  instrument's sound; a phone shows only Play and the clock under the reel, with the default sounds.
+  instrument's sound; a phone shows the reel alone, which plays and pauses on a tap and shows the time played and the total while paused,
+  with the default sounds. The page never scrolls; on a narrow desktop the reel narrows instead.
 
 ## What it will never do
 
@@ -37,7 +38,7 @@ rehearsal or from videos of whole bands, where the parts cannot be told apart.
 | Be an editor or sequencer                           | The job is to understand a performance, not to compose one                        | Never, by the owner's choice                  |
 | Generate video in the page                          | The page stays light on phones; video is made offline by `tools/export-video.mjs` | Never, by the owner's choice                  |
 | Offer sound choices on phones                       | Phones download only the default samples, so the page loads on mobile data        | Never, by the owner's choice                  |
-| Show controls under Play on phones                  | The owner wants the phone page to end at Play and the clock (2026-11-16)          | The owner asks for scene jumps on phones      |
+| Show anything outside the reel on phones            | The owner wants the phone page to be the reel alone, tap to play (2026-11-16)     | The owner asks for controls on phones         |
 | Translate the interface                             | The audience is Brazilian; the copy is pt-BR only                                 | Readers outside Brazil ask for it             |
 
 ## How you know it worked

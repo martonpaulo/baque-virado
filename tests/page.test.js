@@ -348,3 +348,43 @@ test('a real stage resize still re-measures the canvases', async () => {
   assert.deepEqual(errors, []);
   await page.close();
 });
+
+// 2026-11-16, owner: the page never scrolls sideways, and a phone shows the stage alone, which
+// plays and pauses on a tap and shows the time played and the total while paused.
+test('no window is wider than its page, and side options stay on one line', async () => {
+  for (const viewport of [...PHONES, { width: 1000, height: 700 }, { width: 1146, height: 1330 }, DESKTOP]) {
+    const { page, errors } = await openPage(viewport);
+    const found = await page.evaluate(() => {
+      const problems = [];
+      if (document.documentElement.scrollWidth > innerWidth) problems.push(`page is ${document.documentElement.scrollWidth}px wide`);
+      for (const option of document.querySelectorAll('.side .chip, .side .step')) {
+        const box = option.getBoundingClientRect();
+        if (box.height === 0) continue; // a phone hides them
+        if (box.right > option.closest('.side').getBoundingClientRect().right + 0.5) problems.push(`${option.textContent} is cut`);
+        if (option.matches('.chip') && option.scrollHeight > option.clientHeight + 1) problems.push(`${option.textContent} wraps`);
+      }
+      return problems;
+    });
+    assert.deepEqual(found, [], `${viewport.width}x${viewport.height}`);
+    assert.deepEqual(errors, []);
+    await page.close();
+  }
+});
+
+test('on phones only the stage shows, and a tap on it plays and pauses', async () => {
+  const { page, errors } = await openPage(PHONES[0]);
+  const visible = await page.evaluate(() =>
+    [...document.querySelectorAll('.side *')]
+      .filter(element => element.closest('.brand') === null && element.getClientRects().length > 0)
+      .map(element => element.className || element.tagName),
+  );
+  assert.deepEqual(visible, []);
+  assert.equal(await page.$eval('#tapLabel', element => element.textContent), COPY.controls.play);
+  await page.click('#stage');
+  await page.waitForFunction(() => document.getElementById('tap').dataset.state === 'pause');
+  await page.click('#stage');
+  await page.waitForFunction(() => document.getElementById('tap').dataset.state === 'play');
+  assert.match(await page.$eval('#tapTime', element => element.textContent), /^\d:\d\d \/ \d:\d\d$/);
+  assert.deepEqual(errors, []);
+  await page.close();
+});

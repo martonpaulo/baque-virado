@@ -59,5 +59,4 @@ test('the page counts five drumming instruments, not their seven voices', async 
   assert.equal(INSTRUMENT_COUNT, 5);
   assert.equal(INSTRUMENTS.length, 7);
   assert.match(COPY.scenes.ensemble.eyebrow, /^5 instrumentos$/);
-  assert.match(COPY.controls.facts(7, 54, '1:52'), / 5 instrumentos /);
 });
