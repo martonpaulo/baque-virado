@@ -1,99 +1,19 @@
 // Sound: real one-shot recordings (public domain), scheduled sample-accurately with Web Audio.
 // The same scheduler drives live playback and the offline render used by the video exporter.
-import { BAR_SECONDS, BEAT_SECONDS, STEPS_PER_BAR, VOICE_ORDER, VOICES } from './music.js';
+import { BAR_SECONDS, BEAT_SECONDS, STEPS_PER_BAR, STEPS_PER_BEAT, VOICE_ORDER, VOICES } from './music.js';
+import { RHYTHM } from './rhythms/index.js';
 import { barTimeline, hitsInBar, sceneById, TOTAL_BARS } from './show.js';
 import { hash } from './util.js';
 
-// Sounds the viewer can swap on desktop. `files(option)` lists the samples of one option, and
-// `preview` the voices a pick plays while the show is paused.
-// The default, the version chosen by ear for the show, is always listed first. The others follow from
-// the lowest to the brightest sound (measured spectral centroid, 2026-11-16).
-export const SOUND_CHOICES = [
-  {
-    id: 'alfaia',
-    label: 'alfaia',
-    defaultOption: 'deep-click',
-    preview: ['main', 'answer'],
-    files: o => [`alfaia-${o}-main`, `alfaia-${o}-answer`],
-    options: [
-      ['deep-click', 'meião'],
-      ['deep', 'marcante'],
-      ['deep-short', 'grave abafada'],
-      ['dry-body', 'encorpada'],
-      ['dry-surdo', 'seca e estalada'],
-    ],
-  },
-  {
-    id: 'caixa',
-    label: 'caixa',
-    defaultOption: 'padrao',
-    preview: ['caixa'],
-    files: o => [`caixa-${o}`],
-    options: [
-      ['padrao', 'caixa de guerra'],
-      ['brasileira', 'caixa grave'],
-      ['esteira', 'caixa com esteira'],
-      ['aro', 'tarol'],
-    ],
-  },
-  {
-    id: 'ganza',
-    label: 'ganzá',
-    defaultOption: 'rice',
-    preview: ['ganza'],
-    files: o => [`ganza-${o}`],
-    options: [
-      ['rice', 'ganzá de arroz'],
-      ['caxixi', 'caxixi'],
-      ['platinela', 'chocalho de platinelas'],
-      ['dry', 'mineiro'],
-    ],
-  },
-  {
-    id: 'agbe',
-    label: 'agbê',
-    defaultOption: 'maracatu',
-    preview: ['agbe'],
-    files: o => [`agbe-${o}`],
-    options: [
-      ['maracatu', 'agbê seco'],
-      ['soft-shekere', 'xequerê cheio'],
-      ['played-shekere', 'xequerê médio'],
-      ['cabasa', 'cabaça'],
-    ],
-  },
-  {
-    id: 'agogo',
-    label: 'agogô',
-    defaultOption: 'short-bell',
-    preview: ['agogo'],
-    files: o => [`agogo-${o}`],
-    options: [
-      ['short-bell', 'agogô agudo'],
-      ['big-bell', 'agogô grave'],
-      ['stick-bell', 'agogô ressonante'],
-      ['low-agogo', 'agogô metálico'],
-    ],
-  },
-];
-const WHISTLE = 'gym'; // the whistle is fixed: the owner swapped its choice for the caixa's (2026-11-16)
-const WHISTLE_KINDS = ['long', 'short', 'trill'];
-const FIXED_FILES = ['stick', 'caixa-roll', ...WHISTLE_KINDS.map(kind => `whistle-${WHISTLE}-${kind}`)];
+// Sounds the viewer can swap on desktop, the samples that never change, and which sample each hit
+// plays: the rhythm's sound choices (src/rhythms/).
+export const SOUND_CHOICES = RHYTHM.sounds.choices;
+const FIXED_FILES = RHYTHM.sounds.fixedFiles;
 export const ALL_SOUND_FILES = [...SOUND_CHOICES.flatMap(choice => choice.options.flatMap(([option]) => choice.files(option))), ...FIXED_FILES];
 export const DEFAULT_CHOICES = Object.fromEntries(SOUND_CHOICES.map(choice => [choice.id, choice.defaultOption]));
 
 // voice → [sample, gain, playback rate] for one hit, or null for a mark that stays silent
-const SAMPLE_FOR = {
-  main: (choice, velocity) => [`alfaia-${choice.alfaia}-main`, 1.1 * velocity, 1],
-  answer: (choice, velocity) => [`alfaia-${choice.alfaia}-answer`, 0.95 * velocity, 1],
-  stick: (_choice, velocity) => ['stick', 0.85 * velocity, 1],
-  caixa: (choice, velocity, tone) =>
-    tone === 'muted' ? null : tone === 'roll' ? ['caixa-roll', 0.75, 1] : [`caixa-${choice.caixa}`, 0.55 * velocity ** 1.4, 1],
-  agbe: (choice, velocity) => [`agbe-${choice.agbe}`, 0.9 * velocity, 1],
-  ganza: (choice, velocity) => [`ganza-${choice.ganza}`, 0.75 * velocity, 1],
-  whistle: (_choice, velocity, tone, variation) => [`whistle-${WHISTLE}-${tone || 'short'}`, 0.5 * velocity, 0.995 + variation * 0.01], // one note, tiny drift
-  agogo: (choice, velocity, tone) => [`agogo-${choice.agogo}`, 0.62 * velocity, tone === 'low' ? 1 : 1.19],
-};
+const SAMPLE_FOR = RHYTHM.sounds.sampleFor;
 const VOICE_SEED = Object.fromEntries(VOICE_ORDER.map((voice, i) => [voice, i]));
 
 // Each instrument's volume on desktop, as a multiplier of its sound: four steps the ear hears as even
@@ -163,7 +83,7 @@ function scheduleStep(context, buffers, destination, step, time, choice, volume 
     const variation = hash(step * 8 + VOICE_SEED[voice]);
     const level = volumeOf(volume, voice);
     const sample = level > 0 && SAMPLE_FOR[voice](choice, hit.velocity * (scene.gain[voice] || 1) * level, hit.tone, variation);
-    if (sample) playSample(context, buffers, sample[0], time + (swing / 4) * BEAT_SECONDS, sample[1], sample[2], destination, variation);
+    if (sample) playSample(context, buffers, sample[0], time + (swing / STEPS_PER_BEAT) * BEAT_SECONDS, sample[1], sample[2], destination, variation);
   }
 }
 
@@ -220,7 +140,7 @@ export function createSampleBank(baseUrl = 'sounds/') {
 
 // A sound picked while paused is previewed in place (#5).
 const PREVIEW_BARS = 1.5; // a pick plays one and a half cycles of its instrument (owner, 2026-11-16)
-const PREVIEW_BAR = sceneById('marcacao').start; // the first marcação bar: every instrument plays its basic part
+const PREVIEW_BAR = sceneById(RHYTHM.sounds.previewScene).start; // every instrument plays its basic part there
 const PREVIEW_RING_MS = 1500; // a preview's last hit rings this long before the context may sleep
 const MS_PER_SECOND = 1000;
 

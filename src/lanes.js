@@ -3,7 +3,7 @@
 
 import { visualOf } from './audio.js';
 import { COPY } from './copy.js';
-import { BAR_SECONDS, isAlfaia, isOffbeat, STEPS_PER_BAR, VOICE_ORDER, VOICES } from './music.js';
+import { BAR_SECONDS, isHand, isOffbeat, STEPS_PER_BAR, STEPS_PER_BEAT, VOICE_ORDER, VOICES } from './music.js';
 import { barTimeline, blendAt, hitsInBar, sceneAt } from './show.js';
 import { COLORS, fgAlpha, MONO_FONT } from './theme.js';
 import { lerp } from './util.js';
@@ -57,7 +57,7 @@ const HIDDEN_ALPHA = 0.01; // rows fainter than this are skipped
 const MUTED_LABEL_ALPHA = 0.45, // a silent voice keeps its colour, fainter, so it stays named (#12)
   COUNT_ALPHA = 0.55;
 const COUNT_COLOR = fgAlpha(COUNT_ALPHA);
-const INSTRUMENT_LINE = 0.6; // an alfaia hand's label: "ALFAIA" over the hand, this many font sizes up and down
+const INSTRUMENT_LINE = 0.6; // a hand's label: the instrument ("ALFAIA") over the hand, this many font sizes up and down
 const NO_COUNT = '—'; // count shown for a silent voice
 const PLAYHEAD_WIDTH = 1.6; // CSS px
 const PLAYHEAD_OVERHANG = 4; // CSS px above and below the rows
@@ -128,7 +128,7 @@ export function createLanes(canvas, volume = {}) {
       const x = toX(s / STEPS_PER_BAR);
       if (x < plotLeft || x > plotRight) continue;
       const isBar = s % STEPS_PER_BAR === 0,
-        isBeat = s % 4 === 0;
+        isBeat = s % STEPS_PER_BEAT === 0;
       if (isBeat) {
         ctx.fillStyle = BEAT_SHADE;
         ctx.fillRect(x, top, sixteenthWidth, bottom - top);
@@ -161,7 +161,7 @@ export function createLanes(canvas, volume = {}) {
     ctx.globalAlpha = (past ? PAST_ALPHA + PAST_FLASH_ALPHA * flash : FUTURE_ALPHA) * row.alpha * level;
     ctx.fillStyle = VOICES[h.voice].color;
     ctx.fillRect(x, y, blockWidth, blockHeight);
-    if (isAlfaia(h.voice) && isOffbeat(h.hit.step)) {
+    if (isHand(h.voice) && isOffbeat(h.hit.step)) {
       // contratempo outline
       ctx.globalAlpha = (past ? OUTLINE_PAST_ALPHA + OUTLINE_FLASH_ALPHA * flash : OUTLINE_FUTURE_ALPHA) * row.alpha * level;
       ctx.strokeStyle = COLORS.fg;
@@ -209,10 +209,10 @@ export function createLanes(canvas, volume = {}) {
       ctx.globalAlpha = row.alpha * (active.has(voice) ? 1 : MUTED_LABEL_ALPHA) * visualOf(volume, voice);
       ctx.fillStyle = VOICES[voice].color;
       ctx.textAlign = 'left';
-      if (isAlfaia(voice)) {
-        // the hands are the alfaia's: name the instrument over the hand (#12)
+      if (isHand(voice)) {
+        // a hand of an instrument: name the instrument over the hand (#12)
         const shift = fontSize * INSTRUMENT_LINE;
-        ctx.fillText(COPY.read.alfaia.toUpperCase(), 0, row.y - shift);
+        ctx.fillText(COPY.instruments[VOICES[voice].instrument].toUpperCase(), 0, row.y - shift);
         ctx.fillText(COPY.voices[voice].toUpperCase(), 0, row.y + shift);
       } else ctx.fillText(COPY.voices[voice].toUpperCase(), 0, row.y);
       ctx.globalAlpha = row.alpha;

@@ -1,9 +1,10 @@
-// The wheel: a 16-sixteenth polar "scope" with one ring per voice, the rhythm's shapes,
+// The wheel: a one-bar polar "scope" with one ring per voice, the rhythm's shapes,
 // a sweeping hand and the labels in its centre.
 
 import { visualOf } from './audio.js';
 import { COPY } from './copy.js';
-import { BAR_SECONDS, INSTRUMENTS, isAlfaia, isOffbeat, STEPS_PER_BAR, VOICE_ORDER, VOICES } from './music.js';
+import { BAR_SECONDS, BEATS_PER_BAR, INSTRUMENTS, isHand, isOffbeat, STEPS_PER_BAR, STEPS_PER_BEAT, VOICE_ORDER, VOICES } from './music.js';
+import { RHYTHM } from './rhythms/index.js';
 import { barTimeline, recentHits } from './show.js';
 import { COLORS, MONO_FONT, ROLES, TINTS } from './theme.js';
 import { fixed2, pad2, polylinePath, setAttr, setStyle, setText, svgElement } from './util.js';
@@ -22,7 +23,7 @@ const HAND_INNER = 32; // the hand starts just outside the centre disc
 // The scale.
 const TICKS_PER_SIXTEENTH = 4; // 64 ticks per bar
 const TICK_COUNT = STEPS_PER_BAR * TICKS_PER_SIXTEENTH; // ticks around the scale
-const TICKS_PER_BEAT = TICKS_PER_SIXTEENTH * 4; // every 16th tick falls on a beat
+const TICKS_PER_BEAT = TICKS_PER_SIXTEENTH * STEPS_PER_BEAT; // every 16th tick falls on a beat
 const SCALE_OPACITY = 0.35; // the scale circle's stroke opacity
 const HAIRLINE = 0.6; // thin stroke width (SVG units)
 const BEAT_TICK_OPACITY = 0.9,
@@ -64,12 +65,11 @@ const FERMATA_DOT_Y = -22.5,
   FERMATA_DOT_RADIUS = 1.5;
 
 // Rhythm shapes and dots.
-const SHAPE_VOICES = ['agogo', 'answer', 'main'];
+const SHAPE_VOICES = RHYTHM.shapeVoices;
 const SHAPE_GUIDE_OPACITY = 0.13,
   SHAPE_GUIDE_DASH = '1.5 2'; // the dashed full shape
 const SHAPE_LINE_OPACITY = 0.9,
   SHAPE_LINE_WIDTH = 1.1; // the shape drawn so far
-const AGOGO_HIGH_SCALE = 0.7; // high bell dots are smaller
 const DOT_VELOCITY_FLOOR = 0.65,
   DOT_VELOCITY_SPAN = 0.35; // dot size = floor + span × velocity
 const OFFBEAT_RING_GAP = 3.2; // contratempo ring, outside the dot (SVG units)
@@ -80,7 +80,6 @@ const MUTED_DOT_OPACITY = 0.25; // outline of a voice that is silent this bar
 // Centre cue timing.
 const CUT_SILENCE_AFTER = 0.06; // fraction of a cut bar before the silence shows
 const COUNTDOWN_AFTER = 0.25; // fraction of a cut bar before "VOLTA EM n" replaces "CORTE"
-const BEATS_PER_BAR = 4;
 const WHISTLE_WINDOW = 1.1; // seconds a whistle keeps the cue
 const OFFBEAT_WINDOW = 0.2; // seconds a contratempo hit keeps the cue
 const CUE_WINDOW = Math.max(WHISTLE_WINDOW, OFFBEAT_WINDOW);
@@ -159,7 +158,7 @@ function drawScale(svg) {
     );
   }
   for (const voice of INSTRUMENTS)
-    if (voice !== 'stick')
+    if (VOICES[voice].guide !== false)
       svgElement(
         'circle',
         {
@@ -247,14 +246,14 @@ export function createScope(svg, volume = {}) {
       shapes.push({ voice, points, positions, line, drawn: [] });
     }
     for (const voice of VOICE_ORDER) {
-      const { ring, size, color } = VOICES[voice],
+      const { ring, size, color, toneScale } = VOICES[voice],
         level = visualOf(volume, voice);
       if (!ring) continue;
       const on = active.has(voice);
       for (const { hit: h, position } of voices[voice]) {
         const [x, y] = pointAt(ring, position);
-        const radius = size * (voice === 'agogo' && h.tone === 'high' ? AGOGO_HIGH_SCALE : 1) * (DOT_VELOCITY_FLOOR + DOT_VELOCITY_SPAN * h.velocity);
-        if (on && isAlfaia(voice) && isOffbeat(h.step))
+        const radius = size * (toneScale?.[h.tone] ?? 1) * (DOT_VELOCITY_FLOOR + DOT_VELOCITY_SPAN * h.velocity);
+        if (on && isHand(voice) && isOffbeat(h.step))
           svgElement(
             'circle',
             {
@@ -291,8 +290,8 @@ export function createScope(svg, volume = {}) {
     const silence = mode === 'cut' && inBar > CUT_SILENCE_AFTER,
       isEnd = scene.isEnd;
     const recent = recentHits(position, CUE_WINDOW); // one scan for both cues
-    const whistle = recent.some(h => h.voice === 'whistle' && h.age < WHISTLE_WINDOW);
-    const offbeat = recent.some(h => isAlfaia(h.voice) && isOffbeat(h.hit.step) && h.age < OFFBEAT_WINDOW);
+    const whistle = recent.some(h => VOICES[h.voice].calls && h.age < WHISTLE_WINDOW);
+    const offbeat = recent.some(h => isHand(h.voice) && isOffbeat(h.hit.step) && h.age < OFFBEAT_WINDOW);
     setStyle(fermata, 'opacity', silence ? 1 : 0);
     const text =
       silence && !isEnd && inBar >= COUNTDOWN_AFTER

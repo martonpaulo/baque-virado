@@ -8,6 +8,7 @@ import { COPY } from './copy.js';
 import { createKey, createLanes } from './lanes.js';
 import { BAR_SECONDS, BPM, STEPS_PER_BAR } from './music.js';
 import { createReadout } from './readout.js';
+import { RHYTHM } from './rhythms/index.js';
 import { createScope, SCOPE_GEOMETRY } from './scope.js';
 import { recentHits, SCENES, sceneAt, sceneIndexAt, TOTAL_BARS, TOTAL_SECONDS } from './show.js';
 import { createTitle } from './title.js';
@@ -151,7 +152,8 @@ const choice = initialChoices(DESKTOP);
 const bank = createSampleBank();
 bank.prefetch(filesFor(choice));
 const player = createPlayer(bank, choice, volume);
-readout.setAlfaia(choice.alfaia);
+const waveSound = () => choice[RHYTHM.waves?.sound] ?? null; // the option of the sound whose waves the readout shows
+readout.setWaveSound(waveSound());
 const tapButton = $('tap');
 /** The playback state on the stage, which is the Play and Pause button on every screen. */
 function showState(state) {
@@ -219,7 +221,7 @@ if (DESKTOP) {
       if (player.playing) await player.prepare(next);
       else await player.preview(next, sound.preview);
       choice[sound.id] = option;
-      readout.setAlfaia(choice.alfaia);
+      readout.setWaveSound(waveSound());
     },
     choice,
     volume,

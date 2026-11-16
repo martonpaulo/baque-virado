@@ -1,7 +1,8 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { COPY } from '../src/copy.js';
-import { BAQUE_ORDER, barHits, PATTERNS, patternHits, VOICE_ORDER } from '../src/music.js';
+import { VOICE_ORDER } from '../src/music.js';
+import { BAQUE_ORDER, barHits, PATTERNS, patternHits } from '../src/rhythms/maracatu.js';
 import { sceneById } from '../src/show.js';
 
 const steps = hits => hits.map(h => h.step);
@@ -54,7 +55,8 @@ test('parada spans two bars, with stick hits on 4, 8 and 12 of the second', () =
 });
 
 test('the page counts five drumming instruments, not their seven voices', async () => {
-  const { INSTRUMENT_COUNT, INSTRUMENTS } = await import('../src/music.js');
+  const { INSTRUMENTS } = await import('../src/music.js');
+  const { INSTRUMENT_COUNT } = await import('../src/rhythms/maracatu.js');
   const { COPY } = await import('../src/copy.js');
   assert.equal(INSTRUMENT_COUNT, 5);
   assert.equal(INSTRUMENTS.length, 7);

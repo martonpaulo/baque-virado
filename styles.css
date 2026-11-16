@@ -560,17 +560,8 @@ a:focus-visible {
   outline: var(--space-1) solid var(--fg);
   outline-offset: calc(-1 * var(--space-1));
 }
-/* a muted instrument shows disabled wherever the readout shows it */
-.read[data-muted~="alfaia"][data-inst="alfaia"] > *,
-.read[data-muted~="alfaia"] [data-inst="alfaia"],
-.read[data-muted~="caixa"][data-inst="caixa"] > *,
-.read[data-muted~="caixa"] [data-inst="caixa"],
-.read[data-muted~="ganza"][data-inst="ganza"] > *,
-.read[data-muted~="ganza"] [data-inst="ganza"],
-.read[data-muted~="agbe"][data-inst="agbe"] > *,
-.read[data-muted~="agbe"] [data-inst="agbe"],
-.read[data-muted~="agogo"][data-inst="agogo"] > *,
-.read[data-muted~="agogo"] [data-inst="agogo"] {
+/* a muted instrument shows disabled wherever the readout shows it (readout.js marks its parts) */
+.read [data-muted] {
   opacity: 0.2;
 }
 .chip[aria-current="true"],

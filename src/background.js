@@ -1,7 +1,8 @@
 // The moving background: a GPU kaleidoscope underneath, and a 2D video-feedback tunnel on top
 // that the rhythm's shapes and the hits keep feeding.
 
-import { isAlfaia, STEPS_PER_BAR, VOICES } from './music.js';
+import { isHand, STEPS_PER_BAR, VOICES } from './music.js';
+import { RHYTHM } from './rhythms/index.js';
 import { SCOPE_GEOMETRY } from './scope.js';
 
 const { angleOf, radius: SCOPE_RADIUS } = SCOPE_GEOMETRY;
@@ -13,31 +14,14 @@ const CROSSFADE_BARS = 1.5; // ≈3 s, centred on each scene boundary
 const NEARER_HALF = 0.5; // a settled crossfade at or past this mix shows the scene being entered
 const FEEDBACK_KEYS = ['zoom', 'rot', 'hue', 'keep', 'speed'];
 
-// How the background behaves in each scene: feedback zoom, rotation, hue and persistence (keep),
-// kaleidoscope mirrors (seg), warp, speed, palette (pal), and an optional strobe.
-export const SCENE_LOOKS = {
-  opening: { zoom: 0.9, rot: 0.15, hue: 70, keep: 0.93, seg: 16, warp: 1.0, speed: 0.7, pal: 0 },
-  ensemble: { zoom: 0.5, rot: 0.06, hue: 35, keep: 0.9, seg: 7, warp: 0.8, speed: 0.5, pal: 0.15 },
-  agogo: { zoom: 0.25, rot: -0.5, hue: 90, keep: 0.94, seg: 10, warp: 0.6, speed: 0.6, pal: 0.4 },
-  swing: { zoom: 0.08, rot: 0, hue: 15, keep: 0.8, seg: 4, warp: 0.45, speed: 0.3, pal: 0.6 },
-  offbeat: { zoom: 0.8, rot: 0.22, hue: 120, keep: 0.93, seg: 12, warp: 1.2, speed: 0.9, pal: 0.3 },
-  marcacao: { zoom: 1.0, rot: -0.14, hue: 80, keep: 0.93, seg: 5, warp: 1.1, speed: 0.9, pal: 0.25 },
-  arrasto: { zoom: 0.9, rot: 0.12, hue: 70, keep: 0.93, seg: 7, warp: 1.0, speed: 0.9, pal: 0.15 },
-  imale: { zoom: 0.8, rot: 0.18, hue: 60, keep: 0.93, seg: 7, warp: 1.0, speed: 0.8, pal: 0.1 },
-  martelo: { zoom: 1.6, rot: 0.35, hue: 150, keep: 0.95, seg: 8, warp: 1.5, speed: 1.4, pal: 0.5 },
-  trovao: { zoom: 1.2, rot: -0.3, hue: 130, keep: 0.94, seg: 5, warp: 1.3, speed: 1.1, pal: 0.6 },
-  afoxe: { zoom: 0.7, rot: 0.1, hue: 90, keep: 0.93, seg: 6, warp: 1.1, speed: 0.8, pal: 0.35 },
-  parada: { zoom: 0.6, rot: -0.25, hue: 110, keep: 0.93, strobe: 1, seg: 15, warp: 1.2, speed: 1.0, pal: 0.75 },
-  summary: { zoom: 0.8, rot: 0.12, hue: 60, keep: 0.93, seg: 16, warp: 1.0, speed: 0.8, pal: 0.9 },
-  finale: { zoom: 1.4, rot: 0.3, hue: 160, keep: 0.95, seg: 16, warp: 1.4, speed: 1.2, pal: 0.05 },
-};
+// How the background behaves in each scene: the rhythm's looks (src/rhythms/), one per scene id.
+export const SCENE_LOOKS = RHYTHM.looks;
 
 // Hit energy fed to the shader (ages in seconds).
 const BOOM_ATTACK = 0.035; // alfaia/stick boom rise time constant
 const BOOM_DECAY = 0.25; // alfaia/stick boom fall time constant
 const BOOM_GAIN = 1.6; // boom peak scale
-const ANSWER_BOOM_SCALE = 0.7; // the answer hand booms softer
-const CRACK_DECAY = 0.05; // caixa accent flash time constant
+const CRACK_DECAY = 0.05; // accent flash time constant (the caixa's)
 
 // Feedback tunnel.
 const INITIAL_SHADER_SCALE = 0.5; // shader resolution before main.js sets it
@@ -198,14 +182,14 @@ function createKaleidoscope(canvas) {
   };
 }
 
-/** How hard the alfaias (boom) and the caixa accents (crack) are hitting right now. */
+/** How hard the booming voices (the alfaias) and the accents of a cracking voice (the caixa) are hitting right now. */
 function hitEnergy(recent) {
   let boom = 0,
     crack = 0;
   for (const h of recent) {
-    if (isAlfaia(h.voice) || h.voice === 'stick')
-      boom = Math.max(boom, (1 - Math.exp(-h.age / BOOM_ATTACK)) * Math.exp(-h.age / BOOM_DECAY) * BOOM_GAIN * (h.voice === 'answer' ? ANSWER_BOOM_SCALE : 1));
-    if (h.voice === 'caixa' && h.hit.velocity === 1) crack = Math.max(crack, Math.exp(-h.age / CRACK_DECAY));
+    const { boom: weight, crack: cracks } = VOICES[h.voice];
+    if (weight) boom = Math.max(boom, (1 - Math.exp(-h.age / BOOM_ATTACK)) * Math.exp(-h.age / BOOM_DECAY) * BOOM_GAIN * weight);
+    if (cracks && h.hit.velocity === 1) crack = Math.max(crack, Math.exp(-h.age / CRACK_DECAY));
   }
   return { boom, crack };
 }
@@ -260,7 +244,7 @@ export function createBackground(fxCanvas, feedbackCanvas) {
     const { centreX, centreY, scopeRadius, dpr } = geometry,
       toCanvas = (scopeRadius / SCOPE_RADIUS) * SHAPE_SCALE;
     let pulse = 0;
-    for (const h of recent) if (isAlfaia(h.voice)) pulse = Math.max(pulse, Math.exp(-h.age / PULSE_DECAY));
+    for (const h of recent) if (isHand(h.voice)) pulse = Math.max(pulse, Math.exp(-h.age / PULSE_DECAY));
     ctx.save();
     ctx.globalCompositeOperation = 'lighter';
     for (const { voice, drawn } of shapes) {
@@ -290,7 +274,7 @@ export function createBackground(fxCanvas, feedbackCanvas) {
       // a ring and a spark for each fresh hit
       if (h.age > HIT_LIFE) continue;
       const { color } = VOICES[h.voice],
-        big = isAlfaia(h.voice) || h.voice === 'stick',
+        big = Boolean(VOICES[h.voice].boom),
         fade = 1 - h.age / HIT_LIFE;
       ctx.strokeStyle = color;
       ctx.globalAlpha = (big ? BIG_RING_ALPHA : SMALL_RING_ALPHA) * fade * h.hit.velocity;
@@ -298,7 +282,7 @@ export function createBackground(fxCanvas, feedbackCanvas) {
       ctx.beginPath();
       ctx.arc(centreX, centreY, scopeRadius * (big ? BIG_RING_RADIUS : SMALL_RING_RADIUS), 0, FULL_CIRCLE);
       ctx.stroke();
-      if (big || h.voice === 'agogo') {
+      if (big || VOICES[h.voice].spark) {
         const a = angleOf((h.at % 1) * STEPS_PER_BAR);
         ctx.globalAlpha = SPARK_ALPHA * fade;
         ctx.fillStyle = color;
@@ -359,10 +343,10 @@ export function createBackground(fxCanvas, feedbackCanvas) {
     ctx.clearRect(0, 0, width, height);
     if (clock.step > 0 && clock.step < FEEDBACK_MAX_STEP && hasFrame) drawFeedback(params, clock.step);
     drawEmissions(recent, shapes, clock.time);
-    if (params.sceneId === 'swing') drawMoire(position, clock.time);
+    if (SCENE_LOOKS[params.sceneId].moire) drawMoire(position, clock.time);
     if (params.strobe)
       for (const h of recent)
-        if (h.voice === 'stick' && h.age < STROBE_LIFE) {
+        if (VOICES[h.voice].strobe && h.age < STROBE_LIFE) {
           ctx.fillStyle = boneAlpha((STROBE_ALPHA * (1 - h.age / STROBE_LIFE)).toFixed(3));
           ctx.fillRect(0, 0, width, height);
         }

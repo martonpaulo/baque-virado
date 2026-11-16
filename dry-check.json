@@ -4,28 +4,25 @@
     "exclude": ["src/score.js"],
     "counts": {
       "src/audio.js": {
-        "number": 43
+        "number": 42
       },
       "src/background.js": {
         "number": 12
       },
       "src/lanes.js": {
-        "number": 11
+        "number": 10
       },
       "src/main.js": {
         "number": 2
       },
       "src/music.js": {
-        "number": 33
+        "number": 1
       },
-      "src/readout.js": {
-        "number": 5
+      "src/rhythms/maracatu.js": {
+        "number": 36
       },
       "src/scope.js": {
         "number": 18
-      },
-      "src/show.js": {
-        "number": 2
       },
       "src/theme.js": {
         "colour": 1,
