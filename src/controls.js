@@ -1,4 +1,4 @@
-// Controls outside the reel: play button, clock, the scene timeline, keyboard, and (desktop only) sound choices.
+// Controls outside the reel: the scene timeline, keyboard, and (desktop only) sound choices.
 
 import { DEFAULT_VOLUME, SOUND_CHOICES, VOLUME_LEVELS } from './audio.js';
 import { COPY } from './copy.js';
@@ -162,13 +162,13 @@ export function createSoundPickers(container, apply, choice, volume, onVolume) {
 }
 
 /**
- * Space toggles playback anywhere but on the Play button itself (which toggles on its own click), so
- * a chip that keeps focus after a click does not catch it; ← → move between scenes.
+ * Space toggles playback anywhere, so a chip or the stage that keeps focus after a click does not
+ * catch it; ← → move between scenes.
  */
-export function bindKeyboard({ toggle, previousScene, nextScene }, playButton) {
-  const isSpaceForPage = event => event.code === 'Space' && event.target !== playButton;
+export function bindKeyboard({ toggle, previousScene, nextScene }) {
+  const isSpace = event => event.code === 'Space';
   document.addEventListener('keydown', event => {
-    if (isSpaceForPage(event)) {
+    if (isSpace(event)) {
       event.preventDefault();
       if (!event.repeat) toggle();
     }
@@ -177,6 +177,6 @@ export function bindKeyboard({ toggle, previousScene, nextScene }, playButton) {
   });
   // a focused button activates on Space's keyup: stop that too
   document.addEventListener('keyup', event => {
-    if (isSpaceForPage(event)) event.preventDefault();
+    if (isSpace(event)) event.preventDefault();
   });
 }

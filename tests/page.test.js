@@ -120,7 +120,7 @@ test('two Space presses while the samples decode open one audio context', async 
   const { page, errors, contexts } = await openPage(DESKTOP, { delaySounds: true });
   await page.keyboard.press('Space');
   await page.keyboard.press('Space');
-  await page.waitForFunction(pause => document.getElementById('play').textContent === pause, {}, COPY.controls.pause);
+  await page.waitForFunction(() => document.getElementById('tap').dataset.state === 'pause');
   assert.equal(await contexts(), 1);
   assert.deepEqual(errors, []);
   await page.close();

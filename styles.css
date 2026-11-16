@@ -55,7 +55,6 @@
   --space-7: 0.875rem; /* 14px */
   --space-8: 1rem; /* 16px */
   --space-9: 1.125rem; /* 18px */
-  --space-10: 1.5rem; /* 24px */
   --space-11: 2.5rem; /* 40px */
   --chip-padding: 0.3125rem 0.6875rem; /* 5px 11px */
   --text-xs: 0.6875rem; /* 11px */
@@ -485,42 +484,15 @@ body {
   font-size: var(--text-m);
   color: var(--dim);
 }
-.trow {
-  display: flex;
-  gap: var(--space-5);
-  align-items: center;
-  flex-wrap: wrap;
-  justify-content: center;
-}
 button {
   font: inherit;
   color: inherit;
   cursor: pointer;
 }
-#play {
-  background: var(--accent);
-  color: var(--void);
-  border: 0;
-  border-radius: var(--radius-pill);
-  padding: var(--space-5) var(--space-10);
-  font-weight: 700;
-  font-size: var(--text-l);
-  min-width: var(--play-min-width);
-}
-#play:disabled {
-  opacity: 0.6;
-  cursor: progress;
-}
-#play:focus-visible,
 .chip:focus-visible,
 a:focus-visible {
   outline: var(--space-1) solid var(--fg);
   outline-offset: var(--space-1);
-}
-#clock {
-  font-size: var(--text-m);
-  color: var(--dim);
-  font-variant-numeric: tabular-nums;
 }
 .chips {
   display: flex;
@@ -799,9 +771,6 @@ a:focus-visible {
     aspect-ratio: auto;
     border-radius: 0;
   }
-  .trow {
-    display: none; /* the stage is the Play button, as on a phone */
-  }
   /* the project link sits over the foot of the stage while the show is stopped, as on a phone */
   .center > .foot {
     display: none;
@@ -850,7 +819,6 @@ a:focus-visible {
     --space-7: calc(var(--stage-width) * 14 / 540);
     --space-8: calc(var(--stage-width) * 16 / 540);
     --space-9: calc(var(--stage-width) * 18 / 540);
-    --space-10: calc(var(--stage-width) * 24 / 540);
     --space-11: calc(var(--stage-width) * 40 / 540);
     --text-xs: calc(var(--stage-width) * 11 / 540);
     --text-s: calc(var(--stage-width) * 12 / 540);
@@ -867,7 +835,7 @@ a:focus-visible {
     display: flex;
   }
   /* the brand stays a screen-reader heading only, as on a phone: the stage already names the show */
-  .brand + .trow + .block {
+  .brand + .block {
     padding-top: 0;
     border-top: 0; /* the timeline opens its column: no rule above it */
   }
@@ -876,7 +844,6 @@ a:focus-visible {
     flex-direction: column;
     gap: var(--space-11);
   }
-  .trow,
   .chips {
     justify-content: flex-start;
   }

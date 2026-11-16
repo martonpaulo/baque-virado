@@ -141,9 +141,7 @@ function render(at, force = false) {
   setText($('hBar'), COPY.hud.bar(pad2(bar + 1), TOTAL_BARS));
   setText($('hStep'), COPY.hud.step(pad2(Math.floor(sixteenth) + 1)));
   setText($('hTime'), formatPrecise(seconds));
-  const time = `${formatClock(seconds)} / ${formatClock(TOTAL_SECONDS)}`;
-  setText($('clock'), time);
-  setText($('tapTime'), time);
+  setText($('tapTime'), `${formatClock(seconds)} / ${formatClock(TOTAL_SECONDS)}`);
   drawBackground();
   lanes.draw(p);
 }
@@ -154,12 +152,10 @@ const bank = createSampleBank();
 bank.prefetch(filesFor(choice));
 const player = createPlayer(bank, choice, volume);
 readout.setAlfaia(choice.alfaia);
-const playButton = $('play'),
-  tapButton = $('tap');
-/** One playback state on both buttons: Play beside the stage, and the stage itself on phones. */
+const tapButton = $('tap');
+/** The playback state on the stage, which is the Play and Pause button on every screen. */
 function showState(state) {
   const text = COPY.controls[state];
-  playButton.textContent = text;
   setText($('tapLabel'), text);
   tapButton.dataset.state = state;
   tapButton.setAttribute('aria-label', text); // its text hides while playing
@@ -171,7 +167,6 @@ async function play() {
   if (starting || player.playing) return;
   if (position >= TOTAL_BARS - REWIND_AT_END) position = 0;
   starting = true;
-  playButton.disabled = true;
   showState('loading');
   try {
     await player.prepare();
@@ -180,7 +175,6 @@ async function play() {
     return;
   } finally {
     starting = false;
-    playButton.disabled = false;
   }
   player.start(position); // the position read now, so a scene picked while loading is kept
   showState('pause');
@@ -211,9 +205,8 @@ const stepScene = direction => {
 };
 
 showState('play');
-playButton.addEventListener('click', toggle);
 tapButton.addEventListener('click', toggle);
-bindKeyboard({ toggle, previousScene: () => stepScene(-1), nextScene: () => stepScene(1) }, playButton);
+bindKeyboard({ toggle, previousScene: () => stepScene(-1), nextScene: () => stepScene(1) });
 if (DESKTOP) {
   createSoundPickers(
     $('sounds'),
