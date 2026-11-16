@@ -3,7 +3,7 @@
 
 import { createPlayer, createSampleBank, filesFor, renderShowWav } from './audio.js';
 import { backgroundAt, createBackground, SCENE_LOOKS } from './background.js';
-import { bindKeyboard, createSceneChips, createSoundPickers, initialChoices } from './controls.js';
+import { bindKeyboard, createSceneList, createSoundPickers, initialChoices } from './controls.js';
 import { COPY } from './copy.js';
 import { createKey, createLanes } from './lanes.js';
 import { BAQUE_ORDER, BAR_SECONDS, BPM, STEPS_PER_BAR } from './music.js';
@@ -104,7 +104,7 @@ let position = 0,
   currentBar = -1,
   renderedAt = null, // the position the foreground was last drawn at
   shapes = []; // the wheel's partly drawn shapes, which the background echoes
-const sceneChips = createSceneChips($('chips'), scene => seek(scene.start));
+const sceneList = createSceneList($('scenes'), scene => seek(scene.start));
 
 function render(at, force = false) {
   const p = Math.max(0, Math.min(TOTAL_BARS - END_EPSILON, at));
@@ -124,7 +124,7 @@ function render(at, force = false) {
     currentScene = scene;
     title.build(scene);
     readout.build(scene);
-    sceneChips.setCurrent(SCENES.indexOf(scene));
+    sceneList.setCurrent(SCENES.indexOf(scene));
   }
   if (bar !== currentBar || force) {
     currentBar = bar;
@@ -198,7 +198,7 @@ playButton.addEventListener('click', toggle);
 bindKeyboard({ toggle, previousScene: () => stepScene(-1), nextScene: () => stepScene(1) }, playButton);
 if (DESKTOP) {
   createSoundPickers(
-    [$('soundsLeft'), $('soundsRight')],
+    $('sounds'),
     async (sound, option) => {
       if (starting) return false; // the show is still loading: ignore the click
       const next = { ...choice, [sound.id]: option };

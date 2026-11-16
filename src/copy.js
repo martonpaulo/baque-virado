@@ -91,7 +91,7 @@ export const COPY = {
     pause: '❚❚ Pausar',
     loading: 'Carregando…',
     loadFailed: 'Som não carregou · tentar de novo',
-    soundOf: label => `som ${of(label)} ${label}:`,
+    soundOf: label => label,
     soundGroup: label => `Som ${of(label)} ${label}`,
     soundFailed: label => `som ${of(label)} ${label}: não carregou, tente de novo`,
     facts: (baques, bars, length) => `maracatu de baque virado · ${baques} baques · ${INSTRUMENT_COUNT} instrumentos · ${bars} compassos · ${length}`,

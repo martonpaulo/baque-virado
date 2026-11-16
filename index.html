@@ -56,12 +56,17 @@
   <aside class="side left">
     <header class="brand"><h1>O Baque<br>Virado</h1><p id="facts"></p></header>
     <div class="trow"><button id="play" type="button"></button><span id="clock"></span></div>
-    <nav class="chips" id="chips" aria-label="Cenas"></nav>
-    <div class="sounds" id="soundsLeft"></div>
+    <nav class="block" aria-labelledby="scenesTitle">
+      <h2 class="block-title" id="scenesTitle">Roteiro</h2>
+      <ol class="timeline" id="scenes"></ol>
+    </nav>
   </aside>
 
   <aside class="side right">
-    <div class="sounds" id="soundsRight"></div>
+    <section class="block" aria-labelledby="soundsTitle">
+      <h2 class="block-title" id="soundsTitle">Sons <span>· um por instrumento</span></h2>
+      <div class="sounds" id="sounds"></div>
+    </section>
     <p class="lbl keys">espaço: tocar / pausar · ← →: cena</p>
     <p class="foot"><a href="https://github.com/martonpaulo/baque-virado">código</a><a href="https://github.com/martonpaulo/baque-virado/blob/main/CREDITS.md">créditos dos sons</a></p>
   </aside>

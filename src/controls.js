@@ -1,9 +1,10 @@
-// Controls outside the reel: play button, clock, scene chips, keyboard, and (desktop only) sound choices.
+// Controls outside the reel: play button, clock, the scene timeline, keyboard, and (desktop only) sound choices.
 
 import { SOUND_CHOICES } from './audio.js';
 import { COPY } from './copy.js';
+import { BAR_SECONDS } from './music.js';
 import { SCENES } from './show.js';
-import { chipButton } from './util.js';
+import { chipButton, formatClock } from './util.js';
 
 const STORAGE_PREFIX = 'baque-virado:';
 const readStored = key => {
@@ -31,10 +32,19 @@ export function initialChoices(canChoose) {
   return choice;
 }
 
-export function createSceneChips(nav, onSelect) {
+/** The scenes as one timeline, in show order, each row with its start time. */
+export function createSceneList(list, onSelect) {
   const buttons = SCENES.map(scene => {
-    const button = chipButton(COPY.scenes[scene.id].chip, () => onSelect(scene));
-    nav.appendChild(button);
+    const item = document.createElement('li');
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'step';
+    button.innerHTML = `<span class="at"></span><span class="name"></span>`;
+    button.firstElementChild.textContent = formatClock(scene.start * BAR_SECONDS);
+    button.lastElementChild.textContent = COPY.scenes[scene.id].chip;
+    button.addEventListener('click', () => onSelect(scene));
+    item.appendChild(button);
+    list.appendChild(item);
     return button;
   });
   return {
@@ -47,12 +57,12 @@ export function createSceneChips(nav, onSelect) {
 }
 
 /**
- * One row of option chips per sound, split across the given containers. `apply(sound, option)` makes
+ * One row of option chips per sound, in one container. `apply(sound, option)` makes
  * the change: it resolves `false` to ignore the click, and rejects when the sound did not load. Only a
  * change it accepted is shown as picked and remembered.
  */
-export function createSoundPickers(containers, apply, choice) {
-  SOUND_CHOICES.forEach((sound, i) => {
+export function createSoundPickers(container, apply, choice) {
+  for (const sound of SOUND_CHOICES) {
     const group = document.createElement('div');
     group.className = 'sound';
     group.setAttribute('role', 'group');
@@ -80,9 +90,8 @@ export function createSoundPickers(containers, apply, choice) {
     );
     for (const button of buttons) list.appendChild(button);
     showPicked(choice[sound.id]);
-    const half = Math.ceil(SOUND_CHOICES.length / containers.length);
-    containers[Math.min(containers.length - 1, Math.floor(i / half))].appendChild(group);
-  });
+    container.appendChild(group);
+  }
 }
 
 /**

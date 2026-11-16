@@ -127,12 +127,12 @@ test('two Space presses while the samples decode open one audio context', async 
   await page.close();
 });
 
-test('Space after a chip click pauses, and the paused scene shows its full title', async () => {
+test('Space after a scene click pauses, and the paused scene shows its full title', async () => {
   const { page, errors } = await openPage(DESKTOP);
   await page.click('#play');
   await page.waitForFunction(pause => document.getElementById('play').textContent === pause, {}, COPY.controls.pause);
-  const chip = COPY.scenes.trovao.chip;
-  await page.evaluate(text => [...document.querySelectorAll('#chips .chip')].find(button => button.textContent === text).click(), chip);
+  const name = COPY.scenes.trovao.chip;
+  await page.evaluate(text => [...document.querySelectorAll('#scenes .step')].find(button => button.querySelector('.name').textContent === text).click(), name);
   await page.keyboard.press('Space');
   await page.waitForFunction(play => document.getElementById('play').textContent === play, {}, COPY.controls.play);
   await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));

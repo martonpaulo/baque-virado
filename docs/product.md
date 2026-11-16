@@ -26,7 +26,8 @@ rehearsal or from videos of whole bands, where the parts cannot be told apart.
 - Shows each bar on a 16-sixteenth wheel, a scrolling multitrack view and, for each baque, its
   percussion score with a moving cursor.
 - Plays the swing measured on a real workshop recording, and shows the straight grid next to it.
-- On desktop, lets the viewer swap each instrument's sound; phones always use the chosen defaults.
+- On desktop, lists the scenes as one timeline to jump through and lets the viewer swap each
+  instrument's sound; a phone shows only Play and the clock under the reel, with the default sounds.
 
 ## What it will never do
 
@@ -36,6 +37,7 @@ rehearsal or from videos of whole bands, where the parts cannot be told apart.
 | Be an editor or sequencer                           | The job is to understand a performance, not to compose one                        | Never, by the owner's choice                  |
 | Generate video in the page                          | The page stays light on phones; video is made offline by `tools/export-video.mjs` | Never, by the owner's choice                  |
 | Offer sound choices on phones                       | Phones download only the default samples, so the page loads on mobile data        | Never, by the owner's choice                  |
+| Show controls under Play on phones                  | The owner wants the phone page to end at Play and the clock (2026-11-16)          | The owner asks for scene jumps on phones      |
 | Translate the interface                             | The audience is Brazilian; the copy is pt-BR only                                 | Readers outside Brazil ask for it             |
 
 ## How you know it worked
@@ -76,5 +78,5 @@ on 2026-11-12.
 ## Accepted evidence gaps
 
 - Accessibility: no automated accessibility test runs; the markup and `src/controls.js` are the
-  evidence (labelled stage, `aria-pressed` and `aria-current` chips, focus outlines, reduced
+  evidence (labelled stage, `aria-pressed` sound chips, an `aria-current` scene timeline, focus outlines, reduced
   motion). Accepted by the owner on 2026-11-13 for a single static page.
