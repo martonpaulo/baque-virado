@@ -6,7 +6,7 @@ import { COPY } from './copy.js';
 import { BAR_SECONDS, INSTRUMENTS, isAlfaia, isOffbeat, STEPS_PER_BAR, VOICE_ORDER, VOICES } from './music.js';
 import { barTimeline, recentHits } from './show.js';
 import { COLORS, MONO_FONT, ROLES, TINTS } from './theme.js';
-import { fixed2, pad2, polylinePath, setAttr, setText, svgElement } from './util.js';
+import { fixed2, pad2, polylinePath, setAttr, setStyle, setText, svgElement } from './util.js';
 
 // Radii, in SVG units of the viewBox, which spans -VIEWBOX_RADIUS..VIEWBOX_RADIUS on both axes.
 const VIEWBOX_RADIUS = 135;
@@ -83,6 +83,7 @@ const COUNTDOWN_AFTER = 0.25; // fraction of a cut bar before "VOLTA EM n" repla
 const BEATS_PER_BAR = 4;
 const WHISTLE_WINDOW = 1.1; // seconds a whistle keeps the cue
 const OFFBEAT_WINDOW = 0.2; // seconds a contratempo hit keeps the cue
+const CUE_WINDOW = Math.max(WHISTLE_WINDOW, OFFBEAT_WINDOW);
 
 // Dot flash on a hit.
 const FLASH_WINDOW = 0.6; // seconds after a hit that it can still flash
@@ -289,9 +290,10 @@ export function createScope(svg, volume = {}) {
   function centreCue(position, scene, mode, inBar) {
     const silence = mode === 'cut' && inBar > CUT_SILENCE_AFTER,
       isEnd = scene.isEnd;
-    const whistle = recentHits(position, WHISTLE_WINDOW).some(h => h.voice === 'whistle');
-    const offbeat = recentHits(position, OFFBEAT_WINDOW).some(h => isAlfaia(h.voice) && isOffbeat(h.hit.step));
-    fermata.style.opacity = silence ? 1 : 0;
+    const recent = recentHits(position, CUE_WINDOW); // one scan for both cues
+    const whistle = recent.some(h => h.voice === 'whistle' && h.age < WHISTLE_WINDOW);
+    const offbeat = recent.some(h => isAlfaia(h.voice) && isOffbeat(h.hit.step) && h.age < OFFBEAT_WINDOW);
+    setStyle(fermata, 'opacity', silence ? 1 : 0);
     const text =
       silence && !isEnd && inBar >= COUNTDOWN_AFTER
         ? COPY.centre.comeBack(BEATS_PER_BAR - Math.floor(inBar * BEATS_PER_BAR))
@@ -366,6 +368,5 @@ export function createScope(svg, volume = {}) {
     return shapes;
   }
 
-  /** Per-frame update; returns the shapes as drawn so far, for the background. */
   return { build, update };
 }

@@ -23,9 +23,9 @@ import {
   VOICES,
 } from './music.js';
 import { renderScore } from './score.js';
-import { TOTAL_BARS } from './show.js';
+import { barTimeline, TOTAL_BARS } from './show.js';
 import { COLORS, fgAlpha, ROLES } from './theme.js';
-import { replayFade } from './util.js';
+import { replayFade, setAttr, setStyle } from './util.js';
 import { WAVES } from './waves.js';
 
 const T = COPY.read;
@@ -171,8 +171,11 @@ function waveMarkup(alfaia) {
 export function createReadout(element, volume = {}) {
   let score = null,
     scene = null,
-    alfaia = null; // the alfaia option the waves show; main.js sets it
-  const wave = () => element.querySelector('.wave');
+    alfaia = null, // the alfaia option in use; main.js sets it
+    waves = null, // a baque scene's wave block and score cursor, found once per scene
+    cursor = null,
+    shownWaves = null, // the alfaia option the wave block was last drawn for
+    lit = {}; // each hand's clip rectangle in the wave block
   /** Mark the muted instruments, so their parts of the readout show disabled (styles.css). */
   const showVolume = () => {
     element.dataset.muted = Object.keys(volume)
@@ -188,6 +191,9 @@ export function createReadout(element, volume = {}) {
     build(current) {
       const layout = current.named && current.id !== 'summary' ? baqueLayout(current) : { markup: (LAYOUTS[current.id] || (() => ''))(), score: null };
       element.innerHTML = layout.markup;
+      waves = element.querySelector('.wave');
+      cursor = element.querySelector('.scur');
+      shownWaves = null;
       // a scene about one instrument: all of its readout is that instrument's
       element.dataset.inst = current.named && current.id !== 'summary' ? 'alfaia' : current.id === 'agogo' ? 'agogo' : '';
       showVolume();
@@ -197,11 +203,14 @@ export function createReadout(element, volume = {}) {
     },
     /** Parts that change once per bar. */
     onBar(scene, barInScene) {
-      const waves = wave();
       if (waves) {
         const showWave = barInScene >= WAVE_FROM_BAR && alfaia !== null,
           scoreBox = element.querySelector('.score');
-        if (showWave) waves.innerHTML = waveMarkup(alfaia);
+        if (showWave && shownWaves !== alfaia) {
+          waves.innerHTML = waveMarkup(alfaia);
+          shownWaves = alfaia;
+          lit = Object.fromEntries(WAVE_HANDS.map(hand => [hand, waves.querySelector(`[data-lit="${hand}"]`)]));
+        }
         if (waves.hidden === showWave) {
           waves.hidden = !showWave;
           scoreBox.hidden = showWave;
@@ -231,23 +240,21 @@ export function createReadout(element, volume = {}) {
     /** Move the score cursor to the current sixteenth (second bar of a two-bar cycle when needed). */
     update(sixteenth, barInScene) {
       if (!score) return;
-      const waves = wave();
       if (waves && !waves.hidden) {
-        // each hand's wave lights up from its latest hit, for as long as that hit sounds
-        const hits = barHits(scene, barInScene);
+        // each hand's wave lights up from its latest hit, for as long as that hit sounds; the bar's
+        // hits come from the cached timeline, not recomputed each frame
+        const { voices } = barTimeline(scene.start + barInScene);
         for (const hand of WAVE_HANDS) {
-          const last = hits[hand].filter(hit => hit.step <= sixteenth).at(-1),
-            lit = waves.querySelector(`[data-lit="${hand}"]`),
-            slices = WAVES[`alfaia-${alfaia}-${hand}`];
+          const last = voices[hand].findLast(({ hit }) => hit.step <= sixteenth)?.hit,
+            slices = WAVES[`alfaia-${shownWaves}-${hand}`];
           const played = last ? ((sixteenth - last.step) * SIXTEENTH_MS) / slices.ms : 1;
-          lit.setAttribute('width', played < 1 ? (played * slices.peaks.length).toFixed(2) : '0');
+          setAttr(lit[hand], 'width', played < 1 ? (played * slices.peaks.length).toFixed(2) : '0');
         }
         return;
       }
-      const cursor = element.querySelector('.scur'),
-        twoBars = score.slotX.length === 2 * STEPS_PER_BAR;
+      const twoBars = score.slotX.length === 2 * STEPS_PER_BAR;
       const slot = Math.floor(sixteenth) + (twoBars ? (barInScene % 2) * STEPS_PER_BAR : 0);
-      if (cursor) cursor.style.left = `${((score.slotX[slot] / score.width) * 100).toFixed(2)}%`;
+      if (cursor) setStyle(cursor, 'left', `${((score.slotX[slot] / score.width) * 100).toFixed(2)}%`);
     },
   };
 }

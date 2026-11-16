@@ -24,6 +24,11 @@ const BAR_LINE_ALPHA = 0.45,
   BEAT_LINE_ALPHA = 0.16,
   SIXTEENTH_LINE_ALPHA = 0.05;
 const BAR_LINE_WIDTH = 1.4; // CSS px; other lines are 1
+// the grid colours, built once instead of on every line of every frame
+const BEAT_SHADE = fgAlpha(BEAT_SHADE_ALPHA),
+  BAR_LINE = fgAlpha(BAR_LINE_ALPHA),
+  BEAT_LINE = fgAlpha(BEAT_LINE_ALPHA),
+  SIXTEENTH_LINE = fgAlpha(SIXTEENTH_LINE_ALPHA);
 
 // Hit blocks.
 const BLOCK_WIDTH = 0.86; // fraction of a sixteenth
@@ -35,6 +40,7 @@ const GHOST_MIN_SHIFT = 0.5; // CSS px of swing before the straight-grid ghost s
 const GHOST_ALPHA = 0.55,
   GHOST_STROKE_ALPHA = 0.7;
 const GHOST_DASH = 3; // CSS px, dash and gap
+const GHOST_STROKE = fgAlpha(GHOST_STROKE_ALPHA);
 const PAST_ALPHA = 0.3,
   PAST_FLASH_ALPHA = 0.7,
   FUTURE_ALPHA = 0.85; // block fill: played (base + flash part) vs coming
@@ -50,6 +56,7 @@ const LABEL_MAX_SIZE = 0.07; // ...capped at this fraction of the canvas height
 const HIDDEN_ALPHA = 0.01; // rows fainter than this are skipped
 const MUTED_LABEL_ALPHA = 0.45, // a silent voice keeps its colour, fainter, so it stays named (#12)
   COUNT_ALPHA = 0.55;
+const COUNT_COLOR = fgAlpha(COUNT_ALPHA);
 const INSTRUMENT_LINE = 0.6; // an alfaia hand's label: "ALFAIA" over the hand, this many font sizes up and down
 const NO_COUNT = '—'; // count shown for a silent voice
 const PLAYHEAD_WIDTH = 1.6; // CSS px
@@ -123,10 +130,10 @@ export function createLanes(canvas, volume = {}) {
       const isBar = s % STEPS_PER_BAR === 0,
         isBeat = s % 4 === 0;
       if (isBeat) {
-        ctx.fillStyle = fgAlpha(BEAT_SHADE_ALPHA);
+        ctx.fillStyle = BEAT_SHADE;
         ctx.fillRect(x, top, sixteenthWidth, bottom - top);
       }
-      ctx.strokeStyle = fgAlpha(isBar ? BAR_LINE_ALPHA : isBeat ? BEAT_LINE_ALPHA : SIXTEENTH_LINE_ALPHA);
+      ctx.strokeStyle = isBar ? BAR_LINE : isBeat ? BEAT_LINE : SIXTEENTH_LINE;
       ctx.lineWidth = (isBar ? BAR_LINE_WIDTH : 1) * dpr;
       ctx.beginPath();
       ctx.moveTo(x, top);
@@ -144,7 +151,7 @@ export function createLanes(canvas, volume = {}) {
     if (Math.abs(gridX - x) > GHOST_MIN_SHIFT * dpr) {
       // dashed ghost where the straight grid would put it
       ctx.globalAlpha = GHOST_ALPHA * row.alpha;
-      ctx.strokeStyle = fgAlpha(GHOST_STROKE_ALPHA);
+      ctx.strokeStyle = GHOST_STROKE;
       ctx.lineWidth = dpr;
       ctx.setLineDash([GHOST_DASH * dpr, GHOST_DASH * dpr]);
       ctx.strokeRect(gridX, y, blockWidth, blockHeight);
@@ -210,7 +217,7 @@ export function createLanes(canvas, volume = {}) {
       } else ctx.fillText(COPY.voices[voice].toUpperCase(), 0, row.y);
       ctx.globalAlpha = row.alpha;
       ctx.textAlign = 'right';
-      ctx.fillStyle = fgAlpha(COUNT_ALPHA);
+      ctx.fillStyle = COUNT_COLOR;
       ctx.fillText(active.has(voice) ? String(counts[voice] || 0) : NO_COUNT, width, row.y);
     }
     ctx.globalAlpha = 1;
