@@ -4,7 +4,7 @@
 import { COPY } from './copy.js';
 import { SCENES } from './show.js';
 import { TINTS } from './theme.js';
-import { hash } from './util.js';
+import { hash, setStyle } from './util.js';
 
 const GLYPHS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789#%&*+=/<>';
 const DECODE_BARS = 0.12,
@@ -94,10 +94,10 @@ export function createTitle(head) {
     if (eyebrowEl.textContent !== eyebrowText) eyebrowEl.textContent = eyebrowText;
     const split = (SPLIT_REST + glitch * SPLIT_GLITCH).toFixed(2),
       jitter = glitch ? ((hash(Math.floor(position * GLYPH_RATE)) - 0.5) * JITTER * glitch).toFixed(2) : 0;
-    titleEl.style.textShadow = `-${split}cqw 0 0 ${TINTS.titleSplitLeft}, ${split}cqw 0 0 ${TINTS.titleSplitRight}`;
+    setStyle(titleEl, 'textShadow', `-${split}cqw 0 0 ${TINTS.titleSplitLeft}, ${split}cqw 0 0 ${TINTS.titleSplitRight}`);
     // reduced motion keeps the letter scramble and the fade, without the shake and skew
-    titleEl.style.transform = glitch && !REDUCED_MOTION.matches ? `translateX(${jitter}cqw) skewX(${(-glitch * SKEW).toFixed(1)}deg)` : '';
-    titleEl.style.opacity = (1 - glitch * GLITCH_FADE).toFixed(2);
+    setStyle(titleEl, 'transform', glitch && !REDUCED_MOTION.matches ? `translateX(${jitter}cqw) skewX(${(-glitch * SKEW).toFixed(1)}deg)` : '');
+    setStyle(titleEl, 'opacity', (1 - glitch * GLITCH_FADE).toFixed(2));
   }
 
   return { build, fit, update };

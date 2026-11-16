@@ -36,16 +36,18 @@
 <link rel="modulepreload" href="src/theme.js">
 <link rel="modulepreload" href="src/title.js">
 <link rel="modulepreload" href="src/util.js">
+<link rel="modulepreload" href="src/waves.js">
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebSite", "name": "O Baque Virado", "url": "https://baquevirado.martonpaulo.com/", "inLanguage": "pt-BR"}</script>
 </head>
 <body>
 <!-- Static text stays here (works without JS, crawlable); copy for dynamic text lives in src/copy.js. -->
 <div class="wrap">
+  <main class="center">
   <section class="stage" id="stage" aria-label="Animação: o baque virado do maracatu">
     <canvas id="fx"></canvas>
     <canvas id="bg"></canvas>
     <div class="inner">
-      <div class="hud"><div><span id="hSec"></span><br><b id="hBar"></b> · <b id="hStep"></b></div><div class="r">♩ = <b id="hBpm"></b> bpm<br><b id="hTime"></b></div></div>
+      <div class="hud"><div><b id="hBar"></b><br><b id="hStep"></b></div><div class="r">♩ = <b id="hBpm"></b> bpm<br><b id="hTime"></b></div></div>
       <header class="head" id="head"></header>
       <div class="scope" id="scopeBox"><svg id="scope" role="img" aria-label="Roda de 16 semicolcheias com um anel por instrumento"></svg></div>
       <section class="read" id="read"></section>
@@ -54,15 +56,18 @@
     <!-- phones: the whole stage is the Play and Pause button -->
     <button class="tap" id="tap" type="button"><span class="tap-label" id="tapLabel"></span><span class="tap-time" id="tapTime"></span></button>
   </section>
+  <!-- Desktop: zoom the phone-sized stage to its column before the first paint, so it never shows
+       at 393px and then jumps; src/main.js keeps it fitted on resize (PHONE_STAGE_WIDTH there). -->
+  <script>if (matchMedia('(min-width: 900px)').matches) { const s = document.getElementById('stage'); s.style.zoom = String(s.parentElement.clientWidth / 393); }</script>
+  <p class="foot"><a href="https://github.com/martonpaulo/baque-virado">código-fonte</a></p>
+  </main>
 
   <aside class="side left">
     <header class="brand"><h1>O Baque<br>Virado</h1><p>maracatu de baque virado</p></header>
-    <div class="trow"><button id="play" type="button"></button><span id="clock"></span></div>
     <nav class="block" aria-labelledby="scenesTitle">
       <h2 class="block-title" id="scenesTitle">Roteiro</h2>
       <ol class="timeline" id="scenes"></ol>
     </nav>
-    <p class="foot"><a href="https://github.com/martonpaulo/baque-virado#readme">sobre o projeto</a></p>
   </aside>
 
   <aside class="side right">

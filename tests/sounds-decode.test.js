@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
+import { ALL_SOUND_FILES } from '../src/audio.js';
 import { openBrowser } from './support/browser.js';
 
 // #3: the page plays AAC (.m4a). An AAC encoder adds about 1024 priming samples, which the MP4 edit
@@ -47,7 +48,7 @@ test('every .m4a decodes in Chromium aligned with its .wav', async () => {
       SEARCH,
       COMPARED,
     );
-    assert.equal(Object.keys(shifts).length, 43);
+    assert.equal(Object.keys(shifts).length, ALL_SOUND_FILES.length); // every file the page can fetch
     assert.deepEqual(
       Object.entries(shifts).filter(([, shift]) => Math.abs(shift) > MAX_SHIFT),
       [],

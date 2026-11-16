@@ -5,6 +5,8 @@ trimmed, mixed or retuned.
 
 - Alfaia, caixa, agogô (short bell), shekere: Sassaby
 - Dry surdo: gilblack1234
+- Cabasa: sgossner
+- Caixa choices: gilblack1234 (with snares, Brazilian caixa), Sassaby (tarol rim)
 - Maracatu agbê: manoel98
 - Shekere: jonopodmore
 - Rice ganzá: Ilson_Junior · Dry ganzá: mattyharm · Jingle shaker: CamTarn · Caxixi: REVERBERA

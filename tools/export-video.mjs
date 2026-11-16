@@ -174,6 +174,8 @@ async function main() {
     const page = await browser.newPage();
     await page.emulateMediaFeatures([{ name: 'prefers-reduced-motion', value: 'no-preference' }]);
     page.on('pageerror', error => console.error(`page error: ${error.message}`));
+    // the reel keeps its 9:16 layout; the browser view uses the taller phone-shaped stage
+    await page.evaluateOnNewDocument(() => addEventListener('DOMContentLoaded', () => document.documentElement.classList.add('video-export')));
     await page.goto(server.url + encodeURIComponent(path.basename(args.page)), { waitUntil: 'networkidle0', timeout: 60000 });
     await page.waitForFunction(() => window.baque && typeof window.baque.render === 'function', { timeout: 30000 });
     await page.evaluate(() => document.fonts.ready);

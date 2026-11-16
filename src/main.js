@@ -1,9 +1,9 @@
 // Wires the reel together: one render function for a position on the timeline, a live loop,
 // playback, controls, and the `window.baque` API the video exporter drives.
 
-import { createPlayer, createSampleBank, filesFor, renderShowWav } from './audio.js';
+import { createPlayer, createSampleBank, filesFor, isHeard, renderShowWav } from './audio.js';
 import { backgroundAt, createBackground, SCENE_LOOKS } from './background.js';
-import { bindKeyboard, createSceneList, createSoundPickers, initialChoices } from './controls.js';
+import { bindKeyboard, createSceneList, createSoundPickers, initialChoices, initialVolumes } from './controls.js';
 import { COPY } from './copy.js';
 import { createKey, createLanes } from './lanes.js';
 import { BAR_SECONDS, BPM, STEPS_PER_BAR } from './music.js';
@@ -15,7 +15,7 @@ import { formatClock, formatPrecise, pad2, setText } from './util.js';
 
 const $ = id => document.getElementById(id);
 const DESKTOP_QUERY = '(min-width: 900px)'; // also where styles.css switches to the side panels
-const DESKTOP = window.matchMedia(DESKTOP_QUERY).matches;
+const DESKTOP = window.matchMedia(DESKTOP_QUERY).matches; // at load: which sounds and volumes start
 const REDUCED_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)');
 const AUDIO_LEAD_IN = 0.03; // seconds of silence before the first hit in the offline render
 const MIN_VISUAL_SPEED = 0.55; // slowest background speed, as a multiple of real time
@@ -34,12 +34,13 @@ const EXPORT_SHADER_SCALE = 1,
   PHONE_SHADER_SCALE = 0.35;
 
 const stage = $('stage');
-const scope = createScope($('scope'));
-const readout = createReadout($('read'));
+const volume = initialVolumes(DESKTOP); // each instrument's level: the player, the wheel and the lanes read it
+const scope = createScope($('scope'), volume);
+const readout = createReadout($('read'), volume);
 const title = createTitle($('head'));
 const background = createBackground($('fx'), $('bg'));
-const lanes = createLanes($('lanes'));
-const key = createKey($('key'));
+const lanes = createLanes($('lanes'), volume);
+const key = createKey($('key'), volume);
 
 // ---------- sizes ----------
 let measuredSize = ''; // the stage size the canvases were last sized for
@@ -109,7 +110,9 @@ const sceneList = createSceneList($('scenes'), scene => seek(scene.start));
 function render(at, force = false) {
   const p = Math.max(0, Math.min(TOTAL_BARS - END_EPSILON, at));
   const params = backgroundAt(p, !player.playing && !clock.exporting);
-  const drawBackground = () => background.draw(p, params, recentHits(p, RECENT_HITS_WINDOW), clock.tick(p, params), shapes);
+  // a muted instrument does not push the background either
+  const heard = recentHits(p, RECENT_HITS_WINDOW).filter(h => isHeard(volume, h.voice));
+  const drawBackground = () => background.draw(p, params, heard, clock.tick(p, params), shapes);
   if (p === renderedAt && !force) {
     if (!REDUCED_MOTION.matches) drawBackground(); // paused: only the background moves
     return;
@@ -135,13 +138,10 @@ function render(at, force = false) {
   readout.update(sixteenth, barInScene);
   shapes = scope.update(p, scene, barInScene);
   title.update(p, scene, !player.playing && !clock.exporting);
-  setText($('hSec'), `[${scene.section}] ${COPY.sections[scene.section]}`);
   setText($('hBar'), COPY.hud.bar(pad2(bar + 1), TOTAL_BARS));
   setText($('hStep'), COPY.hud.step(pad2(Math.floor(sixteenth) + 1)));
   setText($('hTime'), formatPrecise(seconds));
-  const time = `${formatClock(seconds)} / ${formatClock(TOTAL_SECONDS)}`;
-  setText($('clock'), time);
-  setText($('tapTime'), time);
+  setText($('tapTime'), `${formatClock(seconds)} / ${formatClock(TOTAL_SECONDS)}`);
   drawBackground();
   lanes.draw(p);
 }
@@ -150,13 +150,12 @@ function render(at, force = false) {
 const choice = initialChoices(DESKTOP);
 const bank = createSampleBank();
 bank.prefetch(filesFor(choice));
-const player = createPlayer(bank, choice);
-const playButton = $('play'),
-  tapButton = $('tap');
-/** One playback state on both buttons: Play beside the stage, and the stage itself on phones. */
+const player = createPlayer(bank, choice, volume);
+readout.setAlfaia(choice.alfaia);
+const tapButton = $('tap');
+/** The playback state on the stage, which is the Play and Pause button on every screen. */
 function showState(state) {
   const text = COPY.controls[state];
-  playButton.textContent = text;
   setText($('tapLabel'), text);
   tapButton.dataset.state = state;
   tapButton.setAttribute('aria-label', text); // its text hides while playing
@@ -168,7 +167,6 @@ async function play() {
   if (starting || player.playing) return;
   if (position >= TOTAL_BARS - REWIND_AT_END) position = 0;
   starting = true;
-  playButton.disabled = true;
   showState('loading');
   try {
     await player.prepare();
@@ -177,7 +175,6 @@ async function play() {
     return;
   } finally {
     starting = false;
-    playButton.disabled = false;
   }
   player.start(position); // the position read now, so a scene picked while loading is kept
   showState('pause');
@@ -186,8 +183,10 @@ function pause() {
   const stoppedAt = player.stop();
   if (stoppedAt !== null) position = Math.max(0, stoppedAt);
   renderedAt = null; // redraw once: the title settles
-  showState('play');
+  showIdle();
 }
+/** Paused: «Tocar» at the start, «Continuar» in the middle, «Tocar de novo» at the end. */
+const showIdle = () => showState(position >= TOTAL_BARS - REWIND_AT_END ? 'replay' : position > 0 ? 'resume' : 'play');
 const toggle = () => (player.playing ? pause() : play());
 function seek(to) {
   const wasPlaying = player.playing;
@@ -197,6 +196,7 @@ function seek(to) {
   clock.reset();
   render(position);
   if (wasPlaying) play();
+  else showIdle();
 }
 const stepScene = direction => {
   const index = sceneIndexAt(Math.floor(position));
@@ -205,9 +205,8 @@ const stepScene = direction => {
 };
 
 showState('play');
-playButton.addEventListener('click', toggle);
 tapButton.addEventListener('click', toggle);
-bindKeyboard({ toggle, previousScene: () => stepScene(-1), nextScene: () => stepScene(1) }, playButton);
+bindKeyboard({ toggle, previousScene: () => stepScene(-1), nextScene: () => stepScene(1) });
 if (DESKTOP) {
   createSoundPickers(
     $('sounds'),
@@ -220,8 +219,23 @@ if (DESKTOP) {
       if (player.playing) await player.prepare(next);
       else await player.preview(next, sound.preview);
       choice[sound.id] = option;
+      readout.setAlfaia(choice.alfaia);
     },
     choice,
+    volume,
+    () => {
+      // redraw only the wheel's dots and the lanes at the new strength: a full render would also
+      // step the background's feedback, and the picture would change on every click
+      if (renderedAt === null) return;
+      const bar = Math.floor(renderedAt),
+        scene = sceneAt(bar);
+      scope.build(scene, bar - scene.start);
+      shapes = scope.update(renderedAt, scene, bar - scene.start);
+      lanes.draw(renderedAt);
+      key.update(bar);
+      readout.showVolume();
+      readout.onBar(scene, bar - scene.start);
+    },
   );
 }
 $('hBpm').textContent = BPM;
@@ -234,6 +248,7 @@ function loop() {
     if (position >= TOTAL_BARS) {
       pause();
       position = TOTAL_BARS - END_EPSILON;
+      showIdle(); // the label reads the end position, set after pause()
     }
   }
   render(position);
@@ -267,14 +282,29 @@ window.baque = {
 background.setShaderScale(DESKTOP ? DESKTOP_SHADER_SCALE : PHONE_SHADER_SCALE);
 // Resizing a canvas clears it, so only a real new size re-measures: a stage that blips to 0x0 and
 // back (a hidden page, a screenshot under load) keeps its canvases and the export its trail (#15).
-new ResizeObserver(([entry]) => {
-  const { width, height } = entry.contentRect;
+// Desktop lays the stage out at a phone's size and zooms it to its column (mobile first): every
+// size inside is the phone's, scaled. The width matches styles.css .stage on desktop.
+// The query is read on every fit, not once: a window or tablet that crosses 900px keeps the layout
+// styles.css shows (no zoom on a phone layout, the column's zoom on the desktop one).
+const PHONE_STAGE_WIDTH = 393;
+const DESKTOP_LAYOUT = window.matchMedia(DESKTOP_QUERY);
+// The video export (tools/export-video.mjs sets .video-export) draws the 9:16 reel at its own size:
+// no zoom there.
+const isVideoExport = () => document.documentElement.classList.contains('video-export');
+const fitStage = () => {
+  stage.style.zoom = DESKTOP_LAYOUT.matches && !isVideoExport() ? String(stage.parentElement.clientWidth / PHONE_STAGE_WIDTH) : '';
+};
+fitStage();
+new ResizeObserver(() => {
+  fitStage();
+  const { width, height } = stage.getBoundingClientRect();
   if (!width || !height || sizeKey(width, height) === measuredSize) return;
   measure();
   title.fit();
   render(position, true);
-}).observe(stage);
+}).observe(stage.parentElement);
 document.fonts?.ready.then(() => title.fit());
 measure();
 render(0, true);
+document.documentElement.classList.add('ready'); // the controls have their text: show them
 requestAnimationFrame(loop);

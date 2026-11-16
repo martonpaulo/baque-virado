@@ -1,11 +1,12 @@
 // The wheel: a 16-sixteenth polar "scope" with one ring per voice, the rhythm's shapes,
 // a sweeping hand and the labels in its centre.
 
+import { visualOf } from './audio.js';
 import { COPY } from './copy.js';
 import { BAR_SECONDS, INSTRUMENTS, isAlfaia, isOffbeat, STEPS_PER_BAR, VOICE_ORDER, VOICES } from './music.js';
 import { barTimeline, recentHits } from './show.js';
 import { COLORS, MONO_FONT, ROLES, TINTS } from './theme.js';
-import { fixed2, pad2, polylinePath, setAttr, setText, svgElement } from './util.js';
+import { fixed2, pad2, polylinePath, setAttr, setStyle, setText, svgElement } from './util.js';
 
 // Radii, in SVG units of the viewBox, which spans -VIEWBOX_RADIUS..VIEWBOX_RADIUS on both axes.
 const VIEWBOX_RADIUS = 135;
@@ -82,6 +83,7 @@ const COUNTDOWN_AFTER = 0.25; // fraction of a cut bar before "VOLTA EM n" repla
 const BEATS_PER_BAR = 4;
 const WHISTLE_WINDOW = 1.1; // seconds a whistle keeps the cue
 const OFFBEAT_WINDOW = 0.2; // seconds a contratempo hit keeps the cue
+const CUE_WINDOW = Math.max(WHISTLE_WINDOW, OFFBEAT_WINDOW);
 
 // Dot flash on a hit.
 const FLASH_WINDOW = 0.6; // seconds after a hit that it can still flash
@@ -160,12 +162,20 @@ function drawScale(svg) {
     if (voice !== 'stick')
       svgElement(
         'circle',
-        { r: VOICES[voice].ring, fill: 'none', stroke: VOICES[voice].color, 'stroke-opacity': VOICE_RING_OPACITY, 'stroke-width': SPOKE_WIDTH },
+        {
+          r: VOICES[voice].ring,
+          fill: 'none',
+          stroke: VOICES[voice].color,
+          'stroke-opacity': VOICE_RING_OPACITY,
+          'stroke-width': SPOKE_WIDTH,
+          'data-voice': voice,
+        },
         g,
       );
 }
 
-export function createScope(svg) {
+/** `volume` maps an instrument to its volume level; a quieter voice draws fainter (audio.js visualOf). */
+export function createScope(svg, volume = {}) {
   const side = 2 * VIEWBOX_RADIUS;
   svg.setAttribute('viewBox', `${-VIEWBOX_RADIUS} ${-VIEWBOX_RADIUS} ${side} ${side}`);
   drawScale(svg);
@@ -194,6 +204,8 @@ export function createScope(svg) {
 
   /** Rebuild the dots and shapes for one bar. */
   function build(scene, barInScene) {
+    // each voice's ring fades with its volume, as its dots do
+    for (const ring of svg.querySelectorAll('circle[data-voice]')) ring.style.opacity = visualOf(volume, ring.dataset.voice);
     dotLayer.textContent = '';
     shapeLayer.textContent = '';
     dots = [];
@@ -201,9 +213,10 @@ export function createScope(svg) {
     const { voices, playing } = barTimeline(scene.start + barInScene),
       active = new Set(playing);
     for (const voice of SHAPE_VOICES) {
-      // the shape each rhythm draws on its ring, grown hit by hit
+      // the shape each rhythm draws on its ring, grown hit by hit; it fades with the voice's volume
       if (!active.has(voice) || voices[voice].length < 2) continue;
-      const { ring, color } = VOICES[voice];
+      const { ring, color } = VOICES[voice],
+        faded = visualOf(volume, voice);
       const positions = voices[voice].map(entry => entry.position);
       const points = positions.map(p => pointAt(ring, p));
       svgElement(
@@ -212,7 +225,7 @@ export function createScope(svg) {
           d: `${polylinePath(points)} Z`,
           fill: 'none',
           stroke: color,
-          'stroke-opacity': SHAPE_GUIDE_OPACITY,
+          'stroke-opacity': SHAPE_GUIDE_OPACITY * faded,
           'stroke-width': HAIRLINE,
           'stroke-dasharray': SHAPE_GUIDE_DASH,
         },
@@ -224,7 +237,7 @@ export function createScope(svg) {
           d: '',
           fill: 'none',
           stroke: color,
-          'stroke-opacity': SHAPE_LINE_OPACITY,
+          'stroke-opacity': SHAPE_LINE_OPACITY * faded,
           'stroke-width': SHAPE_LINE_WIDTH,
           'stroke-linejoin': 'round',
           'stroke-linecap': 'round',
@@ -234,7 +247,8 @@ export function createScope(svg) {
       shapes.push({ voice, points, positions, line, drawn: [] });
     }
     for (const voice of VOICE_ORDER) {
-      const { ring, size, color } = VOICES[voice];
+      const { ring, size, color } = VOICES[voice],
+        level = visualOf(volume, voice);
       if (!ring) continue;
       const on = active.has(voice);
       for (const { hit: h, position } of voices[voice]) {
@@ -267,7 +281,7 @@ export function createScope(svg) {
           },
           dotLayer,
         );
-        dots.push({ element, position, radius, on });
+        dots.push({ element, position, radius, on, level });
       }
     }
   }
@@ -276,9 +290,10 @@ export function createScope(svg) {
   function centreCue(position, scene, mode, inBar) {
     const silence = mode === 'cut' && inBar > CUT_SILENCE_AFTER,
       isEnd = scene.isEnd;
-    const whistle = recentHits(position, WHISTLE_WINDOW).some(h => h.voice === 'whistle');
-    const offbeat = recentHits(position, OFFBEAT_WINDOW).some(h => isAlfaia(h.voice) && isOffbeat(h.hit.step));
-    fermata.style.opacity = silence ? 1 : 0;
+    const recent = recentHits(position, CUE_WINDOW); // one scan for both cues
+    const whistle = recent.some(h => h.voice === 'whistle' && h.age < WHISTLE_WINDOW);
+    const offbeat = recent.some(h => isAlfaia(h.voice) && isOffbeat(h.hit.step) && h.age < OFFBEAT_WINDOW);
+    setStyle(fermata, 'opacity', silence ? 1 : 0);
     const text =
       silence && !isEnd && inBar >= COUNTDOWN_AFTER
         ? COPY.centre.comeBack(BEATS_PER_BAR - Math.floor(inBar * BEATS_PER_BAR))
@@ -339,7 +354,7 @@ export function createScope(svg) {
       const age = ((sixteenth - dot.position) / STEPS_PER_BAR) * BAR_SECONDS,
         flash = dot.on && age >= 0 && age < FLASH_WINDOW ? Math.exp(-age / FLASH_DECAY) : 0;
       const r = (dot.radius * (1 + FLASH_GROWTH * flash)).toFixed(2),
-        opacity = dot.on ? (DOT_REST_OPACITY + DOT_FLASH_OPACITY * flash).toFixed(3) : String(MUTED_DOT_FILL_OPACITY);
+        opacity = ((dot.on ? DOT_REST_OPACITY + DOT_FLASH_OPACITY * flash : MUTED_DOT_FILL_OPACITY) * dot.level).toFixed(3);
       // write only what changed: most dots rest most of the time
       if (dot.r !== r) {
         dot.r = r;
@@ -353,6 +368,5 @@ export function createScope(svg) {
     return shapes;
   }
 
-  /** Per-frame update; returns the shapes as drawn so far, for the background. */
   return { build, update };
 }

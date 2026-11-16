@@ -36,7 +36,7 @@ sounds a desktop viewer can pick are fetched when chosen.
 - `src/title.js` - scene titles and labels.
 - `src/background.js` - the animated WebGL background.
 - `src/lanes.js` - the per-voice hit lanes.
-- `src/controls.js` - play, pause, scene and sound controls.
+- `src/controls.js` - the keyboard, the scene timeline and the sound controls.
 - `src/main.js` - wires everything together and exposes `window.baque` for the exporter.
 - `fonts/` - Space Grotesk and JetBrains Mono (Latin subsets, SIL Open Font License; see [CREDITS.md](CREDITS.md)).
 - `sounds/` - the samples: WAV masters and the AAC (`.m4a`) files the page fetches (see [CREDITS.md](CREDITS.md)).

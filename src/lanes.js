@@ -1,6 +1,7 @@
 // The multitrack view under the readout: a short window that scrolls past a fixed playhead.
 // Rows change with the scene and morph into the next scene's rows.
 
+import { visualOf } from './audio.js';
 import { COPY } from './copy.js';
 import { BAR_SECONDS, isAlfaia, isOffbeat, STEPS_PER_BAR, VOICE_ORDER, VOICES } from './music.js';
 import { barTimeline, blendAt, hitsInBar, sceneAt } from './show.js';
@@ -23,6 +24,11 @@ const BAR_LINE_ALPHA = 0.45,
   BEAT_LINE_ALPHA = 0.16,
   SIXTEENTH_LINE_ALPHA = 0.05;
 const BAR_LINE_WIDTH = 1.4; // CSS px; other lines are 1
+// the grid colours, built once instead of on every line of every frame
+const BEAT_SHADE = fgAlpha(BEAT_SHADE_ALPHA),
+  BAR_LINE = fgAlpha(BAR_LINE_ALPHA),
+  BEAT_LINE = fgAlpha(BEAT_LINE_ALPHA),
+  SIXTEENTH_LINE = fgAlpha(SIXTEENTH_LINE_ALPHA);
 
 // Hit blocks.
 const BLOCK_WIDTH = 0.86; // fraction of a sixteenth
@@ -34,6 +40,7 @@ const GHOST_MIN_SHIFT = 0.5; // CSS px of swing before the straight-grid ghost s
 const GHOST_ALPHA = 0.55,
   GHOST_STROKE_ALPHA = 0.7;
 const GHOST_DASH = 3; // CSS px, dash and gap
+const GHOST_STROKE = fgAlpha(GHOST_STROKE_ALPHA);
 const PAST_ALPHA = 0.3,
   PAST_FLASH_ALPHA = 0.7,
   FUTURE_ALPHA = 0.85; // block fill: played (base + flash part) vs coming
@@ -49,6 +56,7 @@ const LABEL_MAX_SIZE = 0.07; // ...capped at this fraction of the canvas height
 const HIDDEN_ALPHA = 0.01; // rows fainter than this are skipped
 const MUTED_LABEL_ALPHA = 0.45, // a silent voice keeps its colour, fainter, so it stays named (#12)
   COUNT_ALPHA = 0.55;
+const COUNT_COLOR = fgAlpha(COUNT_ALPHA);
 const INSTRUMENT_LINE = 0.6; // an alfaia hand's label: "ALFAIA" over the hand, this many font sizes up and down
 const NO_COUNT = '—'; // count shown for a silent voice
 const PLAYHEAD_WIDTH = 1.6; // CSS px
@@ -81,25 +89,26 @@ function morphRows(from, to, amount) {
  * The voices the wheel draws in `bar` that the lanes do not name as a row: the key above the lanes
  * names them in their colours, so every dot colour has a name on the stage (#12).
  */
-export function keyVoices(bar) {
+export function keyVoices(bar, volume = {}) {
   const { voices } = barTimeline(bar),
     rows = new Set(sceneAt(bar).lanes);
-  return VOICE_ORDER.filter(voice => VOICES[voice].ring && voices[voice].length > 0 && !rows.has(voice));
+  return VOICE_ORDER.filter(voice => VOICES[voice].ring && voices[voice].length > 0 && !rows.has(voice) && visualOf(volume, voice) > 0);
 }
 
 /** The key line: one `● name` per voice from `keyVoices`, in the voice's colour. */
-export function createKey(element) {
+export function createKey(element, volume = {}) {
   let shown = null;
   return {
     update(bar) {
-      const voices = keyVoices(bar),
-        id = voices.join();
+      const voices = keyVoices(bar, volume),
+        id = voices.map(voice => `${voice}:${visualOf(volume, voice)}`).join();
       if (id === shown) return;
       shown = id;
       element.textContent = '';
       for (const voice of voices) {
         const item = document.createElement('span');
         item.style.color = VOICES[voice].color;
+        item.style.opacity = visualOf(volume, voice); // a muted voice's name shows disabled
         item.textContent = `● ${COPY.voices[voice]}`;
         element.appendChild(item);
       }
@@ -107,7 +116,8 @@ export function createKey(element) {
   };
 }
 
-export function createLanes(canvas) {
+/** `volume` maps an instrument to its volume level; a quieter voice draws fainter (audio.js visualOf). */
+export function createLanes(canvas, volume = {}) {
   const ctx = canvas.getContext('2d');
   let width = 0,
     height = 0,
@@ -120,10 +130,10 @@ export function createLanes(canvas) {
       const isBar = s % STEPS_PER_BAR === 0,
         isBeat = s % 4 === 0;
       if (isBeat) {
-        ctx.fillStyle = fgAlpha(BEAT_SHADE_ALPHA);
+        ctx.fillStyle = BEAT_SHADE;
         ctx.fillRect(x, top, sixteenthWidth, bottom - top);
       }
-      ctx.strokeStyle = fgAlpha(isBar ? BAR_LINE_ALPHA : isBeat ? BEAT_LINE_ALPHA : SIXTEENTH_LINE_ALPHA);
+      ctx.strokeStyle = isBar ? BAR_LINE : isBeat ? BEAT_LINE : SIXTEENTH_LINE;
       ctx.lineWidth = (isBar ? BAR_LINE_WIDTH : 1) * dpr;
       ctx.beginPath();
       ctx.moveTo(x, top);
@@ -141,18 +151,19 @@ export function createLanes(canvas) {
     if (Math.abs(gridX - x) > GHOST_MIN_SHIFT * dpr) {
       // dashed ghost where the straight grid would put it
       ctx.globalAlpha = GHOST_ALPHA * row.alpha;
-      ctx.strokeStyle = fgAlpha(GHOST_STROKE_ALPHA);
+      ctx.strokeStyle = GHOST_STROKE;
       ctx.lineWidth = dpr;
       ctx.setLineDash([GHOST_DASH * dpr, GHOST_DASH * dpr]);
       ctx.strokeRect(gridX, y, blockWidth, blockHeight);
       ctx.setLineDash([]);
     }
-    ctx.globalAlpha = (past ? PAST_ALPHA + PAST_FLASH_ALPHA * flash : FUTURE_ALPHA) * row.alpha;
+    const level = visualOf(volume, h.voice);
+    ctx.globalAlpha = (past ? PAST_ALPHA + PAST_FLASH_ALPHA * flash : FUTURE_ALPHA) * row.alpha * level;
     ctx.fillStyle = VOICES[h.voice].color;
     ctx.fillRect(x, y, blockWidth, blockHeight);
     if (isAlfaia(h.voice) && isOffbeat(h.hit.step)) {
       // contratempo outline
-      ctx.globalAlpha = (past ? OUTLINE_PAST_ALPHA + OUTLINE_FLASH_ALPHA * flash : OUTLINE_FUTURE_ALPHA) * row.alpha;
+      ctx.globalAlpha = (past ? OUTLINE_PAST_ALPHA + OUTLINE_FLASH_ALPHA * flash : OUTLINE_FUTURE_ALPHA) * row.alpha * level;
       ctx.strokeStyle = COLORS.fg;
       ctx.lineWidth = OUTLINE_WIDTH * dpr;
       ctx.strokeRect(x - OUTLINE_GAP * dpr, y - OUTLINE_GAP * dpr, blockWidth + 2 * OUTLINE_GAP * dpr, blockHeight + 2 * OUTLINE_GAP * dpr);
@@ -185,7 +196,7 @@ export function createLanes(canvas) {
       for (const h of hitsInBar(bar)) {
         const row = rows[h.voice],
           x = toX(h.at);
-        if (!row || row.alpha < HIDDEN_ALPHA || x < plotLeft || x > plotLeft + plotWidth * row.reveal) continue;
+        if (!row || row.alpha < HIDDEN_ALPHA || visualOf(volume, h.voice) === 0 || x < plotLeft || x > plotLeft + plotWidth * row.reveal) continue;
         drawHit(h, row, x, toX(h.grid), sixteenthWidth * BLOCK_WIDTH, position);
       }
     }
@@ -194,8 +205,8 @@ export function createLanes(canvas) {
     for (const h of hitsInBar(Math.floor(position))) counts[h.voice] = (counts[h.voice] || 0) + 1;
     for (const voice in rows) {
       const row = rows[voice];
-      if (row.alpha < HIDDEN_ALPHA) continue;
-      ctx.globalAlpha = row.alpha * (active.has(voice) ? 1 : MUTED_LABEL_ALPHA);
+      if (row.alpha < HIDDEN_ALPHA || visualOf(volume, voice) === 0) continue; // a muted voice's row shows nothing
+      ctx.globalAlpha = row.alpha * (active.has(voice) ? 1 : MUTED_LABEL_ALPHA) * visualOf(volume, voice);
       ctx.fillStyle = VOICES[voice].color;
       ctx.textAlign = 'left';
       if (isAlfaia(voice)) {
@@ -206,7 +217,7 @@ export function createLanes(canvas) {
       } else ctx.fillText(COPY.voices[voice].toUpperCase(), 0, row.y);
       ctx.globalAlpha = row.alpha;
       ctx.textAlign = 'right';
-      ctx.fillStyle = fgAlpha(COUNT_ALPHA);
+      ctx.fillStyle = COUNT_COLOR;
       ctx.fillText(active.has(voice) ? String(counts[voice] || 0) : NO_COUNT, width, row.y);
     }
     ctx.globalAlpha = 1;

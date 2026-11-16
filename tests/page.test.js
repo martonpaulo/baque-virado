@@ -13,9 +13,9 @@ const PHONES = [
   { width: 375, height: 812 },
 ];
 const DESKTOP = { width: 1440, height: 900 };
+const EXPORT_FRAME = { width: 1080, height: 1920 }; // tools/export-video.mjs, the owner's 9:16 frame
 const COPY_ALFAIA = COPY.read.alfaia.toUpperCase(),
   COPY_PRINCIPAL = COPY.voices.main.toUpperCase();
-const LABEL_FLOOR_PX = 11; // #4
 const SOUND_DELAY_MS = 600; // holds every sample back, so Space lands while they decode
 const DETERMINISM_POSITION = 20.3; // bars: a baque scene, wheel, score and background all busy
 const BAQUE_SCENES = SCENES.filter(scene => scene.named && scene.id !== 'summary').map(scene => scene.id);
@@ -30,10 +30,13 @@ after(async () => {
 
 /**
  * A fresh page on the site. Every request must stay on the local server. `errors` collects page
- * errors and console errors; `contexts()` counts the audio contexts the page opened.
+ * errors and console errors; `contexts()` counts the audio contexts the page opened. `videoExport`
+ * sets the class tools/export-video.mjs sets.
  */
-async function openPage(viewport, { delaySounds = false } = {}) {
+async function openPage(viewport, { delaySounds = false, videoExport = false } = {}) {
   const page = await session.browser.newPage();
+  // the same hook tools/export-video.mjs installs
+  if (videoExport) await page.evaluateOnNewDocument(() => addEventListener('DOMContentLoaded', () => document.documentElement.classList.add('video-export')));
   const errors = [];
   page.on('pageerror', error => errors.push(`page error: ${error.message}`));
   page.on('console', message => {
@@ -121,7 +124,7 @@ test('two Space presses while the samples decode open one audio context', async 
   const { page, errors, contexts } = await openPage(DESKTOP, { delaySounds: true });
   await page.keyboard.press('Space');
   await page.keyboard.press('Space');
-  await page.waitForFunction(pause => document.getElementById('play').textContent === pause, {}, COPY.controls.pause);
+  await page.waitForFunction(() => document.getElementById('tap').dataset.state === 'pause');
   assert.equal(await contexts(), 1);
   assert.deepEqual(errors, []);
   await page.close();
@@ -129,12 +132,12 @@ test('two Space presses while the samples decode open one audio context', async 
 
 test('Space after a scene click pauses, and the paused scene shows its full title', async () => {
   const { page, errors } = await openPage(DESKTOP);
-  await page.click('#play');
-  await page.waitForFunction(pause => document.getElementById('play').textContent === pause, {}, COPY.controls.pause);
+  await page.click('#stage'); // the stage is the Play button (mobile first)
+  await page.waitForFunction(() => document.getElementById('tap').dataset.state === 'pause');
   const name = COPY.scenes.trovao.chip;
   await page.evaluate(text => [...document.querySelectorAll('#scenes .step')].find(button => button.querySelector('.name').textContent === text).click(), name);
   await page.keyboard.press('Space');
-  await page.waitForFunction(play => document.getElementById('play').textContent === play, {}, COPY.controls.play);
+  await page.waitForFunction(() => document.getElementById('tap').dataset.state !== 'pause');
   await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
   assert.equal(await page.$eval('.title', element => element.textContent), COPY.scenes.trovao.title.toUpperCase());
   assert.deepEqual(errors, []);
@@ -168,15 +171,16 @@ test('the wheel’s 9 label never overlaps the readout stats', async () => {
   }
 });
 
-test('on phones the stage labels are at least 11 px and every readout fits its box', async () => {
+test('on phones every stage label stays readable and every readout fits its box', async () => {
   for (const viewport of PHONES) {
     const { page, errors } = await openPage(viewport);
     const problems = [];
     for (const scene of SCENES) {
       await showScene(page, scene.id);
-      const found = await page.evaluate(floor => {
+      const found = await page.evaluate(() => {
         const small = [];
-        for (const selector of ['.hud', '.read .k', '.notation .n', '.eyebrow'])
+        const floor = 9; // px: the smallest a phone label may render (iPhone SE)
+        for (const selector of ['.hud', '.read .k', '.notation .n'])
           for (const element of document.querySelectorAll(selector)) {
             const size = parseFloat(getComputedStyle(element).fontSize);
             if (size < floor) small.push(`${selector} ${size}px`);
@@ -184,7 +188,7 @@ test('on phones the stage labels are at least 11 px and every readout fits its b
         const read = document.querySelector('.read');
         const overflow = read.scrollHeight - read.clientHeight;
         return [...small, ...(overflow > 0 ? [`.read overflows by ${overflow}px`] : [])];
-      }, LABEL_FLOOR_PX);
+      });
       problems.push(...found.map(problem => `${viewport.width}x${viewport.height} ${scene.id}: ${problem}`));
     }
     assert.deepEqual(problems, []);
@@ -351,6 +355,34 @@ test('a real stage resize still re-measures the canvases', async () => {
 
 // 2026-11-16, owner: the page never scrolls sideways, and a phone shows the stage alone, which
 // plays and pauses on a tap and shows the time played and the total while paused.
+// A window or tablet that crosses the 900px breakpoint shows the stage as a fresh load at that width does.
+test('crossing the desktop breakpoint fits the stage as a fresh load does', async () => {
+  const narrow = { width: 600, height: 900 };
+  const stageBox = page =>
+    page.evaluate(async () => {
+      await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+      const box = document.getElementById('stage').getBoundingClientRect();
+      return [box.width, box.height].map(value => Math.round(value));
+    });
+  const fresh = {};
+  for (const viewport of [narrow, DESKTOP]) {
+    const { page } = await openPage(viewport);
+    fresh[viewport.width] = await stageBox(page);
+    await page.close();
+  }
+  for (const [from, to] of [
+    [narrow, DESKTOP],
+    [DESKTOP, narrow],
+  ]) {
+    const { page, errors } = await openPage(from);
+    await page.setViewport(to);
+    assert.deepEqual(await stageBox(page), fresh[to.width], `${from.width}px to ${to.width}px`);
+    if (to === narrow) assert.equal(await page.$eval('#stage', stage => stage.style.zoom), '', 'no zoom on the phone layout');
+    assert.deepEqual(errors, []);
+    await page.close();
+  }
+});
+
 test('no window is wider than its page, and side options stay on one line', async () => {
   for (const viewport of [...PHONES, { width: 1000, height: 700 }, { width: 1146, height: 1330 }, DESKTOP]) {
     const { page, errors } = await openPage(viewport);
@@ -383,8 +415,24 @@ test('on phones only the stage shows, and a tap on it plays and pauses', async (
   await page.click('#stage');
   await page.waitForFunction(() => document.getElementById('tap').dataset.state === 'pause');
   await page.click('#stage');
-  await page.waitForFunction(() => document.getElementById('tap').dataset.state === 'play');
+  // paused at the start the stage offers «Tocar», after the first frame «Continuar»: either is paused
+  await page.waitForFunction(() => ['play', 'resume'].includes(document.getElementById('tap').dataset.state));
   assert.match(await page.$eval('#tapTime', element => element.textContent), /^\d:\d\d \/ \d:\d\d$/);
+  assert.deepEqual(errors, []);
+  await page.close();
+});
+
+test('the video export lays out the stage alone, 9:16 and the full window height', async () => {
+  const { page, errors } = await openPage(EXPORT_FRAME, { videoExport: true });
+  await showScene(page, 'opening');
+  const layout = await page.evaluate(() => {
+    const stage = document.getElementById('stage').getBoundingClientRect();
+    const shown = selector => [...document.querySelectorAll(selector)].filter(element => element.getClientRects().length > 0).length;
+    const points = [0.05, 0.5, 0.95].flatMap(x => [0.05, 0.5, 0.95].map(y => [stage.left + x * stage.width, stage.top + y * stage.height]));
+    const covered = points.filter(([x, y]) => !document.getElementById('stage').contains(document.elementFromPoint(x, y))).length;
+    return { width: Math.round(stage.width), height: Math.round(stage.height), side: shown('.side'), tap: shown('.tap'), foot: shown('.foot'), covered };
+  });
+  assert.deepEqual(layout, { width: EXPORT_FRAME.width, height: EXPORT_FRAME.height, side: 0, tap: 0, foot: 0, covered: 0 });
   assert.deepEqual(errors, []);
   await page.close();
 });

@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { createPlayer, DEFAULT_CHOICES, SOUND_CHOICES } from '../src/audio.js';
+import { BAR_SECONDS } from '../src/music.js';
 
 // A fake audio context: enough of the Web Audio API for the player, with a clock the test moves.
 function installFakeAudio() {
@@ -108,22 +109,20 @@ test('starting again replaces the scheduler instead of adding one', async () => 
   }
 });
 
-// #5: a sound picked while paused plays in place; the show does not start.
-test('a preview plays the picked option once without starting the show', async () => {
+// #5, and the owner on 2026-11-16: a pick while paused plays one and a half cycles of its instrument alone,
+// with the picked sound; the show does not start.
+test('a preview plays one and a half cycles of the picked instrument without starting the show', async () => {
   const contexts = installFakeAudio();
   const choice = { ...DEFAULT_CHOICES };
   const player = createPlayer(namedBank(), choice);
   const sound = id => SOUND_CHOICES.find(s => s.id === id);
   await player.preview({ ...choice, agogo: 'big-bell' }, sound('agogo').preview);
-  await player.preview({ ...choice, whistle: 'metal' }, sound('whistle').preview);
-  await player.preview({ ...choice, alfaia: 'deep' }, sound('alfaia').preview);
   assert.equal(player.playing, false);
-  assert.deepEqual(
-    contexts[0].played.map(([name]) => name),
-    ['agogo-big-bell', 'agogo-big-bell', 'whistle-metal-long', 'alfaia-deep-main'],
-  );
-  const [[, low], [, high]] = contexts[0].played;
-  assert.ok(high > low, 'the agogô plays low, then high');
+  const played = contexts[0].played;
+  assert.ok(played.length > 0 && played.every(([name]) => name === 'agogo-big-bell'), 'only the picked agogô');
+  const times = played.map(([, time]) => time);
+  const span = Math.max(...times) - Math.min(...times);
+  assert.ok(span > BAR_SECONDS && span < 1.5 * BAR_SECONDS, 'it spans one and a half cycles');
 });
 
 test('a preview right after a pause is not silenced by the pause', async () => {
@@ -132,7 +131,7 @@ test('a preview right after a pause is not silenced by the pause', async () => {
   await player.prepare();
   player.start(0);
   player.stop();
-  await player.preview({ ...DEFAULT_CHOICES }, [['ganza']]);
+  await player.preview({ ...DEFAULT_CHOICES }, ['ganza']);
   await new Promise(done => setTimeout(done, 450)); // past the pause's release
   assert.equal(contexts[0].state, 'running');
 });
@@ -141,6 +140,18 @@ test('a preview whose samples fail to load rejects and plays nothing', async () 
   const contexts = installFakeAudio();
   const failing = { load: async () => Promise.reject(new Error('offline')) };
   const player = createPlayer(failing, { ...DEFAULT_CHOICES });
-  await assert.rejects(player.preview({ ...DEFAULT_CHOICES }, [['ganza']]));
+  await assert.rejects(player.preview({ ...DEFAULT_CHOICES }, ['ganza']));
   assert.ok(contexts.every(context => context.played.length === 0));
+});
+
+// 2026-11-16, owner: each instrument has a volume; mute plays nothing of it.
+test('a muted instrument plays no hit, and the others still play', async () => {
+  const contexts = installFakeAudio();
+  const choice = { ...DEFAULT_CHOICES };
+  const player = createPlayer(namedBank(), choice, { agogo: 'mute' });
+  const sound = id => SOUND_CHOICES.find(s => s.id === id);
+  await player.preview(choice, sound('agogo').preview);
+  await player.preview(choice, sound('caixa').preview);
+  assert.ok(contexts[0].played.length > 0);
+  assert.ok(contexts[0].played.every(([name]) => name === `caixa-${choice.caixa}`));
 });

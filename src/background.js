@@ -87,10 +87,11 @@ const SWING_WOBBLE_RATE = 1.2; // radians per visual second
 const STROBE_LIFE = 0.07; // seconds
 const STROBE_ALPHA = 0.09; // peak flash
 const VIGNETTE_STOPS = [
-  [0, 0.6],
-  [0.2, 0],
-  [0.6, 0],
-  [0.72, 0.82],
+  [0, 0.85],
+  [0.12, 0.45],
+  [0.26, 0],
+  [0.52, 0],
+  [0.66, 0.82],
   [1, 0.95],
 ]; // [stop, background alpha], top to bottom
 

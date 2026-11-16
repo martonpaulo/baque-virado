@@ -19,10 +19,9 @@ test('scenes are contiguous from bar 0', () => {
   }
 });
 
-test('every scene id and every section has copy', () => {
+test('every scene id has copy', () => {
   for (const scene of SCENES) {
     assert.ok(COPY.scenes[scene.id], `no copy for scene ${scene.id}`);
-    assert.ok(COPY.sections[scene.section], `no copy for section ${scene.section}`);
   }
 });
 
@@ -50,7 +49,7 @@ test('the baque scenes follow BAQUE_ORDER', async () => {
   const { SCENES } = await import('../src/show.js');
   const { BAQUE_ORDER } = await import('../src/music.js');
   assert.deepEqual(
-    SCENES.filter(scene => scene.section === 'D').map(scene => scene.id),
+    SCENES.filter(scene => scene.named && scene.id !== 'summary').map(scene => scene.id),
     BAQUE_ORDER,
   );
 });

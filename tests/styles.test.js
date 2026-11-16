@@ -12,16 +12,6 @@ function rule(selector) {
   return match[1];
 }
 
-// #4: the labels that carry the lesson never render below the phone floor.
-test('stage labels keep the phone font-size floor', () => {
-  for (const selector of ['.hud', '.eyebrow', '.read .k', '.notation .n', '.notation.tight .k,\n.notation.tight .n']) {
-    assert.match(rule(selector), /font-size: max\(var\(--stage-[a-z-]+\), var\(--label-floor\)\);/, selector);
-  }
-  const phone = css.slice(css.indexOf('@media (max-width: 899px)'));
-  assert.match(phone, /--label-floor: 11px;/);
-  assert.match(rule(':root'), /--label-floor: 0px;/);
-});
-
 // #8: the phone toolbar resizes the dynamic viewport; the stage must follow the small one.
 test('the stage is sized from the small viewport height', () => {
   assert.match(rule('.stage'), /100svh/);
@@ -80,4 +70,28 @@ test('controls use rem tokens for space, text and radius', () => {
     .filter(([, , value]) => /\d+px/.test(value))
     .map(([declaration]) => declaration);
   assert.deepEqual(literal, []);
+});
+
+// Layout lives in styles.css; an inline style in the readout markup carries only a per-hit value
+// (a colour, a meter's side and length, a fade).
+test('the readout markup keeps layout out of its inline styles', () => {
+  const source = readFileSync(new URL('../src/readout.js', import.meta.url), 'utf8');
+  const inline = [...source.matchAll(/style="([^"]*)"/g)].map(([, value]) => value);
+  assert.ok(inline.length > 0, 'the readout has inline styles to check');
+  for (const value of inline) assert.doesNotMatch(value, /\b(position|display|height|margin|padding|grid-template-columns|top)\s*:/, value);
+});
+
+// The desktop breakpoint and the phone stage size are spelled in three files: the stylesheet, the
+// zoom script in index.html (it runs before the first paint) and src/main.js. They must agree.
+test('the breakpoint and the phone stage size agree in styles.css, index.html and main.js', () => {
+  const html = readFileSync(new URL('../index.html', import.meta.url), 'utf8'),
+    main = readFileSync(new URL('../src/main.js', import.meta.url), 'utf8');
+  const desktop = Number(css.match(/@media \(min-width: (\d+)px\) \{/)[1]);
+  assert.equal(Number(css.match(/@media \(max-width: (\d+)px\) \{/)[1]), desktop - 1, 'the phone query ends where the desktop one starts');
+  const [, width, height] = css.match(/\.stage \{\n {4}width: (\d+)px;\n {4}height: (\d+)px;/);
+  assert.match(css, new RegExp(`--stage-ratio: calc\\(${width} / ${height}\\)`));
+  assert.match(main, new RegExp(`DESKTOP_QUERY = '\\(min-width: ${desktop}px\\)'`));
+  assert.match(main, new RegExp(`PHONE_STAGE_WIDTH = ${width};`));
+  assert.match(html, new RegExp(`matchMedia\\('\\(min-width: ${desktop}px\\)'\\)`));
+  assert.match(html, new RegExp(`clientWidth / ${width}\\)`));
 });

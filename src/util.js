@@ -70,6 +70,21 @@ export const setText = (element, text) => {
   if (element.textContent !== value) element.textContent = value;
 };
 
+const writtenStyles = new WeakMap(); // element → the inline values setStyle last wrote
+/**
+ * Set an inline style property only when it differs from the value this function last wrote, so a
+ * per-frame update writes no unchanged style. It compares with its own record, not `element.style`,
+ * because the browser rewrites some values on reading (a text-shadow's colour moves first).
+ */
+export const setStyle = (element, name, value) => {
+  const text = String(value);
+  if (!writtenStyles.has(element)) writtenStyles.set(element, {});
+  const written = writtenStyles.get(element);
+  if (written[name] === text) return;
+  written[name] = text;
+  element.style[name] = text;
+};
+
 /** Set an attribute only when it differs. */
 export const setAttr = (element, name, value) => {
   const text = String(value);
