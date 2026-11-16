@@ -80,3 +80,18 @@ test('the readout markup keeps layout out of its inline styles', () => {
   assert.ok(inline.length > 0, 'the readout has inline styles to check');
   for (const value of inline) assert.doesNotMatch(value, /\b(position|display|height|margin|padding|grid-template-columns|top)\s*:/, value);
 });
+
+// The desktop breakpoint and the phone stage size are spelled in three files: the stylesheet, the
+// zoom script in index.html (it runs before the first paint) and src/main.js. They must agree.
+test('the breakpoint and the phone stage size agree in styles.css, index.html and main.js', () => {
+  const html = readFileSync(new URL('../index.html', import.meta.url), 'utf8'),
+    main = readFileSync(new URL('../src/main.js', import.meta.url), 'utf8');
+  const desktop = Number(css.match(/@media \(min-width: (\d+)px\) \{/)[1]);
+  assert.equal(Number(css.match(/@media \(max-width: (\d+)px\) \{/)[1]), desktop - 1, 'the phone query ends where the desktop one starts');
+  const [, width, height] = css.match(/\.stage \{\n {4}width: (\d+)px;\n {4}height: (\d+)px;/);
+  assert.match(css, new RegExp(`--stage-ratio: calc\\(${width} / ${height}\\)`));
+  assert.match(main, new RegExp(`DESKTOP_QUERY = '\\(min-width: ${desktop}px\\)'`));
+  assert.match(main, new RegExp(`PHONE_STAGE_WIDTH = ${width};`));
+  assert.match(html, new RegExp(`matchMedia\\('\\(min-width: ${desktop}px\\)'\\)`));
+  assert.match(html, new RegExp(`clientWidth / ${width}\\)`));
+});
