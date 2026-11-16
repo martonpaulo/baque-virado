@@ -24,15 +24,17 @@ sounds a desktop viewer can pick are fetched when chosen.
 ## Project structure
 
 - `index.html`, `styles.css` - the page and its layout.
-- `src/music.js` - tempo, voices, the measured swing and every rhythmic pattern (`barHits`).
-- `src/show.js` - the scenes, the 54-bar timeline and what sounds at any moment.
+- `src/rhythms/maracatu.js` - the maracatu package: tempo, voices, swing, patterns (`barHits`), the show script, readout layouts, background looks, sounds and its copy.
+- `src/rhythms/index.js` - the rhythms the site ships and the one `?ritmo=<id>` picks.
+- `src/music.js` - the meter, voices and swing of the rhythm on show, as the engine reads them.
+- `src/show.js` - a rhythm's scenes, its timeline and what sounds at any moment.
 - `src/audio.js` - sound choices, the lazy sample bank, the live player and the offline WAV render.
-- `src/copy.js` - every word the viewer reads (Brazilian Portuguese).
+- `src/copy.js` - the interface's words around the rhythm's own (Brazilian Portuguese).
 - `src/util.js` - small helpers, including the deterministic `hash` that seeds per-hit variation.
 - `src/theme.js` - the shared colour palette and fonts.
 - `src/score.js` - one-line percussion notation as an SVG string.
 - `src/scope.js` - the rhythm wheel.
-- `src/readout.js` - the numeric readouts of each scene.
+- `src/readout.js` and `src/readout-markup.js` - the readout under the wheel.
 - `src/title.js` - scene titles and labels.
 - `src/background.js` - the animated WebGL background.
 - `src/lanes.js` - the per-voice hit lanes.

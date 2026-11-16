@@ -72,7 +72,7 @@ on 2026-11-12.
 ## Evidence on hand
 
 - Measured swing: median offsets per sixteenth from a phone recording of a Batuk Nagô workshop
-  (YouTube `hxW-td9bNsg`), in `src/music.js`.
+  (YouTube `hxW-td9bNsg`), in `src/rhythms/maracatu.js`.
 - Patterns: the alfaia hand table at lansdownsoftware.com; not yet checked by a batuqueiro.
 - No screenshots, user figures or quotes exist yet.
 

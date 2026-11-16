@@ -13,7 +13,7 @@
 - License: `MIT`
 - Copyright: 2026 Marton Paulo
 - Development language: English.
-- Product copy: Brazilian Portuguese only; dynamic copy lives in `src/copy.js`, static copy in `index.html`; no localization.
+- Product copy: Brazilian Portuguese only; dynamic copy lives in `src/copy.js` and, for a rhythm's own words, in its package under `src/rhythms/`; static copy in `index.html`; no localization.
 - Branch policy: work directly on `main`; a branch only when the owner asks.
 - Commit policy: the agent commits each verified change, signed, Conventional Commits.
 - Push policy: automatic: push to `main` after the local `pnpm validate` passes. A cloud session pushes `main` too, only for a `runs: cloud` issue whose gates all ran there (the owner's choice, 2026-11-13: «continuar o trabalho em nuvem e terminar tudo por lá»).
@@ -176,9 +176,10 @@ Lead with the outcome, in the output shape, and include:
 ## Project commands and patterns
 
 - `pnpm serve` serves the site at <http://127.0.0.1:8000>; `pnpm validate` runs exactly what CI runs.
-- Keep `VOICE_ORDER` (`src/music.js`) and `hash` (`src/util.js`) stable: they seed the per-hit
+- Keep the voice order of `src/rhythms/maracatu.js` (`VOICE_ORDER` in `src/music.js`) and `hash` (`src/util.js`) stable: they seed the per-hit
   sound variation, and `tests/` pins their values.
 - Phones (`max-width: 899px`) show the reel alone, a tap plays or pauses, and fetch only the default samples.
 - Sound, notes, score, wheel and lanes depend only on the show position; the background also on the
   frames before it (`docs/product.md`, Constraints).
-- Dynamic copy lives in `src/copy.js`, colours in `src/theme.js` mirrored by `styles.css`.
+- Each rhythm is one package in `src/rhythms/` (the engine reads it; nothing else names its voices, patterns or scenes); `?ritmo=<id>` picks one, and the selector shows only with two or more ([#18](https://github.com/martonpaulo/baque-virado/issues/18)).
+- Dynamic copy lives in `src/copy.js` and the rhythm packages, colours in `src/theme.js` mirrored by `styles.css`.
