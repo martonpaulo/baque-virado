@@ -415,7 +415,8 @@ test('on phones only the stage shows, and a tap on it plays and pauses', async (
   await page.click('#stage');
   await page.waitForFunction(() => document.getElementById('tap').dataset.state === 'pause');
   await page.click('#stage');
-  await page.waitForFunction(() => document.getElementById('tap').dataset.state === 'play');
+  // paused at the start the stage offers «Tocar», after the first frame «Continuar»: either is paused
+  await page.waitForFunction(() => ['play', 'resume'].includes(document.getElementById('tap').dataset.state));
   assert.match(await page.$eval('#tapTime', element => element.textContent), /^\d:\d\d \/ \d:\d\d$/);
   assert.deepEqual(errors, []);
   await page.close();
