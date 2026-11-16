@@ -27,7 +27,7 @@ practice, not a cited source. No vocals or lyrics appear in the outlines.
 - **Academic term: «Bregapop».** Fontanella (UFPE, 2005), cited by R. R. da Silva (2023, pp. 28
   to 29), uses it for the urban brega of the North and Northeast. The same dissertation names three
   sub-strands: tecnobrega, bregapop and **brega-calypso**.
-- Thiago Soares (UFPE; book *Ninguém é perfeito e a vida é assim*, 2017) describes three «eixos
+- Thiago Soares (UFPE; book _Ninguém é perfeito e a vida é assim_, 2017) describes three «eixos
   estéticos»:
   1. Reginaldo Rossi.
   2. Women singers, opened by the hit «Amor de Rapariga» (2002) and by Banda Calypso (from Pará)
@@ -83,20 +83,20 @@ How a producer would program it [inferred; check on recordings]:
 
 About 2:00 at about 140 BPM. One bar is about 1.7 s. 64 to 72 bars.
 
-| # | Scene | Bars | What enters or changes | What it teaches |
-|---|---|---|---|---|
-| 1 | Keyboard hook (intro) | 4 | Keyboard plays the melodic hook alone | Brega is a keyboard music |
-| 2 | Xacumbum | 4 | Kick, snare and off-beat hat | The base beat |
-| 3 | Bass | 4 | Bass locks to the kick, pushes on step 16 | Syncopated bass |
-| 4 | Harmony | 4 | String pad and off-beat stabs, I, IV, V | Simple harmony, keyboard texture |
-| 5 | Guitar lead | 8 | Chorus guitar in thirds plays verse A | Romantic melody on guitar |
-| 6 | Virada | 1 | Drum-machine tom fill | How sections join |
-| 7 | Refrão | 8 | Keyboard lead plays the chorus melody, full band | The hook |
-| 8 | Stop and return | 2 | One bar of silence or kick only, then a hit | The break before the chorus |
-| 9 | Brega romântico and calypso | 8 | Same loop, hats doubled to sixteenths, faster feel | Recife and Pará |
-| 10 | Interlude «vinheta» | 4 | Brass-patch stabs answer the guitar | The interlude device |
-| 11 | Final chorus | 8 | Guitar and keyboard in harmony | Everything together |
-| 12 | Coda | 2 to 4 | Hook, final tom fill, stop on 1 | Ending |
+| #   | Scene                       | Bars   | What enters or changes                             | What it teaches                  |
+| --- | --------------------------- | ------ | -------------------------------------------------- | -------------------------------- |
+| 1   | Keyboard hook (intro)       | 4      | Keyboard plays the melodic hook alone              | Brega is a keyboard music        |
+| 2   | Xacumbum                    | 4      | Kick, snare and off-beat hat                       | The base beat                    |
+| 3   | Bass                        | 4      | Bass locks to the kick, pushes on step 16          | Syncopated bass                  |
+| 4   | Harmony                     | 4      | String pad and off-beat stabs, I, IV, V            | Simple harmony, keyboard texture |
+| 5   | Guitar lead                 | 8      | Chorus guitar in thirds plays verse A              | Romantic melody on guitar        |
+| 6   | Virada                      | 1      | Drum-machine tom fill                              | How sections join                |
+| 7   | Refrão                      | 8      | Keyboard lead plays the chorus melody, full band   | The hook                         |
+| 8   | Stop and return             | 2      | One bar of silence or kick only, then a hit        | The break before the chorus      |
+| 9   | Brega romântico and calypso | 8      | Same loop, hats doubled to sixteenths, faster feel | Recife and Pará                  |
+| 10  | Interlude «vinheta»         | 4      | Brass-patch stabs answer the guitar                | The interlude device             |
+| 11  | Final chorus                | 8      | Guitar and keyboard in harmony                     | Everything together              |
+| 12  | Coda                        | 2 to 4 | Hook, final tom fill, stop on 1                    | Ending                           |
 
 ### e. Samples
 
@@ -182,20 +182,20 @@ How a producer would program it [inferred], on a 16-step half-time bar:
 
 About 2:00 at 170 BPM. One half-time bar is about 2.8 s. About 42 bars.
 
-| # | Scene | Bars | What enters or changes | What it teaches |
-|---|---|---|---|---|
-| 1 | Hook alone | 2 | Lead hook, no beat | The hook |
-| 2 | Bumbo | 2 | Kick on 1 and 9 | The half-time pulse |
-| 3 | The lata | 4 | Metallic snare, 3+3+2 | The signature sound |
-| 4 | Chimbais dobrados | 2 | Sixteenth hats, then rolls | Motion |
-| 5 | Graves | 4 | Sliding 808 | The bass |
-| 6 | Full beat | 4 | Hook and chords (MIDI piano) | The whole groove |
-| 7 | Old and new | 4 | Same beat at 190, then back to 170 | Tempo history (VICE) |
-| 8 | Tamborzão contrast | 2 | Carioca tamborzão for 2 bars, then brega funk | Why it is not Rio funk |
-| 9 | Break | 2 | Strip to hook and hats, then a silent beat | The build |
-| 10 | Drop | 4 | Everything, plus a frevo-brass stab | The drop |
-| 11 | Passinho variation | 4 | Kick doubled, lata syncopation varied | Variation for the dance |
-| 12 | Finale | 4 | Hook, final lata, cut | Ending |
+| #   | Scene              | Bars | What enters or changes                        | What it teaches         |
+| --- | ------------------ | ---- | --------------------------------------------- | ----------------------- |
+| 1   | Hook alone         | 2    | Lead hook, no beat                            | The hook                |
+| 2   | Bumbo              | 2    | Kick on 1 and 9                               | The half-time pulse     |
+| 3   | The lata           | 4    | Metallic snare, 3+3+2                         | The signature sound     |
+| 4   | Chimbais dobrados  | 2    | Sixteenth hats, then rolls                    | Motion                  |
+| 5   | Graves             | 4    | Sliding 808                                   | The bass                |
+| 6   | Full beat          | 4    | Hook and chords (MIDI piano)                  | The whole groove        |
+| 7   | Old and new        | 4    | Same beat at 190, then back to 170            | Tempo history (VICE)    |
+| 8   | Tamborzão contrast | 2    | Carioca tamborzão for 2 bars, then brega funk | Why it is not Rio funk  |
+| 9   | Break              | 2    | Strip to hook and hats, then a silent beat    | The build               |
+| 10  | Drop               | 4    | Everything, plus a frevo-brass stab           | The drop                |
+| 11  | Passinho variation | 4    | Kick doubled, lata syncopation varied         | Variation for the dance |
+| 12  | Finale             | 4    | Hook, final lata, cut                         | Ending                  |
 
 Scene 7 changes the tempo inside the show. The decision since then is one tempo per show, so the
 sketch leaves it out.
@@ -274,21 +274,21 @@ How a producer would program it:
 
 About 2:00 at about 120 BPM. This first plan counted four-four wheels of about 2 s, about 60 wheels.
 
-| # | Scene | Wheels | What enters or changes | What it teaches |
-|---|---|---|---|---|
-| 1 | Triângulo | 4 | Closed sixteenths, open off-beat | The pulse and the open accent |
-| 2 | Zabumba pele | 4 | Low-head figure | The bass marking |
-| 3 | Bacalhau | 4 | Off-beat clicks answer the low head | The conversation of the two heads |
-| 4 | The trio | 2 | Sanfona chord rhythm | Pé-de-serra is three players |
-| 5 | Sanfona intro | 8 | Intro melody, octave doubling | The accordion leads |
-| 6 | Baixo and violão | 4 | Bass, cavaquinho | The universitário band |
-| 7 | Melody on rabeca and bandolim | 8 | Tune doubled | The universitário colours |
-| 8 | Jogo de fole | 4 | Bellows 3+3+2 accents | The bellows trick |
-| 9 | Xote | 6 | Tempo down to about 90, xote levada | Named pattern 1 |
-| 10 | Baião | 6 | About 120, baião figure | Named pattern 2 |
-| 11 | Arrasta-pé | 6 | About 150, fast two-step levada | Named pattern 3 |
-| 12 | Breque | 1 | Stop, zabumba roll | The break |
-| 13 | Finale | 4 | All at baião tempo, final accent on 1 | Everything |
+| #   | Scene                         | Wheels | What enters or changes                | What it teaches                   |
+| --- | ----------------------------- | ------ | ------------------------------------- | --------------------------------- |
+| 1   | Triângulo                     | 4      | Closed sixteenths, open off-beat      | The pulse and the open accent     |
+| 2   | Zabumba pele                  | 4      | Low-head figure                       | The bass marking                  |
+| 3   | Bacalhau                      | 4      | Off-beat clicks answer the low head   | The conversation of the two heads |
+| 4   | The trio                      | 2      | Sanfona chord rhythm                  | Pé-de-serra is three players      |
+| 5   | Sanfona intro                 | 8      | Intro melody, octave doubling         | The accordion leads               |
+| 6   | Baixo and violão              | 4      | Bass, cavaquinho                      | The universitário band            |
+| 7   | Melody on rabeca and bandolim | 8      | Tune doubled                          | The universitário colours         |
+| 8   | Jogo de fole                  | 4      | Bellows 3+3+2 accents                 | The bellows trick                 |
+| 9   | Xote                          | 6      | Tempo down to about 90, xote levada   | Named pattern 1                   |
+| 10  | Baião                         | 6      | About 120, baião figure               | Named pattern 2                   |
+| 11  | Arrasta-pé                    | 6      | About 150, fast two-step levada       | Named pattern 3                   |
+| 12  | Breque                        | 1      | Stop, zabumba roll                    | The break                         |
+| 13  | Finale                        | 4      | All at baião tempo, final accent on 1 | Everything                        |
 
 Scenes 9 and 11 change the tempo inside the show. The decision since then is one tempo per show, so
 the sketch keeps only the baião.

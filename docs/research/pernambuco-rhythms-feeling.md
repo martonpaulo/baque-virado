@@ -28,8 +28,8 @@ Research report on the rhythm, melody, social context and feeling of the seven B
 
 Gaps in the sources:
 
-- Crook's *Brazilian Music: Northeastern Traditions and the Heartbeat of a Modern Nation* (2005),
-  Sandroni's *Feitiço decente* (2001) and the *Batuque Book* volumes were not read directly. They
+- Crook's _Brazilian Music: Northeastern Traditions and the Heartbeat of a Modern Nation_ (2005),
+  Sandroni's _Feitiço decente_ (2001) and the _Batuque Book_ volumes were not read directly. They
   appear only through other authors.
 - No ethnomusicological transcription of the brega funk beat was found. Its grids are [I].
 - The ANPPOM paper on coco and Xambá found is by Tainá Menezes Castro (2018) [6].
@@ -40,7 +40,7 @@ Gaps in the sources:
 
 - Sandroni names two rhythmic paradigms. The **paradigma do tresillo** is the 19th-century figure
   of lundu, habanera, tango and maxixe. The **paradigma do Estácio** is a 16-pulse cycle that 1930s
-  Rio samba consolidated. He also discusses *contrametricidade*: placing accents against the strong
+  Rio samba consolidated. He also discusses _contrametricidade_: placing accents against the strong
   beat [S2, 1].
 - Accenting the first onset of each group gives the tresillo its 3+3+2 grouping: `X..X..X.` [S2].
 - [I] **A working hypothesis for the whole show.** Most of these rhythms stack a steady pulse
@@ -57,21 +57,21 @@ Gaps in the sources:
 - The ensemble is percussion and voice only: gonguê (one bell), tarol or caixa de guerra, at least
   twelve alfaias, and mineiro (ganzá) [S2, 2].
 - «Baque virado» means «baque dobrado», the doubled beat of several bass drums [S2, 2, after
-  Guerra-Peixe 1952].
+Guerra-Peixe 1952].
 - The gonguê is the highest instrument. It sets the tempo and plays the cell that «structures and
   directs» the group. The cell changes from nation to nation; the function stays [S, 2].
-- The caixas play continuous sixteenths. Their accents create the *balanço* [S, 2].
+- The caixas play continuous sixteenths. Their accents create the _balanço_ [S, 2].
 - The alfaias are the «heart of the batuque» and carry the main «rhythmic melody». They split into
   low, middle and high voices: Melê, Biancó and Yan in Nação Porto Rico; Marcante, Repique and
   Meião in Leão Coroado. The low drums keep the marcação. Its constant figure across nations is
   **sixteenth, eighth, sixteenth** [S, 2].
 - The agbê cell is eighth, sixteenth, sixteenth. The ganzá is taught as «TUmaraCATUmaraCATU»: four
   sixteenths, accents on the 1st and 4th [S, 2].
-- *Viradas* are breaks that interrupt the repetition or bring in a new baque [S, 2].
+- _Viradas_ are breaks that interrupt the repetition or bring in a new baque [S, 2].
 - Tempo: no source gives a BPM. [I] Nações walk at a heavy processional pace, roughly 80 to 110 BPM.
   Measure recordings before fixing a number.
 
-**Melody and harmony.** The *toadas* are sung by a lead singer and answered by the chorus. [I] The
+**Melody and harmony.** The _toadas_ are sung by a lead singer and answered by the chorus. [I] The
 melodies are short, stepwise and modal-major, with no harmony instrument.
 
 **Social context and feeling.**
@@ -90,22 +90,22 @@ melodies are short, stepwise and modal-major, with no harmony instrument.
 
 **Rhythm.**
 
-- In coco de roda, a *tirador* (solo singer) gives the line and the circle answers. The *umbigada*
+- In coco de roda, a _tirador_ (solo singer) gives the line and the circle answers. The _umbigada_
   invites the next dancer into the ring. Variants include coco de roda, de umbigada, de embolada and
   de zambê [S, 3; search summary].
-- In *coco de trupé* (Arcoverde), dancers stamp wooden *tamancos* on the floor, with triângulo,
+- In _coco de trupé_ (Arcoverde), dancers stamp wooden _tamancos_ on the floor, with triângulo,
   pandeiro, surdo and ganzá [S, 4; search summary].
 - **What sets Xambá apart.** The alfaia is louder and faster. It sits on a chair so both heads can
   be struck. The coco is built from «rhythmic phrases that join together and end in a different
-  *rufo*» [S2, 6, after Alves 2006].
-- The ritual drums are the *engomes*: played by hand, always in a trio (melé, melé-ancó, ian), found
+  _rufo_» [S2, 6, after Alves 2006].
+- The ritual drums are the _engomes_: played by hand, always in a trio (melé, melé-ancó, ian), found
   only in Xambá. Gonguê and agbê play with them [S, 6].
 - Xambá coco is faster than other coco traditions [5; search summary, unverified].
 - [I] Tempo is roughly 110 to 140 BPM. The ganzá runs continuous sixteenths. The low alfaia marks
   beats 1 and 2 with off-beat pick-ups.
 
 **Melody.** [I] Short verses with fixed refrains in call and response, mostly major, in a narrow
-range a chorus of non-singers can sing. The repertoire is *loas* and *toadas*, some traditional,
+range a chorus of non-singers can sing. The repertoire is _loas_ and _toadas_, some traditional,
 some by members of the community [S, 6].
 
 **Social context and feeling.**
@@ -132,19 +132,19 @@ at once by a chorus.
 
 - Frevo is «frenetic carnival dance music». It emerged around 1900 in Recife, among carnival clubs
   of Black and mixed-race urban workers. It grew out of «the marches and polkas» of military-style
-  bands, and its dance steps «developed largely from the Capoeira». Crook distinguishes *frevo de
-  rua* (instrumental), *frevo de bloco* (strings, percussion, female chorus) and *frevo canção*
+  bands, and its dance steps «developed largely from the Capoeira». Crook distinguishes _frevo de
+  rua_ (instrumental), _frevo de bloco_ (strings, percussion, female chorus) and _frevo canção_
   [S, 8].
 - Meter is 2/4. A common tempo is about 120 BPM, reaching about 180 in performance [S, 9; search
-  summary].
+summary].
 - All Pernambuco frevos share one percussion cell. Caixa and surdo play **twelve sixteenths with
-  specific accents, then a *rullo***, filling two bars of 2/4 [S, 10].
+  specific accents, then a _rullo_**, filling two bars of 2/4 [S, 10].
 - The introduction «already is the music itself». It «invariably starts with an anacrusis»,
   bursting in headlong [S2, 10, after Oliveira 1971].
-- A standard orchestra has 2 alto, 2 tenor and 1 baritone saxophone (*palhetas*), plus 4 trumpets
-  and 4 trombones (*metais*) [S, 10].
-- Sub-styles: *frevo-coqueiro* (high trumpet notes), *frevo-ventania* (sax sixteenth runs) and
-  *abafo* (two bands play loud to drown each other out). These come from teaching sources, weaker
+- A standard orchestra has 2 alto, 2 tenor and 1 baritone saxophone (_palhetas_), plus 4 trumpets
+  and 4 trombones (_metais_) [S, 10].
+- Sub-styles: _frevo-coqueiro_ (high trumpet notes), _frevo-ventania_ (sax sixteenth runs) and
+  _abafo_ (two bands play loud to drown each other out). These come from teaching sources, weaker
   than the rest [S, 11].
 
 **Melody and harmony.** [I] Brass and reeds answer each other. Trumpets and trombones throw short
@@ -153,7 +153,7 @@ secondary dominants, inherited from band marches.
 
 **Social context and feeling.**
 
-- The music and the *passo* were born together. Capoeiras walking ahead of the military bands gave
+- The music and the _passo_ were born together. Capoeiras walking ahead of the military bands gave
   the dance its moves [S2, 12, after Oliveira].
 - [I] **The feeling is euphoric, controlled chaos with a fighting edge.** It is the street fully open
   at carnival. The abafo turns the music into a duel.
@@ -174,8 +174,8 @@ roll every second bar.
   hip-hop, soul, funk, rock, reggae, dub, samba-reggae, punk and post-punk [S, 13].
 - Galinsky reads «A cidade» as «a reinterpretation of the ciranda rhythm combined with a rock-funk
   feel» [S2, 13].
-- Herom Vargas reads the band through «hybridism» (*Hibridismos musicais de Chico Science & Nação
-  Zumbi*, 2007) [S, 13, 14].
+- Herom Vargas reads the band through «hybridism» (_Hibridismos musicais de Chico Science & Nação
+  Zumbi_, 2007) [S, 13, 14].
 - [I] Tempo is about 90 to 105 BPM. The alfaias play the maracatu marcação. A rock kit plays the
   backbeat. Guitar and bass lock to the alfaia accents, not the snare.
 
@@ -184,8 +184,8 @@ dorian riffs, with a half-spoken vocal.
 
 **Social context and feeling.**
 
-- The manifesto «Caranguejos com cérebro» is by Fred Zero Quatro. It was printed in the notes of *Da
-  lama ao caos* (1994), when Recife was called the «fourth worst city in the world». Its central
+- The manifesto «Caranguejos com cérebro» is by Fred Zero Quatro. It was printed in the notes of _Da
+  lama ao caos_ (1994), when Recife was called the «fourth worst city in the world». Its central
   image is an **«antenna stuck in the mud»**: local roots connected to the global [S, 13].
 - Chico Science: «Só vale com a diversão levada a sério» (it only counts if fun is taken seriously)
   [S2, 13].
@@ -204,12 +204,12 @@ dorian riffs, with a half-spoken vocal.
 
 - The baião has «a syncopated duple rhythm played on the zabumba and a melodic scale featuring a
   flatted seventh». In the 1940s Luiz Gonzaga built the urban baião from a viola rhythm of
-  northeastern bards and the drum patterns of *bandas de pífanos*. The usual line-up is accordion,
+  northeastern bards and the drum patterns of _bandas de pífanos_. The usual line-up is accordion,
   triangle and zabumba [S, 15].
 - The «standard» baião cell is a reduction. Gonzaga's recordings show many accompaniment patterns
   [S, 16; abstract only].
 - The triangle keeps sixteenths and opens on the off-beats. The zabumba gives the bass pulse [S, 17;
-  search summary].
+search summary].
 - [I] Tempo: baião about 85 to 110 BPM, xote slower, arrasta-pé faster.
 
 **Melody and harmony.**
@@ -226,7 +226,7 @@ dorian riffs, with a half-spoken vocal.
 - The sertão becomes «an idealized mirage of whoever is far away».
 - The sanfona timbre is «analogous to the organ and the human choir», sounds with great «power of
   evocation» in Catholic liturgy.
-- The fast pumping of the bellows, the *fungadinho*, invites dancing and flirtation.
+- The fast pumping of the bellows, the _fungadinho_, invites dancing and flirtation.
 
 The trio of sanfona, zabumba and triângulo, led by the sanfona, gives the «characteristic sound» of
 a shared Northeastern imaginary [S, 19].
@@ -243,7 +243,7 @@ sanfona phrase landing on the flat seventh.
 
 **Sound.**
 
-- The canonical marks of romantic brega are «the vast use of keyboards», drum *viradas* «as
+- The canonical marks of romantic brega are «the vast use of keyboards», drum _viradas_ «as
   foundations for the build-up of the choruses», and singing «with wide use of range and vibrato».
   Later arrangements add guitars and electronic drums [S, 20].
 - [I] Tempo is a mid-tempo two-step or slow bolero feel, about 70 to 100 BPM. Harmony uses major
@@ -253,9 +253,9 @@ sanfona phrase landing on the flat seventh.
 **Social context and feeling.**
 
 - Brega takes the «melancholic» tone of Latin American melodrama. Its songs are spaces «of love,
-  saudade and sexuality (*sacanagem*)». For working-class listeners, the romantic ideal is a small
+  saudade and sexuality (_sacanagem_)». For working-class listeners, the romantic ideal is a small
   way to transgress class domination [S, 20].
-- Thiago Soares's book *Ninguém é perfeito e a vida é assim* (2017) maps the scene «from Reginaldo
+- Thiago Soares's book _Ninguém é perfeito e a vida é assim_ (2017) maps the scene «from Reginaldo
   Rossi to MC Troinha» in three aesthetic axes, starting with Rossi's 1966 debut. Soares reads brega
   as melodrama [S, 21].
 - Until 2017, brega could not play at the official Carnival or apply for public funding. Recife law
@@ -290,7 +290,7 @@ synth in the instrumental form.
 
 **Social context and feeling.**
 
-- The *passinho dos malokas* dance drew «violent looks and actions», and the genre was branded
+- The _passinho dos malokas_ dance drew «violent looks and actions», and the genre was branded
   «vulgar and sexualized». The Aluno Conectado tablet programme (2012 to 2014) sparked interest in
   music software among young people [S, 22].
 - Ethnographies by Moreau (2022) and Paz, both at UFPE [S, 27, 28; abstracts only].
@@ -335,7 +335,7 @@ trupe   X . . . X . . . X . . . X . . .   [I] feet
 
 - **Feeling.** A yard party at a sacred house: joyful, rooted, proud.
 - **Melody must have.** A 2-bar call and a 2-bar answer, the same every round, inside an octave. A
-  closing *rufo* on the alfaia ends each section [S].
+  closing _rufo_ on the alfaia ends each section [S].
 - **Avoid.** Turning it into forró, with sanfona or triangle in the lead. Slowing it into a lament.
   Orixá imagery as decoration: the Xambá toques are religious property, so take the rhythmic feel,
   not ritual songs.
@@ -423,31 +423,31 @@ bass    X . . . . . X . X . . . . . . .   sliding [S]; positions [I]
 
 ## References
 
-1. Napolitano 2002, review of Sandroni, *Feitiço decente*, *História: Questões & Debates* 36. https://revistas.ufpr.br/historia/article/download/2700/2237
+1. Napolitano 2002, review of Sandroni, _Feitiço decente_, _História: Questões & Debates_ 36. https://revistas.ufpr.br/historia/article/download/2700/2237
 2. Martins 2014, «Ritmos do maracatu na Música Brasileira Contemporânea», III SIMPOM, UNIRIO, pp. 1178 to 1183 (cites Santos & Resende 2005, Guerra-Peixe 1952, Guillen & Lima 2006). https://seer.unirio.br/simpom/article/download/4720/4212/24233
 3. Samba de Coco study, UFU journal. https://seer.ufu.br/index.php/reveducpop/article/download/76729/42701/380742
 4. Brasil de Fato, coco de trupé. https://brasildefato.com.br/?p=625494
 5. Cadernos de Estudos Sociais, Fundaj. https://fundaj.emnuvens.com.br/CAD/article/download/88/1237/1697
 6. Castro 2018, «Nação Xambá: identidade negra, tradição religiosa e estratégias de difusão da sua cultura», ANPPOM 2018. https://anppom.org.br/anais/anaiscongresso_anppom_2018/5434/public/5434-18196-1-PB.pdf
 7. Article in the ct-journal of the Universidade da Madeira, on the 29 June coco feast. https://ct-journal.uma.pt/article/download/29434/20945/125577
-8. Crook, «Frevo», *Encyclopedia of Latin American History and Culture*. https://encyclopedia.com/humanities/encyclopedias-almanacs-transcripts-and-maps/frevo
+8. Crook, «Frevo», _Encyclopedia of Latin American History and Culture_. https://encyclopedia.com/humanities/encyclopedias-almanacs-transcripts-and-maps/frevo
 9. ANPPOM 2019, trumpet staccato in frevo de rua. https://anppom.org.br/anais/anaiscongresso_anppom_2019/5983/public/5983-20723-1-PB.pdf
-10. Lima & Alves 2018, «Um planejamento composicional a partir de elementos do frevo de rua pernambucano», *Per Musi* (UFMG). https://periodicos.ufmg.br/index.php/permusi/article/download/5269/3265/16894
-11. EMBAP 2019, *Frevendo*, a teaching booklet of frevos for recorder and harpsichord, Unespar (Curitiba).
+10. Lima & Alves 2018, «Um planejamento composicional a partir de elementos do frevo de rua pernambucano», _Per Musi_ (UFMG). https://periodicos.ufmg.br/index.php/permusi/article/download/5269/3265/16894
+11. EMBAP 2019, _Frevendo_, a teaching booklet of frevos for recorder and harpsichord, Unespar (Curitiba).
 12. Smithsonian Folklife Festival blog post on frevo. https://festival.si.edu/blog/frevo-dances-of-resistance-protest
-13. Sneed 2019, «The Coexistentialism of Chico Science and Brazil's Manguebeat», *Latin American Research Review* 54(3):651 to 664, doi:10.25222/larr.451. https://cambridge.org/core/services/aop-cambridge-core/content/view/408ED146F2DD5F5AAEFF072E37C82907/S0023879100005525a.pdf/coexistentialism_of_chico_science_and_brazils_manguebeat.pdf
+13. Sneed 2019, «The Coexistentialism of Chico Science and Brazil's Manguebeat», _Latin American Research Review_ 54(3):651 to 664, doi:10.25222/larr.451. https://cambridge.org/core/services/aop-cambridge-core/content/view/408ED146F2DD5F5AAEFF072E37C82907/S0023879100005525a.pdf/coexistentialism_of_chico_science_and_brazils_manguebeat.pdf
 14. SESC SP, «Do mangue ao pop», on Vargas 2007. https://portal.sescsp.org.br/online/artigo/compartilhar/11310_DO+MANGUE+AO+POP
-15. Crook, «Baião», *Encyclopedia of Latin American History and Culture*. https://encyclopedia.com/humanities/encyclopedias-almanacs-transcripts-and-maps/baiao
-16. Maia & Nascimento 2019, «Os ritmos do baião fonográfico de Luiz Gonzaga», *Opus* 25(3):508 to 530. https://www.anppom.com.br/revista/index.php/opus/article/view/765
+15. Crook, «Baião», _Encyclopedia of Latin American History and Culture_. https://encyclopedia.com/humanities/encyclopedias-almanacs-transcripts-and-maps/baiao
+16. Maia & Nascimento 2019, «Os ritmos do baião fonográfico de Luiz Gonzaga», _Opus_ 25(3):508 to 530. https://www.anppom.com.br/revista/index.php/opus/article/view/765
 17. Soares 2022, USP thesis. https://www.teses.usp.br/teses/disponiveis/27/27157/tde-12072022-095203/publico/FelipeMarmoratoSoaresCorrigida.pdf
 18. Santos Neto, PianoGroove. https://www.pianogroove.com/?p=23132
-19. Trotta 2012, «Som de cabra-macho: sonoridade, nordestinidade e masculinidades no forró», *Comunicação, Mídia e Consumo* 9(26):151 to 172. https://revistacmc.espm.br/revistacmc/article/download/349/pdf/536
-20. Soares & Alves 2021, «Performance e nostalgia na música brega», *Lumina* (UFJF) 15(2):37 to 54, doi:10.34019/1981-4070.2021.v15.33682. https://periodicos.ufjf.br/index.php/lumina/article/download/33682/23268
+19. Trotta 2012, «Som de cabra-macho: sonoridade, nordestinidade e masculinidades no forró», _Comunicação, Mídia e Consumo_ 9(26):151 to 172. https://revistacmc.espm.br/revistacmc/article/download/349/pdf/536
+20. Soares & Alves 2021, «Performance e nostalgia na música brega», _Lumina_ (UFJF) 15(2):37 to 54, doi:10.34019/1981-4070.2021.v15.33682. https://periodicos.ufjf.br/index.php/lumina/article/download/33682/23268
 21. Diário de Pernambuco 2017, interview with Thiago Soares. https://www.diariodepernambuco.com.br/noticia/viver/2017/08/o-governo-colocou-o-brega-embaixo-do-tapete-diz-autor-de-livro-sobr.html
 22. Billboard Brasil 2024-02-07, brega funk and Recife. https://billboard.com.br/brega-e-chique-a-saga-do-brega-funk-para-se-tornar-filho-prodigo-de-recife/
 23. Intercom Nordeste 2018 abstract. https://portalintercom.org.br/anais/nordeste2018/resumos/R62-0689-1.pdf
-24. Loftin 2019, «Brega funk is the music of Recife that's taking over Brazil», *Mixmag*. https://mixmag.net/feature/brega-funk-recife-brazil-feature
-25. Caceres, Ferrari & Palombini 2014, «A Era Lula/Tamborzão: política e sonoridade», *Revista do IEB* 58:157 to 207. https://www.redalyc.org/pdf/4056/405641280009.pdf
+24. Loftin 2019, «Brega funk is the music of Recife that's taking over Brazil», _Mixmag_. https://mixmag.net/feature/brega-funk-recife-brazil-feature
+25. Caceres, Ferrari & Palombini 2014, «A Era Lula/Tamborzão: política e sonoridade», _Revista do IEB_ 58:157 to 207. https://www.redalyc.org/pdf/4056/405641280009.pdf
 26. Wikipedia, «Funk carioca».
-27. Moreau 2022, *O brega funk como estratégia identitária e de resistência dos jovens da periferia recifense*, UFPE. https://bdtd.ibict.br/vufind/Record/UFPE_e1f1e4d4756544902a2d9bcc55ec1b29
-28. Paz, *O ritmo brega funk e a sua espacialização*, UFPE. https://agencia.ufpe.br/documents/39914/791395/Resumo_Dissertacao_T%C3%BAlio+Felipe+Silva+da+Paz/3f4335ad-b891-44fc-85ce-b2a1c2d7c4f0
+27. Moreau 2022, _O brega funk como estratégia identitária e de resistência dos jovens da periferia recifense_, UFPE. https://bdtd.ibict.br/vufind/Record/UFPE_e1f1e4d4756544902a2d9bcc55ec1b29
+28. Paz, _O ritmo brega funk e a sua espacialização_, UFPE. https://agencia.ufpe.br/documents/39914/791395/Resumo_Dissertacao_T%C3%BAlio+Felipe+Silva+da+Paz/3f4335ad-b891-44fc-85ce-b2a1c2d7c4f0

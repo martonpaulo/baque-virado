@@ -6,15 +6,15 @@ Decisions for expanding the site from one maracatu show to seven rhythm shows. D
 
 The project stays instrumental. No show uses a voice.
 
-| # | Rhythm | Status |
-| --: | :-- | :-- |
-| 1 | Maracatu de baque virado | Already on the site |
-| 2 | Frevo | New |
-| 3 | Manguebeat | New |
-| 4 | Coco da Xambá | New |
-| 5 | Brega romântico | New |
-| 6 | Brega funk | New |
-| 7 | Forró pé-de-serra | New |
+|   # | Rhythm                   | Status              |
+| --: | :----------------------- | :------------------ |
+|   1 | Maracatu de baque virado | Already on the site |
+|   2 | Frevo                    | New                 |
+|   3 | Manguebeat               | New                 |
+|   4 | Coco da Xambá            | New                 |
+|   5 | Brega romântico          | New                 |
+|   6 | Brega funk               | New                 |
+|   7 | Forró pé-de-serra        | New                 |
 
 Coco de embolada was removed. It is led by the voice, and the project is instrumental.
 
@@ -57,20 +57,20 @@ sadness, joy, fury, anger, sensuality, love, saudade or celebration. The working
 - 2/4 at 132 BPM, an estimate to measure on recordings. 8-step wheel, one bar per turn, one tempo.
 - Script, 12 scenes:
 
-| # | Scene | Bars | Content |
-| --: | :-- | --: | :-- |
-| 1 | Introdução | 4 | Alfaia roll |
-| 2 | Alfaia | 8 | Low head on the beats |
-| 3 | Duas peles | 8 | Second head on the off-beats |
-| 4 | Ganzá | 8 | Ganzá |
-| 5 | Pandeiro | 8 | Pandeiro |
-| 6 | Palmas | 8 | Palmas on the off-beats |
-| 7 | Agogô e abê | 8 | Agogô and abê |
-| 8 | Caixa | 8 | Caixa |
-| 9 | Frases | 16 | Alfaia phrases in sequence |
-| 10 | Toque | 16 | More alfaia notes, same tempo |
-| 11 | Rufo | 4 | Final alfaia roll |
-| 12 | Final | 8 | Cut |
+|   # | Scene       | Bars | Content                       |
+| --: | :---------- | ---: | :---------------------------- |
+|   1 | Introdução  |    4 | Alfaia roll                   |
+|   2 | Alfaia      |    8 | Low head on the beats         |
+|   3 | Duas peles  |    8 | Second head on the off-beats  |
+|   4 | Ganzá       |    8 | Ganzá                         |
+|   5 | Pandeiro    |    8 | Pandeiro                      |
+|   6 | Palmas      |    8 | Palmas on the off-beats       |
+|   7 | Agogô e abê |    8 | Agogô and abê                 |
+|   8 | Caixa       |    8 | Caixa                         |
+|   9 | Frases      |   16 | Alfaia phrases in sequence    |
+|  10 | Toque       |   16 | More alfaia notes, same tempo |
+|  11 | Rufo        |    4 | Final alfaia roll             |
+|  12 | Final       |    8 | Cut                           |
 
 ## Visuals per rhythm
 

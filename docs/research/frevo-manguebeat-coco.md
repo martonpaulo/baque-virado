@@ -94,21 +94,21 @@ The melody goes to trumpet 1, with the trombones an octave below. It is an origi
 140 BPM. One 2/4 bar is 0.86 s. In the first plan one 16-step wheel was 2 bars; the decision since
 then is an 8-step wheel, one bar per turn. Total 120 bars, about 1:43.
 
-| # | Scene | Bars | What enters or changes | What it teaches |
-|---|---|---|---|---|
-| 1 | Chamada | 4 | Caixa roll, then a tutti hit | The opening signal |
-| 2 | Surdo | 8 | Surdo alone | The beat-2 marking |
-| 3 | Caixa | 8 | Caixa sixteenths plus a phrase-end roll | The nervous engine |
-| 4 | Pandeiro | 8 | Pandeiro | The full rhythm section, enough to dance to [src: Santos] |
-| 5 | Tuba | 8 | Tuba walking bass | Low end and harmony |
-| 6 | Coqueiro | 16 | Trumpets and trombones, short high stabs | The A part, led by the brass |
-| 7 | Lá e cá | 16 | Saxes answer the brass | Call and response |
-| 8 | Ventania | 8 | Sax and clarinet runs | The «wind» figure |
-| 9 | Bambeando | 8 | Anticipation marked on the wheel | The push |
-| 10 | Fotografia | 4 | Rhythmic break and stop | The bridge pose |
-| 11 | Abafo | 8 | Long fortissimo brass notes | The clash of two bands |
-| 12 | Alto da Sé | 16 | Climax at bars 9 to 12 on IV | Where the peak sits |
-| 13 | Finale | 8 | Tutti, caixa roll, final hit | The ending |
+| #   | Scene      | Bars | What enters or changes                   | What it teaches                                           |
+| --- | ---------- | ---- | ---------------------------------------- | --------------------------------------------------------- |
+| 1   | Chamada    | 4    | Caixa roll, then a tutti hit             | The opening signal                                        |
+| 2   | Surdo      | 8    | Surdo alone                              | The beat-2 marking                                        |
+| 3   | Caixa      | 8    | Caixa sixteenths plus a phrase-end roll  | The nervous engine                                        |
+| 4   | Pandeiro   | 8    | Pandeiro                                 | The full rhythm section, enough to dance to [src: Santos] |
+| 5   | Tuba       | 8    | Tuba walking bass                        | Low end and harmony                                       |
+| 6   | Coqueiro   | 16   | Trumpets and trombones, short high stabs | The A part, led by the brass                              |
+| 7   | Lá e cá    | 16   | Saxes answer the brass                   | Call and response                                         |
+| 8   | Ventania   | 8    | Sax and clarinet runs                    | The «wind» figure                                         |
+| 9   | Bambeando  | 8    | Anticipation marked on the wheel         | The push                                                  |
+| 10  | Fotografia | 4    | Rhythmic break and stop                  | The bridge pose                                           |
+| 11  | Abafo      | 8    | Long fortissimo brass notes              | The clash of two bands                                    |
+| 12  | Alto da Sé | 16   | Climax at bars 9 to 12 on IV             | Where the peak sits                                       |
+| 13  | Finale     | 8    | Tutti, caixa roll, final hit             | The ending                                                |
 
 ### e. Sound sources
 
@@ -132,14 +132,14 @@ then is an 8-step wheel, one bar per turn. Total 120 bars, about 1:43.
   «Manguebeat» was the name the press gave it.
 - Fred Zero Quatro first used the word in 1992. The manifesto «Caranguejos com Cérebro» is by
   Fred 04 and Renato L., dated 1991 or 1992 [src: [pt.wikipedia](https://pt.wikipedia.org/wiki/Manguebeat)].
-- Academic uses of the term: Galinsky, *Maracatu Atomico*; Sneed, *Latin American Research Review*
+- Academic uses of the term: Galinsky, _Maracatu Atomico_; Sneed, _Latin American Research Review_
   2019.
 - It is a **movement or scene, not one rhythm.** Chico Science fused maracatu, ciranda, embolada and
   coco with rap, hip hop, rock and soul [src: same page].
-- The first album of Chico Science & Nação Zumbi, *Da Lama ao Caos* (1994), was produced by Liminha,
+- The first album of Chico Science & Nação Zumbi, _Da Lama ao Caos_ (1994), was produced by Liminha,
   with Chico Neves on samplers [src: [en.wikipedia](https://en.wikipedia.org/wiki/Da_Lama_ao_Caos)].
 
-### b. Instruments on *Da Lama ao Caos*
+### b. Instruments on _Da Lama ao Caos_
 
 Source: the same Wikipedia page.
 
@@ -180,21 +180,21 @@ No melody is required. The guitar riff carries the identity, and it must be an o
 
 108 BPM. One 4/4 bar is 2.22 s and one wheel. Total 52 bars, about 1:55.
 
-| # | Scene | Bars | What enters or changes | What it teaches |
-|---|---|---|---|---|
-| 1 | Antena | 2 | Sampler noise and a delay tail | The mangue «antenna» |
-| 2 | Marcação | 4 | Alfaias in unison | The maracatu root |
-| 3 | Three alfaias | 4 | Main and answer hands split | The baque inside the band |
-| 4 | Caixa | 4 | Caixa ostinato | Drive without a drum kit |
-| 5 | Percussion | 4 | Effects percussion (instrument to confirm) | Colour |
-| 6 | Bass | 4 | Bass locks to the main hand | The rock low end |
-| 7 | Guitar | 4 | Riff | The fusion |
-| 8 | Coco | 4 | Coco cell | The second tradition |
-| 9 | Dub drop | 4 | Only bass and alfaia, delay throws | Dub space |
-| 10 | Rebuild | 4 | Sampler layers return | Production as an instrument |
-| 11 | Parada | 2 | Stop-time break | The break |
-| 12 | Full | 8 | Everything | The peak |
-| 13 | Fade | 4 | Echo tail | The dub ending |
+| #   | Scene         | Bars | What enters or changes                     | What it teaches             |
+| --- | ------------- | ---- | ------------------------------------------ | --------------------------- |
+| 1   | Antena        | 2    | Sampler noise and a delay tail             | The mangue «antenna»        |
+| 2   | Marcação      | 4    | Alfaias in unison                          | The maracatu root           |
+| 3   | Three alfaias | 4    | Main and answer hands split                | The baque inside the band   |
+| 4   | Caixa         | 4    | Caixa ostinato                             | Drive without a drum kit    |
+| 5   | Percussion    | 4    | Effects percussion (instrument to confirm) | Colour                      |
+| 6   | Bass          | 4    | Bass locks to the main hand                | The rock low end            |
+| 7   | Guitar        | 4    | Riff                                       | The fusion                  |
+| 8   | Coco          | 4    | Coco cell                                  | The second tradition        |
+| 9   | Dub drop      | 4    | Only bass and alfaia, delay throws         | Dub space                   |
+| 10  | Rebuild       | 4    | Sampler layers return                      | Production as an instrument |
+| 11  | Parada        | 2    | Stop-time break                            | The break                   |
+| 12  | Full          | 8    | Everything                                 | The peak                    |
+| 13  | Fade          | 4    | Echo tail                                  | The dub ending              |
 
 ### e. Sound sources
 
@@ -213,7 +213,7 @@ No melody is required. The guitar riff carries the identity, and it must be an o
 - **No source uses «coco de terreiro»** as the accepted name. It reads as a description: a coco from
   the terreiro [inf].
 - Coco types vary by place, and the ways of grouping them also vary [src: Journal of Brazilian
-  Ethnomusicology, via search].
+Ethnomusicology, via search].
 - Context: Terreiro Santa Bárbara, Ilê Axé Oyá Meguê, at the Quilombo do Portão do Gelo in Olinda.
   The festival is on 29 June.
 
@@ -235,7 +235,7 @@ No melody is required. The guitar riff carries the identity, and it must be an o
 - One named feature: the coco is built from rhythmic phrases that join into a distinctive final
   **«rufo»**, a roll [src: Castro, citing Alves 2006].
 - Its «toque mais vertiginoso» (more dizzying beat) sets it apart from other cocos [src: Cadernos de
-  Estudos Sociais 2015, Fundaj, via search].
+Estudos Sociais 2015, Fundaj, via search].
 - Meter: 2/4 [inf].
 - Tempo: **no source found.** An estimate is 125 to 145 BPM [inf]. Measure it on recordings.
 
@@ -257,21 +257,21 @@ This is the first plan: 132 BPM, one 2/4 bar is 0.91 s, so one 16-step wheel is 
 bars, about 1:42. The script now in use has 12 scenes on an 8-step wheel (see
 `expansion-decisions.md`).
 
-| # | Scene | Bars | What enters or changes | What it teaches |
-|---|---|---|---|---|
-| 1 | Chamada | 4 | Alfaia rufo | The opening signal |
-| 2 | Low head | 8 | Alfaia downbeats | The bass |
-| 3 | Second head | 8 | Off-beat head | The two-sided Xambá alfaia |
-| 4 | Ganzá | 8 | Ganzá | The shaker engine |
-| 5 | Pandeiro | 8 | Pandeiro | The weave |
-| 6 | Palmas | 8 | Claps | The backbone of the roda |
-| 7 | Agogô and agbê | 8 | Bell and agbê | The colour of the terreiro |
-| 8 | Caixa | 8 | Caixa | Drive |
-| 9 | Pisada | 8 | Foot stamps, if confirmed | The beaten floor |
-| 10 | Phrases | 16 | Alfaia phrases stack | Construction toward the rufo |
-| 11 | Vertigem | 16 | Density rises | The vertiginous feel |
-| 12 | Rufo | 4 | Final roll | The signature ending |
-| 13 | Finale | 8 | Tutti and a cut | The close |
+| #   | Scene          | Bars | What enters or changes    | What it teaches              |
+| --- | -------------- | ---- | ------------------------- | ---------------------------- |
+| 1   | Chamada        | 4    | Alfaia rufo               | The opening signal           |
+| 2   | Low head       | 8    | Alfaia downbeats          | The bass                     |
+| 3   | Second head    | 8    | Off-beat head             | The two-sided Xambá alfaia   |
+| 4   | Ganzá          | 8    | Ganzá                     | The shaker engine            |
+| 5   | Pandeiro       | 8    | Pandeiro                  | The weave                    |
+| 6   | Palmas         | 8    | Claps                     | The backbone of the roda     |
+| 7   | Agogô and agbê | 8    | Bell and agbê             | The colour of the terreiro   |
+| 8   | Caixa          | 8    | Caixa                     | Drive                        |
+| 9   | Pisada         | 8    | Foot stamps, if confirmed | The beaten floor             |
+| 10  | Phrases        | 16   | Alfaia phrases stack      | Construction toward the rufo |
+| 11  | Vertigem       | 16   | Density rises             | The vertiginous feel         |
+| 12  | Rufo           | 4    | Final roll                | The signature ending         |
+| 13  | Finale         | 8    | Tutti and a cut           | The close                    |
 
 ### e. Sound sources
 
