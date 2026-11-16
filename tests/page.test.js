@@ -13,6 +13,7 @@ const PHONES = [
   { width: 375, height: 812 },
 ];
 const DESKTOP = { width: 1440, height: 900 };
+const EXPORT_FRAME = { width: 1080, height: 1920 }; // tools/export-video.mjs, the owner's 9:16 frame
 const COPY_ALFAIA = COPY.read.alfaia.toUpperCase(),
   COPY_PRINCIPAL = COPY.voices.main.toUpperCase();
 const SOUND_DELAY_MS = 600; // holds every sample back, so Space lands while they decode
@@ -29,10 +30,13 @@ after(async () => {
 
 /**
  * A fresh page on the site. Every request must stay on the local server. `errors` collects page
- * errors and console errors; `contexts()` counts the audio contexts the page opened.
+ * errors and console errors; `contexts()` counts the audio contexts the page opened. `videoExport`
+ * sets the class tools/export-video.mjs sets.
  */
-async function openPage(viewport, { delaySounds = false } = {}) {
+async function openPage(viewport, { delaySounds = false, videoExport = false } = {}) {
   const page = await session.browser.newPage();
+  // the same hook tools/export-video.mjs installs
+  if (videoExport) await page.evaluateOnNewDocument(() => addEventListener('DOMContentLoaded', () => document.documentElement.classList.add('video-export')));
   const errors = [];
   page.on('pageerror', error => errors.push(`page error: ${error.message}`));
   page.on('console', message => {
@@ -413,6 +417,21 @@ test('on phones only the stage shows, and a tap on it plays and pauses', async (
   await page.click('#stage');
   await page.waitForFunction(() => document.getElementById('tap').dataset.state === 'play');
   assert.match(await page.$eval('#tapTime', element => element.textContent), /^\d:\d\d \/ \d:\d\d$/);
+  assert.deepEqual(errors, []);
+  await page.close();
+});
+
+test('the video export lays out the stage alone, 9:16 and the full window height', async () => {
+  const { page, errors } = await openPage(EXPORT_FRAME, { videoExport: true });
+  await showScene(page, 'opening');
+  const layout = await page.evaluate(() => {
+    const stage = document.getElementById('stage').getBoundingClientRect();
+    const shown = selector => [...document.querySelectorAll(selector)].filter(element => element.getClientRects().length > 0).length;
+    const points = [0.05, 0.5, 0.95].flatMap(x => [0.05, 0.5, 0.95].map(y => [stage.left + x * stage.width, stage.top + y * stage.height]));
+    const covered = points.filter(([x, y]) => !document.getElementById('stage').contains(document.elementFromPoint(x, y))).length;
+    return { width: Math.round(stage.width), height: Math.round(stage.height), side: shown('.side'), tap: shown('.tap'), foot: shown('.foot'), covered };
+  });
+  assert.deepEqual(layout, { width: EXPORT_FRAME.width, height: EXPORT_FRAME.height, side: 0, tap: 0, foot: 0, covered: 0 });
   assert.deepEqual(errors, []);
   await page.close();
 });
