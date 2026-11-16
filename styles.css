@@ -274,8 +274,22 @@ body {
   color: var(--dim);
   font-size: var(--stage-label);
 }
+/* the swing table: the sixteenth, then a meter and its milliseconds for the caixa and the alfaia */
 .notation.swing {
+  grid-template-columns: minmax(19cqw, max-content) 1fr 9cqw 1fr 9cqw;
   gap: 0.2cqw 1.6cqw;
+}
+/* one swing meter: a bar from the middle, to the left when early and to the right when late */
+.meter {
+  position: relative;
+  display: block;
+  height: 1.6cqw;
+  margin: 0.3cqw 0;
+}
+.meter-bar {
+  position: absolute;
+  top: 0;
+  height: 100%;
 }
 /* the zero line of each swing meter: one row's piece runs into the next row's, so the column
    shows one continuous line where a hit lands exactly on time */

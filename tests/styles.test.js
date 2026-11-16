@@ -71,3 +71,12 @@ test('controls use rem tokens for space, text and radius', () => {
     .map(([declaration]) => declaration);
   assert.deepEqual(literal, []);
 });
+
+// Layout lives in styles.css; an inline style in the readout markup carries only a per-hit value
+// (a colour, a meter's side and length, a fade).
+test('the readout markup keeps layout out of its inline styles', () => {
+  const source = readFileSync(new URL('../src/readout.js', import.meta.url), 'utf8');
+  const inline = [...source.matchAll(/style="([^"]*)"/g)].map(([, value]) => value);
+  assert.ok(inline.length > 0, 'the readout has inline styles to check');
+  for (const value of inline) assert.doesNotMatch(value, /\b(position|display|height|margin|padding|grid-template-columns|top)\s*:/, value);
+});

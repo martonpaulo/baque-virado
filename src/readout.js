@@ -61,9 +61,10 @@ const intervals = steps => steps.map((step, i) => (steps[(i + 1) % steps.length]
 const signed = ms => (ms > 0 ? '+' : ms < 0 ? '−' : '±') + Math.abs(ms);
 
 function swingMeter(ms, color, id) {
-  const bar = `position:absolute;top:0;height:100%;${ms >= 0 ? 'left:50%' : 'right:50%'};width:${Math.abs(ms) * METER_PERCENT_PER_MS}%;background:${color}`;
+  // the layout is in styles.css (.meter); only the side, the length and the colours are per hit
+  const bar = `${ms >= 0 ? 'left:50%' : 'right:50%'};width:${Math.abs(ms) * METER_PERCENT_PER_MS}%;background:${color}`;
   return (
-    `<span${inst(id)} style="position:relative;display:block;height:1.6cqw;margin:.3cqw 0"><i style="${bar}"></i><i class="zero" style="background:${fgAlpha(0.7)}"></i></span>` +
+    `<span class="meter"${inst(id)}><i class="meter-bar" style="${bar}"></i><i class="zero" style="background:${fgAlpha(0.7)}"></i></span>` +
     `<span class="n"${inst(id)} style="color:${color}">${signed(ms)}</span>`
   );
 }
@@ -86,7 +87,7 @@ const LAYOUTS = {
       low = swingMilliseconds('low');
     return (
       `<div class="row swing-head"><span class="k" data-listening></span>${label(T.msLegend)}</div>
-      <div class="notation swing" style="grid-template-columns:minmax(19cqw,max-content) 1fr 9cqw 1fr 9cqw">${label(T.sixteenthHeader)}${label(T.caixa, COLORS.ice, 'caixa')}<span></span>${label(T.alfaia, ROLES.mainHand, 'alfaia')}<span></span>` +
+      <div class="notation swing">${label(T.sixteenthHeader)}${label(T.caixa, COLORS.ice, 'caixa')}<span></span>${label(T.alfaia, ROLES.mainHand, 'alfaia')}<span></span>` +
       [0, 1, 2, 3].map(i => label(T.nth(i + 1)) + swingMeter(high[i], COLORS.ice, 'caixa') + swingMeter(low[i], ROLES.mainHand, 'alfaia')).join('') +
       `</div>`
     );
