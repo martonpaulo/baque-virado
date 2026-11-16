@@ -15,7 +15,7 @@ import { formatClock, formatPrecise, pad2, setText } from './util.js';
 
 const $ = id => document.getElementById(id);
 const DESKTOP_QUERY = '(min-width: 900px)'; // also where styles.css switches to the side panels
-const DESKTOP = window.matchMedia(DESKTOP_QUERY).matches;
+const DESKTOP = window.matchMedia(DESKTOP_QUERY).matches; // at load: which sounds and volumes start
 const REDUCED_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)');
 const AUDIO_LEAD_IN = 0.03; // seconds of silence before the first hit in the offline render
 const MIN_VISUAL_SPEED = 0.55; // slowest background speed, as a multiple of real time
@@ -291,9 +291,12 @@ background.setShaderScale(DESKTOP ? DESKTOP_SHADER_SCALE : PHONE_SHADER_SCALE);
 // back (a hidden page, a screenshot under load) keeps its canvases and the export its trail (#15).
 // Desktop lays the stage out at a phone's size and zooms it to its column (mobile first): every
 // size inside is the phone's, scaled. The width matches styles.css .stage on desktop.
+// The query is read on every fit, not once: a window or tablet that crosses 900px keeps the layout
+// styles.css shows (no zoom on a phone layout, the column's zoom on the desktop one).
 const PHONE_STAGE_WIDTH = 393;
+const DESKTOP_LAYOUT = window.matchMedia(DESKTOP_QUERY);
 const fitStage = () => {
-  if (DESKTOP) stage.style.zoom = String(stage.parentElement.clientWidth / PHONE_STAGE_WIDTH);
+  stage.style.zoom = DESKTOP_LAYOUT.matches ? String(stage.parentElement.clientWidth / PHONE_STAGE_WIDTH) : '';
 };
 fitStage();
 new ResizeObserver(() => {

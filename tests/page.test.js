@@ -351,6 +351,34 @@ test('a real stage resize still re-measures the canvases', async () => {
 
 // 2026-11-16, owner: the page never scrolls sideways, and a phone shows the stage alone, which
 // plays and pauses on a tap and shows the time played and the total while paused.
+// A window or tablet that crosses the 900px breakpoint shows the stage as a fresh load at that width does.
+test('crossing the desktop breakpoint fits the stage as a fresh load does', async () => {
+  const narrow = { width: 600, height: 900 };
+  const stageBox = page =>
+    page.evaluate(async () => {
+      await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+      const box = document.getElementById('stage').getBoundingClientRect();
+      return [box.width, box.height].map(value => Math.round(value));
+    });
+  const fresh = {};
+  for (const viewport of [narrow, DESKTOP]) {
+    const { page } = await openPage(viewport);
+    fresh[viewport.width] = await stageBox(page);
+    await page.close();
+  }
+  for (const [from, to] of [
+    [narrow, DESKTOP],
+    [DESKTOP, narrow],
+  ]) {
+    const { page, errors } = await openPage(from);
+    await page.setViewport(to);
+    assert.deepEqual(await stageBox(page), fresh[to.width], `${from.width}px to ${to.width}px`);
+    if (to === narrow) assert.equal(await page.$eval('#stage', stage => stage.style.zoom), '', 'no zoom on the phone layout');
+    assert.deepEqual(errors, []);
+    await page.close();
+  }
+});
+
 test('no window is wider than its page, and side options stay on one line', async () => {
   for (const viewport of [...PHONES, { width: 1000, height: 700 }, { width: 1146, height: 1330 }, DESKTOP]) {
     const { page, errors } = await openPage(viewport);
