@@ -560,6 +560,27 @@ a:focus-visible {
   outline: var(--space-1) solid var(--fg);
   outline-offset: calc(-1 * var(--space-1));
 }
+/* the rhythm selector, built only with two or more rhythms (main.js): above the Roteiro on desktop,
+   under Play on the stopped stage on phones */
+.rhythms {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+.rhythms .chip {
+  text-decoration: none;
+}
+.rhythms-stage {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(50% + 18cqw);
+  z-index: 6;
+  justify-content: center;
+}
+.tap:where([data-state="pause"]) ~ .rhythms-stage {
+  display: none;
+}
 /* a muted instrument shows disabled wherever the readout shows it (readout.js marks its parts) */
 .read [data-muted] {
   opacity: 0.2;
@@ -724,6 +745,9 @@ a:focus-visible {
 
 /* ---------- desktop: the reel fills the height, controls on both sides ---------- */
 @media (min-width: 900px) {
+  .rhythms-stage {
+    display: none;
+  }
   /* the whole layout sits in the middle of the window, never wider than --page-max */
   body {
     display: flex;
@@ -869,6 +893,7 @@ a:focus-visible {
    a 9:16 box sized from the window height, unzoomed (src/main.js), with nothing drawn over it. */
 html.video-export .side,
 html.video-export .tap,
+html.video-export .rhythms-stage,
 html.video-export .center:has(.tap) > .foot {
   display: none; /* the last outranks the stopped-show rule that shows the link */
 }

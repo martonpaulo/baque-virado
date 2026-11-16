@@ -3,12 +3,12 @@
 
 import { createPlayer, createSampleBank, filesFor, isHeard, renderShowWav } from './audio.js';
 import { backgroundAt, createBackground, SCENE_LOOKS } from './background.js';
-import { bindKeyboard, createSceneList, createSoundPickers, initialChoices, initialVolumes } from './controls.js';
+import { bindKeyboard, createSceneList, createSoundPickers, initialChoices, initialVolumes, rhythmSelector } from './controls.js';
 import { COPY } from './copy.js';
 import { createKey, createLanes } from './lanes.js';
 import { BAR_SECONDS, BPM, STEPS_PER_BAR } from './music.js';
 import { createReadout } from './readout.js';
-import { RHYTHM } from './rhythms/index.js';
+import { RHYTHM, rhythmChoices } from './rhythms/index.js';
 import { createScope, SCOPE_GEOMETRY } from './scope.js';
 import { recentHits, SCENES, sceneAt, sceneIndexAt, TOTAL_BARS, TOTAL_SECONDS } from './show.js';
 import { createTitle } from './title.js';
@@ -208,6 +208,13 @@ const stepScene = direction => {
 
 showState('play');
 tapButton.addEventListener('click', toggle);
+// With two or more rhythms, a selector above the Roteiro (desktop) and under Play (phones, stopped);
+// a link reloads the page with `?ritmo=<id>`. With one rhythm nothing is added.
+const rhythms = rhythmChoices(RHYTHM);
+if (rhythms.length) {
+  $('scenes').parentElement.before(rhythmSelector(rhythms, 'block rhythms-side'));
+  tapButton.after(rhythmSelector(rhythms, 'rhythms-stage'));
+}
 bindKeyboard({ toggle, previousScene: () => stepScene(-1), nextScene: () => stepScene(1) });
 if (DESKTOP) {
   createSoundPickers(

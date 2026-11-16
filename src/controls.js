@@ -180,3 +180,22 @@ export function bindKeyboard({ toggle, previousScene, nextScene }) {
     if (isSpace(event)) event.preventDefault();
   });
 }
+
+/**
+ * The rhythm selector: one link per rhythm (`rhythmChoices`), the current one marked. `className`
+ * places it: the left column on desktop, the stopped stage on phones (styles.css .rhythms).
+ */
+export function rhythmSelector(choices, className) {
+  const nav = document.createElement('nav');
+  nav.className = `rhythms ${className}`;
+  nav.setAttribute('aria-label', COPY.controls.rhythm);
+  for (const choice of choices) {
+    const link = document.createElement('a');
+    link.className = 'chip';
+    link.href = choice.href;
+    link.textContent = choice.label;
+    if (choice.current) link.setAttribute('aria-current', 'true');
+    nav.appendChild(link);
+  }
+  return nav;
+}

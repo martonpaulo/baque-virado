@@ -2,7 +2,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { meterOf } from '../src/music.js';
-import { RHYTHM, RHYTHMS, rhythmFor } from '../src/rhythms/index.js';
+import { RHYTHM, RHYTHMS, rhythmChoices, rhythmFor } from '../src/rhythms/index.js';
 import { MARACATU } from '../src/rhythms/maracatu.js';
 import { createShow } from '../src/show.js';
 import { TWO_FOUR } from './support/rhythm-two-four.js';
@@ -22,6 +22,14 @@ test('?ritmo=<id> picks a rhythm; an unknown or missing id falls back to maracat
   assert.equal(rhythmFor('?ritmo=frevo', BOTH), MARACATU);
   assert.equal(rhythmFor('', BOTH), MARACATU);
   assert.equal(rhythmFor('?ritmo=dois-por-quatro'), MARACATU); // not shipped
+});
+
+test('the selector has no entry with one rhythm, and one link per rhythm with two', () => {
+  assert.deepEqual(rhythmChoices(MARACATU), []);
+  assert.deepEqual(rhythmChoices(TWO_FOUR, BOTH), [
+    { id: 'maracatu', label: 'maracatu de baque virado', href: '?ritmo=maracatu', current: false },
+    { id: 'dois-por-quatro', label: 'dois por quatro', href: '?ritmo=dois-por-quatro', current: true },
+  ]);
 });
 
 test('a 2/4 rhythm runs on an 8-step bar, one bar per turn, with its own tempo and swing', () => {

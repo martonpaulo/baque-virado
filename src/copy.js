@@ -19,6 +19,7 @@ export const COPY = {
     ...RHYTHM.copy.centre,
   },
   controls: {
+    rhythm: 'Ritmo', // the rhythm selector, shown only with two or more rhythms
     play: '▶ Tocar',
     resume: '▶ Continuar', // Play once the show has left its start
     replay: '↻ Tocar de novo', // Play at the end of the show

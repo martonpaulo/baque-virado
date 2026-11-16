@@ -11,5 +11,14 @@ export function rhythmFor(search, rhythms = RHYTHMS) {
   return rhythms.find(rhythm => rhythm.id === id) || rhythms[0];
 }
 
+/**
+ * The rhythm selector's entries: one link per rhythm, the current one marked. Empty while there is
+ * only one rhythm, so the selector is not shown.
+ */
+export function rhythmChoices(current, rhythms = RHYTHMS) {
+  if (rhythms.length < 2) return [];
+  return rhythms.map(rhythm => ({ id: rhythm.id, label: rhythm.copy.name, href: `?${RHYTHM_PARAMETER}=${rhythm.id}`, current: rhythm === current }));
+}
+
 /** The rhythm this page load shows (Node, which has no location, gets the first). */
 export const RHYTHM = rhythmFor(globalThis.location?.search ?? '');

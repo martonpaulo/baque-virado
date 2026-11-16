@@ -3,10 +3,17 @@
 // layout of #4 hold.
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
+import { readFileSync } from 'node:fs';
 import { after, before, test } from 'node:test';
 import { COPY } from '../src/copy.js';
 import { SCENES } from '../src/show.js';
 import { openBrowser } from './support/browser.js';
+
+// The shipped rhythm registry with the tests-only 2/4 fixture added, served in its place.
+const TWO_FOUR_REGISTRY = readFileSync(new URL('../src/rhythms/index.js', import.meta.url), 'utf8').replace(
+  'export const RHYTHMS = [MARACATU];',
+  "import { TWO_FOUR } from '../../tests/support/rhythm-two-four.js';\nexport const RHYTHMS = [MARACATU, TWO_FOUR];",
+);
 
 const PHONES = [
   { width: 375, height: 667 },
@@ -33,7 +40,7 @@ after(async () => {
  * errors and console errors; `contexts()` counts the audio contexts the page opened. `videoExport`
  * sets the class tools/export-video.mjs sets.
  */
-async function openPage(viewport, { delaySounds = false, videoExport = false } = {}) {
+async function openPage(viewport, { delaySounds = false, videoExport = false, query = '', withTwoFour = false } = {}) {
   const page = await session.browser.newPage();
   // the same hook tools/export-video.mjs installs
   if (videoExport) await page.evaluateOnNewDocument(() => addEventListener('DOMContentLoaded', () => document.documentElement.classList.add('video-export')));
@@ -61,10 +68,14 @@ async function openPage(viewport, { delaySounds = false, videoExport = false } =
       return;
     }
     if (delaySounds && url.includes('/sounds/')) await new Promise(resolve => setTimeout(resolve, SOUND_DELAY_MS));
+    if (withTwoFour && url.endsWith('/src/rhythms/index.js')) {
+      await request.respond({ contentType: 'text/javascript', body: TWO_FOUR_REGISTRY });
+      return;
+    }
     await request.continue();
   });
   await page.setViewport(viewport);
-  await page.goto(session.server.url, { waitUntil: 'load' });
+  await page.goto(session.server.url + query, { waitUntil: 'load' });
   await page.waitForFunction(() => window.baque);
   await page.evaluate(() => document.fonts.ready);
   return { page, errors, contexts: () => page.evaluate(() => window.__audioContexts) };
@@ -435,4 +446,51 @@ test('the video export lays out the stage alone, 9:16 and the full window height
   assert.deepEqual(layout, { width: EXPORT_FRAME.width, height: EXPORT_FRAME.height, side: 0, tap: 0, foot: 0, covered: 0 });
   assert.deepEqual(errors, []);
   await page.close();
+});
+
+test('the rhythm selector stays out of the page while one rhythm ships', async () => {
+  for (const viewport of [PHONES[0], DESKTOP]) {
+    const { page, errors } = await openPage(viewport, { query: '?ritmo=desconhecido' });
+    assert.equal(await page.$$eval('.rhythms', list => list.length), 0);
+    assert.deepEqual(errors, []);
+    await page.close();
+  }
+});
+
+test('with a second rhythm, ?ritmo= plays it on its own wheel and the selector shows', async () => {
+  const visible = (page, selector) => page.$eval(selector, element => element.checkVisibility());
+  const { page, errors } = await openPage(PHONES[0], { withTwoFour: true, query: '?ritmo=dois-por-quatro' });
+  // a 2/4 bar: the wheel numbers its 8 steps, and the show is the fixture's 5 bars
+  assert.deepEqual(await page.$$eval('#scope text[fill-opacity]', texts => texts.map(t => t.textContent).filter(t => /^\d+$/.test(t))), [
+    '1',
+    '2',
+    '3',
+    '4',
+    '5',
+    '6',
+    '7',
+    '8',
+  ]);
+  assert.equal(await page.evaluate(() => window.baque.TOTAL), 5);
+  // phones: under Play on the stopped stage, the current rhythm marked; hidden while playing
+  assert.ok(await visible(page, '.rhythms-stage'));
+  assert.deepEqual(await page.$$eval('.rhythms-stage a', links => links.map(a => [a.getAttribute('href'), a.getAttribute('aria-current')])), [
+    ['?ritmo=maracatu', null],
+    ['?ritmo=dois-por-quatro', 'true'],
+  ]);
+  await page.click('#tap');
+  await page.waitForFunction(() => document.getElementById('tap').dataset.state === 'pause');
+  assert.equal(await visible(page, '.rhythms-stage'), false);
+  await page.click('#tap');
+  for (let at = 0; at < 5; at += 0.1) await page.evaluate(position => window.baque.render(position), at);
+  assert.deepEqual(errors, []);
+  await page.close();
+  // desktop: above the Roteiro in the left column; the stage copy stays hidden
+  const desktop = await openPage(DESKTOP, { withTwoFour: true, query: '?ritmo=dois-por-quatro' });
+  assert.ok(await visible(desktop.page, '.rhythms-side'));
+  assert.equal(await visible(desktop.page, '.rhythms-stage'), false);
+  assert.equal(await desktop.page.$eval('.rhythms-side', nav => nav.nextElementSibling.contains(document.getElementById('scenes'))), true);
+  assert.equal(await desktop.page.$$eval('#scenes li', items => items.length), 2);
+  assert.deepEqual(desktop.errors, []);
+  await desktop.page.close();
 });
