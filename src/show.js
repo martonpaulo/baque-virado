@@ -1,4 +1,4 @@
-// The order of the show: scenes, sections, the timeline and what sounds at any moment.
+// The order of the show: scenes, the timeline and what sounds at any moment.
 // Positions on the timeline are measured in bars (a float: 7.25 = a quarter into bar 8).
 import { ALFAIA_HANDS, ALFAIA_WITH_STICK, BAQUE_ORDER, BAR_SECONDS, barHits, INSTRUMENTS, STEPS_PER_BAR, swingOffset, VOICE_ORDER } from './music.js';
 import { smooth } from './util.js';
@@ -11,7 +11,7 @@ const SCENE_DEFAULTS = { pattern: 'marcacao', mode: normal, voices: always(VOICE
 const ENSEMBLE_ENTRY = ['agogo', 'caixa', 'agbe', 'ganza', 'answer', 'main'];
 
 /** A baque scene: four bars, the last one a virada. */
-const baque = (id, extra) => ({ id, pattern: id, section: 'D', bars: 4, mode: breakOnBar(3), lanes: ALFAIA_HANDS, named: true, ...extra });
+const baque = (id, extra) => ({ id, pattern: id, bars: 4, mode: breakOnBar(3), lanes: ALFAIA_HANDS, named: true, ...extra });
 
 const BAQUE_EXTRAS = {
   imale: { mode: bar => (bar === 3 ? 'cut' : 'normal') }, // ends on a cut, not a virada
@@ -22,21 +22,18 @@ const BAQUE_EXTRAS = {
 const SCENE_LIST = [
   {
     id: 'opening',
-    section: 'A',
     bars: 5,
     mode: bar => ['call', 'roll'][bar] || 'normal',
     lanes: ['whistle', 'caixa', ...ALFAIA_HANDS],
   },
   {
     id: 'ensemble',
-    section: 'B',
     bars: 6,
     voices: bar => ENSEMBLE_ENTRY.slice(0, bar + 1),
     lanes: INSTRUMENTS,
   },
   {
     id: 'agogo',
-    section: 'B',
     bars: 2,
     voices: always(['agogo', 'caixa']),
     gain: { caixa: 0.32 },
@@ -45,7 +42,6 @@ const SCENE_LIST = [
   },
   {
     id: 'swing',
-    section: 'C',
     bars: 4,
     voices: always(['main', 'answer', 'caixa', 'agbe', 'ganza', 'agogo']),
     swing: bar => bar >= 2,
@@ -53,7 +49,6 @@ const SCENE_LIST = [
   },
   {
     id: 'offbeat',
-    section: 'C',
     bars: 3,
     voices: always([...ALFAIA_HANDS, 'agogo', 'caixa']),
     gain: { caixa: 0.45 },
@@ -62,14 +57,12 @@ const SCENE_LIST = [
   ...BAQUE_ORDER.map(id => baque(id, BAQUE_EXTRAS[id])),
   {
     id: 'summary',
-    section: 'E',
     bars: 3,
     lanes: ALFAIA_HANDS,
     named: true,
   },
   {
     id: 'finale',
-    section: 'E',
     bars: 3,
     mode: bar => (bar < 2 ? 'break' : 'cut'),
     lanes: [...ALFAIA_HANDS, 'whistle'],

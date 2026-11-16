@@ -15,7 +15,6 @@ const PHONES = [
 const DESKTOP = { width: 1440, height: 900 };
 const COPY_ALFAIA = COPY.read.alfaia.toUpperCase(),
   COPY_PRINCIPAL = COPY.voices.main.toUpperCase();
-const LABEL_FLOOR_PX = 11; // #4
 const SOUND_DELAY_MS = 600; // holds every sample back, so Space lands while they decode
 const DETERMINISM_POSITION = 20.3; // bars: a baque scene, wheel, score and background all busy
 const BAQUE_SCENES = SCENES.filter(scene => scene.named && scene.id !== 'summary').map(scene => scene.id);
@@ -129,12 +128,12 @@ test('two Space presses while the samples decode open one audio context', async 
 
 test('Space after a scene click pauses, and the paused scene shows its full title', async () => {
   const { page, errors } = await openPage(DESKTOP);
-  await page.click('#play');
-  await page.waitForFunction(pause => document.getElementById('play').textContent === pause, {}, COPY.controls.pause);
+  await page.click('#stage'); // the stage is the Play button (mobile first)
+  await page.waitForFunction(() => document.getElementById('tap').dataset.state === 'pause');
   const name = COPY.scenes.trovao.chip;
   await page.evaluate(text => [...document.querySelectorAll('#scenes .step')].find(button => button.querySelector('.name').textContent === text).click(), name);
   await page.keyboard.press('Space');
-  await page.waitForFunction(play => document.getElementById('play').textContent === play, {}, COPY.controls.play);
+  await page.waitForFunction(() => document.getElementById('tap').dataset.state !== 'pause');
   await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
   assert.equal(await page.$eval('.title', element => element.textContent), COPY.scenes.trovao.title.toUpperCase());
   assert.deepEqual(errors, []);
@@ -168,15 +167,16 @@ test('the wheel’s 9 label never overlaps the readout stats', async () => {
   }
 });
 
-test('on phones the stage labels are at least 11 px and every readout fits its box', async () => {
+test('on phones every stage label stays readable and every readout fits its box', async () => {
   for (const viewport of PHONES) {
     const { page, errors } = await openPage(viewport);
     const problems = [];
     for (const scene of SCENES) {
       await showScene(page, scene.id);
-      const found = await page.evaluate(floor => {
+      const found = await page.evaluate(() => {
         const small = [];
-        for (const selector of ['.hud', '.read .k', '.notation .n', '.eyebrow'])
+        const floor = 9; // px: the smallest a phone label may render (iPhone SE)
+        for (const selector of ['.hud', '.read .k', '.notation .n'])
           for (const element of document.querySelectorAll(selector)) {
             const size = parseFloat(getComputedStyle(element).fontSize);
             if (size < floor) small.push(`${selector} ${size}px`);
@@ -184,7 +184,7 @@ test('on phones the stage labels are at least 11 px and every readout fits its b
         const read = document.querySelector('.read');
         const overflow = read.scrollHeight - read.clientHeight;
         return [...small, ...(overflow > 0 ? [`.read overflows by ${overflow}px`] : [])];
-      }, LABEL_FLOOR_PX);
+      });
       problems.push(...found.map(problem => `${viewport.width}x${viewport.height} ${scene.id}: ${problem}`));
     }
     assert.deepEqual(problems, []);

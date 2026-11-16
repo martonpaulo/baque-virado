@@ -14,7 +14,7 @@ test('the page fetches AAC', () => {
 });
 
 test('every sound file the page can fetch exists, beside its WAV master', () => {
-  assert.equal(ALL_SOUND_FILES.length, 43);
+  assert.equal(ALL_SOUND_FILES.length, 31);
   assert.deepEqual(missingFiles(ALL_SOUND_FILES), []);
   assert.deepEqual(missingFiles(ALL_SOUND_FILES, '.wav'), []);
 });
@@ -37,4 +37,9 @@ test('the default choices need 11 files, all present and known, under 100 KB in 
   );
   const bytes = files.reduce((sum, name) => sum + statSync(pathOf(name, SOUND_EXTENSION)).size, 0);
   assert.ok(bytes < PHONE_BYTES, `the default samples weigh ${bytes} bytes`);
+});
+
+test('every sound lists its default option first', async () => {
+  const { SOUND_CHOICES } = await import('../src/audio.js');
+  for (const sound of SOUND_CHOICES) assert.equal(sound.options[0][0], sound.defaultOption, sound.id);
 });

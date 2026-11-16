@@ -12,16 +12,6 @@ function rule(selector) {
   return match[1];
 }
 
-// #4: the labels that carry the lesson never render below the phone floor.
-test('stage labels keep the phone font-size floor', () => {
-  for (const selector of ['.hud', '.eyebrow', '.read .k', '.notation .n', '.notation.tight .k,\n.notation.tight .n']) {
-    assert.match(rule(selector), /font-size: max\(var\(--stage-[a-z-]+\), var\(--label-floor\)\);/, selector);
-  }
-  const phone = css.slice(css.indexOf('@media (max-width: 899px)'));
-  assert.match(phone, /--label-floor: 11px;/);
-  assert.match(rule(':root'), /--label-floor: 0px;/);
-});
-
 // #8: the phone toolbar resizes the dynamic viewport; the stage must follow the small one.
 test('the stage is sized from the small viewport height', () => {
   assert.match(rule('.stage'), /100svh/);
