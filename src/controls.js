@@ -32,7 +32,6 @@ export function initialChoices(canChoose) {
   return choice;
 }
 
-/** The scenes as one timeline, in show order, each row with its start time. */
 /** Each instrument's volume level: the remembered one on desktop, normal on phones. */
 export function initialVolumes(canChoose) {
   const volume = {};
@@ -72,6 +71,7 @@ function volumeSlider(sound, volume, group, onVolume) {
   return { slider, set };
 }
 
+/** The scenes as one timeline, in show order, each row with its start time. */
 export function createSceneList(list, onSelect) {
   const buttons = SCENES.map(scene => {
     const item = document.createElement('li');

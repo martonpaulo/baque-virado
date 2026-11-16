@@ -1,6 +1,6 @@
 // Sound: real one-shot recordings (public domain), scheduled sample-accurately with Web Audio.
 // The same scheduler drives live playback and the offline render used by the video exporter.
-import { BAR_SECONDS, BEAT_SECONDS, STEPS_PER_BAR, VOICE_ORDER } from './music.js';
+import { BAR_SECONDS, BEAT_SECONDS, STEPS_PER_BAR, VOICE_ORDER, VOICES } from './music.js';
 import { barTimeline, hitsInBar, sceneById, TOTAL_BARS } from './show.js';
 import { hash } from './util.js';
 
@@ -106,7 +106,8 @@ export const VOLUME_LEVELS = [
   ['high', 1.5],
 ];
 export const DEFAULT_VOLUME = 'normal';
-const VOICE_INSTRUMENT = { main: 'alfaia', answer: 'alfaia', stick: 'alfaia', caixa: 'caixa', agbe: 'agbe', ganza: 'ganza', agogo: 'agogo' };
+// one owner: VOICES[voice].instrument (the whistle has no volume of its own, so it always sounds)
+const VOICE_INSTRUMENT = Object.fromEntries(VOICE_ORDER.map(voice => [voice, VOICES[voice].instrument]));
 /** A voice's volume multiplier; `volume` maps a SOUND_CHOICES id to a VOLUME_LEVELS name. */
 const volumeOf = (volume, voice) => {
   const level = VOLUME_LEVELS.find(([name]) => name === volume[VOICE_INSTRUMENT[voice]]);
