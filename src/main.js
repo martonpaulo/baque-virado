@@ -288,8 +288,11 @@ background.setShaderScale(DESKTOP ? DESKTOP_SHADER_SCALE : PHONE_SHADER_SCALE);
 // styles.css shows (no zoom on a phone layout, the column's zoom on the desktop one).
 const PHONE_STAGE_WIDTH = 393;
 const DESKTOP_LAYOUT = window.matchMedia(DESKTOP_QUERY);
+// The video export (tools/export-video.mjs sets .video-export) draws the 9:16 reel at its own size:
+// no zoom there.
+const isVideoExport = () => document.documentElement.classList.contains('video-export');
 const fitStage = () => {
-  stage.style.zoom = DESKTOP_LAYOUT.matches ? String(stage.parentElement.clientWidth / PHONE_STAGE_WIDTH) : '';
+  stage.style.zoom = DESKTOP_LAYOUT.matches && !isVideoExport() ? String(stage.parentElement.clientWidth / PHONE_STAGE_WIDTH) : '';
 };
 fitStage();
 new ResizeObserver(() => {

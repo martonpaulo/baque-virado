@@ -873,6 +873,22 @@ a:focus-visible {
     align-items: flex-end;
   }
 }
+/* ---------- the video export: the 9:16 reel alone (owner, 2026-11-16) ----------
+   tools/export-video.mjs sets .video-export and screenshots the stage at 1080 x 1920: the stage is
+   a 9:16 box sized from the window height, unzoomed (src/main.js), with nothing drawn over it. */
+html.video-export .side,
+html.video-export .tap,
+html.video-export .center:has(.tap) > .foot {
+  display: none; /* the last outranks the stopped-show rule that shows the link */
+}
+html.video-export .center {
+  width: auto;
+}
+html.video-export .stage {
+  width: calc(100svh * 9 / 16);
+  height: auto;
+  aspect-ratio: 9 / 16;
+}
 /* ---------- the tall stage: phone and desktop share one layout ----------
    The owner chose the phone's proportions for desktop too (2026-11-16). The stage is 393:852 (an
    iPhone's screen) and --room is the height that leaves over a 9:16 column: the screen's on a
