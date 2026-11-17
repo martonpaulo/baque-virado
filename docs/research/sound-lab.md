@@ -133,9 +133,14 @@ Whole show, loudest windows, against the owner's references as the lab held them
 | manguebeat | 0.74 → 0.85 (0.90)     | 0.99 → 1.00 (1.00) | −5.3 −2.0 −11.1 → −1.4 −7.7 −9.5 (−2.2 −7.6 −9.5)    | −20.5 → −12.1 (−9.2)  | 4.7 → 6.6 (6.6)          |
 | brega      | 0.76 → 0.75 (0.93)     | 0.03 → 0.01 (0.57) | −2.6 −7.0 −6.0 → −3.0 −5.1 −7.3 (−2.9 −6.0 −7.9)     | −19.5 → −13.0 (−14.5) | 5.2 → 5.1 (5.2)          |
 | bregafunk  | 0.76 → 0.85 (0.96)     | 0.10 → 0.63 (0.34) | −1.9 −5.7 −10.6 → −1.6 −5.5 −15.7 (−0.7 −10.6 −12.3) | −23.7 → −18.1 (−17.8) | 10.2 → 5.7 (5.0)         |
+| frevo      | 0.88 → 0.86 (0.86)     | 0.60 → 0.68 (0.52) | −2.6 −8.0 −5.4 → −4.0 −6.6 −4.2 (−16.5 −9.6 −2.4)    | −16.3 → −22.4 (−23.3) | 8.0 → 7.2 (6.7)          |
+| forró      | 0.85 → 0.88 (0.88)     | 0.47 → 0.95 (0.88) | −3.2 −9.3 −3.9 → −1.7 −10.4 −6.2 (−11.4 −5.7 −4.8)   | −14.6 → −15.1 (−12.0) | 7.6 → 5.6 (5.8)          |
 
-Frevo and forró were deployed from the work their agents had committed when the owner stopped
-them; their scores after the change are in the next commit of this file.
+The «before» of frevo and forró was scored against that morning's wider reference set, before the
+owner removed the agent's similar songs; every «after» is against the owner's set. Frevo and forró
+were deployed from the work their agents had committed when the owner stopped them, so their
+percussion is still far too loud against the tune by the stem measure (drums −4 and −2 dB against
+−16 and −11 in the references): that is the first thing to fix when they resume.
 
 What changed in each show is in its own document: [`bregafunk.md`](../rhythms/bregafunk.md),
 [`manguebeat.md`](../rhythms/manguebeat.md), [`brega.md`](../rhythms/brega.md),
