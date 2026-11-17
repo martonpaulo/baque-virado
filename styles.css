@@ -860,8 +860,18 @@ a:focus-visible {
   .side.left {
     order: 1;
   }
+  .side.left {
+    padding-bottom: var(--space-11); /* the same room under the selector as above the Roteiro */
+  }
+  /* the selector closes the column and looks like the sound options: one option per line, each as
+     wide as its name, the same gap, and no rule above it (owner, 2026-11-17) */
   .rhythms-side {
     margin-top: auto; /* the Roteiro opens the column, the selector closes it */
+    padding-top: 0;
+    border-top: 0;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-3);
   }
   /* «Exportar vídeo» sits in the middle of the room between the Roteiro and the selector (#19) */
   .export-video {

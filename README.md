@@ -57,6 +57,8 @@ sounds a desktop viewer can pick are fetched when chosen.
 - [docs/research/pernambuco-rhythms-feeling.md](docs/research/pernambuco-rhythms-feeling.md) - why Pernambuco rhythms move people.
 - [docs/research/music-cognition.md](docs/research/music-cognition.md) - music cognition and semiotics for the shows.
 - [docs/research/colour-and-visuals.md](docs/research/colour-and-visuals.md) - colour and animation evidence for the rhythm backgrounds.
+- [docs/research/human-feel.md](docs/research/human-feel.md) - how to make a sample engine sound played by people.
+- [docs/research/software-music-feel.md](docs/research/software-music-feel.md) - why software-made music can feel alive, and how producers do it.
 - [docs/sketches/scripts.html](docs/sketches/scripts.html) - throwaway sketch of the show scripts.
 - [docs/sketches/backgrounds.html](docs/sketches/backgrounds.html) - throwaway sketch of the rhythm backgrounds.
 
