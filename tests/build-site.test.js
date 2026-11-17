@@ -5,7 +5,7 @@ import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { test } from 'node:test';
-import { ROUTES } from '../src/rhythms/index.js';
+import { MOVED, ROUTES } from '../src/rhythms/index.js';
 import { buildSite } from '../tools/build-site.mjs';
 import { startStaticServer } from '../tools/static-server.mjs';
 
@@ -35,6 +35,13 @@ test('every rhythm path answers 200 from the built site; a shipped one is the sh
     assert.match(manguebeat, /<a class="chip" href="\/manguebeat" aria-current="true">manguebeat<\/a>/);
     assert.equal((manguebeat.match(/class="chip"/g) || []).length, ROUTES.length);
     assert.doesNotMatch(manguebeat, /<script type="module"|id="stage"/);
+    // a path that was live before the rename (#37): it answers and moves to the new path, query kept
+    for (const [from, to] of Object.entries(MOVED)) {
+      assert.equal((await fetch(`${server.url}${from}`)).status, 200, `/${from}`);
+      assert.match(page(from), new RegExp(`location\\.replace\\('/${to}' \\+ location\\.search`));
+      assert.match(page(from), new RegExp(`<link rel="canonical" href="https://batuque\\.martonpaulo\\.com/${to}">`));
+      assert.match(page(from), new RegExp(`<meta http-equiv="refresh" content="0; url=/${to}">`));
+    }
   } finally {
     await server.close();
     rmSync(parent, { recursive: true, force: true });

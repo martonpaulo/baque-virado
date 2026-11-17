@@ -3,28 +3,35 @@
 // and redirects to its path. An unknown or missing id falls back to the first (maracatu), which `/`
 // shows. Add a rhythm by adding its package here; a route id with no package yet is a rhythm being
 // prepared (`preparing.js`): its path shows the selector and one line, no show.
-import { BREGA_FUNK } from './brega-funk.js';
+import { BREGAFUNK } from './bregafunk.js';
 import { COCO_XAMBA } from './coco-xamba.js';
 import { FORRO_PE_DE_SERRA } from './forro.js';
 import { FREVO } from './frevo.js';
 import { MARACATU } from './maracatu.js';
 import { PREPARING } from './preparing.js';
 
-export const RHYTHMS = [MARACATU, COCO_XAMBA, FREVO, FORRO_PE_DE_SERRA, BREGA_FUNK];
+export const RHYTHMS = [MARACATU, COCO_XAMBA, FREVO, FORRO_PE_DE_SERRA, BREGAFUNK];
 export const RHYTHM_PARAMETER = 'ritmo';
 /** Every public path, in the selector's order: shipped rhythms and rhythms being prepared. */
-export const ROUTES = ['maracatu', 'coco', 'frevo', 'forro', 'manguebeat', 'brega-romantico', 'brega-funk'];
+export const ROUTES = ['maracatu', 'coco', 'frevo', 'forro', 'manguebeat', 'brega', 'bregafunk'];
+/** Paths that were live under another id: each moves to its new route, the query kept (#37). */
+export const MOVED = { 'brega-funk': 'bregafunk', 'brega-romantico': 'brega' };
 
-/** The route id a location names: its last path segment when that is a route, else `?ritmo=`. */
+/** The route id a location names: its last path segment when that is a route, else `?ritmo=`; a moved id gives its new route. */
 export function routeIdFor(pathname, search, routes = ROUTES) {
-  const segment = pathname
+  const segment = lastSegment(pathname);
+  if (routes.includes(segment)) return segment;
+  if (MOVED[segment]) return MOVED[segment];
+  const id = new URLSearchParams(search).get(RHYTHM_PARAMETER);
+  return MOVED[id] || id;
+}
+
+const lastSegment = pathname =>
+  pathname
     .split('/')
     .filter(Boolean)
     .at(-1)
     ?.replace(/\.html$/, '');
-  if (routes.includes(segment)) return segment;
-  return new URLSearchParams(search).get(RHYTHM_PARAMETER);
-}
 
 /** The rhythm a location asks for, or the first one. */
 export function rhythmFor(search, rhythms = RHYTHMS, pathname = '/') {
@@ -35,14 +42,18 @@ export function rhythmFor(search, rhythms = RHYTHMS, pathname = '/') {
 /** The route ids that have no rhythm package yet. */
 export const preparingIds = (rhythms = RHYTHMS, routes = ROUTES) => routes.filter(id => !rhythms.some(rhythm => rhythm.id === id));
 
-/** The path `?ritmo=<id>` moves to (`/<id>`, the rest of the query kept), or null when it names no route. */
-export function redirectFor(search, routes = ROUTES) {
+/** The path a location moves to, the rest of the query kept: `?ritmo=<id>` moves to `/<id>`, and a
+ * moved path (`MOVED`) to its new route. Null when the location is already a route's own address. */
+export function redirectFor(search, routes = ROUTES, pathname = '/') {
   const params = new URLSearchParams(search);
-  const id = params.get(RHYTHM_PARAMETER);
-  if (!routes.includes(id)) return null;
+  const named = params.get(RHYTHM_PARAMETER);
+  const id = MOVED[named] || named;
+  const moved = MOVED[lastSegment(pathname)];
+  const target = routes.includes(id) ? id : moved;
+  if (!target) return null;
   params.delete(RHYTHM_PARAMETER);
   const rest = params.toString();
-  return `/${id}${rest ? `?${rest}` : ''}`;
+  return `/${target}${rest ? `?${rest}` : ''}`;
 }
 
 /**

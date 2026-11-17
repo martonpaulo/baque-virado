@@ -12,8 +12,8 @@ The project stays instrumental. No show uses a voice.
 |   2 | Frevo                    | New                 |
 |   3 | Manguebeat               | New                 |
 |   4 | Coco da Xambá            | New                 |
-|   5 | Brega romântico          | New                 |
-|   6 | Brega funk               | New                 |
+|   5 | Brega                    | New                 |
+|   6 | Bregafunk                | New                 |
 |   7 | Forró pé-de-serra        | New                 |
 
 Coco de embolada was removed. It is led by the voice, and the project is instrumental.
@@ -29,7 +29,7 @@ Coco de embolada was removed. It is led by the voice, and the project is instrum
 - Some sounds have no free recording: zabumba, rabeca, accordion, alto sax, distorted guitar and
   the Xambá drums. They are synthesized or built from similar sounds.
 - The site name is «Batuque».
-- The site calls romantic brega «Brega romântico».
+- The site calls romantic brega «Brega».
 - Words on the site and in the shows are terms really used in Pernambuco, musical terms and the
   terms the academic sources use. No catchy phrases. The copy stays as clean as in the baque
   virado show.
@@ -42,8 +42,8 @@ sadness, joy, fury, anger, sensuality, love, saudade or celebration. The working
 - Frevo: euphoria, with the fury of the abafo.
 - Manguebeat: anger and weight, in a minor key.
 - Coco da Xambá: the trance and devotion of the terreiro.
-- Brega romântico: saudade and heartbreak, in a minor key.
-- Brega funk: sensuality and provocation.
+- Brega: saudade and heartbreak, in a minor key.
+- Bregafunk: sensuality and provocation.
 - Forró: saudade of the sertão inside the party, in mixolydian (flat seventh).
 
 ## Coco da Xambá
@@ -112,11 +112,11 @@ knowledge. They are not researched yet and must be confirmed before the build.
   Symbol: São João and its bandeirinhas. Palette: a dusk sky from orange to dark blue, because
   saudade is light leaving, with the bonfire at the centre and sanfona red on accents. The current
   sketch is too orange, and the incoming blue is missing.
-- **Brega romântico** (heartbreak; keyboard, guitar). Icon: stage red and gold, the glow of the
+- **Brega** (heartbreak; keyboard, guitar). Icon: stage red and gold, the glow of the
   keyboard. Index: low bar light, red neon. Symbol: the red rose. Palette: wine red and low amber
   light, blurred, warm but dark. The current sketch is too pink. Pink reads as tenderness, and
   brega is about pain.
-- **Brega funk** (sensuality, provocation; lata, 808). Icon: the metal of the tin can, the LEDs of
+- **Bregafunk** (sensuality, provocation; lata, 808). Icon: the metal of the tin can, the LEDs of
   the sound systems (paredões). Index: a night party in the periphery, a motorbike, a phone
   filming. Symbol: the neon purple and lime of the parties and covers. Palette: deep purple, lime
   flashes on the latas and gold on the drops, with high contrast and hard cuts. The current sketch

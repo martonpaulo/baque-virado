@@ -24,12 +24,12 @@ Source access caveat: most academic items were checked through abstracts, catalo
 ### Inference
 
 - A grid sounds good when the _pattern_ carries the tension (syncopation, cross-accents, layer phase) and the _sound_ carries the life (section 2). It sounds dead when a simple pattern on a grid is also played with identical samples at identical velocity.
-- Machine genres (techno, house, trap, funk carioca, brega funk) want a tight grid on kick and bass; looseness belongs in hats, shakers, percussion samples and swing.
+- Machine genres (techno, house, trap, funk carioca, bregafunk) want a tight grid on kick and bass; looseness belongs in hats, shakers, percussion samples and swing.
 - Dilla-style timing works because it is _consistent per loop_, not random per hit. A fixed per-step offset table beats per-note jitter.
 
 ### Uncertain
 
-- No source found that measures swing percentages in brega funk or manguebeat records.
+- No source found that measures swing percentages in bregafunk or manguebeat records.
 - Davies et al. used short rhythms; long-form engagement may differ.
 
 ---
@@ -81,19 +81,19 @@ Source access caveat: most academic items were checked through abstracts, catalo
 
 - Sampling, cut-and-paste and microsampling are treated as expressive crafts (Brøvig-Hanssen's and Harkins's chapters in Danielsen 2010; Brøvig-Hanssen and Danielsen 2016).
 - Tamborzão is a sampling act: Afro-Brazilian drum samples (capoeira, candomblé, maculelê) over an 808 bass (García 2017, RBMA, above).
-- Brega funk: beats are made on home computers, many in FL Studio; producers use sliding bass lines, complex changing drum patterns with an offbeat "clinking" rhythm, and MIDI horn sounds echoing frevo brass, plus Casio-like MIDI brass and guitar (Loftin, 2019, "Brega funk is the music of Recife that's taking over Brazil", Mixmag, https://mixmag.net/feature/brega-funk-recife-brazil-feature).
-- Brega funk grew from MC battles and the fusion of electrobrega with funk carioca in Recife's peripheries, around 2008 to 2009, mostly in independent home studios (Revista Caboré, UFRPE, https://journals.ufrpe.br/index.php/revistacabore/article/download/5270/482484855; Billboard Brasil, https://billboard.com.br/brega-e-chique-a-saga-do-brega-funk-para-se-tornar-filho-prodigo-de-recife/; Diário de Pernambuco 2020, https://www.diariodepernambuco.com.br/noticia/viver/2020/02/como-o-brega-funk-que-surgiu-periferia-do-recife-emplacou-tres-hits.html).
-- Producer Marley No Beat said brega funk tempos rose over time, reaching 165 to 170 BPM (Diário de Pernambuco, per search excerpt). A 2025 viral beat by Gordinho Bolado reportedly used only bass, kick and a "can-sounding" snare (Diário de Pernambuco, 2025, https://www.diariodepernambuco.com.br/amp/viver/2025/07/7795294-brega-funk-viral-de-gordinho-bolado-mc-daninho-e-trovao-no-beat-vira-febre-nas-redes-sociais.html).
+- Bregafunk: beats are made on home computers, many in FL Studio; producers use sliding bass lines, complex changing drum patterns with an offbeat "clinking" rhythm, and MIDI horn sounds echoing frevo brass, plus Casio-like MIDI brass and guitar (Loftin, 2019, "Bregafunk is the music of Recife that's taking over Brazil", Mixmag, https://mixmag.net/feature/brega-funk-recife-brazil-feature).
+- Bregafunk grew from MC battles and the fusion of electrobrega with funk carioca in Recife's peripheries, around 2008 to 2009, mostly in independent home studios (Revista Caboré, UFRPE, https://journals.ufrpe.br/index.php/revistacabore/article/download/5270/482484855; Billboard Brasil, https://billboard.com.br/brega-e-chique-a-saga-do-brega-funk-para-se-tornar-filho-prodigo-de-recife/; Diário de Pernambuco 2020, https://www.diariodepernambuco.com.br/noticia/viver/2020/02/como-o-brega-funk-que-surgiu-periferia-do-recife-emplacou-tres-hits.html).
+- Producer Marley No Beat said bregafunk tempos rose over time, reaching 165 to 170 BPM (Diário de Pernambuco, per search excerpt). A 2025 viral beat by Gordinho Bolado reportedly used only bass, kick and a "can-sounding" snare (Diário de Pernambuco, 2025, https://www.diariodepernambuco.com.br/amp/viver/2025/07/7795294-brega-funk-viral-de-gordinho-bolado-mc-daninho-e-trovao-no-beat-vira-febre-nas-redes-sociais.html).
 - Manguebeat: _Da Lama ao Caos_ (1994), produced by Liminha, fused maracatu alfaias with hip hop, funk rock and metal; Chico Science is credited with samplers on "Lixo do Mangue" (Wikipedia album credits, https://en.wikipedia.org/wiki/Da_Lama_ao_Caos; Rolling Stone Brasil, https://rollingstone.com.br/?p=9665).
 
 ### Inference
 
-- Brega funk's life comes from minimal, loud, specific sounds (sub bass, tinny snare, MIDI brass), fast tempo and constant drum-pattern change, not from humanised timing.
+- Bregafunk's life comes from minimal, loud, specific sounds (sub bass, tinny snare, MIDI brass), fast tempo and constant drum-pattern change, not from humanised timing.
 - Manguebeat's model is a live alfaia section _under_ a programmed or sampled layer: the human layer carries the maracatu baque, the machine layer carries the hip-hop pulse.
 
 ### Uncertain
 
-- No primary source found on paredão sound-system practice or on brega funk drum-pattern transcriptions. Tempo claims rest on one producer quote.
+- No primary source found on paredão sound-system practice or on bregafunk drum-pattern transcriptions. Tempo claims rest on one producer quote.
 
 ---
 
@@ -135,12 +135,12 @@ Source access caveat: most academic items were checked through abstracts, catalo
 
 ## 7. Production rules for Batuque
 
-Rhythm groups: **E** = electronic/produced (brega funk, manguebeat's machine layer, funk carioca references). **A** = acoustic/live (coco, maracatu, forró, frevo, manguebeat's alfaia layer). **B** = brega romântico (keyboard-band; in between). Numbers are starting points to tune by ear, except where cited.
+Rhythm groups: **E** = electronic/produced (bregafunk, manguebeat's machine layer, funk carioca references). **A** = acoustic/live (coco, maracatu, forró, frevo, manguebeat's alfaia layer). **B** = brega (keyboard-band; in between). Numbers are starting points to tune by ear, except where cited.
 
 ### Timing
 
 1. **Keep a hard grid for E kick, bass and snare** (Davies et al. 2013; funk carioca practice). Zero offset, zero jitter.
-2. **Swing per rhythm, on 16ths, Linn-style percent** (scale from Linn 2013; per-genre values are inference): brega funk 50 to 52%; manguebeat machine layer 54 to 56%; brega romântico 52 to 54%; forró and coco 56 to 60% on the ganzá/triangle line; maracatu and frevo straight grid plus the companion report's microtiming tables. Lower swing at faster tempos (Linn: 62% feels looser than 66% at 90 BPM).
+2. **Swing per rhythm, on 16ths, Linn-style percent** (scale from Linn 2013; per-genre values are inference): bregafunk 50 to 52%; manguebeat machine layer 54 to 56%; brega 52 to 54%; forró and coco 56 to 60% on the ganzá/triangle line; maracatu and frevo straight grid plus the companion report's microtiming tables. Lower swing at faster tempos (Linn: 62% feels looser than 66% at 90 BPM).
 3. **Use a fixed per-step offset table, not per-hit random jitter**, for A rhythms (Hein 2022 on repeated deviations). Per-hit jitter, if any, at most ±3 ms.
 
 ### Sound
@@ -159,12 +159,12 @@ Rhythm groups: **E** = electronic/produced (brega funk, manguebeat's machine lay
 
 ### Sidechain
 
-12. **Brega funk and the manguebeat machine layer**: duck bass, pads and synth leads from the kick (SOS practice). Web Audio has no keyed compressor, so implement as gain automation scheduled with each kick: drop 4 to 6 dB in 5 ms, recover over 80 to 150 ms (shorter at 160+ BPM). Automate depth up into drops.
-13. **No sidechain on coco, maracatu, forró, frevo or brega romântico**: pumping is not idiomatic there (inference).
+12. **Bregafunk and the manguebeat machine layer**: duck bass, pads and synth leads from the kick (SOS practice). Web Audio has no keyed compressor, so implement as gain automation scheduled with each kick: drop 4 to 6 dB in 5 ms, recover over 80 to 150 ms (shorter at 160+ BPM). Automate depth up into drops.
+13. **No sidechain on coco, maracatu, forró, frevo or brega**: pumping is not idiomatic there (inference).
 
 ### Variation and probability
 
-14. **Fix the identity cell at 100%**: brega funk kick/snare pattern; maracatu alfaia baque; coco's surdo/zabumba cell; forró zabumba; frevo caixa. Ghosts and ornaments at 40 to 80% chance.
+14. **Fix the identity cell at 100%**: bregafunk kick/snare pattern; maracatu alfaia baque; coco's surdo/zabumba cell; forró zabumba; frevo caixa. Ghosts and ornaments at 40 to 80% chance.
 15. **Use A:B periodic conditions for fills**: fill on pass 4:4 (end of each 4-bar phrase) and a bigger fill on 8:8 (Elektron practice; Future Music's 8-bar roll).
 16. **Prevent clashes with a PRE/NEI rule**: only one instrument may fill in a bar.
 17. **Pattern variants by weighted Markov choice**: 3 to 5 variants per instrument, every one sharing the identity cell; stay-probability 0.6 to 0.7 per phrase.
@@ -182,7 +182,7 @@ Rhythm groups: **E** = electronic/produced (brega funk, manguebeat's machine lay
 21. **Ear-candy rate**: 2 to 4 one-off events per minute for E rhythms (vocal chop, reversed cymbal, riser, MIDI-brass stab); 1 to 2 per minute for A rhythms (a shout, an apito whistle, a single open agbê, a frevo brass hit). Never two in the same bar. Do not repeat the same event within 32 bars.
 22. **Call and response**: alternate two timbres every 2 or 4 bars in one section per scene (alfaia vs. caixa; MIDI brass vs. vocal chop; sanfona vs. triangle break).
 23. **Complexity budget per scene** (Witek 2014; Gold 2019): when many layers play, lower ornament probability; when few play, raise it and allow more ear candy.
-24. **Brega funk specifics** (Mixmag 2019; Diário de Pernambuco): 150 to 170 BPM; sliding sub bass (pitch glide 30 to 60 ms); tinny, bright snare; MIDI horn stabs echoing frevo; drum pattern varies every 2 to 4 bars.
+24. **Bregafunk specifics** (Mixmag 2019; Diário de Pernambuco): 150 to 170 BPM; sliding sub bass (pitch glide 30 to 60 ms); tinny, bright snare; MIDI horn stabs echoing frevo; drum pattern varies every 2 to 4 bars.
 25. **Manguebeat specifics**: alfaia layer follows the acoustic rules (offset tables, no sidechain, room reverb); machine layer (breakbeat or drum machine, distorted guitar/bass samples) follows E rules with 54 to 56% swing.
 
 ### Not verified

@@ -1,8 +1,8 @@
-// The brega funk background: a night party around the wheel. Everything comes out of the wheel and
+// The bregafunk background: a night party around the wheel. Everything comes out of the wheel and
 // stays circular: a dark purple bloom on the bumbo (the sub-bass felt, not flashed), lime rays thrown
 // from the lata like the LEDs of a paredão, rings that sway like hips on alternate beats, and gold only on
 // the drop's horns. Bright emissions are limited to 3 per second (WCAG 2.3.1).
-// Palette and reasons: docs/rhythms/brega-funk.md.
+// Palette and reasons: docs/rhythms/bregafunk.md.
 
 export const PALETTE = {
   ground: '#0d0612', // the night
@@ -40,7 +40,7 @@ const alphaOf = (hex, alpha) =>
     .join(',')},${alpha})`;
 const angleAt = bar => (bar % 1) * TAU - Math.PI / 2; // where a hit sits on the wheel
 
-export function createBregaFunkBackground() {
+export function createBregafunkBackground() {
   let emissions = [], // { kind, born, angle }
     lastFlash = -Infinity,
     bloom = 0;

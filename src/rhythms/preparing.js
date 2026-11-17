@@ -4,7 +4,7 @@
 /** Each rhythm being prepared: its selector chip and the name its page title shows. */
 export const PREPARING = {
   manguebeat: { selector: 'manguebeat', name: 'Manguebeat' },
-  'brega-romantico': { selector: 'brega romântico', name: 'Brega romântico' },
+  brega: { selector: 'brega', name: 'Brega' },
 };
 
 /** The one line a rhythm being prepared shows in place of its show. */

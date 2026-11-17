@@ -9,14 +9,15 @@ import { canExportVideo, download, exportVideo } from './export.js';
 import { createKey, createLanes } from './lanes.js';
 import { BAR_SECONDS, BPM, STEPS_PER_BAR } from './music.js';
 import { createReadout } from './readout.js';
-import { RHYTHM, redirectFor, rhythmChoices } from './rhythms/index.js';
+import { RHYTHM, ROUTES, redirectFor, rhythmChoices } from './rhythms/index.js';
 import { createScope, SCOPE_GEOMETRY } from './scope.js';
 import { recentHits, SCENES, sceneAt, sceneIndexAt, TOTAL_BARS, TOTAL_SECONDS } from './show.js';
 import { createTitle } from './title.js';
 import { formatClock, formatPrecise, pad2, setText } from './util.js';
 
-// `?ritmo=<id>` names a rhythm that has its own path: move there, so each rhythm has one address
-const redirect = redirectFor(location.search);
+// `?ritmo=<id>` names a rhythm that has its own path, or the path moved (#37): move there, so each
+// rhythm has one address
+const redirect = redirectFor(location.search, ROUTES, location.pathname);
 if (redirect) location.replace(redirect + location.hash);
 
 const $ = id => document.getElementById(id);

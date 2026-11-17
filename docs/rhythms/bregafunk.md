@@ -1,6 +1,6 @@
-# Brega funk
+# Bregafunk
 
-The brega funk show: `?ritmo=brega-funk`, package `src/rhythms/brega-funk.js`, built in
+The bregafunk show: `/bregafunk`, package `src/rhythms/bregafunk.js`, built in
 [#23](https://github.com/martonpaulo/baque-virado/issues/23). It follows the script in
 `docs/sketches/scripts.html` and the research in `docs/research/brega-forro.md`,
 `docs/research/pernambuco-rhythms-feeling.md`, `docs/research/music-cognition.md` and
@@ -34,14 +34,14 @@ and can be changed.
 
 ## The beat
 
-| Voice     | Sixteenths (from 1)             | Why                                                                                   |
-| :-------- | :------------------------------ | :------------------------------------------------------------------------------------ |
-| bumbo     | 1, 9; ghost notes on 7 and 15   | Beats 1 and 3 of 170, low and clear (rules 6 and 7)                                   |
-| lata      | 4, 7, 12, 15                    | With the bumbo heads it groups each half bar as 3 + 3 + 2, the dembow-like bounce     |
-| chimbal   | all 16, the off-beat «e» louder | Chimbais dobrados; 32nd-note rolls (fusas) before the grave and in the quebra         |
-| grave     | 1 (held), 7, 9 (gliding)        | The sliding 808: the note on 9 glides into the next bar's root                        |
-| teclado   | 5, 13, and a light 15           | Chords on beats 2 and 4, the reggae-like keyboard the sources describe                |
-| tamborzão | 1, 4, 7, 11, 14 (3 3 4 3 3)     | The Rio atabaque line, played alone for 4 bars to show why brega funk is not Rio funk |
+| Voice     | Sixteenths (from 1)             | Why                                                                                  |
+| :-------- | :------------------------------ | :----------------------------------------------------------------------------------- |
+| bumbo     | 1, 9; ghost notes on 7 and 15   | Beats 1 and 3 of 170, low and clear (rules 6 and 7)                                  |
+| lata      | 4, 7, 12, 15                    | With the bumbo heads it groups each half bar as 3 + 3 + 2, the dembow-like bounce    |
+| chimbal   | all 16, the off-beat «e» louder | Chimbais dobrados; 32nd-note rolls (fusas) before the grave and in the quebra        |
+| grave     | 1 (held), 7, 9 (gliding)        | The sliding 808: the note on 9 glides into the next bar's root                       |
+| teclado   | 5, 13, and a light 15           | Chords on beats 2 and 4, the reggae-like keyboard the sources describe               |
+| tamborzão | 1, 4, 7, 11, 14 (3 3 4 3 3)     | The Rio atabaque line, played alone for 4 bars to show why bregafunk is not Rio funk |
 
 The passinho scene doubles the bumbo (1, 3, 7, 9, 11, 15) and moves the lata (4, 7, 11, 12, 15).
 
@@ -69,8 +69,9 @@ A voice is drawn on the wheel only in the scenes where it plays, so each entry s
 
 ## Sounds
 
-Every voice is a recorded instrument played through the studio
-([`studio.md`](studio.md)); sources are in [`CREDITS.md`](../../CREDITS.md).
+Freesound refuses this environment, so every voice is synthesized in the page
+(`src/rhythms/bregafunk-sounds.js`): nothing is downloaded, and a phone fetches no sound file. Brega
+funk itself is made of drum-machine and MIDI sounds, so most of these are the real thing in kind.
 
 | Voice                | Recording                                              | Takes |
 | :------------------- | :----------------------------------------------------- | :---- |
@@ -91,7 +92,7 @@ horns.
 
 The palette follows `docs/research/expansion-decisions.md` (deep purple, lime on the latas, gold on
 the drops, no romantic pink) over the ground `#0d0612` of `docs/research/colour-and-visuals.md`. The
-pink `#ff2e88` of that note was dropped: the expansion decision says pink repeats brega romântico.
+pink `#ff2e88` of that note was dropped: the expansion decision says pink repeats brega.
 
 | Voice     | Colour    | Reading                              |
 | :-------- | :-------- | :----------------------------------- |
@@ -106,7 +107,7 @@ pink `#ff2e88` of that note was dropped: the expansion decision says pink repeat
 
 ## Background and wheel motion
 
-- `src/rhythms/brega-funk-background.js` replaces the kaleidoscope for this rhythm. Everything comes
+- `src/rhythms/bregafunk-background.js` replaces the kaleidoscope for this rhythm. Everything comes
   out of the wheel and stays circular: a large dark purple bloom on the bumbo and the grave (the
   sub-bass felt, not flashed), lime rays thrown from where the lata sits on the wheel, three rings
   that lean wide over beats 1 and 2 and tall over 3 and 4, gold rings on the drop's horns, leather

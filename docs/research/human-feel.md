@@ -179,7 +179,7 @@ or a secondary summary was reached, the entry says so.
 
 - No numbers in ms for samba, baque virado, coco, frevo or forró microtiming were found in text I
   could read. The Pernambuco templates below must be measured from reference recordings or set by
-  ear with players. No timing study of coco, frevo, forró, brega or brega funk was found.
+  ear with players. No timing study of coco, frevo, forró, brega or bregafunk was found.
 
 ## 4. Larger-scale dynamics, phrasing and arrangement
 
@@ -313,7 +313,7 @@ are set]. Add a fill on the last bar of each 4- or 8-bar phrase.
       [set; Linn's percentages are for drum machines].
     - Frevo: fast and driving; caixa (snare) rolls with ghost-note layers; near-straight 16ths
       [inference].
-    - Brega and brega funk: produced, machine-based styles; tight quantization is authentic here
+    - Brega and bregafunk: produced, machine-based styles; tight quantization is authentic here
       [inference, "exactitude" aesthetic per Frühauf 2013]; variation should come from sample
       choice, arrangement and drops, not timing.
     - Manguebeat: blend of maracatu percussion (rules above) with rock band timing; keep the kit

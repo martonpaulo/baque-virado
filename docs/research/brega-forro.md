@@ -1,4 +1,4 @@
-# Research: brega romântico, brega funk and forró pé-de-serra
+# Research: brega, bregafunk and forró pé-de-serra
 
 Research notes on three rhythms for the instrumental Batuque shows: names, instruments, patterns, tempo, show outlines and samples. Date: 2026-11-17.
 
@@ -8,15 +8,15 @@ practice, not a cited source. No vocals or lyrics appear in the outlines.
 
 ## Contents
 
-- [1. Brega romântico (bregapop)](#1-brega-romântico-bregapop)
-- [2. Brega funk](#2-brega-funk)
+- [1. Brega (bregapop)](#1-brega-bregapop)
+- [2. Bregafunk](#2-bregafunk)
 - [3. Forró pé-de-serra](#3-forró-pé-de-serra)
 - [Open questions](#open-questions)
 - [Sources](#sources)
 
 ---
 
-## 1. Brega romântico (bregapop)
+## 1. Brega (bregapop)
 
 ### a. Name
 
@@ -32,7 +32,7 @@ practice, not a cited source. No vocals or lyrics appear in the outlines.
   1. Reginaldo Rossi.
   2. Women singers, opened by the hit «Amor de Rapariga» (2002) and by Banda Calypso (from Pará)
      moving to Recife.
-  3. «Funkização», which became brega funk.
+  3. «Funkização», which became bregafunk.
 - **«Bregadeira»:** no source defines it, so the site does not use it.
 - Recife and Pará name their grooves differently. The dominant Recife groove is nicknamed
   **«xacumbum»**. The Pará groove is the faster «calipso» (O Liberal 2021). Pará broadcasters
@@ -83,20 +83,20 @@ How a producer would program it [inferred; check on recordings]:
 
 About 2:00 at about 140 BPM. One bar is about 1.7 s. 64 to 72 bars.
 
-| #   | Scene                       | Bars   | What enters or changes                             | What it teaches                  |
-| --- | --------------------------- | ------ | -------------------------------------------------- | -------------------------------- |
-| 1   | Keyboard hook (intro)       | 4      | Keyboard plays the melodic hook alone              | Brega is a keyboard music        |
-| 2   | Xacumbum                    | 4      | Kick, snare and off-beat hat                       | The base beat                    |
-| 3   | Bass                        | 4      | Bass locks to the kick, pushes on step 16          | Syncopated bass                  |
-| 4   | Harmony                     | 4      | String pad and off-beat stabs, I, IV, V            | Simple harmony, keyboard texture |
-| 5   | Guitar lead                 | 8      | Chorus guitar in thirds plays verse A              | Romantic melody on guitar        |
-| 6   | Virada                      | 1      | Drum-machine tom fill                              | How sections join                |
-| 7   | Refrão                      | 8      | Keyboard lead plays the chorus melody, full band   | The hook                         |
-| 8   | Stop and return             | 2      | One bar of silence or kick only, then a hit        | The break before the chorus      |
-| 9   | Brega romântico and calypso | 8      | Same loop, hats doubled to sixteenths, faster feel | Recife and Pará                  |
-| 10  | Interlude «vinheta»         | 4      | Brass-patch stabs answer the guitar                | The interlude device             |
-| 11  | Final chorus                | 8      | Guitar and keyboard in harmony                     | Everything together              |
-| 12  | Coda                        | 2 to 4 | Hook, final tom fill, stop on 1                    | Ending                           |
+| #   | Scene                 | Bars   | What enters or changes                             | What it teaches                  |
+| --- | --------------------- | ------ | -------------------------------------------------- | -------------------------------- |
+| 1   | Keyboard hook (intro) | 4      | Keyboard plays the melodic hook alone              | Brega is a keyboard music        |
+| 2   | Xacumbum              | 4      | Kick, snare and off-beat hat                       | The base beat                    |
+| 3   | Bass                  | 4      | Bass locks to the kick, pushes on step 16          | Syncopated bass                  |
+| 4   | Harmony               | 4      | String pad and off-beat stabs, I, IV, V            | Simple harmony, keyboard texture |
+| 5   | Guitar lead           | 8      | Chorus guitar in thirds plays verse A              | Romantic melody on guitar        |
+| 6   | Virada                | 1      | Drum-machine tom fill                              | How sections join                |
+| 7   | Refrão                | 8      | Keyboard lead plays the chorus melody, full band   | The hook                         |
+| 8   | Stop and return       | 2      | One bar of silence or kick only, then a hit        | The break before the chorus      |
+| 9   | Brega and calypso     | 8      | Same loop, hats doubled to sixteenths, faster feel | Recife and Pará                  |
+| 10  | Interlude «vinheta»   | 4      | Brass-patch stabs answer the guitar                | The interlude device             |
+| 11  | Final chorus          | 8      | Guitar and keyboard in harmony                     | Everything together              |
+| 12  | Coda                  | 2 to 4 | Hook, final tom fill, stop on 1                    | Ending                           |
 
 ### e. Samples
 
@@ -106,18 +106,18 @@ About 2:00 at about 140 BPM. One bar is about 1.7 s. 64 to 72 bars.
 
 ---
 
-## 2. Brega funk
+## 2. Bregafunk
 
 ### a. Name
 
 - **Names:**
   - In Recife: just «brega».
-  - National and academic term: **«brega funk»**, also «bregafunk».
+  - National and academic term: **«bregafunk»**, also «bregafunk».
   - Other names found: tecno brega, arrocha-brega, eletro brega and «brega de passinho» (Correio
     Braziliense 2019; Revista Continente).
 - **Academic sources (UFPE):**
   - Franckel Moreau, master's dissertation in anthropology (2022).
-  - R. R. da Silva, master's dissertation in communication (2023). It calls brega funk a hybrid of
+  - R. R. da Silva, master's dissertation in communication (2023). It calls bregafunk a hybrid of
     funk and tecnobrega, citing Gomes (UFPE doctoral thesis, 2013).
   - Ariel S. N. da Silva, undergraduate thesis (2021).
 - **Dates:** Billboard Brasil says it has existed since 2009 and became national from 2018
@@ -127,7 +127,7 @@ About 2:00 at about 140 BPM. One bar is about 1.7 s. 64 to 72 bars.
 
 - **Drum and bass terms used by Recife producers:**
   - **Bumbo**, the kick.
-  - **Caixa**, especially the metallic **«lata»** snare, «uma das assinaturas do brega funk desde
+  - **Caixa**, especially the metallic **«lata»** snare, «uma das assinaturas do bregafunk desde
     2018» (Diario de Pernambuco 2025, on the producer Gordinho Bolado).
   - **Chimbais dobrados**, doubled hats.
   - **«Graves»**, sub or 808 bass.
@@ -146,7 +146,7 @@ From VICE (Duca do Baixo, MC Tocha, Dany Bala):
 
 - Funk was at 130 BPM.
 - A track of that time by one of these producers was at 150 BPM.
-- Brega funk climbed to 190 to 195 BPM around 2011 to 2014.
+- Bregafunk climbed to 190 to 195 BPM around 2011 to 2014.
 - Duca slowed it to about 170. Then a later hit set **about 160, up to 170, still common today**.
 - Commercial sample packs notate it in half time (87 BPM).
 - The «160 to 180 BPM, half-time feel» on Wikipedia is consistent with this.
@@ -185,20 +185,20 @@ How a producer would program it [inferred], on a 16-step bar at 170:
 About 2:00 at 170 BPM. This first plan counted half-time bars of about 2.8 s, about 42 bars; at
 the felt 170 a bar is about 1.41 s, so the show doubles each scene's bars (D10).
 
-| #   | Scene              | Bars | What enters or changes                        | What it teaches         |
-| --- | ------------------ | ---- | --------------------------------------------- | ----------------------- |
-| 1   | Hook alone         | 2    | Lead hook, no beat                            | The hook                |
-| 2   | Bumbo              | 2    | Kick on 1 and 9                               | The pulse on 1 and 3    |
-| 3   | The lata           | 4    | Metallic snare, 3+3+2                         | The signature sound     |
-| 4   | Chimbais dobrados  | 2    | Sixteenth hats, then rolls                    | Motion                  |
-| 5   | Graves             | 4    | Sliding 808                                   | The bass                |
-| 6   | Full beat          | 4    | Hook and chords (MIDI piano)                  | The whole groove        |
-| 7   | Old and new        | 4    | Same beat at 190, then back to 170            | Tempo history (VICE)    |
-| 8   | Tamborzão contrast | 2    | Carioca tamborzão for 2 bars, then brega funk | Why it is not Rio funk  |
-| 9   | Break              | 2    | Strip to hook and hats, then a silent beat    | The build               |
-| 10  | Drop               | 4    | Everything, plus a frevo-brass stab           | The drop                |
-| 11  | Passinho variation | 4    | Kick doubled, lata syncopation varied         | Variation for the dance |
-| 12  | Finale             | 4    | Hook, final lata, cut                         | Ending                  |
+| #   | Scene              | Bars | What enters or changes                       | What it teaches         |
+| --- | ------------------ | ---- | -------------------------------------------- | ----------------------- |
+| 1   | Hook alone         | 2    | Lead hook, no beat                           | The hook                |
+| 2   | Bumbo              | 2    | Kick on 1 and 9                              | The pulse on 1 and 3    |
+| 3   | The lata           | 4    | Metallic snare, 3+3+2                        | The signature sound     |
+| 4   | Chimbais dobrados  | 2    | Sixteenth hats, then rolls                   | Motion                  |
+| 5   | Graves             | 4    | Sliding 808                                  | The bass                |
+| 6   | Full beat          | 4    | Hook and chords (MIDI piano)                 | The whole groove        |
+| 7   | Old and new        | 4    | Same beat at 190, then back to 170           | Tempo history (VICE)    |
+| 8   | Tamborzão contrast | 2    | Carioca tamborzão for 2 bars, then bregafunk | Why it is not Rio funk  |
+| 9   | Break              | 2    | Strip to hook and hats, then a silent beat   | The build               |
+| 10  | Drop               | 4    | Everything, plus a frevo-brass stab          | The drop                |
+| 11  | Passinho variation | 4    | Kick doubled, lata syncopation varied        | Variation for the dance |
+| 12  | Finale             | 4    | Hook, final lata, cut                        | Ending                  |
 
 Scene 7 changes the tempo inside the show. The decision since then is one tempo per show, so the
 sketch leaves it out.
@@ -208,7 +208,7 @@ sketch leaves it out.
 - **Easy:** CC0 kicks, snares, 808s and hats are plentiful on Freesound. A tin-can hit works as the
   «lata»: Freesound has 115 CC0 results for «tin can hit».
 - **Lead hook:** synthesize it.
-- **Avoid:** commercial brega funk kits (Kit Maloka, RVerso). They are licensed royalty-free, not
+- **Avoid:** commercial bregafunk kits (Kit Maloka, RVerso). They are licensed royalty-free, not
   CC0.
 
 ---
@@ -312,7 +312,7 @@ the sketch keeps only the baião.
 1. What is the real tempo of each of the three rhythms? Tap it on recordings, or add a measurement
    step to the build.
 
-Settled since the first draft: the site label is «Brega romântico»; the forró show includes the
+Settled since the first draft: the site label is «Brega»; the forró show includes the
 universitário extras; each show keeps one tempo.
 
 ## Sources
@@ -327,12 +327,12 @@ universitário extras; each show keeps one tempo.
 - Chada, ANPPOM 2014: https://anppom.org.br/anais/anaiscongresso_anppom_2014/3148/public/3148-9938-1-PB.pdf
 - Chada, ANPPOM 2013: https://anppom.org.br/anais/anaiscongresso_anppom_2013/2179/public/2179-6953-1-PB.pdf
 - Wikipedia, Brega pop: https://en.wikipedia.org/wiki/Brega_pop
-- VICE, brega funk history: https://www.vice.com/pt/article/historia-bregafunk-parte-2/
+- VICE, bregafunk history: https://www.vice.com/pt/article/historia-bregafunk-parte-2/
 - Mixmag: https://mixmag.net/feature/brega-funk-recife-brazil-feature
 - Diario de Pernambuco 2025 (lata): https://www.diariodepernambuco.com.br/viver/2025/07/7795294-brega-funk-viral-de-gordinho-bolado-mc-daninho-e-trovao-no-beat-vira-febre-nas-redes-sociais.html
 - Diario de Pernambuco 2020: https://www.diariodepernambuco.com.br/noticia/viver/2020/02/como-o-brega-funk-que-surgiu-periferia-do-recife-emplacou-tres-hits.html
 - Correio Braziliense 2019: https://www.correiobraziliense.com.br/app/noticia/diversao-e-arte/2019/11/26/interna_diversao_arte,809103/brega-funk-o-que-e.shtml
-- Wikipedia PT, Brega funk: https://pt.wikipedia.org/wiki/Brega_funk
+- Wikipedia PT, Bregafunk: https://pt.wikipedia.org/wiki/Brega_funk
 - Côrtes, Per Musi 2014: https://www.scielo.br/j/pm/a/6sW6mgh4bZhTRngXKxnRygH/
 - Paulino, UFS doctoral thesis 2017: https://bdtd.ibict.br/vufind/Record/UFS-2_b02ef142b6ea92d5fdea2b9b74a5d564
 - Wikipedia, Forró: https://en.wikipedia.org/wiki/Forr%C3%B3

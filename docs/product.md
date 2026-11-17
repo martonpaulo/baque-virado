@@ -88,8 +88,8 @@ The rules every rhythm package in `src/rhythms/` follows.
   [`frevo-manguebeat-coco.md`](research/frevo-manguebeat-coco.md), and the agent checks it before
   the owner listens.
 - **Background.** Circular, coming out of the central wheel, in the rhythm's palette from section 5
-  of [`colour-and-visuals.md`](research/colour-and-visuals.md): brega romântico in desaturated blue
-  and muted rose, brega funk in purple, magenta and gold. The approved backgrounds are a sketch to
+  of [`colour-and-visuals.md`](research/colour-and-visuals.md): brega in desaturated blue
+  and muted rose, bregafunk in purple, magenta and gold. The approved backgrounds are a sketch to
   improve, not a finished design. Flashes stay within WCAG 2.3.1.
 - **Sound.** Real CC0 recordings first. A synthesized voice must sound like the real instrument.
   One sample repeated unchanged is not acceptable: use round robin, velocity layers, humanised

@@ -12,7 +12,7 @@ import { cpSync, existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { COPY } from '../src/copy.js';
-import { RHYTHMS, ROUTES, rhythmChoices } from '../src/rhythms/index.js';
+import { MOVED, RHYTHMS, ROUTES, rhythmChoices } from '../src/rhythms/index.js';
 import { PREPARING, preparingLine } from '../src/rhythms/preparing.js';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -57,6 +57,25 @@ export function preparingPage(html, id) {
 </html>
 `;
   return head + body;
+}
+
+/** The page at a moved path: it sends the viewer to the new route at once, the query and the fragment
+ * kept, and tells search engines the new address. Without JavaScript the refresh still moves (#37). */
+export function movedPage(to, origin) {
+  const url = `${origin}/${to}`;
+  return `<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>${escapeHtml(capitalized(to))} · ${SITE_NAME}</title>
+<meta name="robots" content="noindex">
+<link rel="canonical" href="${url}">
+<meta http-equiv="refresh" content="0; url=/${to}">
+<script>location.replace('/${to}' + location.search + location.hash);</script>
+</head>
+<body><p><a href="/${to}">${escapeHtml(capitalized(to))}</a></p></body>
+</html>
+`;
 }
 
 const listModules = (dir, prefix) =>
@@ -108,6 +127,7 @@ export function buildSite(out, root = ROOT, version = '') {
       throw new Error(`route ${id} has neither a rhythm package nor an entry in src/rhythms/preparing.js`);
     }
   }
+  for (const [from, to] of Object.entries(MOVED)) writeFileSync(path.join(out, `${from}.html`), movedPage(to, origin));
 }
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {

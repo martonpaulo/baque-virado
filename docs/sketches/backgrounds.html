@@ -39,7 +39,7 @@ const SKETCHES = [
      for (const d of s.cloth) { d.r += 0.0015; if (d.r > 1) d.r = 0.15; const a = d.a + t * 0.25, rr = d.r * w * 0.75; c.fillStyle = `rgba(239,230,214,${0.5 * (1 - d.r)})`; c.fillRect(cx + Math.cos(a) * rr, cy + Math.sin(a) * rr, d.s, d.s); }
      wheel(c, cx, cy, w, `rgba(199,121,58,${0.6 + p * 0.4})`);
    } },
- { key: 'bfunk', name: 'Brega funk', feel: 'Sensualidade e provocação', bpm: 85, steps: 16, hits: [3, 6, 11, 14], accent: [0, 8],
+ { key: 'bfunk', name: 'Bregafunk', feel: 'Sensualidade e provocação', bpm: 85, steps: 16, hits: [3, 6, 11, 14], accent: [0, 8],
    init(w, h) { return { rays: [], bloom: 0 }; },
    draw(c, w, h, t, p, s, step, hit) {
      c.fillStyle = 'rgba(13,6,18,0.28)'; c.fillRect(0, 0, w, h);
@@ -80,7 +80,7 @@ const SKETCHES = [
      c.globalAlpha = 1; s.flags = s.flags.filter(f => f.life > 0);
      wheel(c, cx, cy, w, 'rgba(14,15,31,0.85)');
    } },
- { key: 'brega', name: 'Brega romântico', feel: 'Dor de amor', bpm: 140, steps: 16, hits: [0, 8], accent: [0],
+ { key: 'brega', name: 'Brega', feel: 'Dor de amor', bpm: 140, steps: 16, hits: [0, 8], accent: [0],
    init(w, h) { return { b: [] }; },
    draw(c, w, h, t, p, s, step, hit) {
      c.fillStyle = 'rgba(10,11,24,0.06)'; c.fillRect(0, 0, w, h);

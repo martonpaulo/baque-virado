@@ -11,8 +11,8 @@ Research report on the rhythm, melody, social context and feeling of the seven B
 - [3. Frevo](#3-frevo)
 - [4. Manguebeat](#4-manguebeat)
 - [5. Forró pé-de-serra](#5-forró-pé-de-serra)
-- [6. Brega romântico](#6-brega-romântico)
-- [7. Brega funk](#7-brega-funk)
+- [6. Brega](#6-brega)
+- [7. Bregafunk](#7-bregafunk)
 - [Design notes](#design-notes)
 - [References](#references)
 
@@ -31,7 +31,7 @@ Gaps in the sources:
 - Crook's _Brazilian Music: Northeastern Traditions and the Heartbeat of a Modern Nation_ (2005),
   Sandroni's _Feitiço decente_ (2001) and the _Batuque Book_ volumes were not read directly. They
   appear only through other authors.
-- No ethnomusicological transcription of the brega funk beat was found. Its grids are [I].
+- No ethnomusicological transcription of the bregafunk beat was found. Its grids are [I].
 - The ANPPOM paper on coco and Xambá found is by Tainá Menezes Castro (2018) [6].
 
 ---
@@ -239,7 +239,7 @@ sanfona phrase landing on the flat seventh.
 
 ---
 
-## 6. Brega romântico
+## 6. Brega
 
 **Sound.**
 
@@ -270,7 +270,7 @@ synth in the instrumental form.
 
 ---
 
-## 7. Brega funk
+## 7. Bregafunk
 
 **Sound.**
 
@@ -387,7 +387,7 @@ triangle x x o x x x o x x x o x x x o x   closed/open, offbeats open [S]
 - **Avoid.** Quoting «Asa Branca». One «standard» cell for the whole show: vary it as Gonzaga did
   [S]. Electronic forró gloss. Sad minor keys: saudade here sits in major with a flat seventh.
 
-### Brega romântico
+### Brega
 
 ```text
 step    1 . . . 5 . . . 9 . . . 13. . .
@@ -401,11 +401,11 @@ fill    . . . . . . . . . . . . X x x x   virada into chorus [S]
 - **Melody must have.** A singable, wide line with long notes for vibrato [S]. A drum fill before
   every chorus [S]. A key change up a step on the last chorus [I]. Sax or synth answering each
   phrase.
-- **Avoid.** Irony: Soares reads the genre as melodrama to take seriously. Brega funk drums. A sad
+- **Avoid.** Irony: Soares reads the genre as melodrama to take seriously. Bregafunk drums. A sad
   minor key throughout, since brega cries in major. The show decision still sets a minor key for
   saudade, so test both.
 
-### Brega funk
+### Bregafunk
 
 ```text
 step    1 . . . 5 . . . 9 . . . 13. . .
@@ -445,10 +445,10 @@ bass    X . . . . . X . X . . . . . . .   sliding [S]; positions [I]
 19. Trotta 2012, «Som de cabra-macho: sonoridade, nordestinidade e masculinidades no forró», _Comunicação, Mídia e Consumo_ 9(26):151 to 172. https://revistacmc.espm.br/revistacmc/article/download/349/pdf/536
 20. Soares & Alves 2021, «Performance e nostalgia na música brega», _Lumina_ (UFJF) 15(2):37 to 54, doi:10.34019/1981-4070.2021.v15.33682. https://periodicos.ufjf.br/index.php/lumina/article/download/33682/23268
 21. Diário de Pernambuco 2017, interview with Thiago Soares. https://www.diariodepernambuco.com.br/noticia/viver/2017/08/o-governo-colocou-o-brega-embaixo-do-tapete-diz-autor-de-livro-sobr.html
-22. Billboard Brasil 2024-02-07, brega funk and Recife. https://billboard.com.br/brega-e-chique-a-saga-do-brega-funk-para-se-tornar-filho-prodigo-de-recife/
+22. Billboard Brasil 2024-02-07, bregafunk and Recife. https://billboard.com.br/brega-e-chique-a-saga-do-brega-funk-para-se-tornar-filho-prodigo-de-recife/
 23. Intercom Nordeste 2018 abstract. https://portalintercom.org.br/anais/nordeste2018/resumos/R62-0689-1.pdf
-24. Loftin 2019, «Brega funk is the music of Recife that's taking over Brazil», _Mixmag_. https://mixmag.net/feature/brega-funk-recife-brazil-feature
+24. Loftin 2019, «Bregafunk is the music of Recife that's taking over Brazil», _Mixmag_. https://mixmag.net/feature/brega-funk-recife-brazil-feature
 25. Caceres, Ferrari & Palombini 2014, «A Era Lula/Tamborzão: política e sonoridade», _Revista do IEB_ 58:157 to 207. https://www.redalyc.org/pdf/4056/405641280009.pdf
 26. Wikipedia, «Funk carioca».
-27. Moreau 2022, _O brega funk como estratégia identitária e de resistência dos jovens da periferia recifense_, UFPE. https://bdtd.ibict.br/vufind/Record/UFPE_e1f1e4d4756544902a2d9bcc55ec1b29
-28. Paz, _O ritmo brega funk e a sua espacialização_, UFPE. https://agencia.ufpe.br/documents/39914/791395/Resumo_Dissertacao_T%C3%BAlio+Felipe+Silva+da+Paz/3f4335ad-b891-44fc-85ce-b2a1c2d7c4f0
+27. Moreau 2022, _O bregafunk como estratégia identitária e de resistência dos jovens da periferia recifense_, UFPE. https://bdtd.ibict.br/vufind/Record/UFPE_e1f1e4d4756544902a2d9bcc55ec1b29
+28. Paz, _O ritmo bregafunk e a sua espacialização_, UFPE. https://agencia.ufpe.br/documents/39914/791395/Resumo_Dissertacao_T%C3%BAlio+Felipe+Silva+da+Paz/3f4335ad-b891-44fc-85ce-b2a1c2d7c4f0

@@ -11,10 +11,10 @@ import { TWO_FOUR } from './support/rhythm-two-four.js';
 
 const BOTH = [MARACATU, TWO_FOUR];
 
-test('the site ships maracatu, the coco, frevo, forró and brega funk, and shows maracatu by default', () => {
+test('the site ships maracatu, the coco, frevo, forró and bregafunk, and shows maracatu by default', () => {
   assert.deepEqual(
     RHYTHMS.map(rhythm => rhythm.id),
-    ['maracatu', 'coco', 'frevo', 'forro', 'brega-funk'],
+    ['maracatu', 'coco', 'frevo', 'forro', 'bregafunk'],
   );
   assert.equal(RHYTHM, MARACATU);
 });
@@ -37,8 +37,8 @@ test('a path /<id> picks a rhythm, and wins over ?ritmo=', () => {
 });
 
 test('seven paths, in the order the owner set; the ones with no package yet are being prepared', () => {
-  assert.deepEqual(ROUTES, ['maracatu', 'coco', 'frevo', 'forro', 'manguebeat', 'brega-romantico', 'brega-funk']);
-  assert.deepEqual(preparingIds(), ['manguebeat', 'brega-romantico']);
+  assert.deepEqual(ROUTES, ['maracatu', 'coco', 'frevo', 'forro', 'manguebeat', 'brega', 'bregafunk']);
+  assert.deepEqual(preparingIds(), ['manguebeat', 'brega']);
 });
 
 test('?ritmo=<id> of a route redirects to its path and keeps the rest of the query', () => {
@@ -46,6 +46,15 @@ test('?ritmo=<id> of a route redirects to its path and keeps the rest of the que
   assert.equal(redirectFor('?ritmo=frevo&x=1'), '/frevo?x=1');
   assert.equal(redirectFor('?ritmo=desconhecido'), null);
   assert.equal(redirectFor(''), null);
+});
+
+test('the paths that were live before the rename move to the new ones, the query kept (#37)', () => {
+  assert.equal(redirectFor('', ROUTES, '/brega-funk'), '/bregafunk');
+  assert.equal(redirectFor('?x=1', ROUTES, '/brega-romantico.html'), '/brega?x=1');
+  assert.equal(redirectFor('?ritmo=brega-funk'), '/bregafunk');
+  assert.equal(redirectFor('?ritmo=brega-romantico&x=1'), '/brega?x=1');
+  assert.equal(redirectFor('', ROUTES, '/bregafunk'), null);
+  assert.equal(rhythmFor('', RHYTHMS, '/brega-funk').id, 'bregafunk');
 });
 
 test('the selector has no entry with one route, and one link per route with two or more', () => {
@@ -62,8 +71,8 @@ test('the selector has no entry with one route, and one link per route with two 
       ['frevo', '/frevo', true],
       ['forró', '/forro', false],
       ['manguebeat', '/manguebeat', false],
-      ['brega romântico', '/brega-romantico', false],
-      ['brega funk', '/brega-funk', false],
+      ['brega', '/brega', false],
+      ['bregafunk', '/bregafunk', false],
     ],
   );
 });

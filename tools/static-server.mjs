@@ -8,7 +8,7 @@ import { readFile, stat } from 'node:fs/promises';
 import { createServer } from 'node:http';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { ROUTES } from '../src/rhythms/index.js';
+import { MOVED, ROUTES } from '../src/rhythms/index.js';
 
 const REPO_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const OK = 200,
@@ -88,6 +88,6 @@ export function startStaticServer(root = REPO_ROOT, port = 0, { routes = [] } = 
 }
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
-  const { url } = await startStaticServer(REPO_ROOT, Number(process.argv[2]) || 8000, { routes: ROUTES });
+  const { url } = await startStaticServer(REPO_ROOT, Number(process.argv[2]) || 8000, { routes: [...ROUTES, ...Object.keys(MOVED)] });
   console.log(`serving ${REPO_ROOT} at ${url}`);
 }

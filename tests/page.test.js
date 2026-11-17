@@ -521,8 +521,8 @@ test('an unknown ?ritmo= shows maracatu, marked in the selector of every rhythm 
       ['/frevo', null],
       ['/forro', null],
       ['/manguebeat', null],
-      ['/brega-romantico', null],
-      ['/brega-funk', null],
+      ['/brega', null],
+      ['/bregafunk', null],
     ]);
     assert.deepEqual(errors, []);
     await page.close();
@@ -570,15 +570,16 @@ test('?ritmo=coco moves to /coco and shows the coco on an 8-step wheel, its 12 s
     ['frevo', null],
     ['forró', null],
     ['manguebeat', null],
-    ['brega romântico', null],
-    ['brega funk', null],
+    ['brega', null],
+    ['bregafunk', null],
   ]);
   assert.deepEqual(errors, []);
   await page.close();
 });
 
-test('?ritmo=brega-funk plays its recorded sounds through the studio, with no error', async () => {
+test('?ritmo=brega-funk moves to /bregafunk and plays its synthesized sounds without fetching a sound file', async () => {
   const { page, errors } = await openPage(DESKTOP, { query: '?ritmo=brega-funk' });
+  assert.equal(await page.evaluate(() => location.pathname), '/bregafunk');
   await page.click('#tap');
   await page.waitForFunction(() => document.getElementById('tap').dataset.state === 'pause');
   assert.ok(await page.evaluate(() => performance.getEntriesByType('resource').some(entry => entry.name.includes('/sounds/sala-viva'))));

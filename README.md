@@ -53,7 +53,7 @@ sounds a desktop viewer can pick are fetched when chosen.
 - `tools/export-video.mjs` - the vertical video exporter on the command line.
 - [docs/research/expansion-decisions.md](docs/research/expansion-decisions.md) - the decisions for growing from one rhythm show to seven.
 - [docs/research/frevo-manguebeat-coco.md](docs/research/frevo-manguebeat-coco.md) - research on frevo, manguebeat and coco da Xambá.
-- [docs/research/brega-forro.md](docs/research/brega-forro.md) - research on brega romântico, brega funk and forró pé-de-serra.
+- [docs/research/brega-forro.md](docs/research/brega-forro.md) - research on brega, bregafunk and forró pé-de-serra.
 - [docs/research/pernambuco-rhythms-feeling.md](docs/research/pernambuco-rhythms-feeling.md) - why Pernambuco rhythms move people.
 - [docs/research/music-cognition.md](docs/research/music-cognition.md) - music cognition and semiotics for the shows.
 - [docs/research/colour-and-visuals.md](docs/research/colour-and-visuals.md) - colour and animation evidence for the rhythm backgrounds.

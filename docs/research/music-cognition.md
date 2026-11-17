@@ -235,15 +235,15 @@ this pass agree on sadness and the arousal grouping (anger high, tenderness low)
 
 ### Inferences per rhythm (our reading, not the sources')
 
-| Rhythm          | Style flag (what must be present)      | Anaphone to use                          | Peirce                                   |
-| --------------- | -------------------------------------- | ---------------------------------------- | ---------------------------------------- |
-| Maracatu        | alfaias, gonguê, agbê                  | kinetic: the cortejo walk                | index of the nação and the street        |
-| Coco            | ganzá, pandeiro, foot-stomp pattern    | kinetic and tactile: the tamanco on wood | index of the roda                        |
-| Frevo           | fast brass-like lines, marcha pulse    | kinetic: the passista's leaps            | symbol of Carnival                       |
-| Manguebeat      | alfaia under distorted bass            | sonic: grit, city noise                  | genre synecdoche of maracatu inside rock |
-| Forró           | zabumba, triangle, accordion-like line | kinetic: the couple's two-step           | index of São João                        |
-| Brega romântico | crooner-like melody, soft keyboard     | tactile: smooth, close                   | symbol of the radio ballad               |
-| Brega funk      | tamborzão-like kick, sub bass          | kinetic: the passinho                    | index of the periphery party             |
+| Rhythm     | Style flag (what must be present)      | Anaphone to use                          | Peirce                                   |
+| ---------- | -------------------------------------- | ---------------------------------------- | ---------------------------------------- |
+| Maracatu   | alfaias, gonguê, agbê                  | kinetic: the cortejo walk                | index of the nação and the street        |
+| Coco       | ganzá, pandeiro, foot-stomp pattern    | kinetic and tactile: the tamanco on wood | index of the roda                        |
+| Frevo      | fast brass-like lines, marcha pulse    | kinetic: the passista's leaps            | symbol of Carnival                       |
+| Manguebeat | alfaia under distorted bass            | sonic: grit, city noise                  | genre synecdoche of maracatu inside rock |
+| Forró      | zabumba, triangle, accordion-like line | kinetic: the couple's two-step           | index of São João                        |
+| Brega      | crooner-like melody, soft keyboard     | tactile: smooth, close                   | symbol of the radio ballad               |
+| Bregafunk  | tamborzão-like kick, sub bass          | kinetic: the passinho                    | index of the periphery party             |
 
 Topic theory suggests each scene should open with its style flag before anything else, so the
 genre is recognized at once (Agawu 1991; Tagg's style indicator).
@@ -274,7 +274,7 @@ Each rule names its source. Rules marked _inference_ are our extrapolation.
    variation and a small, consistent swing where the style has one. Hove et al. 2014; Davies et al.
    2013; Frühauf et al. 2013.
 7. **Tune the lowest drum low and give it a clear attack.** This applies to the alfaia, zabumba and
-   brega funk kick. Stupacher et al. 2016.
+   bregafunk kick. Stupacher et al. 2016.
 
 ### Arrangement and density
 

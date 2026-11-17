@@ -1,10 +1,11 @@
-// Brega funk: everything the engine plays and shows that belongs to this rhythm (Recife, since about
+// Bregafunk: everything the engine plays and shows that belongs to this rhythm (Recife, since about
 // 2009). 170 BPM, felt at 170: one 16-sixteenth bar per turn of the wheel (1.41 s), the bumbo on 1
 // and 3, the metallic «lata» in 3 + 3 + 2 per half bar, chimbais in sixteenths, the sliding «grave»,
 // keys on 2 and 4 and a short minor hook. Hard-quantized, as it is programmed: no swing.
-// Research and choices: docs/research/brega-forro.md, docs/rhythms/brega-funk.md.
+// Research and choices: docs/research/brega-forro.md, docs/rhythms/bregafunk.md.
 import { label, row, stat, stats } from '../readout-markup.js';
-import { BEATS_PER_LEAN, createBregaFunkBackground, PALETTE } from './brega-funk-background.js';
+import { BEATS_PER_LEAN, createBregafunkBackground, PALETTE } from './bregafunk-background.js';
+import { atabaque, brass, grave, hat, keys, kick, lata, lead } from './bregafunk-sounds.js';
 import { straightMeter } from './meter.js';
 import { midiOf, recordedChoices, studioSounds, takes } from './studio-kit.js';
 
@@ -17,7 +18,7 @@ const STEPS_PER_BAR = BEATS_PER_BAR * STEPS_PER_BEAT;
 const STEP_SECONDS = 60 / BPM / STEPS_PER_BEAT;
 const BAR_SECONDS = STEP_SECONDS * STEPS_PER_BAR;
 const SIXTEENTHS = [...Array(STEPS_PER_BAR).keys()];
-const ID = 'brega-funk';
+const ID = 'bregafunk';
 
 // ring/size: where and how big the voice sits on the wheel. register: the band it fills (grave,
 // médio, agudo: one layer per band). pitched: a melodic voice keeps its tuning on every hit.
@@ -225,16 +226,13 @@ const SCENE_LIST = [
     isEnd: true,
   },
 ];
-// The background is the rhythm's own (brega-funk-background.js); the looks keep only the speed of
+// The background is the rhythm's own (bregafunk-background.js); the looks keep only the speed of
 // its clock, which the engine reads, at real time.
 const LOOK = { zoom: 0, rot: 0, hue: 0, keep: 0, seg: 0, warp: 0, pal: 0, speed: 1 };
 const SCENE_LOOKS = Object.fromEntries(SCENE_LIST.map(scene => [scene.id, LOOK]));
 
-// ---------- sound: recorded instruments in the studio (src/studio.js) ----------
-// Recorded takes (CC0) for every voice: 808 kicks and subs, cans for the lata, hi-hats, an upright
-// piano for the keys, a trumpet for the hook, trumpet and trombone for the horns, congas for the
-// tamborzão. Programmed, as producers do: every voice on the hard grid, the kick ducks the rest.
-// Sources: CREDITS.md; choices: docs/rhythms/studio.md.
+// ---------- sound: synthesized in the page (bregafunk-sounds.js) ----------
+const NAME = `${ID}-`;
 const lengthOf = tone => Number(TONE.exec(tone)[2]) * STEP_SECONDS;
 const noteOf = tone => TONE.exec(tone)[1];
 const ECHO = { delay: 3 * STEP_SECONDS, gain: 0.32 }; // the lead's echo, a dotted eighth behind
@@ -397,7 +395,7 @@ const READ = {
   bars: 'compassos',
 };
 const SCENE_COPY = {
-  tema: { chip: 'Tema', eyebrow: 'brega funk', title: 'Tema' },
+  tema: { chip: 'Tema', eyebrow: 'bregafunk', title: 'Tema' },
   bumbo: { chip: 'Bumbo', eyebrow: 'no 1 e no 3', title: 'Bumbo' },
   lata: { chip: 'Lata', eyebrow: READ.groupingValue, title: 'Lata' },
   chimbais: { chip: 'Chimbais', eyebrow: 'chimbais dobrados', title: 'Chimbais' },
@@ -410,7 +408,7 @@ const SCENE_COPY = {
   final: { chip: 'Final', eyebrow: '', title: 'Fim' },
 };
 const COPY = {
-  name: 'brega funk',
+  name: 'bregafunk',
   feminineInstruments: ['lata'], // "som da lata", "som do bumbo"
   scenes: SCENE_COPY,
   patterns: {},
@@ -489,7 +487,7 @@ const LAYOUTS = {
 const FOCUS = { bumbo: 'bumbo', lata: 'lata', chimbais: 'chimbal', grave: 'grave' };
 const readout = (scene, show) => ({ markup: (LAYOUTS[scene.id] || (() => ''))(show), score: null, focus: FOCUS[scene.id] || '' });
 
-export const BREGA_FUNK = {
+export const BREGAFUNK = {
   id: ID,
   ...straightMeter(BPM, BEATS_PER_BAR, STEPS_PER_BEAT),
   voices: VOICES,
@@ -498,7 +496,7 @@ export const BREGA_FUNK = {
   sceneDefaults: { pattern: 'brega' },
   scenes: SCENE_LIST,
   looks: SCENE_LOOKS,
-  background: { create: createBregaFunkBackground },
+  background: { create: createBregafunkBackground },
   wheelMotion,
   readout,
   waves: null,

@@ -1,12 +1,15 @@
-// The brega funk package: one tempo, its beat, the hook's form, its background and the flash limit.
+// The bregafunk package: one tempo, its beat, the hook's form, sounds for every hit and the flash limit.
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { meterOf } from '../src/music.js';
-import { BEAT, BREGA_FUNK, HOOK, HOOK_VARIED, TAMBORZAO } from '../src/rhythms/brega-funk.js';
-import { createBregaFunkBackground, PALETTE } from '../src/rhythms/brega-funk-background.js';
+import { BEAT, BREGAFUNK, HOOK, HOOK_VARIED, TAMBORZAO } from '../src/rhythms/bregafunk.js';
+import { createBregafunkBackground, PALETTE } from '../src/rhythms/bregafunk-background.js';
+import { noteFrequency } from '../src/rhythms/bregafunk-sounds.js';
 import { createShow } from '../src/show.js';
 
-const show = createShow(BREGA_FUNK);
+const show = createShow(BREGAFUNK);
+const SAMPLE_RATE = 44100;
+const DEFAULTS = Object.fromEntries(BREGAFUNK.sounds.choices.map(choice => [choice.id, choice.defaultOption]));
 const leadBars = () =>
   [...Array(show.TOTAL_BARS).keys()].map(bar => ({
     bar,
@@ -19,8 +22,8 @@ const leadBars = () =>
 const asHits = bar => bar.map(([step, note, length]) => [step, `${note}:${length}`]);
 
 test('one tempo for the whole show, felt at 170 BPM: one 16-sixteenth bar of 1.41 s per turn', () => {
-  const meter = meterOf(BREGA_FUNK);
-  assert.equal(BREGA_FUNK.bpm, 170);
+  const meter = meterOf(BREGAFUNK);
+  assert.equal(BREGAFUNK.bpm, 170);
   assert.equal(meter.stepsPerBar, 16);
   assert.ok(Math.abs(meter.barSeconds - 1.41) < 0.01, `${meter.barSeconds} s per turn`);
   assert.equal(show.TOTAL_BARS, 68);
@@ -90,15 +93,46 @@ test('the quebra leaves its last beat silent before the drop', () => {
   for (const h of last.filter(h => h.voice === 'lead')) assert.ok(h.hit.step + Number(h.hit.tone.split(':')[1]) <= 12);
 });
 
+test('every hit has a sound: synthesized, or the CC0 tarol for the lata', () => {
+  const { synth, sampleFor } = BREGAFUNK.sounds;
+  for (let bar = 0; bar < show.TOTAL_BARS; bar++)
+    for (const h of show.hitsInBar(bar)) {
+      const [name, gain] = sampleFor[h.voice](DEFAULTS, h.hit.velocity, h.hit.tone, 0.5);
+      assert.ok(Object.hasOwn(synth, name), `${h.voice} ${h.hit.tone}: ${name}`);
+      assert.ok(gain > 0 && gain <= 1);
+    }
+  const [tarol] = sampleFor.lata({ ...DEFAULTS, lata: 'tarol' }, 1);
+  assert.ok(existsSync(new URL(`../sounds/${tarol}.m4a`, import.meta.url)));
+  // the default choices name only synthesized sounds: a phone downloads nothing
+  for (const choice of BREGAFUNK.sounds.choices) for (const name of choice.files(choice.defaultOption)) assert.ok(Object.hasOwn(synth, name), name);
+});
+
+test('the synthesized sounds render finite, audible and the same every time', () => {
+  for (const [name, render] of Object.entries(BREGAFUNK.sounds.synth)) {
+    const samples = render(SAMPLE_RATE);
+    let peak = 0;
+    for (const value of samples) {
+      assert.ok(Number.isFinite(value), name);
+      peak = Math.max(peak, Math.abs(value));
+    }
+    assert.ok(peak > 0.5 && peak <= 1, `${name} peaks at ${peak}`);
+    assert.equal(Math.abs(samples.at(-1)) < 1e-3, true, `${name} ends without a click`);
+  }
+  const name = Object.keys(BREGAFUNK.sounds.synth).find(key => key.includes('lata'));
+  assert.deepEqual(BREGAFUNK.sounds.synth[name](SAMPLE_RATE), BREGAFUNK.sounds.synth[name](SAMPLE_RATE));
+  assert.equal(noteFrequency('A4'), 440);
+  assert.equal(Math.round(noteFrequency('A1')), 55);
+});
+
 test('the background flashes at most 3 times in any second (WCAG 2.3.1)', () => {
   const FPS = 30;
-  const layer = createBregaFunkBackground();
+  const layer = createBregafunkBackground();
   const noop = () => {};
   const ctx = new Proxy({}, { get: (_target, key) => (key === 'createRadialGradient' ? () => ({ addColorStop: noop }) : noop), set: () => true });
   const geometry = { width: 400, height: 800, centreX: 200, centreY: 330, scopeRadius: 120, dpr: 1, shapes: [] };
   for (let frame = 0; frame < show.TOTAL_SECONDS * FPS; frame++) {
     const time = frame / FPS,
-      position = time / meterOf(BREGA_FUNK).barSeconds;
+      position = time / meterOf(BREGAFUNK).barSeconds;
     const recent = show.recentHits(position, 1.2);
     layer.draw(ctx, { ...geometry, position, params: { sceneId: show.sceneAt(Math.floor(position)).id }, recent, time, step: 1 / FPS, fresh: frame === 0 });
   }
@@ -139,8 +173,8 @@ test('under the wheel the background keeps the wheel colours at 3:1 or more', ()
     },
   };
   const ctx = new Proxy({}, { get: (_target, key) => record[key] || (() => {}), set: () => true });
-  const layer = createBregaFunkBackground(),
-    { barSeconds } = meterOf(BREGA_FUNK);
+  const layer = createBregafunkBackground(),
+    { barSeconds } = meterOf(BREGAFUNK);
   const geometry = { width: 400, height: 800, centreX: 200, centreY: 330, scopeRadius: RADIUS, dpr: 1, shapes: [] };
   for (const id of ['tamborzao', 'drop']) {
     const scene = show.sceneById(id);
@@ -156,13 +190,13 @@ test('under the wheel the background keeps the wheel colours at 3:1 or more', ()
 });
 
 test('the wheel leans on alternate beats and swells on the bumbo, by position alone', () => {
-  const still = BREGA_FUNK.wheelMotion(0, []);
+  const still = BREGAFUNK.wheelMotion(0, []);
   assert.deepEqual(still, { rotate: 0, scale: 1 });
   // at 170 the hips lean on alternate beats: one way over beats 1 and 2, the other over 3 and 4
-  const lean = BREGA_FUNK.wheelMotion(1 / 4, []);
+  const lean = BREGAFUNK.wheelMotion(1 / 4, []);
   assert.ok(lean.rotate > 0);
-  assert.ok(BREGA_FUNK.wheelMotion(1 / 8, []).rotate > 0, 'the second beat keeps the lean');
-  assert.ok(BREGA_FUNK.wheelMotion(3 / 4, []).rotate < 0, 'beats 3 and 4 lean the other way');
-  const swell = BREGA_FUNK.wheelMotion(2, [{ voice: 'bumbo', hit: { velocity: 1 }, age: 0 }]);
+  assert.ok(BREGAFUNK.wheelMotion(1 / 8, []).rotate > 0, 'the second beat keeps the lean');
+  assert.ok(BREGAFUNK.wheelMotion(3 / 4, []).rotate < 0, 'beats 3 and 4 lean the other way');
+  const swell = BREGAFUNK.wheelMotion(2, [{ voice: 'bumbo', hit: { velocity: 1 }, age: 0 }]);
   assert.ok(swell.scale > 1);
 });

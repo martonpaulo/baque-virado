@@ -66,10 +66,10 @@ Read on branch `ritmos` at `066315a`, with four rhythm packages merged and three
 above and becomes one allowlist entry of the check until its step lands.
 
 - Data imports presentation: `src/rhythms/maracatu.js` imports `readout-markup.js` and
-  `score.js`; `coco-xamba.js`, `forro.js` and `brega-funk.js` import `readout-markup.js`
+  `score.js`; `coco-xamba.js`, `forro.js` and `bregafunk.js` import `readout-markup.js`
   (rule 4).
-- Data imports a background: `forro.js` imports `forro-backdrop.js` and `brega-funk.js` imports
-  `brega-funk-background.js` (rule 1).
+- Data imports a background: `forro.js` imports `forro-backdrop.js` and `bregafunk.js` imports
+  `bregafunk-background.js` (rule 1).
 - The route lives in the data layer: `src/rhythms/index.js` reads `globalThis.location` (path and
   query) to export the `RHYTHM` singleton (rules 2 and 3).
 - The engine is a singleton of that route: `src/music.js` exports the meter of `RHYTHM`, and
