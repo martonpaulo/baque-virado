@@ -30,7 +30,26 @@ Alfaia patterns: the table at lansdownsoftware.com. Swing measured on a Batuk Na
 
 - Alfaia, caixa, ganzá, agogô and abê reuse the samples above; the second alfaia head is the
   answer sample played at a higher pitch.
-- Pandeiro and palmas are recordings listed under «Studio instruments» below.
+- Pandeiro, palmas and atabaques are studio takes (below). The coco's own recordings, each one hit
+  cut from a Freesound recording, normalised, with a 60 ms fade out:
+
+  | File                   | Plays                                | Recording                                                     | Author          |
+  | :--------------------- | :----------------------------------- | :------------------------------------------------------------ | :-------------- |
+  | `pandeiro-grave-1`     | «pandeiro grave»                     | [844751](https://freesound.org/s/844751/), the hit at 38.23 s | MeanRaccoon     |
+  | `pandeiro-grave-2`     | «pandeiro de couro»                  | [609770](https://freesound.org/s/609770/)                     | Ilson_Junior    |
+  | `pandeiro-grave-3`     | «pandeiro seco»                      | [90078](https://freesound.org/s/90078/)                       | menegass        |
+  | `pandeiro-platinela-1` | «pandeiro de platinela», the jingles | [527967](https://freesound.org/s/527967/)                     | katusm          |
+  | `palmas-1`             | «uma palma»                          | [537735](https://freesound.org/s/537735/)                     | steeltowngaming |
+  | `palmas-2`             | «palmas da roda»                     | [531693](https://freesound.org/s/531693/)                     | junioraragaki   |
+  | `palmas-3`             | «palma abafada»                      | [154399](https://freesound.org/s/154399/)                     | semccab         |
+  | `palmas-4`             | «palma com pulseira»                 | [557368](https://freesound.org/s/557368/)                     | launchsite      |
+  | `atabaque-grave-7`     | the rum                              | [49991](https://freesound.org/s/49991/)                       | la.terror       |
+  | `atabaque-agudo-7`     | the rumpi                            | [373411](https://freesound.org/s/373411/)                     | sgossner        |
+  | `atabaque-agudo-8`     | the lé                               | [99740](https://freesound.org/s/99740/)                       | menegass        |
+
+  The roda also claps with `palmas-5` and `palmas-6`, the rumpi with the conga takes
+  `atabaque-grave-1` to `-6` and the lé with the quinto takes `atabaque-agudo-1` to `-6` (VSCO 2 CE,
+  below).
 - Sources: Tainá Menezes Castro, «Nação Xambá: identidade negra, tradição religiosa e estratégias
   de difusão da sua cultura», ANPPOM 2018
   (<https://anppom.org.br/anais/anaiscongresso_anppom_2018/5434/public/5434-18196-1-PB.pdf>);
