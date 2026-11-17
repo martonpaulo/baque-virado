@@ -20,6 +20,7 @@ const SITE_NAME = 'Batuque';
 const COPIED = ['index.html', '404.html', 'styles.css', 'src', 'vendor', 'social.png', 'apple-touch-icon.png', 'icon.svg', 'icons', 'CNAME', '.nojekyll'];
 
 const escapeHtml = text => text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+const LD_JSON = /<script type="application\/ld\+json">(.*)<\/script>/;
 const capitalized = text => text.charAt(0).toUpperCase() + text.slice(1);
 
 /** index.html with the title, description, address, preview and structured data of one route (#31). */
@@ -27,15 +28,17 @@ function withRoute(html, { id, title, description, origin }) {
   const fullTitle = escapeHtml(`${title} · ${SITE_NAME}`);
   const url = `${origin}/${id}`;
   const text = escapeHtml(description);
-  const data = {
-    '@context': 'https://schema.org',
+  // the page of a rhythm being prepared has no structured data: preparingPage drops it
+  const site = LD_JSON.test(html) ? siteData(html) : null;
+  const data = site && {
+    '@context': site['@context'], // index.html's structured data owns the vocabulary
     '@type': 'WebPage',
     name: `${title} · ${SITE_NAME}`,
     description,
     url,
-    inLanguage: 'pt-BR',
+    inLanguage: site.inLanguage,
     about: { '@type': 'Thing', name: title },
-    isPartOf: { '@type': 'WebSite', name: SITE_NAME, url: `${origin}/` },
+    isPartOf: { '@type': site['@type'], name: site.name, url: site.url },
   };
   return html
     .replace(/<title>[^<]*<\/title>/, `<title>${fullTitle}</title>`)
@@ -44,19 +47,18 @@ function withRoute(html, { id, title, description, origin }) {
     .replace(/(<meta property="og:description" content=")[^"]*"/, `$1${text}"`)
     .replace(/(<link rel="canonical" href=")[^"]*"/, `$1${url}"`)
     .replace(/(<meta property="og:url" content=")[^"]*"/, `$1${url}"`)
-    .replace(
-      /<script type="application\/ld\+json">.*<\/script>/,
-      `<script type="application/ld+json">${JSON.stringify(data).replace(/</g, '\\u003c')}</script>`,
-    );
+    .replace(LD_JSON, () => `<script type="application/ld+json">${JSON.stringify(data).replace(/</g, '\\u003c')}</script>`);
 }
 
-/** The sitemap: the home page and every route's own address. Moved paths are left out. */
+/** index.html's own structured data: the site as a schema.org WebSite. */
+const siteData = html => JSON.parse(html.match(LD_JSON)[1]);
+
+/** The sitemap (tools/sitemap-template.xml): the home page and every route's own address. Moved paths are left out. */
 export const sitemap = origin =>
-  `<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-${['', ...ROUTES].map(id => `  <url><loc>${origin}/${id}</loc></url>`).join('\n')}
-</urlset>
-`;
+  readFileSync(path.join(ROOT, 'tools', 'sitemap-template.xml'), 'utf8').replace(
+    '<!-- urls -->',
+    ['', ...ROUTES].map(id => `  <url><loc>${origin}/${id}</loc></url>`).join('\n'),
+  );
 
 /** robots.txt: everything may be crawled, and the sitemap is named. */
 export const robots = origin => `User-agent: *\nAllow: /\n\nSitemap: ${origin}/sitemap.xml\n`;
