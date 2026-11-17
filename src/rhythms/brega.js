@@ -5,10 +5,10 @@
 // 4/4 at one tempo, a 16-step wheel, one bar per turn. A minor (heartbreak), the last chorus a whole
 // tone higher. The melodies are original to this project; choices and sources: docs/rhythms/brega.md.
 import { label, row, stat, stats } from '../readout-markup.js';
-import { renderRoll } from '../roll.js';
+import { rollReadout } from '../roll.js';
 import { fgAlpha } from '../theme.js';
 import { BREGA_PALETTE, createBregaPainter } from './brega-background.js';
-import { straightMeter } from './meter.js';
+import { sceneStarts, straightMeter } from './meter.js';
 import { midiOf, recordedChoices, studioSounds, takes } from './studio-kit.js';
 
 // docs/research/brega-forro.md, § 1c: «Expect about 130 to 150 BPM on a quarter-note pulse», and the
@@ -226,12 +226,7 @@ const SCENE_LIST = [
     accents: [3],
   },
 ];
-const SCENE_STARTS = [];
-let TOTAL_BARS = 0;
-for (const scene of SCENE_LIST) {
-  SCENE_STARTS.push(TOTAL_BARS);
-  TOTAL_BARS += scene.bars;
-}
+const { starts: SCENE_STARTS, total: TOTAL_BARS } = sceneStarts(SCENE_LIST);
 const sceneIndexOf = bar => SCENE_LIST.findLastIndex((_, i) => SCENE_STARTS[i] <= bar);
 
 /** The chord of an absolute bar, with the transposition of its scene, or null. */
@@ -583,6 +578,7 @@ const READ = {
 };
 const COPY = {
   name: 'brega',
+  description: 'Brega do Recife: bateria, baixo, teclado, cordas, guitarra em terças e metais, um de cada vez e depois juntos, em lá menor.', // the page's search and preview description
   feminineInstruments: ['caixa', 'guitarra'], // "som da caixa", "som do bumbo"
   scenes: {
     introducao: { chip: 'Introdução', eyebrow: 'teclado com o tema', title: 'Brega' },
@@ -632,14 +628,16 @@ const SHORT = 1;
 
 /** The melody roll of a scene: its melodic voices, bar by bar (the guitar's two lines alike). */
 function sceneRoll(scene, voices, band) {
-  const lines = voices.filter(voice => LINES[voice]).flatMap(voice => {
-    const notesOf = pick =>
-      [...Array(scene.bars).keys()].flatMap(bar =>
-        (LINES[voice].get(scene.start + bar) || []).map(note => ({ slot: bar * STEPS_PER_BAR + note.step, midi: pick(note), length: note.length || SHORT })),
-      );
-    const upper = { id: voice, color: VOICES[voice].color, notes: notesOf(note => note.midi) };
-    return voice === 'guitarra' ? [upper, { id: voice, color: VOICES[voice].color, notes: notesOf(note => note.lower) }] : [upper];
-  });
+  const lines = voices
+    .filter(voice => LINES[voice])
+    .flatMap(voice => {
+      const notesOf = pick =>
+        [...Array(scene.bars).keys()].flatMap(bar =>
+          (LINES[voice].get(scene.start + bar) || []).map(note => ({ slot: bar * STEPS_PER_BAR + note.step, midi: pick(note), length: note.length || SHORT })),
+        );
+      const upper = { id: voice, color: VOICES[voice].color, notes: notesOf(note => note.midi) };
+      return voice === 'guitarra' ? [upper, { id: voice, color: VOICES[voice].color, notes: notesOf(note => note.lower) }] : [upper];
+    });
   const horns =
     voices.includes('metais') && scene.horns
       ? [...Array(scene.bars).keys()]
@@ -651,8 +649,7 @@ function sceneRoll(scene, voices, band) {
           }))
       : [];
   if (horns.length) lines.push({ id: 'metais', color: VOICES.metais.color, notes: horns });
-  const score = renderRoll({ bars: scene.bars, stepsPerBar: STEPS_PER_BAR, stepsPerBeat: STEPS_PER_BEAT, lines, band });
-  return { markup: `<div class="score roll">${score.markup}<i class="scur"></i></div>`, score };
+  return rollReadout({ bars: scene.bars, stepsPerBar: STEPS_PER_BAR, stepsPerBeat: STEPS_PER_BEAT, lines, band });
 }
 const progression = chords => chords.map(symbol => CHORDS[symbol].symbol).join(' · ');
 const sceneOf = id => ({ ...SCENE_LIST.find(scene => scene.id === id), start: SCENE_STARTS[SCENE_LIST.findIndex(scene => scene.id === id)] });

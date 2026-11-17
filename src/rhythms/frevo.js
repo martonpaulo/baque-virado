@@ -4,10 +4,10 @@
 // sixteenths of the bar (0–7). The melodies are original to this project; choices and sources are
 // in docs/frevo.md.
 import { label, row, stat, stats } from '../readout-markup.js';
-import { renderRoll } from '../roll.js';
+import { rollReadout } from '../roll.js';
 import { fgAlpha } from '../theme.js';
 import { createFrevoPainter, FREVO_PALETTE } from './frevo-background.js';
-import { straightMeter } from './meter.js';
+import { sceneStarts, straightMeter } from './meter.js';
 import { recordedChoices, studioSounds } from './studio-kit.js';
 
 const BPM = 140;
@@ -289,12 +289,7 @@ const SCENE_LIST = [
 ];
 // a named scene's centre shows its tópica: the scene's own name
 for (const scene of SCENE_LIST) if (scene.named) scene.pattern = scene.id;
-const SCENE_STARTS = [];
-let TOTAL_BARS = 0;
-for (const scene of SCENE_LIST) {
-  SCENE_STARTS.push(TOTAL_BARS);
-  TOTAL_BARS += scene.bars;
-}
+const { starts: SCENE_STARTS, total: TOTAL_BARS } = sceneStarts(SCENE_LIST);
 const sceneOfBar = bar => SCENE_LIST.findLastIndex((_, i) => SCENE_STARTS[i] <= bar);
 
 /** The chord at a step of an absolute bar. */
@@ -632,8 +627,7 @@ function sceneRoll(scene, voices, band) {
       })),
     ),
   }));
-  const score = renderRoll({ bars: scene.bars, stepsPerBar: STEPS_PER_BAR, stepsPerBeat: STEPS_PER_BEAT, lines, band });
-  return { markup: `<div class="score roll">${score.markup}<i class="scur"></i></div>`, score };
+  return rollReadout({ bars: scene.bars, stepsPerBar: STEPS_PER_BAR, stepsPerBeat: STEPS_PER_BEAT, lines, band });
 }
 const progression = scene =>
   scene.chords

@@ -6,7 +6,8 @@ import os from 'node:os';
 import path from 'node:path';
 import { test } from 'node:test';
 import { MOVED, RHYTHMS, ROUTES } from '../src/rhythms/index.js';
-import { buildSite } from '../tools/build-site.mjs';
+import { PREPARING } from '../src/rhythms/preparing.js';
+import { buildSite, preparingPage } from '../tools/build-site.mjs';
 import { startStaticServer } from '../tools/static-server.mjs';
 
 test('every rhythm path answers 200 from the built site; a shipped one is the show, one being prepared says so', async () => {
@@ -31,13 +32,17 @@ test('every rhythm path answers 200 from the built site; a shipped one is the sh
         .replace(/<script type="application\/ld\+json">.*<\/script>/, '')
         .replace(/https:\/\/batuque\.martonpaulo\.com\/[a-z-]*/g, '');
     assert.equal(showOnly(page('maracatu')), showOnly(index));
-    // a rhythm being prepared: its name in the title, one line, the selector, and no show
-    const preparing = page('brega');
-    assert.match(preparing, /<title>Brega · Batuque<\/title>/);
-    assert.match(preparing, /<p>O show de brega está sendo preparado\.<\/p>/);
-    assert.match(preparing, /<a class="chip" href="\/brega" aria-current="true">brega<\/a>/);
-    assert.equal((preparing.match(/class="chip"/g) || []).length, ROUTES.length);
-    assert.doesNotMatch(preparing, /<script type="module"|id="stage"/);
+    // a rhythm being prepared (none is today; a test entry): its name, one line, the selector, and no show
+    PREPARING.teste = { selector: 'teste', name: 'Teste', description: 'Teste.' };
+    try {
+      const preparing = preparingPage(index, 'teste');
+      assert.match(preparing, /<h1>Teste<\/h1>/);
+      assert.match(preparing, /<p>O show de teste está sendo preparado\.<\/p>/);
+      assert.equal((preparing.match(/class="chip"/g) || []).length, ROUTES.length);
+      assert.doesNotMatch(preparing, /<script type="module"|id="stage"/);
+    } finally {
+      delete PREPARING.teste;
+    }
     // a path that was live before the rename (#37): it answers and moves to the new path, query kept
     for (const [from, to] of Object.entries(MOVED)) {
       assert.equal((await fetch(`${server.url}${from}`)).status, 200, `/${from}`);

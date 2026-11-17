@@ -55,17 +55,17 @@ and why. The package is [`src/rhythms/brega.js`](../../src/rhythms/brega.js), it
 Every sound is a real CC0 recording, played through the studio
 ([`docs/rhythms/studio.md`](studio.md)). Sources and edits are in [`CREDITS.md`](../../CREDITS.md).
 
-| Voice    | Takes                                                        | Source                     |
-| :------- | :----------------------------------------------------------- | :------------------------- |
-| bumbo    | three 808-style kicks (reused)                               | Freesound                  |
-| caixa    | snare with snares, four dynamics, two round robins (reused)  | VSCO 2 CE                  |
-| chimbal  | four closed and two open hats (reused)                       | Freesound                  |
-| tom      | high and low tom, two dynamics; the middle tom from both     | VCSL                       |
-| baixo    | eight picked electric bass notes, E1 to E2 (reused)          | Freesound                  |
-| cordas   | eleven viola and violin section notes with vibrato           | VSCO 2 CE                  |
-| teclado  | TX81Z FM piano, five notes, two dynamics; chords and theme   | VCSL                       |
-| guitarra | seven clean picked notes and two sustained ones              | Freesound                  |
-| metais   | trumpet and trombone staccato (reused); two section falls    | VSCO 2 CE; Freesound       |
+| Voice    | Takes                                                       | Source               |
+| :------- | :---------------------------------------------------------- | :------------------- |
+| bumbo    | three 808-style kicks (reused)                              | Freesound            |
+| caixa    | snare with snares, four dynamics, two round robins (reused) | VSCO 2 CE            |
+| chimbal  | four closed and two open hats (reused)                      | Freesound            |
+| tom      | high and low tom, two dynamics; the middle tom from both    | VCSL                 |
+| baixo    | eight picked electric bass notes, E1 to E2 (reused)         | Freesound            |
+| cordas   | eleven viola and violin section notes with vibrato          | VSCO 2 CE            |
+| teclado  | TX81Z FM piano, five notes, two dynamics; chords and theme  | VCSL                 |
+| guitarra | seven clean picked notes and two sustained ones             | Freesound            |
+| metais   | trumpet and trombone staccato (reused); two section falls   | VSCO 2 CE; Freesound |
 
 - A note plays a take within five semitones, retuned by its playback rate; a voice never plays
   the same take twice in a row while another is near enough (both checked in the test).
@@ -107,19 +107,19 @@ Every sound is a real CC0 recording, played through the studio
 
 ## Widgets per scene
 
-| Scene        | Widget                                           | Why                           |
-| :----------- | :----------------------------------------------- | :---------------------------- |
-| Introdução   | tempo, metre, bar length, key, theme             | one tempo, A minor            |
-| Base         | one bar of bumbo, caixa and chimbal              | the off-beat chimbal          |
-| Baixo        | bumbo and bass side by side                      | the bass locks to the bumbo   |
-| Teclado      | the progression, the off-beat stabs, the pad     | keyboard texture              |
-| Guitarra     | a melody roll of both lines                      | the thirds                    |
-| Virada       | the fill on high, middle and low tom             | how sections join             |
-| Refrão       | a melody roll of the chorus                      | the theme and its answer      |
-| Breque       | the pause and the heartbeat                      | the break                     |
-| Vinheta      | a roll of the guitar's calls and the horns       | call and answer               |
-| Refrão final | a roll of theme and guitar, the key change       | a whole tone up               |
-| Final        | scenes, voices, bars                             | the totals                    |
+| Scene        | Widget                                       | Why                         |
+| :----------- | :------------------------------------------- | :-------------------------- |
+| Introdução   | tempo, metre, bar length, key, theme         | one tempo, A minor          |
+| Base         | one bar of bumbo, caixa and chimbal          | the off-beat chimbal        |
+| Baixo        | bumbo and bass side by side                  | the bass locks to the bumbo |
+| Teclado      | the progression, the off-beat stabs, the pad | keyboard texture            |
+| Guitarra     | a melody roll of both lines                  | the thirds                  |
+| Virada       | the fill on high, middle and low tom         | how sections join           |
+| Refrão       | a melody roll of the chorus                  | the theme and its answer    |
+| Breque       | the pause and the heartbeat                  | the break                   |
+| Vinheta      | a roll of the guitar's calls and the horns   | call and answer             |
+| Refrão final | a roll of theme and guitar, the key change   | a whole tone up             |
+| Final        | scenes, voices, bars                         | the totals                  |
 
 ## Open points
 

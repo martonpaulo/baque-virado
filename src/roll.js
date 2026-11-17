@@ -48,3 +48,9 @@ export function renderRoll({ bars, stepsPerBar, stepsPerBeat, lines, band }) {
     width,
   };
 }
+
+/** A scene's roll as readout markup: the roll and its cursor, and the roll itself for its owner. */
+export function rollReadout(options) {
+  const score = renderRoll(options);
+  return { markup: `<div class="score roll">${score.markup}<i class="scur"></i></div>`, score };
+}

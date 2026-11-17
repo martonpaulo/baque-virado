@@ -3,6 +3,7 @@
 // and redirects to its path. An unknown or missing id falls back to the first (maracatu), which `/`
 // shows. Add a rhythm by adding its package here; a route id with no package yet is a rhythm being
 // prepared (`preparing.js`): its path shows the selector and one line, no show.
+import { BREGA } from './brega.js';
 import { BREGAFUNK } from './bregafunk.js';
 import { COCO_XAMBA } from './coco-xamba.js';
 import { FORRO_PE_DE_SERRA } from './forro.js';
@@ -11,7 +12,7 @@ import { MANGUEBEAT } from './manguebeat.js';
 import { MARACATU } from './maracatu.js';
 import { PREPARING } from './preparing.js';
 
-export const RHYTHMS = [MARACATU, COCO_XAMBA, FREVO, FORRO_PE_DE_SERRA, MANGUEBEAT, BREGAFUNK];
+export const RHYTHMS = [MARACATU, COCO_XAMBA, FREVO, FORRO_PE_DE_SERRA, MANGUEBEAT, BREGA, BREGAFUNK];
 export const RHYTHM_PARAMETER = 'ritmo';
 /** Every public path, in the selector's order: shipped rhythms and rhythms being prepared. */
 export const ROUTES = ['maracatu', 'coco', 'frevo', 'forro', 'manguebeat', 'brega', 'bregafunk'];
