@@ -205,7 +205,7 @@ Three ways, as researched on 2026-11-17.
 
 ## How to run a round
 
-1. The owner names the reference and the similar songs; record them in
+1. The owner names the references; record them in
    [`references.md`](references.md) and `lab/references.json`. A show is based only on songs the
    owner names.
 2. Measure the references and the show as it is. Read tempo, drum cell, balance, width and density
@@ -220,8 +220,9 @@ Three ways, as researched on 2026-11-17.
 - The owner has not yet judged the first round by ear.
 - Frevo, forró and bregafunk still bring their parts in one at a time; the rule since that day is
   that only the maracatu does ([`../product.md`](../product.md), Rhythm shows). Their rewrite waits
-  for the owner's similar songs.
-- Similar songs still to be named: three for frevo, three for bregafunk, one for forró.
+  for the full recordings of their four references ([`round-two.md`](round-two.md)).
+- The next round, with four references of equal weight per rhythm and the whole of each recording, is
+  planned in [`round-two.md`](round-two.md).
 - The brega needs a recorded drum kit and a better keyboard.
 - The coco was measured (1 to 8 kHz about 7 to 10 dB over its references) and not changed.
 - «Mulungu» and the SuperStar recordings are not in the lab.
