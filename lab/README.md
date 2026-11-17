@@ -48,6 +48,7 @@ python lab/analyze.py refs                     # the references scored against t
 | `fetch-references.py`       | Downloads the previews `references.json` lists                                        |
 | `references.json`           | The owner's references the lab holds, each with its catalogue id                      |
 | `reference-style-facts.txt` | `style.py` over every reference, as measured on 2026-11-17                            |
+| `second-ear-prompt.md`      | The prompt the owner gives an audio-capable model, as a second, descriptive ear       |
 
 Add a reference: put its row in `references.json` (the key is `<genre>/<index>-<id>`), then run
 `fetch-references.py`, `sep.py` on the new file and `addrefs.py`.
