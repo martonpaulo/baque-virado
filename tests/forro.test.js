@@ -1,15 +1,12 @@
-// The forró pé-de-serra package: the show script, the tune's rules and that every hit has a sound.
+// The forró pé-de-serra package: the show script, the tune's rules.
 import assert from 'node:assert/strict';
-import { existsSync } from 'node:fs';
 import { test } from 'node:test';
-import { fileURLToPath } from 'node:url';
 import { meterOf } from '../src/music.js';
 import { FORRO_PE_DE_SERRA as FORRO, FORRO_PIECES } from '../src/rhythms/forro.js';
 import { createShow } from '../src/show.js';
 
 const show = createShow(FORRO);
 const { MOTIFS, PHRASE, ANSWER, MODE, midiOf, thirdBelow } = FORRO_PIECES;
-const soundPath = (name, extension) => fileURLToPath(new URL(`../sounds/${name}${extension}`, import.meta.url));
 
 test('one tempo, 2/4 on an 8-step wheel, the eleven scenes of the script, 98 bars', () => {
   assert.equal(FORRO.bpm, 120);
@@ -41,19 +38,6 @@ test('the voice order is pinned', () => {
 test('the parts enter one by one: the triângulo alone, then the zabumba, then the bacalhau, then the sanfona', () => {
   const firstBars = ['triangulo', 'zabumba', 'bacalhau', 'trio'].map(id => show.barTimeline(show.sceneById(id).start).playing.length);
   assert.deepEqual(firstBars, [1, 2, 3, 4]);
-});
-
-test('every hit of the show plays a sample that exists, in tune and in a sane rate', () => {
-  for (const option of ['funda', 'seca']) {
-    for (let bar = 0; bar < show.TOTAL_BARS; bar++) {
-      for (const { voice, hit } of show.hitsInBar(bar)) {
-        const [name, gain, rate] = FORRO.sounds.sampleFor[voice]({ zabumba: option }, hit.velocity, hit.tone, 0.5);
-        assert.ok(existsSync(soundPath(name, '.m4a')) && existsSync(soundPath(name, '.wav')), `${voice} in bar ${bar}: ${name}`);
-        assert.ok(gain > 0 && gain <= 1.5, `${voice} gain ${gain}`);
-        assert.ok(rate > 0.6 && rate < 1.6, `${voice} rate ${rate} retunes too far`);
-      }
-    }
-  }
 });
 
 test('the melody stays in G mixolydian, with the flat seventh on a beat head of the hook', () => {
@@ -88,18 +72,14 @@ test('the breque cuts on 1 and the sanfona alone leads back; the show ends on th
 
 // docs/research/brega-forro.md, «What makes it special»: bacalhau at 50 to 70 % of the low head,
 // triângulo closed at about 60 % under the open accent. Too quiet and the signature is lost.
-test('the bacalhau and the closed triângulo sit at the research levels under their accents', () => {
-  const { sampleFor } = FORRO.sounds,
-    choice = { zabumba: 'funda' };
+// The levels between voices are the studio's (src/studio.js, docs/rhythms/studio.md); inside the
+// triângulo, the closed strokes stay soft under the open accent (brega-forro.md: about 60 %).
+test('the closed triângulo strokes sit under the open accent', () => {
   const bar = show.barTimeline(show.sceneById('bacalhau').start).voices;
-  const gainOf = (voice, { hit }) => sampleFor[voice](choice, hit.velocity, hit.tone, 0.5)[1];
-  const onBeat = bar.grave.find(h => h.hit.step === 0);
-  const grave = gainOf('grave', onBeat),
-    bacalhau = Math.max(...bar.bacalhau.map(h => gainOf('bacalhau', h)));
-  assert.ok(bacalhau / grave >= 0.5 && bacalhau / grave <= 0.7, `bacalhau at ${bacalhau / grave} of the low head`);
-  const triangle = bar.triangulo.map(h => [h.hit.tone, gainOf('triangulo', h)]),
-    open = Math.min(...triangle.filter(([tone]) => tone === 'aberto').map(([, g]) => g));
-  for (const [tone, g] of triangle) if (tone === 'fechado') assert.ok(g / open <= 0.7, `closed stroke at ${g / open} of the open one`);
+  const triangle = bar.triangulo.map(h => [h.hit.tone, h.hit.velocity]),
+    open = Math.min(...triangle.filter(([tone]) => tone === 'aberto').map(([, v]) => v));
+  assert.ok(triangle.some(([tone]) => tone === 'fechado'));
+  for (const [tone, v] of triangle) if (tone === 'fechado') assert.ok(v / open <= 0.7, `closed stroke at ${v / open} of the open one`);
 });
 
 // The key over the lanes names, on one line, each wheel voice the lanes do not show (src/lanes.js

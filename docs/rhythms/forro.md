@@ -36,13 +36,22 @@ why ([#21](https://github.com/martonpaulo/baque-virado/issues/21)).
 
 ## Sounds
 
-- **Reused CC0 recordings.** The zabumba's maceta is the alfaia (`alfaia-deep-main`, pressed:
-  `alfaia-deep-short-main`; a second option, «zabumba seca», uses the dry surdo). The bacalhau is
-  `stick`, played a little higher.
-- **Synthesized.** Triângulo, sanfona, rabeca, bandolim, cavaquinho and baixo, by
-  [`tools/synth-forro.mjs`](../../tools/synth-forro.mjs): seeded, so a rerun writes the same files.
-  A melodic sample is one note at a base pitch, retuned by the playback rate (at most seven
-  semitones). Melodic voices are never detuned per hit (`pitched` in `src/audio.js`).
+Every instrument is recorded and played through the studio ([`studio.md`](studio.md)); sources are
+in [`CREDITS.md`](../../CREDITS.md).
+
+- **Zabumba**: open head from a concert bass drum (three dynamics, two round robins) and two alfaia
+  hits; the pressed note from muted bass drums, a stick hit, a short surdo and the dry alfaia.
+- **Bacalhau**: five stick and rim clicks and the maracatu's stick.
+- **Triângulo**: two triangles, open and muted, two dynamics and two round robins each.
+- **Sanfona**: nine recorded notes (C3 to E5), bass buttons C, F and G; chord buttons are three
+  recorded notes together. A held note or a motif's first note opens with the bellows (45 ms), the
+  others with a finger (6 ms).
+- **Rabeca**: a solo violin, spiccato for short notes and arco with vibrato for held ones.
+- **Bandolim**: twelve single mandolin notes cut from longer recordings.
+- **Cavaquinho**: one strummed ukulele chord each for C, F and G.
+- **Baixo**: ten electric bass notes, picked and fingered.
+
+The zabumba leads the timing; the triângulo's off-beat sixteenths sit about 10 % of a sixteenth late.
 
 ## Visuals
 

@@ -46,7 +46,7 @@ sounds a desktop viewer can pick are fetched when chosen.
 - `fonts/` - Space Grotesk and JetBrains Mono (Latin subsets, SIL Open Font License; see [CREDITS.md](CREDITS.md)).
 - `sounds/` - the samples: WAV masters and the AAC (`.m4a`) files the page fetches (see [CREDITS.md](CREDITS.md)).
 - `tools/encode-sounds.mjs` - encodes each WAV to AAC at 96 kbps (`node tools/encode-sounds.mjs`, needs `ffmpeg`).
-- `tools/make-coco-sounds.mjs` - synthesizes the coco's pandeiro and palmas WAV masters (`node tools/make-coco-sounds.mjs`).
+- `tools/prepare-takes.mjs` - cuts and normalises the studio instruments' recorded takes and writes `src/rhythms/recorded-takes.js` (needs `ffmpeg` and the CC0 sources it names).
 - `tests/` - unit tests of the DOM-free modules, and browser tests of the page in headless Chromium (`tests/page.test.js`, `tests/sounds-decode.test.js`).
 - `tools/static-server.mjs` - the local static server (`pnpm serve`).
 - `src/export.js`, `src/stage-capture.js` - the video export in the page.

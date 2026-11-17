@@ -40,9 +40,6 @@
       "tools/export-video.mjs": {
         "number": 13
       },
-      "tools/make-coco-sounds.mjs": {
-        "number": 21
-      },
       "tools/static-server.mjs": {
         "number": 3,
         "url": 2

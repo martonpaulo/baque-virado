@@ -8,6 +8,7 @@ import { renderRoll } from '../roll.js';
 import { fgAlpha } from '../theme.js';
 import { createFrevoPainter, FREVO_PALETTE } from './frevo-background.js';
 import { straightMeter } from './meter.js';
+import { recordedChoices, studioSounds } from './studio-kit.js';
 
 const BPM = 140;
 const BEATS_PER_BAR = 2;
@@ -449,94 +450,84 @@ const SAMPLE_NOTES = {
   sax: ['c4', 'd4', 'e4', 'fs4', 'gs4', 'bb4', 'c5', 'd5', 'e5', 'f5'],
 };
 export const MAX_RETUNE = 2; // semitones
-const sampleFiles = set => SAMPLE_NOTES[set].map(note => `frevo-${set}-${note}`);
 /** The sample of `set` nearest to a note, and the playback rate that tunes it. */
 export function nearestSample(set, note) {
   const midi = midiOf(note);
   const best = SAMPLE_NOTES[set].reduce((a, b) => (Math.abs(midiOf(b) - midi) < Math.abs(midiOf(a) - midi) ? b : a));
   return [`frevo-${set}-${best}`, 2 ** ((midi - midiOf(best)) / OCTAVE_SEMITONES), midi - midiOf(best)];
 }
-const pitched = (set, gain) => (_choice, velocity, tone) => {
-  const long = tone.endsWith('~'),
-    [file, rate] = nearestSample(long ? `${set}-longo` : set, tone.replace('~', ''));
-  return [file, gain * velocity, rate];
+// ---------- sound: the studio (src/studio.js) ----------
+// The frevo's recordings, each note a take at its pitch; a note borrows the neighbouring recorded
+// note within MAX_RETUNE, so repeated notes alternate takes. The pandeiro adds the coco's recorded
+// strokes. The surdo leads; the band follows it with a correlated drift; no swing.
+const brassTakes = set => SAMPLE_NOTES[set].map(note => ({ file: `frevo-${set}-${note}`, root: midiOf(note) }));
+const brass = set => ({
+  zone: MAX_RETUNE,
+  maxZone: MAX_RETUNE,
+  strokes: () => ({ curta: brassTakes(set), longa: brassTakes(SAMPLE_NOTES[`${set}-longo`] ? `${set}-longo` : set) }),
+  shape: tone => ({ stroke: tone.endsWith('~') ? 'longa' : 'curta', notes: [midiOf(tone.replace('~', ''))] }),
+});
+const MUFFLED = 0.7; // the abafado stroke, against the open one
+const STUDIO = {
+  room: 'sala-pequena',
+  roomLevel: 0.9,
+  lead: 'surdo',
+  voices: {
+    surdo: {
+      seed: 41,
+      role: 'lead',
+      gain: 1.4,
+      send: 0.12,
+      bright: [900, 9000],
+      strokes: () => ({
+        aberto: [{ file: 'frevo-surdo-aberto' }, { file: 'alfaia-dry-surdo-main' }],
+        abafado: [{ file: 'frevo-surdo-abafado' }, { file: 'zabumba-abafada-4' }],
+      }),
+      shape: tone => (tone === 'abafado' ? { stroke: 'abafado', gain: MUFFLED } : { stroke: 'aberto' }),
+    },
+    tarol: {
+      seed: 42,
+      role: 'follower',
+      gain: 0.8, // the review (#25): the caixa over the surdo
+      pan: 0.2,
+      send: 0.16,
+      strokes: () => ({
+        hit: [
+          { file: 'frevo-tarol-forte', layer: 0.9 },
+          { file: 'frevo-tarol-fraco', layer: 0.4 },
+        ],
+        rufo: [{ file: 'frevo-tarol-rufo' }],
+      }),
+      shape: tone => (tone === 'muted' ? null : { stroke: tone === 'rufo' ? 'rufo' : 'hit' }),
+    },
+    pandeiro: {
+      seed: 43,
+      role: 'follower',
+      gain: 0.9,
+      pan: -0.3,
+      send: 0.18,
+      strokes: () => ({
+        grave: [{ file: 'frevo-pandeiro-grave' }, { file: 'pandeiro-grave-3' }], // the lightest: the phone set stays under 400 KB
+        platinela: [{ file: 'frevo-pandeiro-platinela' }, { file: 'pandeiro-platinela-1' }],
+      }),
+      shape: tone => ({ stroke: tone === 'grave' ? 'grave' : 'platinela' }),
+    },
+    tuba: { seed: 44, role: 'follower', gain: 0.75, send: 0.1, bright: [800, 6000], ...brass('tuba') },
+    trombone: { seed: 45, role: 'follower', gain: 0.85, pan: -0.25, send: 0.2, ...brass('trombone') },
+    trompete: { seed: 46, role: 'follower', gain: 0.85, pan: 0.25, send: 0.22, ...brass('trompete') },
+    sax: { seed: 47, role: 'follower', gain: 0.75, pan: 0.45, send: 0.22, ...brass('sax') },
+  },
 };
-
-// Sounds the viewer can swap and set the volume of on desktop. The ids differ from the maracatu's,
-// so a pick there does not carry over (the stored choices share one prefix).
-const SOUND_CHOICES = [
-  {
-    id: 'surdo',
-    label: 'surdo',
-    defaultOption: 'aberto',
-    preview: ['surdo'],
-    files: o => (o === 'aberto' ? ['frevo-surdo-aberto', 'frevo-surdo-abafado'] : ['alfaia-dry-surdo-main']),
-    options: [
-      ['aberto', 'surdo de frevo'],
-      ['seco', 'surdo seco'],
-    ],
-  },
-  {
-    id: 'tarol',
-    label: 'caixa',
-    defaultOption: 'tarol',
-    preview: ['tarol'],
-    files: o => (o === 'tarol' ? ['frevo-tarol-forte', 'frevo-tarol-fraco'] : [`caixa-${o}`]),
-    options: [
-      ['tarol', 'tarol'],
-      ['padrao', 'caixa de guerra'],
-      ['esteira', 'caixa com esteira'],
-    ],
-  },
-  {
-    id: 'pandeiro',
-    label: 'pandeiro',
-    defaultOption: 'pandeiro',
-    preview: ['pandeiro'],
-    files: () => ['frevo-pandeiro-grave', 'frevo-pandeiro-platinela'],
-    options: [['pandeiro', 'pandeiro']],
-  },
-  { id: 'tuba', label: 'tuba', defaultOption: 'tuba', preview: ['tuba'], files: () => sampleFiles('tuba'), options: [['tuba', 'tuba']] },
-  {
-    id: 'trombone',
-    label: 'trombone',
-    defaultOption: 'trombone',
-    preview: ['trombone'],
-    files: () => [...sampleFiles('trombone'), ...sampleFiles('trombone-longo')],
-    options: [['trombone', 'trombone']],
-  },
-  {
-    id: 'trompete',
-    label: 'trompete',
-    defaultOption: 'trompete',
-    preview: ['trompete'],
-    files: () => [...sampleFiles('trompete'), ...sampleFiles('trompete-longo')],
-    options: [['trompete', 'trompete']],
-  },
-  { id: 'sax', label: 'saxofone', defaultOption: 'tenor', preview: ['sax'], files: () => sampleFiles('sax'), options: [['tenor', 'sax tenor']] },
-];
-
-// voice → [sample, gain, playback rate] for one hit, or null for a mark that stays silent
-// Levels set by measuring an offline render, not yet by ear: in the 80 ms after each of its hits, each
-// voice above the low end is at least 3 dB louder above 1 kHz than the surdo and tuba together.
-const GAIN = { surdo: 1, ghost: 0.7, tarol: 0.8, pandeiro: 0.65, tuba: 0.75, trombone: 0.85, trompete: 0.85, sax: 0.75 };
-const SAMPLE_FOR = {
-  surdo: (choice, velocity, tone) =>
-    choice.surdo === 'aberto'
-      ? [tone === 'abafado' ? 'frevo-surdo-abafado' : 'frevo-surdo-aberto', (tone === 'abafado' ? GAIN.ghost : GAIN.surdo) * velocity, 1]
-      : ['alfaia-dry-surdo-main', GAIN.surdo * velocity, 1],
-  tarol: (choice, velocity, tone) => {
-    if (tone === 'muted') return null;
-    if (tone === 'rufo') return ['frevo-tarol-rufo', GAIN.tarol * velocity, 1];
-    const file = choice.tarol === 'tarol' ? (tone === 'forte' ? 'frevo-tarol-forte' : 'frevo-tarol-fraco') : `caixa-${choice.tarol}`;
-    return [file, GAIN.tarol * velocity ** (1 + 1 / 2), 1];
-  },
-  pandeiro: (_choice, velocity, tone) => [tone === 'grave' ? 'frevo-pandeiro-grave' : 'frevo-pandeiro-platinela', GAIN.pandeiro * velocity, 1],
-  tuba: pitched('tuba', GAIN.tuba),
-  trombone: pitched('trombone', GAIN.trombone),
-  trompete: pitched('trompete', GAIN.trompete),
-  sax: pitched('sax', GAIN.sax),
-};
+// One recorded option per instrument, so the desktop gives each its volume.
+const SOUND_CHOICES = recordedChoices(STUDIO, [
+  ['surdo', 'surdo', ['surdo'], 'surdo de frevo'],
+  ['tarol', 'caixa', ['tarol'], 'tarol'],
+  ['pandeiro', 'pandeiro', ['pandeiro'], 'pandeiro'],
+  ['tuba', 'tuba', ['tuba'], 'tuba'],
+  ['trombone', 'trombone', ['trombone'], 'trombone'],
+  ['trompete', 'trompete', ['trompete'], 'trompete'],
+  ['sax', 'saxofone', ['sax'], 'sax tenor'],
+]);
 
 // ---------- copy ----------
 const INSTRUMENT_COUNT = VOICE_ORDER.length;
@@ -719,11 +710,6 @@ export const FREVO = {
   background: { create: options => createFrevoPainter({ ...options, beatsPerBar: BEATS_PER_BAR }) },
   readout,
   waves: null,
-  sounds: {
-    choices: SOUND_CHOICES,
-    fixedFiles: ['frevo-tarol-rufo'],
-    sampleFor: SAMPLE_FOR,
-    previewScene: 'final', // every instrument plays its part in the final's first bars
-  },
+  sounds: studioSounds(STUDIO, SOUND_CHOICES, 'final'), // every instrument plays its part in the final's first bars
   copy: COPY,
 };

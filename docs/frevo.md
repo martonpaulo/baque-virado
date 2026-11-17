@@ -60,10 +60,13 @@ edits are in [`CREDITS.md`](../CREDITS.md).
 - Each pitched sample was measured, retuned to the exact note and trimmed so the note starts at
   0. A note plays the nearest sample, retuned by its playback rate, never more than two semitones
   (`tests/frevo.test.js` checks every note of the show).
-- Levels were set by measuring an offline render, not yet by ear. In the 80 ms after each of its
-  hits, the caixa, pandeiro, trombones, trompetes and saxofone are each at least 3 dB louder above
-  1 kHz than the surdo and the tuba together, so the low end masks none of them.
-- A phone downloads every default sample, 43 files, about 380 KB. The maracatu limit of 100 KB
+- Every voice plays through the studio ([`rhythms/studio.md`](rhythms/studio.md)): a repeated
+  note alternates with the neighbouring recorded note when one is within two semitones, the surdo
+  and caixa alternate two takes each, the pandeiro adds one coco stroke per kind, and the band
+  follows the surdo with a correlated drift. One option per instrument: the surdo seco and the
+  repository caixas are no longer choices.
+- Levels were set by measuring an offline render, not yet by ear.
+- A phone downloads every default sample, 47 files, about 397 KB. The maracatu limit of 100 KB
   cannot hold a melodic show; the frevo limit is 400 KB (`docs/product.md`, Limits).
 
 ## Visuals

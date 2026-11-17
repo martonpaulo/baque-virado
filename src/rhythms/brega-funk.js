@@ -5,10 +5,10 @@
 // Research and choices: docs/research/brega-forro.md, docs/rhythms/brega-funk.md.
 import { label, row, stat, stats } from '../readout-markup.js';
 import { BEATS_PER_LEAN, createBregaFunkBackground, PALETTE } from './brega-funk-background.js';
-import { atabaque, brass, grave, hat, keys, kick, lata, lead } from './brega-funk-sounds.js';
 import { straightMeter } from './meter.js';
+import { midiOf, recordedChoices, studioSounds, takes } from './studio-kit.js';
 
-// The top of today's 160 to 170 (docs/research/brega-forro.md, Tempo; D25 in docs/decisions.md):
+// The top of today's 160 to 170 (docs/research/brega-forro.md, Tempo; D26 in docs/decisions.md):
 // the wheel is one bar at that tempo, so the bumbo, lata and chimbal are felt at 170 (#23).
 const BPM = 170;
 const BEATS_PER_BAR = 4;
@@ -230,94 +230,108 @@ const SCENE_LIST = [
 const LOOK = { zoom: 0, rot: 0, hue: 0, keep: 0, seg: 0, warp: 0, pal: 0, speed: 1 };
 const SCENE_LOOKS = Object.fromEntries(SCENE_LIST.map(scene => [scene.id, LOOK]));
 
-// ---------- sound: synthesized in the page (brega-funk-sounds.js) ----------
-const NAME = `${ID}-`;
+// ---------- sound: recorded instruments in the studio (src/studio.js) ----------
+// Recorded takes (CC0) for every voice: 808 kicks and subs, cans for the lata, hi-hats, an upright
+// piano for the keys, a trumpet for the hook, trumpet and trombone for the horns, congas for the
+// tamborzão. Programmed, as producers do: every voice on the hard grid, the kick ducks the rest.
+// Sources: CREDITS.md; choices: docs/rhythms/studio.md.
 const lengthOf = tone => Number(TONE.exec(tone)[2]) * STEP_SECONDS;
 const noteOf = tone => TONE.exec(tone)[1];
-const ECHO_STEPS = 3; // the lead's echo, a dotted eighth behind
-/** Each voice's synthesized sound: the sample name for one tone, and how to render it. */
-const SYNTH_VOICES = {
-  bumbo: { name: () => `${NAME}bumbo`, render: () => sampleRate => kick(sampleRate) },
-  lata: { name: () => `${NAME}lata`, render: () => sampleRate => lata(sampleRate) },
-  chimbal: { name: tone => `${NAME}chimbal-${tone}`, render: tone => sampleRate => hat(sampleRate, tone, STEP_SECONDS) },
-  grave: {
-    name: tone => `${NAME}grave-${tone.replace('>', '-').replace(':', '-')}`,
-    render: tone => sampleRate => {
-      const [from, to] = noteOf(tone).split('>');
-      return grave(sampleRate, from, to, lengthOf(tone));
+const ECHO = { delay: 3 * STEP_SECONDS, gain: 0.32 }; // the lead's echo, a dotted eighth behind
+const STACCATO_STEPS = 2; // a hook note this short or shorter is tongued short
+const ROLL = { notes: 2, gain: 0.8 }; // a «double» hat: two strokes in one sixteenth
+const STUDIO = {
+  room: 'sala-viva',
+  roomLevel: 0.7,
+  lead: 'bumbo',
+  duck: { by: 'bumbo', depth: 0.45, hold: 0.07, release: 0.06 },
+  voices: {
+    bumbo: { seed: 31, role: 'grid', gain: 0.95, send: 0.03, bright: [6000, 18000], strokes: () => ({ hit: takes('bumbo') }) },
+    grave: {
+      seed: 32,
+      role: 'grid',
+      gain: 0.7,
+      send: 0.02,
+      ducked: true,
+      bright: [600, 3000],
+      zone: 6,
+      maxZone: 9, // a sine sub keeps its sound when retuned further
+      strokes: () => ({ nota: takes('grave808') }),
+      shape: tone => {
+        const [from, to] = noteOf(tone).split('>'),
+          length = lengthOf(tone),
+          semitones = midiOf(to) - midiOf(from);
+        return { stroke: 'nota', notes: [midiOf(from)], length, glide: semitones ? { semitones, at: length * 0.55, over: length * 0.4 } : null };
+      },
+    },
+    lata: { seed: 33, role: 'grid', gain: 0.6, pan: 0.15, send: 0.14, strokes: () => ({ hit: takes('lata') }) },
+    chimbal: {
+      seed: 34,
+      role: 'grid',
+      gain: 1.1,
+      pan: 0.35,
+      send: 0.08,
+      bright: [5000, 18000],
+      strokes: () => ({ closed: takes('chimbal-fechado'), open: takes('chimbal-aberto') }),
+      shape: tone =>
+        tone === 'double'
+          ? { stroke: 'closed', notes: Array(ROLL.notes).fill(null), strum: STEP_SECONDS / ROLL.notes, gain: ROLL.gain }
+          : { stroke: tone === 'open' ? 'open' : 'closed' },
+    },
+    teclado: {
+      seed: 35,
+      role: 'grid',
+      gain: 0.3,
+      pan: -0.3,
+      send: 0.2,
+      ducked: true,
+      bright: [1500, 7000],
+      strokes: () => ({ acorde: takes('piano') }),
+      shape: tone => ({ stroke: 'acorde', notes: KEY_CHORDS[noteOf(tone)].map(midiOf), length: lengthOf(tone), strum: 0.004 }),
+    },
+    lead: {
+      seed: 36,
+      role: 'grid',
+      gain: 0.42,
+      pan: 0.1,
+      send: 0.22,
+      ducked: true,
+      strokes: () => ({ curta: takes('trompete-stac'), longa: takes('trompete-sus') }),
+      shape: tone => {
+        const length = lengthOf(tone);
+        return { stroke: length > STACCATO_STEPS * STEP_SECONDS ? 'longa' : 'curta', notes: [midiOf(noteOf(tone))], length, echo: ECHO };
+      },
+    },
+    metais: {
+      seed: 37,
+      role: 'grid',
+      gain: 0.45,
+      pan: -0.15,
+      send: 0.2,
+      ducked: true,
+      strokes: () => ({ acorde: takes('trompete-stac', 'trombone-stac') }),
+      shape: tone => ({ stroke: 'acorde', notes: HORN_CHORDS[noteOf(tone)].map(midiOf), length: lengthOf(tone) }),
+    },
+    tamborzao: {
+      seed: 38,
+      role: 'grid',
+      gain: 0.75,
+      pan: -0.1,
+      send: 0.1,
+      strokes: () => ({ grave: takes('atabaque-grave'), agudo: takes('atabaque-agudo') }),
     },
   },
-  teclado: {
-    name: tone => `${NAME}teclado-${tone.replace(':', '-')}`,
-    render: tone => sampleRate => keys(sampleRate, KEY_CHORDS[noteOf(tone)], lengthOf(tone)),
-  },
-  lead: {
-    name: tone => `${NAME}lead-${tone.replace(':', '-')}`,
-    render: tone => sampleRate => lead(sampleRate, noteOf(tone), lengthOf(tone), ECHO_STEPS * STEP_SECONDS),
-  },
-  metais: {
-    name: tone => `${NAME}metais-${tone.replace(':', '-')}`,
-    render: tone => sampleRate => brass(sampleRate, HORN_CHORDS[noteOf(tone)], lengthOf(tone)),
-  },
-  tamborzao: { name: tone => `${NAME}tamborzao-${tone}`, render: tone => sampleRate => atabaque(sampleRate, tone) },
 };
-// Levels chosen by ear against the bumbo; the lead's echo and the horns' chords sum louder. Measured
-// offline, the mix peaks before the master bus where maracatu does (about +3 dBFS), so the bus
-// saturates no harder than for maracatu: about −6.5 dBFS RMS in the full scenes (#23).
-const LEVEL = { bumbo: 0.54, grave: 0.39, lata: 0.38, chimbal: 0.18, teclado: 0.19, lead: 0.23, metais: 0.26, tamborzao: 0.44, tarol: 0.35 };
-const SAMPLED_LATA = 'caixa-aro'; // the tarol rim, a CC0 recording, as the other lata
-
-/** Every tone each voice plays in the show, from the script itself: the sounds to synthesize. */
-function tonesInShow() {
-  const tones = Object.fromEntries(VOICE_ORDER.map(voice => [voice, new Set()]));
-  for (const definition of SCENE_LIST) {
-    const scene = { mode: always('normal'), pattern: 'brega', ...definition };
-    for (let bar = 0; bar < scene.bars; bar++) {
-      const hits = barHits(scene, bar);
-      for (const voice of VOICE_ORDER) for (const h of hits[voice]) tones[voice].add(h.tone || '');
-    }
-  }
-  return tones;
-}
-const TONES = tonesInShow();
-const synthNames = voice => [...TONES[voice]].map(tone => SYNTH_VOICES[voice].name(tone));
-const SYNTH = Object.fromEntries(
-  VOICE_ORDER.flatMap(voice => [...TONES[voice]].map(tone => [SYNTH_VOICES[voice].name(tone), SYNTH_VOICES[voice].render(tone)])),
-);
-
-// One choice per instrument, so the desktop gives each its volume; only the lata has two sounds.
-// A single option names what the sound is.
-const choiceOf = (id, text, preview, options) => ({
-  id,
-  label: text,
-  defaultOption: options[0][0],
-  preview,
-  files: option => (option === 'synth' ? preview.flatMap(synthNames) : [SAMPLED_LATA]),
-  options,
-});
-const SOUND_CHOICES = [
-  choiceOf('bumbo', 'bumbo', ['bumbo'], [['synth', 'bumbo 808']]),
-  choiceOf('grave', 'grave', ['grave'], [['synth', 'grave 808']]),
-  choiceOf(
-    'lata',
-    'lata',
-    ['lata'],
-    [
-      ['synth', 'lata'],
-      ['tarol', 'tarol'],
-    ],
-  ),
-  choiceOf('chimbal', 'chimbal', ['chimbal'], [['synth', 'chimbal 808']]),
-  choiceOf('teclado', 'teclado', ['teclado'], [['synth', 'piano elétrico']]),
-  choiceOf('lead', 'sintetizador', ['lead'], [['synth', 'dente de serra']]),
-  choiceOf('metais', 'naipe de metais', ['metais'], [['synth', 'metais MIDI']]),
-  choiceOf('tamborzao', 'atabaque', ['tamborzao'], [['synth', 'atabaque do tamborzão']]),
-];
-const synthHit = (voice, level) => (_choice, velocity, tone) => [SYNTH_VOICES[voice].name(tone || ''), level * velocity, 1];
-const SAMPLE_FOR = {
-  ...Object.fromEntries(VOICE_ORDER.map(voice => [voice, synthHit(voice, LEVEL[voice])])),
-  lata: (choice, velocity) => (choice.lata === 'tarol' ? [SAMPLED_LATA, LEVEL.tarol * velocity, 1] : [SYNTH_VOICES.lata.name(), LEVEL.lata * velocity, 1]),
-};
+const SOUND_CHOICES = recordedChoices(STUDIO, [
+  ['bumbo', 'bumbo', ['bumbo'], 'bumbo 808'],
+  ['grave', 'grave', ['grave'], 'grave 808'],
+  ['lata', 'lata', ['lata'], 'latas gravadas'],
+  ['chimbal', 'chimbal', ['chimbal'], 'chimbal gravado'],
+  ['teclado', 'teclado', ['teclado'], 'piano gravado'],
+  ['lead', 'trompete', ['lead'], 'trompete gravado'],
+  ['metais', 'naipe de metais', ['metais'], 'trompete e trombone'],
+  ['tamborzao', 'atabaque', ['tamborzao'], 'atabaques gravados'],
+]);
 
 // ---------- the wheel's motion: the hips of the passinho ----------
 // At 170 a lean on every beat would be 0.35 s: the hips lean one way over beats 1 and 2 and the
@@ -488,12 +502,6 @@ export const BREGA_FUNK = {
   wheelMotion,
   readout,
   waves: null,
-  sounds: {
-    choices: SOUND_CHOICES,
-    fixedFiles: [],
-    synth: SYNTH,
-    sampleFor: SAMPLE_FOR,
-    previewScene: 'drop',
-  },
+  sounds: studioSounds(STUDIO, SOUND_CHOICES, 'drop'),
   copy: COPY,
 };

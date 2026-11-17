@@ -25,7 +25,7 @@ and can be changed.
 - Feeling: sensuality and provocation. The music cues follow music-cognition rule 15: minor mode, a
   deep bass groove, a dark timbre on the low end, and a short bright hook on top.
 - One tempo for the whole show: 170 BPM, felt at 170, the top of today's 160 to 170 range
-  (`docs/research/brega-forro.md`, Tempo; D25 in `docs/decisions.md`). The engine runs at 170 BPM
+  (`docs/research/brega-forro.md`, Tempo; D26 in `docs/decisions.md`). The engine runs at 170 BPM
   with one 16-sixteenth bar per turn of the wheel (1.41 s): the chimbal runs in sixteenths of 170,
   the bumbo falls on beats 1 and 3, and the lata makes the 3 + 3 + 2 inside each half bar. The HUD
   shows ♩ = 170 and the first readout says «170 BPM». The «old and new» tempo scene of the research
@@ -69,26 +69,23 @@ A voice is drawn on the wheel only in the scenes where it plays, so each entry s
 
 ## Sounds
 
-Freesound refuses this environment, so every voice is synthesized in the page
-(`src/rhythms/brega-funk-sounds.js`): nothing is downloaded, and a phone fetches no sound file. Brega
-funk itself is made of drum-machine and MIDI sounds, so most of these are the real thing in kind.
+Every voice is a recorded instrument played through the studio
+([`studio.md`](studio.md)); sources are in [`CREDITS.md`](../../CREDITS.md).
 
-| Voice                | How                                                       | Status                  |
-| :------------------- | :-------------------------------------------------------- | :---------------------- |
-| bumbo                | 808-style kick: sine pitch fall, beater click, saturation | genre-true, synthesized |
-| grave                | 808 sub: sine with a pitch punch, glide and saturation    | genre-true, synthesized |
-| chimbal              | 808-style hats: six square oscillators, band-passed       | genre-true, synthesized |
-| sintetizador         | two detuned band-limited saws, a sub square, filter, echo | genre-true, synthesized |
-| lata                 | tin-can plate modes, noise crack, seam rattle             | needs a real recording  |
-| teclado              | FM electric piano                                         | needs a real recording  |
-| metais               | three detuned saws per note, lip scoop, brass filter      | needs a real recording  |
-| atabaque (tamborzão) | membrane modes with a slap                                | needs a real recording  |
+| Voice                | Recording                                              | Takes |
+| :------------------- | :----------------------------------------------------- | :---- |
+| bumbo                | three 808 kicks                                        | 3     |
+| grave                | 808 subs, retuned, with a glide into the next chord    | 5     |
+| lata                 | struck cans, buckets and pots                          | 10    |
+| chimbal              | closed and open hi-hats                                | 4 + 2 |
+| teclado              | upright piano, two dynamics, two round robins per note | 20    |
+| trompete (the hook)  | trumpet, staccato and sustained with vibrato           | 30    |
+| metais               | trumpet and tenor trombone staccato                    | 30    |
+| atabaque (tamborzão) | conga and quinto, three dynamics                       | 15    |
 
-The lata has a second choice on desktop, «tarol», the CC0 tarol rim recording already in `sounds/`.
-
-What to look for, CC0 only: a struck empty tin or paint can, dry and bright, short ring; an acoustic
-or MIDI-like piano chord stab in A minor, F and G; a trumpet and trombone section stab, short, in
-A minor, F and G; open and slapped atabaque or conga hits.
+The hook was a sawtooth synthesizer; it is now a trumpet, with the same dotted-eighth echo. Every
+voice stays on the hard grid, as producers program it, and the kick ducks the grave, keys, hook and
+horns.
 
 ## Colours
 

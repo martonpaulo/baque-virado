@@ -577,11 +577,11 @@ test('?ritmo=coco moves to /coco and shows the coco on an 8-step wheel, its 12 s
   await page.close();
 });
 
-test('?ritmo=brega-funk plays its synthesized sounds without fetching a sound file', async () => {
+test('?ritmo=brega-funk plays its recorded sounds through the studio, with no error', async () => {
   const { page, errors } = await openPage(DESKTOP, { query: '?ritmo=brega-funk' });
   await page.click('#tap');
   await page.waitForFunction(() => document.getElementById('tap').dataset.state === 'pause');
-  assert.equal(await page.evaluate(() => performance.getEntriesByType('resource').filter(entry => entry.name.includes('/sounds/')).length), 0);
+  assert.ok(await page.evaluate(() => performance.getEntriesByType('resource').some(entry => entry.name.includes('/sounds/sala-viva'))));
   await page.click('#tap');
   const total = await page.evaluate(() => window.baque.TOTAL);
   for (let at = 0; at < total; at += 0.25) await page.evaluate(position => window.baque.render(position), at);
