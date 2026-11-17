@@ -195,9 +195,10 @@ function hitEnergy(recent) {
 }
 
 export function createBackground(fxCanvas, feedbackCanvas) {
-  // A rhythm with a background of its own draws it on the 2D canvas, over the frame before, in
-  // place of the kaleidoscope and the feedback tunnel (src/rhythms/, `background`).
-  const layer = RHYTHM.background?.create() ?? null;
+  // The one hook for a rhythm's own background: `background.create({ stepsPerBar, angleOf })`
+  // returns { draw(ctx, frame), vignette?(ctx, frame) }. It draws on the 2D canvas, over the frame
+  // before unless `frame.fresh`, in place of the kaleidoscope and the feedback tunnel (src/rhythms/).
+  const layer = RHYTHM.background?.create({ stepsPerBar: STEPS_PER_BAR, angleOf }) ?? null;
   const kaleidoscope = layer ? null : createKaleidoscope(fxCanvas);
   const ctx = feedbackCanvas.getContext('2d');
   const previous = document.createElement('canvas'),
@@ -347,7 +348,10 @@ export function createBackground(fxCanvas, feedbackCanvas) {
     if (layer) {
       const fresh = !hasFrame || clock.step >= FEEDBACK_MAX_STEP;
       if (!fresh) ctx.drawImage(previous, 0, 0);
-      layer.draw(ctx, { ...geometry, position, totalBars: TOTAL_BARS, params, recent, shapes, time: clock.time, step: clock.step, fresh });
+      const bar = Math.floor(position),
+        scene = sceneAt(bar);
+      const frame = { ...geometry, position, totalBars: TOTAL_BARS, params, recent, shapes, clock, time: clock.time, step: clock.step, fresh };
+      layer.draw(ctx, { ...frame, mode: scene.mode(bar - scene.start), barStart: bar });
     } else {
       if (clock.step > 0 && clock.step < FEEDBACK_MAX_STEP && hasFrame) drawFeedback(params, clock.step);
       drawEmissions(recent, shapes, clock.time);
@@ -362,7 +366,8 @@ export function createBackground(fxCanvas, feedbackCanvas) {
     // keep this frame for the feedback, then darken top and bottom for the viewer only
     previousCtx.globalCompositeOperation = 'copy';
     previousCtx.drawImage(feedbackCanvas, 0, 0);
-    drawVignette();
+    if (layer?.vignette) layer.vignette(ctx, geometry);
+    else drawVignette();
     hasFrame = true;
   }
 

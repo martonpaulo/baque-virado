@@ -5,6 +5,7 @@
 // Research and choices: docs/research/brega-forro.md, docs/rhythms/brega-funk.md.
 import { label, row, stat, stats } from '../readout-markup.js';
 import { createBregaFunkBackground, PALETTE } from './brega-funk-background.js';
+import { straightMeter } from './meter.js';
 import { midiOf, recordedChoices, studioSounds, takes } from './studio-kit.js';
 
 const BPM = 85;
@@ -484,10 +485,7 @@ const readout = (scene, show) => ({ markup: (LAYOUTS[scene.id] || (() => ''))(sh
 
 export const BREGA_FUNK = {
   id: ID,
-  bpm: BPM,
-  beatsPerBar: BEATS_PER_BAR,
-  stepsPerBeat: STEPS_PER_BEAT,
-  swing: {},
+  ...straightMeter(BPM, BEATS_PER_BAR, STEPS_PER_BEAT),
   voices: VOICES,
   shapeVoices: ['lata', 'bumbo'], // the 3 + 3 + 2: the lata's shape over the bumbo's
   barHits,

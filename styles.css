@@ -1023,6 +1023,15 @@ html:not(.video-export) .read:has(> .score) > .stats {
 html:not(.video-export) .read > .score {
   width: calc(62% + min(6%, var(--room) * 0.05)); /* fits the score under the larger labels */
 }
+/* a melody roll stretches its bars across a fixed height, so a long phrase stays readable */
+.score.roll svg {
+  height: 11cqw;
+}
+/* a melody roll is a strip across the readout, never the baque score's narrow column */
+.read > .score.roll,
+html:not(.video-export) .read > .score.roll {
+  width: 100%;
+}
 html:not(.video-export) .stats.small b {
   font-size: calc(var(--stage-figure-s) + min(var(--figure-grow), var(--room) * 0.1));
 } /* the Painel and Leitura labels and values, at the sizes a 393px phone shows them (11, 12 and
