@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { meterOf } from '../src/music.js';
 import { FORRO_PE_DE_SERRA } from '../src/rhythms/forro.js';
+import { FREVO } from '../src/rhythms/frevo.js';
 import { preparingIds, RHYTHM, RHYTHMS, ROUTES, redirectFor, rhythmChoices, rhythmFor } from '../src/rhythms/index.js';
 import { MARACATU } from '../src/rhythms/maracatu.js';
 import { createShow } from '../src/show.js';
@@ -10,10 +11,10 @@ import { TWO_FOUR } from './support/rhythm-two-four.js';
 
 const BOTH = [MARACATU, TWO_FOUR];
 
-test('the site ships maracatu, the coco, forró and brega funk, and shows maracatu by default', () => {
+test('the site ships maracatu, the coco, frevo, forró and brega funk, and shows maracatu by default', () => {
   assert.deepEqual(
     RHYTHMS.map(rhythm => rhythm.id),
-    ['maracatu', 'coco', 'forro', 'brega-funk'],
+    ['maracatu', 'coco', 'frevo', 'forro', 'brega-funk'],
   );
   assert.equal(RHYTHM, MARACATU);
 });
@@ -30,13 +31,14 @@ test('a path /<id> picks a rhythm, and wins over ?ritmo=', () => {
   assert.equal(rhythmFor('', RHYTHMS, '/forro'), FORRO_PE_DE_SERRA);
   assert.equal(rhythmFor('?ritmo=maracatu', RHYTHMS, '/forro'), FORRO_PE_DE_SERRA);
   assert.equal(rhythmFor('', RHYTHMS, '/forro.html'), FORRO_PE_DE_SERRA);
-  assert.equal(rhythmFor('', RHYTHMS, '/frevo'), MARACATU); // being prepared: its page has no show
+  assert.equal(rhythmFor('', RHYTHMS, '/frevo'), FREVO);
+  assert.equal(rhythmFor('', RHYTHMS, '/manguebeat'), MARACATU); // being prepared: its page has no show
   assert.equal(rhythmFor('', RHYTHMS, '/'), MARACATU);
 });
 
 test('seven paths, in the order the owner set; the ones with no package yet are being prepared', () => {
   assert.deepEqual(ROUTES, ['maracatu', 'coco', 'frevo', 'forro', 'manguebeat', 'brega-romantico', 'brega-funk']);
-  assert.deepEqual(preparingIds(), ['frevo', 'manguebeat', 'brega-romantico']);
+  assert.deepEqual(preparingIds(), ['manguebeat', 'brega-romantico']);
 });
 
 test('?ritmo=<id> of a route redirects to its path and keeps the rest of the query', () => {

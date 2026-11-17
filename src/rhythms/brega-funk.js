@@ -6,6 +6,7 @@
 import { label, row, stat, stats } from '../readout-markup.js';
 import { createBregaFunkBackground, PALETTE } from './brega-funk-background.js';
 import { atabaque, brass, grave, hat, keys, kick, lata, lead } from './brega-funk-sounds.js';
+import { straightMeter } from './meter.js';
 
 const BPM = 85;
 const SHOWN_BPM = BPM * 2; // the tempo producers name; the wheel turns once per half-time bar
@@ -468,10 +469,7 @@ const readout = (scene, show) => ({ markup: (LAYOUTS[scene.id] || (() => ''))(sh
 
 export const BREGA_FUNK = {
   id: ID,
-  bpm: BPM,
-  beatsPerBar: BEATS_PER_BAR,
-  stepsPerBeat: STEPS_PER_BEAT,
-  swing: {},
+  ...straightMeter(BPM, BEATS_PER_BAR, STEPS_PER_BEAT),
   voices: VOICES,
   shapeVoices: ['lata', 'bumbo'], // the 3 + 3 + 2: the lata's shape over the bumbo's
   barHits,

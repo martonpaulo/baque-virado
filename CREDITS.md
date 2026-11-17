@@ -1,7 +1,8 @@
 # Sound credits
 
-All sounds come from [Freesound](https://freesound.org) and are in the public domain (CC0). Some were
-trimmed, mixed or retuned.
+All sounds are in the public domain (CC0). Some were trimmed, mixed or retuned. The maracatu sounds
+come from [Freesound](https://freesound.org); the frevo sounds (`sounds/frevo-*`) from two sample
+libraries.
 
 - Alfaia, caixa, agogô (short bell), shekere: Sassaby
 - Dry surdo: gilblack1234
@@ -17,6 +18,15 @@ trimmed, mixed or retuned.
 The forró triângulo, sanfona, rabeca, bandolim, cavaquinho and baixo are synthesized for this
 project by `tools/synth-forro.mjs`; its zabumba reuses the alfaia, surdo and stick recordings above
 ([`docs/rhythms/forro.md`](docs/rhythms/forro.md)).
+
+Frevo, each note measured, retuned to its exact pitch, trimmed to start on the note, faded and
+level-matched; the frevo show also uses the dry surdo and two caixas above:
+
+- Trumpet, tenor trombone and tuba: [VSCO 2 Community Edition](https://github.com/sgossner/VSCO-2-CE)
+  by Versilian Studios (CC0)
+- Tenor saxophone, rope-tension snare (tarol), bass drum (surdo), small frame drum and tambourine
+  (pandeiro): [VCSL](https://github.com/sgossner/VCSL) (CC0). The caixa's rufo is built from the
+  same snare's strokes.
 
 Alfaia patterns: the table at lansdownsoftware.com. Swing measured on a Batuk Nagô workshop recording.
 

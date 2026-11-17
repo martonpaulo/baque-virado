@@ -6,6 +6,7 @@
 import { label, row, stat, stats } from '../readout-markup.js';
 import { FORRO } from '../theme.js';
 import { drawForroBackdrop } from './forro-backdrop.js';
+import { straightMeter } from './meter.js';
 
 const BPM = 120;
 const BEATS_PER_BAR = 2;
@@ -488,10 +489,7 @@ export const FORRO_PIECES = { MOTIFS, PHRASE, ANSWER, MODE, PATTERNS, midiOf, th
 
 export const FORRO_PE_DE_SERRA = {
   id: 'forro',
-  bpm: BPM,
-  beatsPerBar: BEATS_PER_BAR,
-  stepsPerBeat: STEPS_PER_BEAT,
-  swing: {}, // no measured swing for this rhythm: the grid stays straight (docs/rhythms/forro.md)
+  ...straightMeter(BPM, BEATS_PER_BAR, STEPS_PER_BEAT), // no measured swing for this rhythm: the grid stays straight (docs/rhythms/forro.md)
   voices: VOICES,
   shapeVoices: ['bacalhau', 'grave'],
   barHits,

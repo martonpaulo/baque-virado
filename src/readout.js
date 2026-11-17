@@ -125,7 +125,7 @@ export function createReadout(element, volume = {}) {
         listening.style.color = swingOn ? ROLES.accent : '';
       }
     },
-    /** Move the score cursor to the current sixteenth (second bar of a two-bar cycle when needed). */
+    /** Move the score cursor to the current sixteenth (its bar of a cycle of several bars when needed). */
     update(sixteenth, barInScene) {
       if (!score) return;
       if (waves && !waves.hidden) {
@@ -140,8 +140,9 @@ export function createReadout(element, volume = {}) {
         }
         return;
       }
-      const twoBars = score.slotX.length === 2 * STEPS_PER_BAR;
-      const slot = Math.floor(sixteenth) + (twoBars ? (barInScene % 2) * STEPS_PER_BAR : 0);
+      // a score of n bars repeats every n bars of the scene (a baque: one or two; a melody roll: more)
+      const bars = score.slotX.length / STEPS_PER_BAR;
+      const slot = Math.floor(sixteenth) + (barInScene % bars) * STEPS_PER_BAR;
       if (cursor) setStyle(cursor, 'left', `${((score.slotX[slot] / score.width) * 100).toFixed(2)}%`);
     },
   };
