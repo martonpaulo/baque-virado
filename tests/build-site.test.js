@@ -29,12 +29,12 @@ test('every rhythm path answers 200 from the built site; a shipped one is the sh
         .replace(/https:\/\/batuque\.martonpaulo\.com\/[a-z-]*/g, '');
     assert.equal(showOnly(page('maracatu')), showOnly(index));
     // a rhythm being prepared: its name in the title, one line, the selector, and no show
-    const frevo = page('frevo');
-    assert.match(frevo, /<title>Frevo · O Baque Virado<\/title>/);
-    assert.match(frevo, /<p>O show de frevo está sendo preparado\.<\/p>/);
-    assert.match(frevo, /<a class="chip" href="\/frevo" aria-current="true">frevo<\/a>/);
-    assert.equal((frevo.match(/class="chip"/g) || []).length, ROUTES.length);
-    assert.doesNotMatch(frevo, /<script type="module"|id="stage"/);
+    const manguebeat = page('manguebeat');
+    assert.match(manguebeat, /<title>Manguebeat · O Baque Virado<\/title>/);
+    assert.match(manguebeat, /<p>O show de manguebeat está sendo preparado\.<\/p>/);
+    assert.match(manguebeat, /<a class="chip" href="\/manguebeat" aria-current="true">manguebeat<\/a>/);
+    assert.equal((manguebeat.match(/class="chip"/g) || []).length, ROUTES.length);
+    assert.doesNotMatch(manguebeat, /<script type="module"|id="stage"/);
   } finally {
     await server.close();
     rmSync(parent, { recursive: true, force: true });

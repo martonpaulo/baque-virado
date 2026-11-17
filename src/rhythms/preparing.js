@@ -3,7 +3,6 @@
 
 /** Each rhythm being prepared: its selector chip and the name its page title shows. */
 export const PREPARING = {
-  frevo: { selector: 'frevo', name: 'Frevo' },
   manguebeat: { selector: 'manguebeat', name: 'Manguebeat' },
   'brega-romantico': { selector: 'brega romântico', name: 'Brega romântico' },
 };

@@ -471,6 +471,17 @@ test('the rhythm selector stays out of the page with one rhythm', async () => {
   }
 });
 
+test('?ritmo=frevo plays the frevo show on an 8-step wheel, every bar drawn without an error', async () => {
+  const pages = await Promise.all([PHONES[0], DESKTOP].map(viewport => openPage(viewport, { query: '?ritmo=frevo' })));
+  for (const { page, errors } of pages) {
+    assert.equal(await page.evaluate(() => window.baque.TOTAL), 104);
+    assert.equal(await page.$$eval('#scope text[fill-opacity]', texts => texts.filter(t => /^\d+$/.test(t.textContent)).length), 8);
+    for (let at = 0; at < 104; at += 0.37) await page.evaluate(position => window.baque.render(position), at);
+    assert.deepEqual(errors, [], 'no console error on either viewport');
+    await page.close();
+  }
+});
+
 test('an unknown ?ritmo= shows maracatu, marked in the selector of every rhythm path', async () => {
   for (const viewport of [PHONES[0], DESKTOP]) {
     const { page, errors } = await openPage(viewport, { query: '?ritmo=desconhecido' });
