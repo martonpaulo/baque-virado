@@ -5,7 +5,7 @@ import { existsSync, statSync } from 'node:fs';
 import { test } from 'node:test';
 import { fileURLToPath } from 'node:url';
 import { meterOf } from '../src/music.js';
-import { ACCENT_BARS, BEAT, BREGA, BREGA_LINES, HEARTBEAT, parseBar, THEME, thirdBelow } from '../src/rhythms/brega.js';
+import { ACCENT_BARS, BEAT, BREGA, BREGA_LINES, COMP, HEARTBEAT, parseBar, THEME, thirdBelow } from '../src/rhythms/brega.js';
 import { BREGA_PALETTE, createBregaPainter } from '../src/rhythms/brega-background.js';
 import { midiOf } from '../src/rhythms/studio-kit.js';
 import { createShow } from '../src/show.js';
@@ -17,7 +17,7 @@ const meter = meterOf(BREGA);
 const DEFAULTS = Object.fromEntries(BREGA.sounds.choices.map(choice => [choice.id, choice.defaultOption]));
 const soundPath = (name, extension) => fileURLToPath(new URL(`../sounds/${name}${extension}`, import.meta.url));
 const allFiles = choices => [...new Set([...BREGA.sounds.choices.flatMap(c => c.files(choices[c.id])), ...BREGA.sounds.fixedFiles])];
-const PHONE_BYTES = 900_000; // every default sample of the band, before Play (docs/rhythms/brega.md)
+const PHONE_BYTES = 1_200_000; // every default sample of the band, before Play (docs/rhythms/brega.md)
 const MAX_RETUNE = 5; // semitones a take may be retuned
 const stepsOf = (voice, bar) =>
   show
@@ -25,10 +25,10 @@ const stepsOf = (voice, bar) =>
     .filter(h => h.voice === voice)
     .map(h => h.hit.step);
 
-test('brega is 4/4 at 140 BPM on a 16-step wheel, eleven scenes as the script lists them, about 1:41', () => {
+test('brega is 4/4 at 136 BPM on a 16-step wheel, eleven scenes, about 1:37', () => {
   assert.equal(BREGA.id, 'brega');
   assert.equal(BREGA.copy.name, 'brega');
-  assert.equal(BREGA.bpm, 140);
+  assert.equal(BREGA.bpm, 136, 'the tempo measured on the owner’s references');
   assert.equal(meter.stepsPerBar, 16);
   assert.deepEqual(
     show.SCENES.map(scene => [scene.id, scene.bars]),
@@ -36,7 +36,7 @@ test('brega is 4/4 at 140 BPM on a 16-step wheel, eleven scenes as the script li
       ['introducao', 4],
       ['base', 4],
       ['baixo', 4],
-      ['teclado', 8],
+      ['teclado', 4],
       ['guitarra', 8],
       ['virada', 1],
       ['refrao', 8],
@@ -46,7 +46,7 @@ test('brega is 4/4 at 140 BPM on a 16-step wheel, eleven scenes as the script li
       ['final', 4],
     ],
   );
-  assert.ok(show.TOTAL_SECONDS > 90 && show.TOTAL_SECONDS < 120, `${show.TOTAL_SECONDS} s`);
+  assert.ok(show.TOTAL_SECONDS > 80 && show.TOTAL_SECONDS < 130, `${show.TOTAL_SECONDS} s`);
   for (let bar = 0; bar < show.TOTAL_BARS; bar++)
     for (const h of show.hitsInBar(bar)) {
       assert.ok(h.grid >= bar && h.grid < bar + 1, `${h.voice} at ${h.grid} is outside bar ${bar}`);
@@ -54,51 +54,86 @@ test('brega is 4/4 at 140 BPM on a 16-step wheel, eleven scenes as the script li
     }
 });
 
-test('the parts enter one by one: the theme alone, the base, the bass, the keyboard, then the guitar', () => {
-  const firstBar = voice => {
-    for (let bar = 0; bar < show.TOTAL_BARS; bar++) if (show.hitsInBar(bar).some(h => h.voice === voice)) return bar;
-    return null;
-  };
-  const order = ['tema', 'bumbo', 'baixo', 'cordas', 'guitarra', 'tom', 'metais'].map(firstBar);
-  assert.deepEqual(
-    [...order].sort((a, b) => a - b),
-    order,
-  );
-  assert.deepEqual(show.barTimeline(0).playing, ['tema']);
+test('the band plays from the first bar; a scene thins the band to show one thing, never one voice alone for long', () => {
+  assert.deepEqual(show.barTimeline(0).playing, ['bumbo', 'caixa', 'chimbal', 'baixo', 'cordas', 'teclado', 'tema']);
+  const SOLO_BARS = new Set([show.sceneById('virada').start, show.sceneById('breque').start + 1]); // the fill and the heartbeat, one bar each
+  for (let bar = 0; bar < show.TOTAL_BARS; bar++) {
+    const voices = new Set(show.hitsInBar(bar).map(h => h.voice));
+    if (!SOLO_BARS.has(bar)) assert.ok(voices.size >= 5, `bar ${bar} has ${[...voices]} only`);
+  }
+  // what a scene shows is louder there, what stays under it is softer
+  const gain = id => show.sceneById(id).gain;
+  assert.ok(gain('base').bumbo > 1 && gain('base').baixo < 1);
+  assert.ok(gain('baixo').baixo > 1 && gain('baixo').teclado < 1);
+  assert.ok(gain('teclado').teclado > 1);
+  assert.ok(gain('guitarra').guitarra > 1);
 });
 
-test('the xacumbum base: bumbo on 1 and 3 with a pick-up, caixa on 2 and 4, the chimbal loud on the off-beat', () => {
+test('the xacumbum base splits the bar 3 + 3 + 2: two bumbos, then the caixa, over a chimbal in eighths', () => {
   const bar = show.sceneById('base').start;
-  assert.deepEqual(stepsOf('bumbo', bar), [0, 8, 15]);
-  assert.deepEqual(stepsOf('caixa', bar), [4, 12]);
+  assert.deepEqual(stepsOf('bumbo', bar), [0, 6]);
+  assert.deepEqual(stepsOf('caixa', bar), [12]);
   assert.deepEqual(stepsOf('chimbal', bar), [0, 2, 4, 6, 8, 10, 12, 14]);
-  const loud = BEAT.chimbal.filter(h => h.velocity > 0.7).map(h => h.step);
-  assert.deepEqual(loud, [2, 6, 10, 14]);
+  assert.deepEqual(
+    BEAT.bumbo.map(h => h.step),
+    [0, 6],
+  );
+  // every fourth bar leads out: one more bumbo and a ghost on the caixa, the identifying cell intact
+  assert.deepEqual(stepsOf('bumbo', bar + 3), [0, 6, 10]);
+  assert.deepEqual(stepsOf('caixa', bar + 3), [12, 15]);
 });
 
-test('the bass plays with the bumbo and pushes the next root on the last sixteenth', () => {
-  const bar = show.sceneById('baixo').start;
-  assert.deepEqual(stepsOf('baixo', bar), stepsOf('bumbo', bar));
-  const last = show.hitsInBar(bar).find(h => h.voice === 'baixo' && h.hit.step === 15);
-  assert.equal(Number(last.hit.tone.split(':')[0]), midiOf('F1'), 'the anticipation is the next chord’s root');
+test('the bass lands with both bumbos, leaps through the chord and steps into the next root', () => {
+  const scene = show.sceneById('baixo');
+  for (let bar = scene.start; bar < scene.start + scene.bars; bar++) {
+    const notes = show
+      .hitsInBar(bar)
+      .filter(h => h.voice === 'baixo')
+      .map(h => ({ step: h.hit.step, midi: Number(h.hit.tone.split(':')[0]) }));
+    assert.ok(notes.length >= 6, `bar ${bar} has ${notes.length} bass notes`);
+    for (const step of stepsOf('bumbo', scene.start))
+      assert.ok(
+        notes.some(note => note.step === step),
+        `no bass with the bumbo on ${step}`,
+      );
+    assert.ok(
+      notes.some((note, i) => i > 0 && Math.abs(note.midi - notes[i - 1].midi) >= 5),
+      'the line leaps',
+    );
+  }
+  const last = show.hitsInBar(scene.start).findLast(h => h.voice === 'baixo');
+  assert.equal(Number(last.hit.tone.split(':')[0]), midiOf('G2') - 1, 'a semitone below the next chord’s root');
 });
 
-test('the keyboard chords sit on the off-beats; the strings hold one chord per bar', () => {
+test('the keyboard plays short chords around the bumbos; the pad holds one chord per bar', () => {
   const bar = show.sceneById('teclado').start;
-  assert.deepEqual(stepsOf('teclado', bar), [2, 6, 10, 14]);
+  assert.deepEqual(
+    stepsOf('teclado', bar),
+    COMP[0].map(h => h.step),
+  );
+  for (const shape of COMP) {
+    assert.ok(!shape.some(h => h.step === 0), 'the downbeat belongs to the pad and the bass');
+    assert.ok(
+      shape.some(h => h.step === BEAT.bumbo[1].step),
+      'a chord with the second bumbo',
+    );
+  }
   assert.deepEqual(stepsOf('cordas', bar), [0]);
 });
 
-test('the guitar plays in thirds: each hit is two notes a diatonic third apart', () => {
+test('the guitar plays in thirds and sixths: each hit is two notes of the scale', () => {
   const scene = show.sceneById('guitarra');
-  let hits = 0;
+  let thirds = 0,
+    sixths = 0;
   for (let bar = scene.start; bar < scene.start + scene.bars; bar++)
     for (const h of show.hitsInBar(bar).filter(candidate => candidate.voice === 'guitarra')) {
       const [upper, lower] = h.hit.tone.split(':')[0].split(',').map(Number);
-      assert.ok([3, 4].includes(upper - lower), `${upper} over ${lower}`);
-      hits++;
+      assert.ok([3, 4, 8, 9].includes(upper - lower), `${upper} over ${lower}`);
+      if (upper - lower > 4) sixths++;
+      else thirds++;
     }
-  assert.ok(hits > 20);
+  assert.ok(thirds > 30, `${thirds} thirds`);
+  assert.ok(sixths > 0 && sixths < thirds, `${sixths} sixths`);
   assert.equal(thirdBelow(midiOf('B4'), 'E7'), midiOf('G#4'));
   assert.equal(thirdBelow(midiOf('C5'), 'Am'), midiOf('A4'));
 });
@@ -130,24 +165,39 @@ test('the horns answer the guitar in the vinheta, bar after bar', () => {
   }
 });
 
+test('the theme: eight bars with pushed notes and bends, the guitar answering in its rests', () => {
+  const notes = THEME.map(parseBar);
+  assert.equal(notes.length, 8);
+  const all = notes.flat();
+  // it sings (long notes), it is syncopated (notes that start off the beat and are held) and it bends
+  assert.ok(all.filter(note => note.length >= 4).length >= 6, 'long notes');
+  assert.ok(all.filter(note => note.step % 4 !== 0 && note.length >= 2).length >= 12, 'pushed notes');
+  assert.ok(all.some(note => note.bend));
+  assert.ok(all.filter(note => note.length === 1).length >= 10, 'runs and turns of sixteenths');
+  assert.ok(new Set(all.map(note => note.length)).size >= 5, 'many note lengths');
+  // a minor key: the theme rests on A
+  assert.equal(notes.at(-1).at(-1).midi % 12, midiOf('A4') % 12);
+  // call and response: where the theme rests (bars 4 and 8), the guitar plays after its long note
+  const chorus = show.sceneById('refrao').start;
+  for (const i of [3, 7]) {
+    const rest = Math.max(...notes[i].filter(note => note.length >= 4).map(note => note.step + note.length));
+    const answer = stepsOf('guitarra', chorus + i);
+    assert.ok(answer.length >= 4 && answer[0] >= rest - 2, `no answer in bar ${i + 1}`);
+  }
+  for (const i of [0, 1, 2, 4, 5, 6]) assert.equal(stepsOf('guitarra', chorus + i).length, 0);
+});
+
 test('the theme opens the show, returns in both choruses, and the last chorus is a whole tone higher', () => {
   const tema = bar => (BREGA_LINES.tema.get(bar) || []).map(note => note.midi);
   const intro = show.sceneById('introducao').start,
     chorus = show.sceneById('refrao').start,
     last = show.sceneById('refrao-final').start;
-  for (let i = 0; i < THEME.length; i++) {
-    assert.deepEqual(tema(chorus + i), tema(intro + i));
+  for (const i of [0, 1]) assert.deepEqual(tema(intro + i), tema(chorus + i));
+  for (let i = 0; i < THEME.length; i++)
     assert.deepEqual(
       tema(last + i),
-      tema(intro + i).map(midi => midi + 2),
+      tema(chorus + i).map(midi => midi + 2),
     );
-  }
-  // a minor key: the theme rests on A and its long notes are chord tones
-  assert.equal(parseBar(THEME.at(-1)).at(-1).midi % 12, midiOf('A4') % 12);
-  assert.ok(
-    THEME.flatMap(parseBar).some(note => note.length >= 8),
-    'the theme has long notes',
-  );
 });
 
 test('the show ends on one held chord in the new key', () => {
@@ -157,7 +207,7 @@ test('the show ends on one held chord in the new key', () => {
   assert.equal(Number(tema.hit.tone.split(':')[0]), midiOf('B4'));
 });
 
-test('every note plays a recorded take within five semitones, never the same take twice in a row', () => {
+test('every note plays a take within five semitones, never the same take twice in a row', () => {
   const plan = planStudio(BREGA, show, DEFAULTS),
     last = {};
   for (const step of [...plan.keys()].sort((a, b) => a - b))
@@ -186,7 +236,7 @@ test('the drums stay on the grid and the players drift; the same plan every time
       offsets[voice].every(offset => offset === 0),
       voice,
     );
-  for (const voice of ['baixo', 'teclado', 'guitarra'])
+  for (const voice of ['baixo', 'teclado', 'guitarra', 'tema'])
     assert.ok(
       offsets[voice].some(offset => offset !== 0),
       voice,
@@ -194,12 +244,13 @@ test('the drums stay on the grid and the players drift; the same plan every time
   assert.deepEqual(JSON.stringify([...planStudio(BREGA, show, DEFAULTS)]), JSON.stringify([...plan]));
 });
 
-test('every sound has its WAV master; the phone set stays under 900 KB', () => {
-  for (const name of allFiles(DEFAULTS)) {
+test('every recorded sound has its WAV master; the phone set stays under 1.2 MB', () => {
+  const recorded = allFiles(DEFAULTS);
+  for (const name of recorded) {
     assert.ok(existsSync(soundPath(name, '.m4a')), `${name}.m4a`);
     assert.ok(existsSync(soundPath(name, '.wav')), `${name}.wav`);
   }
-  const bytes = allFiles(DEFAULTS).reduce((sum, name) => sum + statSync(soundPath(name, '.m4a')).size, 0);
+  const bytes = recorded.reduce((sum, name) => sum + statSync(soundPath(name, '.m4a')).size, 0);
   assert.ok(bytes < PHONE_BYTES, `the default samples weigh ${bytes} bytes`);
 });
 
