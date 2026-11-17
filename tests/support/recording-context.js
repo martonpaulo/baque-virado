@@ -24,6 +24,7 @@ export function installRecordingContext() {
     createConvolver = () => node({ buffer: null });
     createBiquadFilter = () => node({ type: '', frequency: param(), Q: param() });
     createStereoPanner = () => node({ pan: param() });
+    createDelay = () => node({ delayTime: param() });
     createOscillator = () => node({ frequency: param(), start() {}, stop() {} });
     createBufferSource() {
       const entry = { name: null, time: 0, rate: 1, level: 1 };

@@ -326,7 +326,7 @@ window.baque = {
     this.render(seconds / BAR_SECONDS);
     stepAnimations(seconds);
   },
-  renderAudio: () => renderShowWav(bank, choice, AUDIO_LEAD_IN),
+  renderAudio: options => renderShowWav(bank, choice, AUDIO_LEAD_IN, options),
   TOTAL: TOTAL_BARS,
   BAR: BAR_SECONDS,
   audioOffset: AUDIO_LEAD_IN,

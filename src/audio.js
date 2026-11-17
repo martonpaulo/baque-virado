@@ -331,15 +331,19 @@ export function createPlayer(bank, choice, volume = {}) {
   };
 }
 
-/** The whole show rendered offline as a 16-bit stereo WAV (for the video exporter). */
-export async function renderShowWav(bank, choice, leadIn) {
+const RENDER_TAIL_SECONDS = 1.2; // the last hit rings out
+/**
+ * The show rendered offline as a 16-bit stereo WAV (for the video exporter): the whole show, or only
+ * the bars from `fromBar` to `toBar`, with the instrument volumes `volume` (all normal when empty).
+ */
+export async function renderShowWav(bank, choice, leadIn, { fromBar = 0, toBar = TOTAL_BARS, volume = {} } = {}) {
   const sampleRate = 44100,
-    length = Math.ceil((TOTAL_BARS * BAR_SECONDS + 1.2) * sampleRate);
+    length = Math.ceil(((toBar - fromBar) * BAR_SECONDS + leadIn + RENDER_TAIL_SECONDS) * sampleRate);
   const context = new OfflineAudioContext(2, length, sampleRate);
   const buffers = await bank.load(context, filesFor(choice)),
     master = masterChain(context);
-  for (let step = 0; step < TOTAL_BARS * STEPS_PER_BAR; step++)
-    scheduleStep(context, buffers, master, step, leadIn + (step / STEPS_PER_BAR) * BAR_SECONDS, choice);
+  for (let step = fromBar * STEPS_PER_BAR; step < toBar * STEPS_PER_BAR; step++)
+    scheduleStep(context, buffers, master, step, leadIn + (step / STEPS_PER_BAR - fromBar) * BAR_SECONDS, choice, volume);
   return encodeWav(await context.startRendering());
 }
 
