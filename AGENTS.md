@@ -8,8 +8,8 @@
 - Identifier name: `baqueVirado`
 - Benefit-first description: See and hear what each maracatu instrument plays, where the swing sits and how seven baques differ, in a two-minute animated show.
 - Repository: `martonpaulo/baque-virado` (public)
-- Public identifiers: the domain `baquevirado.martonpaulo.com`, the repository name and the localStorage prefix `baque-virado:`
-- Landing page: the site itself is the product, served by GitHub Pages at https://baquevirado.martonpaulo.com
+- Public identifiers: the domain `batuque.martonpaulo.com` (moved from `baquevirado.martonpaulo.com`, which 301-redirects to it with the same path and query, [#28](https://github.com/martonpaulo/baque-virado/issues/28)), the repository name and the localStorage prefix `baque-virado:`, kept unchanged so viewers keep their settings
+- Landing page: the site itself is the product, served by GitHub Pages at https://batuque.martonpaulo.com
 - License: `MIT`
 - Copyright: 2026 Marton Paulo
 - Development language: English.

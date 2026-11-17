@@ -5,7 +5,7 @@ with real one-shot drum samples. It walks through the instruments, the measured 
 offbeat and the seven baques, then ends on the unison virada. The interface is in Brazilian
 Portuguese.
 
-Live: <https://baquevirado.martonpaulo.com>
+Live: <https://batuque.martonpaulo.com>
 
 ## Run locally
 
