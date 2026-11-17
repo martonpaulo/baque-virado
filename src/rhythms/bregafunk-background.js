@@ -11,8 +11,9 @@ export const PALETTE = {
   violet: '#7d4dff', // the grave, under the bumbo
   lime: '#c6f432', // the paredão LEDs: the lata
   tin: '#d4dbe0', // the metal of the chimbais
+  aqua: '#3fe0d0', // the palma: the turquoise of the LED strips
   ivory: '#f1e6cf', // the keys
-  orange: '#ff7a3d', // the lead: a phone screen lit in the dark
+  orange: '#ff7a3d', // the flute hook: a phone screen lit in the dark
   gold: '#ffd23f', // the drop: the horns
   leather: '#c4875a', // the atabaque of the Rio tamborzão
 };

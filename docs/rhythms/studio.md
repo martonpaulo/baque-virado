@@ -57,8 +57,8 @@ A voice names its strokes; each stroke is a list of recorded takes. A take has a
 Each voice has its channel: a pan and a send to one shared room, a convolution reverb with a
 recorded impulse response (a small room for forró and coco, a living room for bregafunk). The
 voices meet in a glue compressor (2:1 from −18 dB), then the site's master chain (gentle
-saturation and a compressor). In bregafunk the kick ducks the grave, keys, hook and horns by
-45 % for 70 ms.
+saturation and a compressor). In bregafunk the kick ducks the grave and the melodic voices
+([`bregafunk.md`](bregafunk.md), Mix).
 
 ## Parameters and their sources
 
