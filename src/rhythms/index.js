@@ -1,10 +1,11 @@
 // The rhythms the site can show, and the one this page load shows: `?ritmo=<id>` picks it, and an
 // unknown or missing id falls back to the first (maracatu). Add a rhythm by adding its package here.
+import { BREGA_FUNK } from './brega-funk.js';
 import { COCO_XAMBA } from './coco-xamba.js';
 import { FORRO_PE_DE_SERRA } from './forro.js';
 import { MARACATU } from './maracatu.js';
 
-export const RHYTHMS = [MARACATU, COCO_XAMBA, FORRO_PE_DE_SERRA];
+export const RHYTHMS = [MARACATU, COCO_XAMBA, FORRO_PE_DE_SERRA, BREGA_FUNK];
 export const RHYTHM_PARAMETER = 'ritmo';
 
 /** The rhythm a query string (`location.search`) asks for, or the first one. */

@@ -16,8 +16,6 @@ const FEEDBACK_KEYS = ['zoom', 'rot', 'hue', 'keep', 'speed'];
 
 // How the background behaves in each scene: the rhythm's looks (src/rhythms/), one per scene id.
 export const SCENE_LOOKS = RHYTHM.looks;
-// A rhythm may draw its own background instead of the kaleidoscope and the feedback tunnel.
-const BACKDROP = RHYTHM.backdrop;
 
 // Hit energy fed to the shader (ages in seconds).
 const BOOM_ATTACK = 0.035; // alfaia/stick boom rise time constant
@@ -197,7 +195,10 @@ function hitEnergy(recent) {
 }
 
 export function createBackground(fxCanvas, feedbackCanvas) {
-  const kaleidoscope = createKaleidoscope(fxCanvas);
+  // A rhythm with a background of its own draws it on the 2D canvas, over the frame before, in
+  // place of the kaleidoscope and the feedback tunnel (src/rhythms/, `background`).
+  const layer = RHYTHM.background?.create() ?? null;
+  const kaleidoscope = layer ? null : createKaleidoscope(fxCanvas);
   const ctx = feedbackCanvas.getContext('2d');
   const previous = document.createElement('canvas'),
     previousCtx = previous.getContext('2d');
@@ -341,15 +342,16 @@ export function createBackground(fxCanvas, feedbackCanvas) {
   function draw(position, params, recent, clock, shapes) {
     if (!geometry?.width || !geometry.height) return; // not laid out, or hidden: a 0-px canvas cannot be drawn
     const { width, height, centreX, centreY } = geometry;
-    if (BACKDROP) {
-      BACKDROP(ctx, geometry, { position, totalBars: TOTAL_BARS, recent });
-      drawVignette();
-      return;
-    }
     if (kaleidoscope) kaleidoscope.draw({ centreX: centreX * fxRatio(), centreY: centreY * fxRatio(), time: clock.time, params, ...hitEnergy(recent) });
     ctx.clearRect(0, 0, width, height);
-    if (clock.step > 0 && clock.step < FEEDBACK_MAX_STEP && hasFrame) drawFeedback(params, clock.step);
-    drawEmissions(recent, shapes, clock.time);
+    if (layer) {
+      const fresh = !hasFrame || clock.step >= FEEDBACK_MAX_STEP;
+      if (!fresh) ctx.drawImage(previous, 0, 0);
+      layer.draw(ctx, { ...geometry, position, totalBars: TOTAL_BARS, params, recent, shapes, time: clock.time, step: clock.step, fresh });
+    } else {
+      if (clock.step > 0 && clock.step < FEEDBACK_MAX_STEP && hasFrame) drawFeedback(params, clock.step);
+      drawEmissions(recent, shapes, clock.time);
+    }
     if (SCENE_LOOKS[params.sceneId].moire) drawMoire(position, clock.time);
     if (params.strobe)
       for (const h of recent)

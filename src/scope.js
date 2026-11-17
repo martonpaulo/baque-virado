@@ -66,6 +66,11 @@ const FERMATA_DOT_Y = -22.5,
 
 // Rhythm shapes and dots.
 const SHAPE_VOICES = RHYTHM.shapeVoices;
+// A rhythm may move the whole wheel with its pulse: (position, hits just heard) → { rotate
+// (degrees), scale }. It depends on the position only, and reduced motion keeps the wheel still.
+const WHEEL_MOTION = RHYTHM.wheelMotion || null;
+const MOTION_WINDOW = 0.5; // seconds of hits the motion reads
+const REDUCED_MOTION = globalThis.matchMedia?.('(prefers-reduced-motion: reduce)');
 const SHAPE_GUIDE_OPACITY = 0.13,
   SHAPE_GUIDE_DASH = '1.5 2'; // the dashed full shape
 const SHAPE_LINE_OPACITY = 0.9,
@@ -322,6 +327,10 @@ export function createScope(svg, volume = {}) {
     const inBar = position - Math.floor(position),
       sixteenth = inBar * STEPS_PER_BAR;
     setAttr(hand, 'transform', `rotate(${(inBar * 360).toFixed(2)})`);
+    if (WHEEL_MOTION) {
+      const { rotate, scale } = REDUCED_MOTION?.matches ? { rotate: 0, scale: 1 } : WHEEL_MOTION(position, recentHits(position, MOTION_WINDOW));
+      setStyle(svg, 'transform', `rotate(${rotate.toFixed(2)}deg) scale(${scale.toFixed(3)})`);
+    }
     const from = angleOf(sixteenth - TRAIL_SIXTEENTHS),
       to = angleOf(sixteenth); // trailing sector behind the hand
     trail.setAttribute(

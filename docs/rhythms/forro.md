@@ -47,7 +47,8 @@ why ([#21](https://github.com/martonpaulo/baque-virado/issues/21)).
   and mother-of-pearl buttons (the left hand), the rabeca's varnish, the bandolim's spruce. The
   cavaquinho takes the faded teal and the bass the incoming dusk blue, as no material sets them
   apart.
-- **Background.** Its own, in [`forro-backdrop.js`](../../src/rhythms/forro-backdrop.js), circular
+- **Background.** Its own, through the engine's one `background.create()` hook, in
+  [`forro-backdrop.js`](../../src/rhythms/forro-backdrop.js), circular
   and coming out of the wheel: a dusk sky from bonfire orange to night indigo, whose warm light
   shrinks toward the wheel over the show (saudade is light leaving); a sanfona bellows that opens
   and closes once per bar around the wheel; bandeirinhas thrown outward by the zabumba's low head.

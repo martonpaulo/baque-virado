@@ -99,9 +99,10 @@ function flags(ctx, { centreX, centreY, scopeRadius, dpr }, recent) {
   ctx.globalAlpha = 1;
 }
 
-/** One frame of the forró background at `position` (bars), with the show's length and recent hits. */
-export function drawForroBackdrop(ctx, geometry, { position, totalBars, recent }) {
-  sky(ctx, geometry, Math.min(1, position / totalBars));
-  bellows(ctx, geometry, position % 1);
-  flags(ctx, geometry, recent);
+/** One frame of the forró background: `frame` is the canvas geometry plus `position` (bars), `totalBars` and the recent hits. */
+export function drawForroBackdrop(ctx, frame) {
+  const { position, totalBars, recent } = frame;
+  sky(ctx, frame, Math.min(1, position / totalBars));
+  bellows(ctx, frame, position % 1);
+  flags(ctx, frame, recent);
 }

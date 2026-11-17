@@ -463,6 +463,21 @@ test('the rhythm selector stays out of the page with one rhythm', async () => {
   }
 });
 
+test('an unknown ?ritmo= shows maracatu, marked in the selector of the shipped rhythms', async () => {
+  for (const viewport of [PHONES[0], DESKTOP]) {
+    const { page, errors } = await openPage(viewport, { query: '?ritmo=desconhecido' });
+    assert.equal(await page.evaluate(() => window.baque.TOTAL), SCENES.at(-1).start + SCENES.at(-1).bars);
+    assert.deepEqual(await page.$$eval('.rhythms-stage a', links => links.map(a => [a.getAttribute('href'), a.getAttribute('aria-current')])), [
+      ['?ritmo=maracatu', 'true'],
+      ['?ritmo=coco-xamba', null],
+      ['?ritmo=forro', null],
+      ['?ritmo=brega-funk', null],
+    ]);
+    assert.deepEqual(errors, []);
+    await page.close();
+  }
+});
+
 test('?ritmo=forro shows the forró on an 8-step wheel, over its own background, with no error', async () => {
   for (const viewport of [PHONES[0], DESKTOP]) {
     const { page, errors } = await openPage(viewport, { query: '?ritmo=forro' });
@@ -488,7 +503,20 @@ test('?ritmo=coco-xamba shows the coco on an 8-step wheel, its 12 scenes and the
     ['maracatu', null],
     ['coco', 'true'],
     ['forró', null],
+    ['brega funk', null],
   ]);
+  assert.deepEqual(errors, []);
+  await page.close();
+});
+
+test('?ritmo=brega-funk plays its synthesized sounds without fetching a sound file', async () => {
+  const { page, errors } = await openPage(DESKTOP, { query: '?ritmo=brega-funk' });
+  await page.click('#tap');
+  await page.waitForFunction(() => document.getElementById('tap').dataset.state === 'pause');
+  assert.equal(await page.evaluate(() => performance.getEntriesByType('resource').filter(entry => entry.name.includes('/sounds/')).length), 0);
+  await page.click('#tap');
+  const total = await page.evaluate(() => window.baque.TOTAL);
+  for (let at = 0; at < total; at += 0.25) await page.evaluate(position => window.baque.render(position), at);
   assert.deepEqual(errors, []);
   await page.close();
 });

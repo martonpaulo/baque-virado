@@ -498,7 +498,7 @@ export const FORRO_PE_DE_SERRA = {
   sceneDefaults: { tune: PHRASE, zabumba: 'base', fole: 'base' },
   scenes: SCENE_LIST,
   looks: SCENE_LOOKS,
-  backdrop: drawForroBackdrop,
+  background: { create: () => ({ draw: drawForroBackdrop }) },
   readout,
   waves: null,
   sounds: {

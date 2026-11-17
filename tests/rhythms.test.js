@@ -10,10 +10,10 @@ import { TWO_FOUR } from './support/rhythm-two-four.js';
 
 const BOTH = [MARACATU, TWO_FOUR];
 
-test('the site ships maracatu the coco and forró, and shows maracatu by default', () => {
+test('the site ships maracatu, the coco, forró and brega funk, and shows maracatu by default', () => {
   assert.deepEqual(
     RHYTHMS.map(rhythm => rhythm.id),
-    ['maracatu', 'coco-xamba', 'forro'],
+    ['maracatu', 'coco-xamba', 'forro', 'brega-funk'],
   );
   assert.equal(RHYTHM, MARACATU);
 });

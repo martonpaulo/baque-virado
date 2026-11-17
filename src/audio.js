@@ -9,7 +9,14 @@ import { hash } from './util.js';
 // plays: the rhythm's sound choices (src/rhythms/).
 export const SOUND_CHOICES = RHYTHM.sounds.choices;
 const FIXED_FILES = RHYTHM.sounds.fixedFiles;
-export const ALL_SOUND_FILES = [...SOUND_CHOICES.flatMap(choice => choice.options.flatMap(([option]) => choice.files(option))), ...FIXED_FILES];
+// Sounds the rhythm synthesizes in the page instead of fetching: name → render(sampleRate), which
+// returns the samples of one mono hit. They download nothing, so phones pay nothing for them.
+const SYNTH = RHYTHM.sounds.synth || {};
+const isSynth = name => Object.hasOwn(SYNTH, name);
+/** Every recorded file the page can fetch (the synthesized sounds are not files). */
+export const ALL_SOUND_FILES = [...SOUND_CHOICES.flatMap(choice => choice.options.flatMap(([option]) => choice.files(option))), ...FIXED_FILES].filter(
+  name => !isSynth(name),
+);
 export const DEFAULT_CHOICES = Object.fromEntries(SOUND_CHOICES.map(choice => [choice.id, choice.defaultOption]));
 
 // voice → [sample, gain, playback rate] for one hit, or null for a mark that stays silent
@@ -61,7 +68,9 @@ function masterChain(context) {
   return input;
 }
 
-// A melodic voice (VOICES[voice].pitched) keeps its tuning; every other hit drifts a little in pitch.
+// A pitched voice (a melody, a chord, a bass line) keeps its tuning: only its level varies per hit.
+const isPitched = voice => Boolean(VOICES[voice].pitched);
+
 function playSample(context, buffers, name, time, gain, rate, destination, variation, pitched = false) {
   const buffer = buffers[name];
   if (!buffer) return;
@@ -85,17 +94,7 @@ function scheduleStep(context, buffers, destination, step, time, choice, volume 
     const level = volumeOf(volume, voice);
     const sample = level > 0 && SAMPLE_FOR[voice](choice, hit.velocity * (scene.gain[voice] || 1) * level, hit.tone, variation);
     if (sample)
-      playSample(
-        context,
-        buffers,
-        sample[0],
-        time + (swing / STEPS_PER_BEAT) * BEAT_SECONDS,
-        sample[1],
-        sample[2],
-        destination,
-        variation,
-        VOICES[voice].pitched,
-      );
+      playSample(context, buffers, sample[0], time + (swing / STEPS_PER_BEAT) * BEAT_SECONDS, sample[1], sample[2], destination, variation, isPitched(voice));
   }
 }
 
@@ -105,8 +104,8 @@ export const filesFor = choice => [...SOUND_CHOICES.flatMap(c => c.files(choice[
 // The page fetches AAC at 96 kbps (#3); `tools/encode-sounds.mjs` makes each one from its WAV master.
 export const SOUND_EXTENSION = '.m4a';
 
-/** Fetches samples on demand and decodes them once per audio context. */
-export function createSampleBank(baseUrl = 'sounds/') {
+/** Fetches samples on demand and decodes them once per audio context; a synthesized sound is rendered instead. */
+export function createSampleBank(baseUrl = 'sounds/', synth = SYNTH) {
   const downloads = new Map(),
     decoded = new WeakMap();
   const MAX_ATTEMPTS = 3;
@@ -132,7 +131,7 @@ export function createSampleBank(baseUrl = 'sounds/') {
   return {
     /** Start downloading without decoding (no audio context needed yet). */
     prefetch: names => {
-      for (const name of names) download(name).catch(() => {});
+      for (const name of names) if (!Object.hasOwn(synth, name)) download(name).catch(() => {});
     },
     /** Decode `names` for `context`; resolves to that context's buffer map. */
     async load(context, names) {
@@ -142,6 +141,13 @@ export function createSampleBank(baseUrl = 'sounds/') {
         names
           .filter(name => !buffers[name])
           .map(async name => {
+            if (Object.hasOwn(synth, name)) {
+              const samples = synth[name](context.sampleRate),
+                buffer = context.createBuffer(1, samples.length, context.sampleRate);
+              buffer.copyToChannel(samples, 0);
+              buffers[name] = buffer;
+              return;
+            }
             buffers[name] = await context.decodeAudioData((await download(name)).slice(0));
           }),
       );
@@ -274,7 +280,7 @@ export function createPlayer(bank, choice, volume = {}) {
           const variation = hash((cycle * STEPS_PER_BAR + hit.step) * 8 + VOICE_SEED[voice]);
           const sample = SAMPLE_FOR[voice](next, hit.velocity * level, hit.tone, variation);
           const at = start + (cycle + (hit.step + swing) / STEPS_PER_BAR) * BAR_SECONDS;
-          if (sample) playSample(context, buffers, sample[0], at, sample[1], sample[2], bus, variation, VOICES[voice].pitched);
+          if (sample) playSample(context, buffers, sample[0], at, sample[1], sample[2], bus, variation, isPitched(voice));
         }
       const ringMs = (START_DELAY + PREVIEW_BARS * BAR_SECONDS) * MS_PER_SECOND + PREVIEW_RING_MS;
       awakeUntil = Math.max(awakeUntil, performance.now() + ringMs);
