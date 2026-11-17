@@ -53,8 +53,8 @@ why ([#24](https://github.com/martonpaulo/baque-virado/issues/24)).
 - **Corte and Final.** Corte: everyone on 1 and a bar of silence, then the band plays only the
   main hand's strokes together. Final: the band once more, one stroke for all with the guitar and
   the bass held, then only that stroke's echo, softer each time, then a bar of silence.
-- **No reference.** No song, recording or performer is named or used as a model (`docs/product.md`,
-  Limits).
+- **Reference.** The owner's reference and similar songs are in
+  [`references.md`](../research/references.md).
 
 ## Sound
 

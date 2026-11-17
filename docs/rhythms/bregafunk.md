@@ -136,8 +136,8 @@ pink `#ff2e88` of that note was dropped: the expansion decision says pink repeat
 ## Copy
 
 Brazilian Portuguese, with the producers' and the sources' terms: bumbo, lata, chimbais dobrados,
-grave, glissando, tamborzão, quebra, drop, passinho, fusas, naipe de metais. No song
-title, recording or performer is named.
+grave, glissando, tamborzão, quebra, drop, passinho, fusas, naipe de metais. The reference
+and similar songs are in [`references.md`](../research/references.md).
 
 ## Engine hooks this rhythm added
 
