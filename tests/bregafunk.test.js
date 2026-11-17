@@ -33,9 +33,9 @@ test('one tempo for the whole show, 170 BPM: one 16-sixteenth bar of 1.41 s per 
   assert.equal(BREGAFUNK.bpm, 170);
   assert.equal(meter.stepsPerBar, 16);
   assert.ok(Math.abs(meter.barSeconds - 1.41) < 0.01, `${meter.barSeconds} s per turn`);
-  assert.equal(show.TOTAL_BARS, 65);
+  assert.equal(show.TOTAL_BARS, 59);
   assert.ok(show.TOTAL_SECONDS >= 80 && show.TOTAL_SECONDS <= 130, `${show.TOTAL_SECONDS} s`);
-  assert.equal(show.SCENES.length, 12);
+  assert.equal(show.SCENES.length, 11);
   for (let bar = 0; bar < show.TOTAL_BARS; bar++) for (const h of show.hitsInBar(bar)) assert.equal(h.swing, 0, 'hard-quantized: no swing');
 });
 
@@ -54,7 +54,7 @@ test('the beat is sparse: a few hard hits with space between them, never a wall 
 });
 
 test('the bumbo on 1 and 9 and the lata on 7 and 13 group the bar as 3 + 3 + 2 eighths, the palma with the second bumbo', () => {
-  const lata = show.sceneById('lata');
+  const lata = show.sceneById('tresillo');
   assert.deepEqual(stepsOf(lata.start, 'lata'), BEAT.lata.steps);
   assert.deepEqual(stepsOf(lata.start, 'lata'), [6, 12]);
   assert.deepEqual(stepsOf(lata.start, 'bumbo'), [0, 8]);
@@ -63,23 +63,53 @@ test('the bumbo on 1 and 9 and the lata on 7 and 13 group the bar as 3 + 3 + 2 e
     tresillo.map((step, i) => ((tresillo[(i + 1) % tresillo.length] - step + 16) % 16) / 2),
     [3, 3, 2],
   );
-  assert.deepEqual(stepsOf(show.sceneById('palmas').start, 'palma'), [8]);
-  // the contrast scene drops the lata for the Rio atabaque line
+  assert.deepEqual(stepsOf(lata.start, 'palma'), [8]);
+  // the contrast scene drops the lata for the Rio atabaque line, two bars, then Recife comes back
   const rio = show.sceneById('tamborzao').start;
   assert.equal(stepsOf(rio, 'lata').length, 0);
   assert.deepEqual(stepsOf(rio, 'tamborzao'), TAMBORZAO.drum.steps);
+  assert.deepEqual(stepsOf(rio + 2, 'lata'), BEAT.lata.steps);
+  assert.equal(stepsOf(rio + 2, 'tamborzao').length, 0);
   // the passinho doubles the bumbo
   assert.deepEqual(stepsOf(show.sceneById('passinho').start, 'bumbo'), PASSINHO.bumbo.steps);
 });
 
-test('each part enters on its own: a scene draws and plays only its voices', () => {
-  assert.deepEqual([...new Set(show.hitsInBar(0).map(h => h.voice))], ['flauta']);
-  assert.deepEqual([...new Set(show.hitsInBar(show.sceneById('bumbo').start).map(h => h.voice))], ['bumbo']);
-  const entering = ['tema', 'bumbo', 'lata', 'palmas', 'grave', 'teclado', 'batida'].map(id => show.barTimeline(show.sceneById(id).start).playing.length);
-  assert.deepEqual(entering, [1, 1, 2, 4, 5, 6, 7], 'the parts add up, scene by scene');
+// Owner direction (2026-11-17): the show plays like a track, never one instrument entering at a time;
+// a scene highlights one characteristic by thinning the others for a few bars, then the beat returns.
+test('the show plays like a track: the beat drops in the third bar and the texture is full most of the time', () => {
+  const playing = bar => show.barTimeline(bar).playing;
+  assert.deepEqual(playing(0), ['teclado', 'flauta'], 'the flute opens over the stab');
+  assert.equal(playing(2).length, 7, 'the full beat is in by the third bar');
+  let full = 0;
   for (let bar = 0; bar < show.TOTAL_BARS; bar++) {
-    const { voices, playing } = show.barTimeline(bar);
-    for (const voice of Object.keys(voices)) if (!playing.includes(voice)) assert.equal(voices[voice].length, 0, `${voice} in bar ${bar}`);
+    assert.ok(playing(bar).length >= 2, `bar ${bar} leaves one instrument alone`);
+    if (playing(bar).length >= 7) full++;
+    const { voices } = show.barTimeline(bar);
+    for (const voice of Object.keys(voices)) if (!playing(bar).includes(voice)) assert.equal(voices[voice].length, 0, `${voice} in bar ${bar}`);
+  }
+  assert.ok(full / show.TOTAL_BARS >= 0.6, `${full} of ${show.TOTAL_BARS} bars are full`);
+  let thin = 0;
+  for (let bar = 0; bar < show.TOTAL_BARS; bar++) {
+    thin = playing(bar).length < 7 ? thin + 1 : 0;
+    assert.ok(thin <= 4, `more than four thin bars in a row at bar ${bar}`);
+  }
+});
+
+test('each highlight thins to its featured parts for two bars, mixes one louder, then the full beat returns', () => {
+  const featured = {
+    tresillo: ['bumbo', 'lata', 'palma'],
+    grave: ['bumbo', 'chimbal', 'grave'],
+    teclado: ['bumbo', 'lata', 'teclado'],
+    flauta: ['chimbal', 'grave', 'teclado', 'flauta'],
+  };
+  for (const [id, voices] of Object.entries(featured)) {
+    const scene = show.sceneById(id);
+    assert.deepEqual(show.barTimeline(scene.start).playing, voices, id);
+    assert.deepEqual(show.barTimeline(scene.start + 1).playing, voices, id);
+    for (let i = 2; i < scene.bars; i++) assert.equal(show.barTimeline(scene.start + i).playing.length, 7, `${id}, bar ${i}: the beat is back`);
+    for (const voice of scene.lanes) assert.ok(voices.includes(voice), `${id} shows ${voice}`);
+    const [louder] = Object.keys(scene.gain);
+    assert.ok(voices.includes(louder) && scene.gain[louder] > 1 && scene.gain[louder] <= 1.6, `${id} mixes ${louder} louder`);
   }
 });
 
@@ -87,6 +117,7 @@ test('the hook is an eight-bar flute tune: stated alone, played whole, varied on
   const bars = fluteBars();
   assert.equal(HOOK.length, 8);
   const tema = show.sceneById('tema');
+  assert.equal(tema.bars, 2, 'a short intro');
   for (let i = 0; i < tema.bars; i++) assert.deepEqual(bars[tema.start + i].notes, asHits(HOOK[i]), `tema, bar ${i}`);
   const batida = show.sceneById('batida');
   for (let i = 0; i < HOOK.length; i++) assert.deepEqual(bars[batida.start + i].notes, asHits(HOOK[i]), `batida, bar ${i}`);
@@ -119,7 +150,7 @@ test('the hook is written for a flute: high, monophonic, with repeated notes, sl
 });
 
 test('the grave follows the bumbo, on the roots of an eight-bar harmony, and slides into the next bar', () => {
-  const grave = show.sceneById('grave');
+  const grave = show.sceneById('batida');
   const notesOf = i => show.hitsInBar(grave.start + (i % grave.bars)).filter(h => h.voice === 'grave');
   const roots = [];
   for (let i = 0; i < grave.bars; i++) {

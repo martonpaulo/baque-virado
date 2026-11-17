@@ -284,12 +284,12 @@ const hornsBar = barInScene => HORNS_AT[barInScene % HORNS_AT.length].map(([step
 const hatsBar = barInScene => HATS[isTurn(barInScene) ? 'turn' : barInScene % 2 ? 'open' : 'plain'].map(([step, velocity, tone]) => hit(step, velocity, tone));
 
 // Bar modes: normal, break (the quebra's last bar: a stutter, a roll, then one silent beat), cut
-// (everyone on 1, then silence: the end). `scene.pattern` picks the beat: brega (the basic one),
-// passinho or tamborzao.
+// (everyone on 1, then silence: the end). `scene.pattern` picks the beat: brega (the basic one) or
+// passinho; a scene's first `rioBars` bars play the Rio tamborzão.
 export function barHits(scene, barInScene) {
   const hits = allHits(scene, barInScene),
     playing = new Set(scene.voices(barInScene));
-  // a voice that has not entered yet is not on the wheel: each entry stands out on its own
+  // a voice a scene leaves out is not on the wheel: the featured parts stand out
   return Object.fromEntries(VOICE_ORDER.map(voice => [voice, playing.has(voice) ? hits[voice] : []]));
 }
 function cutBar() {
@@ -321,7 +321,7 @@ function allHits(scene, barInScene) {
   const mode = scene.mode(barInScene);
   if (mode === 'cut') return cutBar();
   if (mode === 'break') return breakBar();
-  if (scene.pattern === 'tamborzao')
+  if (barInScene < (scene.rioBars ?? 0))
     return {
       ...silentBar(),
       bumbo: at(TAMBORZAO.bumbo),
@@ -346,24 +346,26 @@ function allHits(scene, barInScene) {
 }
 
 // ---------- the show script, one tempo throughout ----------
-// Parts enter one at a time, then play together; the drums drop out in the quebra and come back in
-// the drop. A scene's mode reads its last bar from its own length.
+// The show plays like a track: the flute opens, the beat drops in the third bar, and the texture is
+// full most of the time. Each scene highlights one characteristic by the means a producer uses: the
+// other parts drop out for `THIN_BARS` bars, the featured part is mixed louder (`gain`), then the full
+// beat returns. A scene's mode reads its last bar from its own length.
 const always = value => () => value;
-const DRUMS = ['bumbo', 'lata', 'palma', 'chimbal'];
-const BEAT_VOICES = [...DRUMS, 'grave'];
-const FULL = [...BEAT_VOICES, 'teclado', 'flauta'];
+const FULL = ['bumbo', 'lata', 'palma', 'chimbal', 'grave', 'teclado', 'flauta'];
+const THIN_BARS = 2;
+const thinThenFull = thin => bar => (bar < THIN_BARS ? thin : FULL);
 const lastBarIs = (bars, mode) => bar => (bar === bars - 1 ? mode : 'normal');
 const QUEBRA_BARS = 4;
 const FINAL_BARS = 5;
 const SCENE_LIST = [
-  { id: 'tema', bars: 4, voices: always(['flauta']), lanes: ['flauta'] },
-  { id: 'bumbo', bars: 4, voices: always(['bumbo']), lanes: ['bumbo'] },
-  { id: 'lata', bars: 4, voices: always(['bumbo', 'lata']), lanes: ['bumbo', 'lata'] },
-  { id: 'palmas', bars: 4, voices: always(['bumbo', 'lata', 'chimbal', 'palma']), lanes: ['bumbo', 'lata', 'palma', 'chimbal'] },
-  { id: 'grave', bars: 8, voices: always(BEAT_VOICES), lanes: ['bumbo', 'grave', 'lata', 'palma'] },
-  { id: 'teclado', bars: 4, voices: always([...BEAT_VOICES, 'teclado']), lanes: ['bumbo', 'grave', 'lata', 'teclado'] },
-  { id: 'batida', bars: 8, voices: always(FULL), lanes: ['bumbo', 'grave', 'lata', 'teclado', 'flauta'] },
-  { id: 'tamborzao', bars: 4, pattern: 'tamborzao', voices: always(['bumbo', 'tamborzao']), lanes: ['bumbo', 'tamborzao', 'lata'] },
+  { id: 'tema', bars: 2, voices: always(['teclado', 'flauta']), lanes: ['flauta', 'teclado'] },
+  { id: 'batida', bars: 8, voices: always(FULL), openHat: true, lanes: ['bumbo', 'grave', 'lata', 'teclado', 'flauta'] },
+  { id: 'tresillo', bars: 4, voices: thinThenFull(['bumbo', 'lata', 'palma']), gain: { lata: 1.15 }, lanes: ['bumbo', 'lata', 'palma'] },
+  { id: 'grave', bars: 4, voices: thinThenFull(['bumbo', 'chimbal', 'grave']), gain: { grave: 1.3 }, lanes: ['bumbo', 'grave'] },
+  { id: 'teclado', bars: 4, voices: thinThenFull(['bumbo', 'lata', 'teclado']), gain: { teclado: 1.6 }, lanes: ['lata', 'teclado', 'bumbo'] },
+  { id: 'flauta', bars: 8, voices: thinThenFull(['chimbal', 'grave', 'teclado', 'flauta']), gain: { flauta: 1.25 }, lanes: ['flauta', 'teclado', 'grave'] },
+  // two bars of Rio, then Recife again: the contrast is heard side by side
+  { id: 'tamborzao', bars: 4, rioBars: 2, voices: bar => (bar < 2 ? ['bumbo', 'tamborzao'] : FULL), lanes: ['bumbo', 'tamborzao', 'lata'] },
   {
     id: 'quebra',
     bars: QUEBRA_BARS,
@@ -581,22 +583,23 @@ const READ = {
   keyValue: 'lá frígio',
   hook: 'tema',
   hookValue: `${HOOK.length} compassos, na flauta`,
-  enters: 'entra',
-  entersMuted: 'sem som',
-  heads: 'no tempo',
   grouping: 'agrupamento',
   groupingValue: GROUPING.join(' + '),
   groupingUnit: 'colcheias',
   withKick: 'com o bumbo',
-  few: 'chimbais',
-  fewValue: `${HATS.plain.length} por compasso, secos`,
   notes: 'notas',
   notesValue: [...new Set(PROGRESSION)].map(chord => noteName(ROOTS[chord])).join(' · '),
   glide: 'glissando',
   glideValue: 'para a nota do compasso seguinte',
+  slideEvery: 'desliza',
+  slideEveryValue: 'a cada 2 compassos',
   withLata: 'com a lata',
   stabNotes: 'acorde',
   stabNotesValue: 'tônica, quinta e oitava',
+  repeated: 'notas repetidas',
+  repeatedValue: 'em semicolcheias',
+  slides: 'glissando',
+  slidesValue: 'nas notas longas',
   low: 'grave',
   mid: 'médio',
   high: 'agudo',
@@ -613,12 +616,11 @@ const READ = {
 };
 const SCENE_COPY = {
   tema: { chip: 'Tema', eyebrow: 'bregafunk', title: 'Tema' },
-  bumbo: { chip: 'Bumbo', eyebrow: 'no 1 e no 3', title: 'Bumbo' },
-  lata: { chip: 'Lata', eyebrow: READ.groupingValue, title: 'Lata' },
-  palmas: { chip: 'Palma', eyebrow: 'palma e chimbal', title: 'Palma' },
-  grave: { chip: 'Grave', eyebrow: 'grave 808', title: 'Grave' },
+  batida: { chip: 'Batida', eyebrow: `${FULL.length} instrumentos`, title: 'Batida' },
+  tresillo: { chip: READ.groupingValue, eyebrow: 'bumbo e lata', title: READ.groupingValue },
+  grave: { chip: 'Grave', eyebrow: 'segue o bumbo', title: 'Grave' },
   teclado: { chip: 'Teclado', eyebrow: READ.withLata, title: 'Teclado' },
-  batida: { chip: 'Batida', eyebrow: `${FULL.length} instrumentos`, title: 'Batida completa' },
+  flauta: { chip: 'Flauta', eyebrow: `${HOOK.length} compassos`, title: 'Flauta' },
   tamborzao: { chip: 'Tamborzão', eyebrow: 'funk carioca', title: 'Tamborzão' },
   quebra: { chip: 'Quebra', eyebrow: `1 ${READ.silentBeat}`, title: 'Quebra' },
   drop: { chip: 'Pancadão', eyebrow: 'com metais', title: 'Pancadão' },
@@ -656,7 +658,6 @@ const sequence = (steps, color) =>
 const notationRow = (text, steps, voice) =>
   `${label(text, VOICES[voice].color, voice)}${sequence(steps, VOICES[voice].color)}<span class="n">${steps.length}</span>`;
 const notation = (...rows) => `<div class="notation">${rows.join('')}</div>`;
-const entry = `<div data-entry></div>`;
 const registerRow = (band, text) =>
   row(
     label(text),
@@ -670,14 +671,17 @@ const LAYOUTS = {
     row(label(T.cycle), T.cycleValue(BAR_SECONDS.toFixed(2).replace('.', ','))) +
     row(label(T.key), T.keyValue) +
     row(label(T.hook), T.hookValue, 'flauta'),
-  bumbo: () => entry + row(label(T.heads), countFromOne(BEAT.bumbo.steps), 'bumbo'),
-  lata: () =>
+  batida: () => registerRow('low', T.low) + registerRow('mid', T.mid) + registerRow('high', T.high),
+  tresillo: () =>
     notation(notationRow(COPY.voices.bumbo, BEAT.bumbo.steps, 'bumbo'), notationRow(COPY.voices.lata, BEAT.lata.steps, 'lata')) +
     row(label(T.grouping), `${T.groupingValue} ${T.groupingUnit}`),
-  palmas: () => entry + row(label(T.withKick), countFromOne(BEAT.palma.steps), 'palma') + row(label(T.few), T.fewValue, 'chimbal'),
-  grave: () => entry + row(label(T.notes), T.notesValue, 'grave') + row(label(T.glide), T.glideValue, 'grave'),
-  teclado: () => entry + row(label(T.withLata), countFromOne(STAB_AT.map(([step]) => step)), 'teclado') + row(label(T.stabNotes), T.stabNotesValue, 'teclado'),
-  batida: () => registerRow('low', T.low) + registerRow('mid', T.mid) + registerRow('high', T.high),
+  grave: () =>
+    row(label(T.withKick), countFromOne(BEAT.bumbo.steps), 'grave') +
+    row(label(T.notes), T.notesValue, 'grave') +
+    row(label(T.slideEvery), T.slideEveryValue, 'grave') +
+    row(label(T.glide), T.glideValue, 'grave'),
+  teclado: () => row(label(T.withLata), countFromOne(STAB_AT.map(([step]) => step)), 'teclado') + row(label(T.stabNotes), T.stabNotesValue, 'teclado'),
+  flauta: () => row(label(T.hook), T.hookValue, 'flauta') + row(label(T.repeated), T.repeatedValue, 'flauta') + row(label(T.slides), T.slidesValue, 'flauta'),
   tamborzao: () =>
     notation(notationRow(T.rio, TAMBORZAO.drum.steps, 'tamborzao'), notationRow(T.recife, TRESILLO, 'lata')) +
     row(label(T.rio), RIO_GROUPING.join(' ')) +
@@ -695,7 +699,7 @@ const LAYOUTS = {
     ),
   final: show => stats('', stat(DRUMMING.size, T.voices, PALETTE.lime), stat(show.totalBars, T.bars, PALETTE.ivory), stat(BPM, 'BPM', PALETTE.gold)),
 };
-const FOCUS = { bumbo: 'bumbo', lata: 'lata', palmas: 'palma', grave: 'grave', teclado: 'teclado' };
+const FOCUS = { tresillo: 'lata', grave: 'grave', teclado: 'teclado', flauta: 'flauta' };
 const readout = (scene, show) => ({ markup: (LAYOUTS[scene.id] || (() => ''))(show), score: null, focus: FOCUS[scene.id] || '' });
 
 export const BREGAFUNK = {
