@@ -40,17 +40,37 @@ main reference.
   («Tempo is about 90 to 105 BPM»), and the nearest to the main reference, which a beat tracker
   reads at 107 («Meu Maracatu Pesa uma Tonelada» also reads near 107). It was 100. 4/4 on a
   16-step wheel, one bar per turn: 2.29 s per turn. 52 bars, 1:59.
-- **Scenes.** Twelve: Introdução (sampler, one stroke in the echo, a guitar's feedback), Alfaias
-  (in unison), Mãos (main hand and answer), Caixa, Coco (the ganzá; the drums are complete), Baixo
-  (its riff), Guitarra (the power-chord riff), Dub (the band stops; bass, echo and the clean
-  guitar), Retorno (the layers come back one per bar), Corte (a stop and a stop-time bar), Banda
-  completa (12 bars: the riff, a second part, the riff again), Final (the echo until silence).
+- **One track, not a roll call.** The owner's direction of 2026-11-17: the band plays from the
+  start, as a real track of the genre does, with the full texture most of the time, and each scene
+  brings one characteristic of the rhythm forward, not one instrument entering alone. The show does
+  it the way a band does: the other parts drop back (a scene's `gain`: 1.2 for its subject, 0.8
+  for the rest), thin out or stop for a few bars, then the full band returns. After the two-bar
+  introduction no bar has fewer than three instruments, and 40 of the 52 bars have six voices or
+  more (`tests/manguebeat.test.js`).
+- **Scenes.** Thirteen:
+
+  | Scene          | Bars | What it brings forward                 | How the band does it                                                 |
+  | :------------- | :--- | :------------------------------------- | :------------------------------------------------------------------- |
+  | Introdução     | 2    | the sampler and the echo               | the record's noise, one stroke thrown, a guitar's feedback           |
+  | Célula         | 4    | the cell, 3 + 3 + 2 twice a bar        | the whole band in; both alfaia hands hit it together, in front       |
+  | Mãos           | 4    | the main hand and the answer's pick-up | guitar and bass hold one chord a bar; caixa and ganzá drop back      |
+  | Caixa          | 4    | syncopated accents and ghost notes     | the riff is back; the caixa in front, a throw closes the phrase      |
+  | Baixo          | 4    | how the bass locks with the alfaia     | the guitars stop; the bass riff over the drums                       |
+  | Riff           | 4    | the guitar on the cell's accents       | the whole band, the guitar in front                                  |
+  | Dub            | 4    | the drop and the echo                  | the band stops: bass, one stroke a bar, throws, the clean guitar     |
+  | Retorno        | 4    | the way back from the drop             | the layers return one per bar                                        |
+  | Conversa       | 4    | call and response                      | the riff asks in the first half of the bar, the clean guitar answers |
+  | Corte          | 2    | the break                              | a stop into the echo, then a stop-time bar                           |
+  | Parte B        | 4    | the second part                        | the riffs move to the fourth and climb back                          |
+  | Banda completa | 8    | everything                             | the riff twice, the clean guitar answering                           |
+  | Final          | 4    | the dub ending                         | one stroke for all, its echo, silence                                |
+
 - **The cell.** The drums of the main reference were separated and folded on the sixteenth grid:
   the low, middle and high bands are all strong on sixteenths 1, 4 and 7 of each half bar, with a
   pick-up on 8, and weak on beat 2. That is the coco's cell, 3 + 3 + 2, twice a bar, played by the
   whole drum section, with no backbeat. The show's first version had 3 + 3 + 4 + 3 + 3 for the
   alfaia and a backbeat on beats 2 and 4: the reference disagrees, and the reference wins.
-- **Alfaias.** The main hand plays the cell (sixteenths 1, 4, 7, 9, 12, 15), heavy. In Alfaias
+- **Alfaias.** The main hand plays the cell (sixteenths 1, 4, 7, 9, 12, 15), heavy. In Célula
   the answer hand plays it too, in unison; from Mãos on it plays the pick-ups before beats 3 and 1
   (sixteenths 8 and 16) and soft strokes between, rolls into every second bar, and fills at the
   end of each four-bar phrase.
@@ -69,7 +89,7 @@ main reference.
   Every chord is one the recorded takes can vary: see Sound.
 - **Second guitar.** Clean, in the echo: short answers in E minor pentatonic in the second half
   of the bar, where the riff rests, with one bar of silence in four for the echo to ring. It
-  enters in the Dub, where it leads, and answers through the whole band.
+  leads in the Dub and answers from Conversa to the end.
 - **Dub.** The band stops. One stroke of the alfaia a bar, thrown into the echo, whose repeats play
   the cell (each is three sixteenths after the one before); a bass line with long notes and long
   rests; two caixa throws; the clean guitar's phrases. The bass drops out in the last bar, where
@@ -132,37 +152,41 @@ and a small room (`sala-pequena`). Sources are in [`CREDITS.md`](../../CREDITS.m
 ## Measured against the references
 
 Measured with the sound lab of 2026-11-17 (Demucs stems, CLAP embeddings, long-term spectrum), on
-the full band (bars 37 to 48) and on the whole show's loudest windows. «References» is the mean
-of the four recordings' instrumental stems; the CLAP row gives each recording's similarity to the
-centre of the four.
+the full band (bars 37 to 48: Parte B and Banda completa) and on the whole show's loudest windows.
+«References» is the mean of the four recordings' instrumental stems; the CLAP row gives each
+recording's similarity to the centre of the four. «Before» is the first version, at 100 BPM, with
+the parts entering one at a time.
 
-| Measure                                    | Before (100 BPM)     | Full band now           | Whole show now       | References             |
+| Measure                                    | Before               | Full band now           | Whole show now       | References             |
 | :----------------------------------------- | :------------------- | :---------------------- | :------------------- | :--------------------- |
-| CLAP similarity to the references' centre  | 0.74 to 0.78         | 0.83                    | 0.84                 | 0.84, 0.94, 0.93, 0.91 |
+| CLAP similarity to the references' centre  | 0.74 to 0.78         | 0.86                    | 0.85                 | 0.84, 0.94, 0.93, 0.91 |
 | «Real band or MIDI file» probe             | 0.77 to 0.93         | 1.00                    | 1.00                 | 0.96 to 1.00           |
-| Drums, bass, other (Demucs, dB of the sum) | −5.3, −2.0, −11.1    | −1.6, −8.0, −8.5        | not separated        | −2.2, −7.6, −9.5       |
-| Side against mid (stereo width), dB        | −20.5                | −11.1                   | −11.4                | −9.2 (main one: −10.8) |
-| Onsets a second                            | 4.7                  | 6.9                     | 6.8                  | 6.6                    |
-| Crest factor, dB                           | 11.0                 | 11.3                    | 11.4                 | 12.3                   |
-| Spectrum, worst band from 60 Hz to 8 kHz   | −7.2 dB (4 to 8 kHz) | +2.5 dB (250 to 500 Hz) | −2.1 dB (2 to 4 kHz) | 0                      |
-| Spectrum, 20 to 60 Hz                      | −7.3 dB              | −0.3 dB                 | −0.3 dB              | 0                      |
+| Drums, bass, other (Demucs, dB of the sum) | −5.3, −2.0, −11.1    | −1.6, −7.9, −8.3        | not separated        | −2.2, −7.6, −9.5       |
+| Side against mid (stereo width), dB        | −20.5                | −11.0                   | −12.1                | −9.2 (main one: −10.8) |
+| Onsets a second                            | 4.7                  | 6.3                     | 6.6                  | 6.6                    |
+| Crest factor, dB                           | 11.0                 | 11.8                    | 11.3                 | 12.3                   |
+| Spectrum, worst band from 60 Hz to 8 kHz   | −7.2 dB (4 to 8 kHz) | +2.8 dB (250 to 500 Hz) | −3.0 dB (2 to 4 kHz) | 0                      |
+| Spectrum, 20 to 60 Hz                      | −7.3 dB              | −0.1 dB                 | −0.7 dB              | 0                      |
 
 - The drum grid of the full band, folded as the reference's was (low band, eight sixteenths of a
-  half bar): 0.89, 0.49, 0.25, 1.00, 0.32, 0.65, 0.84, 0.40; the main reference: 1.00, 0.37, 0.23,
+  half bar): 0.93, 0.45, 0.26, 1.00, 0.32, 0.72, 0.86, 0.43; the main reference: 1.00, 0.37, 0.23,
   0.74, 0.23, 0.36, 0.79, 0.51. Both are the 3 + 3 + 2 cell.
 - Solo renders, tagged without training (CLAP): the guitars read as «a distorted electric guitar»
   (0.76) or «a clean electric guitar with delay» (0.18), not «a synthesizer» or «a MIDI keyboard»
   (0.01); the bass as «an electric bass guitar» (0.96); the alfaias as «large bass drums played
   with sticks» (0.99); the caixa as «a marching snare drum with ghost notes» (0.98).
-- The similarity goal was 0.85; the full band reaches 0.83 to 0.84, the level of the main reference
-  itself against the four (0.84). The second part of the band scored 0.73 without the clean guitar
-  and 0.85 with it, which is why that guitar now answers through the whole band.
-- Window by window (10 s), the show climbs from 0.60 to 0.71 (drums alone and with the bass) to
-  0.79 to 0.86 once the guitars are in, and falls to 0.63 in the dub's emptiest bars.
+- The similarity goal was 0.85. The band's second part scored 0.73 without the clean guitar and
+  0.85 with it, which is why that guitar answers from Conversa to the end.
+- Window by window (10 s), the whole show now stays between 0.77 and 0.86 while the band plays,
+  and falls to 0.72 only in the dub's drop. With the parts entering one at a time the first 40
+  seconds scored 0.58 to 0.73.
+- The whole show is a little darker than the full band from 500 Hz to 4 kHz (−2 to −3 dB), because
+  the scenes pull the guitars back or out.
+- The audio-quality model (Audiobox aesthetics, production quality) gives the full band 6.6 and
+  the references 7.0 to 8.0; the first version scored 7.3 to 7.4. The drive and the record's noise
+  are the likely cost; it needs the owner's ear.
 
-What the numbers do not show: the scenes before the band (drums alone, then drums and bass) are
-far from any full-band recording, as a teaching show must be. No number here replaces the owner's
-ear.
+What the numbers do not show: whether it grooves. No number here replaces the owner's ear.
 
 ## Visuals
 
@@ -188,20 +212,21 @@ ear.
 
 ## Widgets per scene
 
-| Scene          | Widget                                                   | Why                                   |
-| :------------- | :------------------------------------------------------- | :------------------------------------ |
-| Introdução     | tempo, metre, bar length, the echo's length, instruments | one tempo; the dub delay              |
-| Alfaias        | one row of marks, the cell, the strokes counted from 1   | both hands in unison on 3 + 3 + 2     |
-| Mãos           | the two hands' rows                                      | the answer plays the pick-ups         |
-| Caixa          | the main hand's row over the caixa's, accents and ghosts | the caixa accents the alfaia's cell   |
-| Coco           | the ganzá's row, the cell                                | the coco inside the groove            |
-| Baixo          | a roll of the bass riff, its notes                       | a riff with rests                     |
-| Guitarra       | a roll of the riff over the bass, key and chords         | the riff and the bass under it        |
-| Dub            | the main hand's row with the echo's repeats, the space   | the echo plays the cell; the band out |
-| Retorno        | the entering instrument                                  | the layers return one per bar         |
-| Corte          | stop bars and strokes together                           | the break                             |
-| Banda completa | a roll of the riff over the bass for the 12 bars         | the parts: A, B and A                 |
-| Final          | scenes, instruments, bars                                | the totals                            |
+| Scene          | Widget                                                    | Why                                   |
+| :------------- | :-------------------------------------------------------- | :------------------------------------ |
+| Introdução     | tempo, metre, bar length, the echo's length, instruments  | one tempo; the dub delay              |
+| Célula         | one row of marks, the cell, the strokes counted from 1    | both hands in unison on 3 + 3 + 2     |
+| Mãos           | the two hands' rows, the held chords                      | the answer plays the pick-ups         |
+| Caixa          | the main hand's row over the caixa's, accents and ghosts  | the caixa accents the alfaia's cell   |
+| Baixo          | a roll of the bass riff, where it meets the alfaia, notes | together on beat 1, then rests        |
+| Riff           | a roll of the riff over the bass, key and chords          | the riff and the bass under it        |
+| Dub            | the main hand's row with the echo's repeats, the space    | the echo plays the cell; the band out |
+| Retorno        | the entering instrument                                   | the layers return one per bar         |
+| Conversa       | a roll of the two guitars, who asks and who answers       | call and response inside the bar      |
+| Corte          | stop bars and strokes together                            | the break                             |
+| Parte B        | a roll of the second part over the bass, its chords       | the variation                         |
+| Banda completa | a roll of the riff over the bass for the 8 bars           | the whole band                        |
+| Final          | scenes, instruments, bars                                 | the totals                            |
 
 ## Open points
 
