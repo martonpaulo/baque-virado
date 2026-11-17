@@ -539,6 +539,7 @@ const READ = {
 };
 const COPY = {
   name: 'manguebeat',
+  description: 'Manguebeat do Recife: alfaias em uníssono, caixa, baixo, guitarra distorcida, ganzá e eco, um de cada vez e depois juntos.', // the page's search and preview description
   feminineInstruments: ['alfaia', 'caixa', 'guitarra'],
   scenes: {
     introducao: { chip: 'Introdução', eyebrow: 'sampler e eco', title: 'Manguebeat' },

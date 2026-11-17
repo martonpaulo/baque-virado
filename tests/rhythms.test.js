@@ -11,10 +11,10 @@ import { TWO_FOUR } from './support/rhythm-two-four.js';
 
 const BOTH = [MARACATU, TWO_FOUR];
 
-test('the site ships maracatu, the coco, frevo, forró and bregafunk, and shows maracatu by default', () => {
+test('the site ships maracatu, the coco, frevo, forró, manguebeat and bregafunk, and shows maracatu by default', () => {
   assert.deepEqual(
     RHYTHMS.map(rhythm => rhythm.id),
-    ['maracatu', 'coco', 'frevo', 'forro', 'bregafunk'],
+    ['maracatu', 'coco', 'frevo', 'forro', 'manguebeat', 'bregafunk'],
   );
   assert.equal(RHYTHM, MARACATU);
 });
@@ -32,13 +32,13 @@ test('a path /<id> picks a rhythm, and wins over ?ritmo=', () => {
   assert.equal(rhythmFor('?ritmo=maracatu', RHYTHMS, '/forro'), FORRO_PE_DE_SERRA);
   assert.equal(rhythmFor('', RHYTHMS, '/forro.html'), FORRO_PE_DE_SERRA);
   assert.equal(rhythmFor('', RHYTHMS, '/frevo'), FREVO);
-  assert.equal(rhythmFor('', RHYTHMS, '/manguebeat'), MARACATU); // being prepared: its page has no show
+  assert.equal(rhythmFor('', RHYTHMS, '/brega'), MARACATU); // being prepared: its page has no show
   assert.equal(rhythmFor('', RHYTHMS, '/'), MARACATU);
 });
 
 test('seven paths, in the order the owner set; the ones with no package yet are being prepared', () => {
   assert.deepEqual(ROUTES, ['maracatu', 'coco', 'frevo', 'forro', 'manguebeat', 'brega', 'bregafunk']);
-  assert.deepEqual(preparingIds(), ['manguebeat', 'brega']);
+  assert.deepEqual(preparingIds(), ['brega']);
 });
 
 test('?ritmo=<id> of a route redirects to its path and keeps the rest of the query', () => {

@@ -7,10 +7,11 @@ import { BREGAFUNK } from './bregafunk.js';
 import { COCO_XAMBA } from './coco-xamba.js';
 import { FORRO_PE_DE_SERRA } from './forro.js';
 import { FREVO } from './frevo.js';
+import { MANGUEBEAT } from './manguebeat.js';
 import { MARACATU } from './maracatu.js';
 import { PREPARING } from './preparing.js';
 
-export const RHYTHMS = [MARACATU, COCO_XAMBA, FREVO, FORRO_PE_DE_SERRA, BREGAFUNK];
+export const RHYTHMS = [MARACATU, COCO_XAMBA, FREVO, FORRO_PE_DE_SERRA, MANGUEBEAT, BREGAFUNK];
 export const RHYTHM_PARAMETER = 'ritmo';
 /** Every public path, in the selector's order: shipped rhythms and rhythms being prepared. */
 export const ROUTES = ['maracatu', 'coco', 'frevo', 'forro', 'manguebeat', 'brega', 'bregafunk'];

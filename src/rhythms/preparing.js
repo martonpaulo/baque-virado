@@ -3,7 +3,6 @@
 
 /** Each rhythm being prepared: its selector chip and the name its page title shows. */
 export const PREPARING = {
-  manguebeat: { selector: 'manguebeat', name: 'Manguebeat', description: 'Manguebeat: alfaias, guitarra distorcida e baixo, o show está sendo preparado.' },
   brega: { selector: 'brega', name: 'Brega', description: 'Brega do Recife: teclado, guitarra e bateria, o show está sendo preparado.' },
 };
 
