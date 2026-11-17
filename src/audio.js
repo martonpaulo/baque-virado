@@ -3,6 +3,7 @@
 import { BAR_SECONDS, BEAT_SECONDS, STEPS_PER_BAR, STEPS_PER_BEAT, VOICE_ORDER, VOICES } from './music.js';
 import { RHYTHM } from './rhythms/index.js';
 import { barTimeline, hitsInBar, sceneById, TOTAL_BARS } from './show.js';
+import { createStudioMix, planStudio } from './studio.js';
 import { hash } from './util.js';
 
 // Sounds the viewer can swap on desktop, the samples that never change, and which sample each hit
@@ -83,8 +84,33 @@ function playSample(context, buffers, name, time, gain, rate, destination, varia
   source.start(Math.max(time, context.currentTime));
 }
 
+// A rhythm with a studio (src/studio.js) plays recorded multi-sample instruments with a human feel
+// through its own mix bus; the plan for one set of choices is made once and reused.
+const STUDIO = RHYTHM.sounds.studio || null;
+const SHOW = { barTimeline, hitsInBar, TOTAL_BARS };
+const plans = new Map();
+const studioPlan = choice => {
+  const key = JSON.stringify(choice);
+  if (!plans.has(key)) plans.set(key, planStudio(RHYTHM, SHOW, choice));
+  return plans.get(key);
+};
+const mixes = new WeakMap(); // destination → its studio mix
+const mixFor = (context, buffers, destination) => {
+  if (!mixes.has(destination)) mixes.set(destination, createStudioMix(context, destination, buffers, STUDIO));
+  return mixes.get(destination);
+};
+/** Play the planned studio events of `step` at `time`, only those of `voices` when given. */
+function scheduleStudio(context, buffers, destination, step, time, choice, volume, voices = null) {
+  const mix = mixFor(context, buffers, destination);
+  for (const event of studioPlan(choice).get(step) || []) {
+    const level = volumeOf(volume, event.voice);
+    if (level > 0 && (!voices || voices.includes(event.voice))) mix.play(event, time + event.offset, level);
+  }
+}
+
 /** Schedule every hit of one sixteenth of the show (`step` counts from the start) at `time`. */
 function scheduleStep(context, buffers, destination, step, time, choice, volume = {}) {
+  if (STUDIO) return scheduleStudio(context, buffers, destination, step, time, choice, volume);
   const bar = Math.floor(step / STEPS_PER_BAR),
     sixteenth = step % STEPS_PER_BAR,
     { scene } = barTimeline(bar);
@@ -272,16 +298,29 @@ export function createPlayer(bank, choice, volume = {}) {
       bus.connect(master);
       previewBus = bus;
       const start = context.currentTime + START_DELAY;
-      for (let cycle = 0; cycle < PREVIEW_BARS; cycle++)
-        for (const { voice, hit, swing } of hitsInBar(PREVIEW_BAR)) {
-          const level = volumeOf(volume, voice);
-          // a part cycle (1.25, 1.5) stops where its fraction of the bar ends
-          if (!voices.includes(voice) || level === 0 || cycle * STEPS_PER_BAR + hit.step >= PREVIEW_BARS * STEPS_PER_BAR) continue;
-          const variation = hash((cycle * STEPS_PER_BAR + hit.step) * 8 + VOICE_SEED[voice]);
-          const sample = SAMPLE_FOR[voice](next, hit.velocity * level, hit.tone, variation);
-          const at = start + (cycle + (hit.step + swing) / STEPS_PER_BAR) * BAR_SECONDS;
-          if (sample) playSample(context, buffers, sample[0], at, sample[1], sample[2], bus, variation, isPitched(voice));
-        }
+      if (STUDIO) {
+        for (let at = 0; at < PREVIEW_BARS * STEPS_PER_BAR; at++)
+          scheduleStudio(
+            context,
+            buffers,
+            bus,
+            PREVIEW_BAR * STEPS_PER_BAR + (at % STEPS_PER_BAR),
+            start + (at / STEPS_PER_BAR) * BAR_SECONDS,
+            next,
+            volume,
+            voices,
+          );
+      } else
+        for (let cycle = 0; cycle < PREVIEW_BARS; cycle++)
+          for (const { voice, hit, swing } of hitsInBar(PREVIEW_BAR)) {
+            const level = volumeOf(volume, voice);
+            // a part cycle (1.25, 1.5) stops where its fraction of the bar ends
+            if (!voices.includes(voice) || level === 0 || cycle * STEPS_PER_BAR + hit.step >= PREVIEW_BARS * STEPS_PER_BAR) continue;
+            const variation = hash((cycle * STEPS_PER_BAR + hit.step) * 8 + VOICE_SEED[voice]);
+            const sample = SAMPLE_FOR[voice](next, hit.velocity * level, hit.tone, variation);
+            const at = start + (cycle + (hit.step + swing) / STEPS_PER_BAR) * BAR_SECONDS;
+            if (sample) playSample(context, buffers, sample[0], at, sample[1], sample[2], bus, variation, isPitched(voice));
+          }
       const ringMs = (START_DELAY + PREVIEW_BARS * BAR_SECONDS) * MS_PER_SECOND + PREVIEW_RING_MS;
       awakeUntil = Math.max(awakeUntil, performance.now() + ringMs);
       sleepLater(ringMs);

@@ -6,6 +6,7 @@
 // Neither source writes the parts out: the patterns below are this project's reading, kept simple.
 import { label, row, stat, stats } from '../readout-markup.js';
 import { COLORS, ROLES } from '../theme.js';
+import { lilt, recordedChoices, studioSounds, takes } from './studio-kit.js';
 
 const BPM = 132;
 const BEATS_PER_BAR = 2;
@@ -131,106 +132,106 @@ const SCENE_LOOKS = {
   finale: { zoom: 1.2, rot: 0.25, hue: 50, keep: 0.95, seg: 16, warp: 1.2, speed: 1.0, pal: 0.05 },
 };
 
-// ---------- sound ----------
-// The maracatu's CC0 samples, plus the synthesized pandeiro and palmas (tools/make-coco-sounds.mjs).
-const SOUND_CHOICES = [
-  {
-    id: 'alfaia',
-    label: 'alfaia',
-    defaultOption: 'deep-click',
-    preview: ALFAIA,
-    files: o => [`alfaia-${o}-main`, `alfaia-${o}-answer`],
-    options: [
-      ['deep-click', 'meião'],
-      ['deep', 'marcante'],
-      ['deep-short', 'grave abafada'],
-      ['dry-body', 'encorpada'],
-      ['dry-surdo', 'seca e estalada'],
-    ],
-  },
-  {
-    id: 'caixa',
-    label: 'caixa',
-    defaultOption: 'aro',
-    preview: ['caixa'],
-    files: o => [`caixa-${o}`],
-    options: [
-      ['aro', 'tarol'],
-      ['padrao', 'caixa de guerra'],
-      ['brasileira', 'caixa grave'],
-      ['esteira', 'caixa com esteira'],
-    ],
-  },
-  {
-    id: 'ganza',
-    label: 'ganzá',
-    defaultOption: 'rice',
-    preview: ['ganza'],
-    files: o => [`ganza-${o}`],
-    options: [
-      ['rice', 'ganzá de arroz'],
-      ['caxixi', 'caxixi'],
-      ['platinela', 'chocalho de platinelas'],
-      ['dry', 'mineiro'],
-    ],
-  },
-  {
-    id: 'abe',
-    label: 'abê',
-    defaultOption: 'maracatu',
-    preview: ['abe'],
-    files: o => [`agbe-${o}`],
-    options: [
-      ['maracatu', 'abê seco'],
-      ['soft-shekere', 'xequerê cheio'],
-      ['played-shekere', 'xequerê médio'],
-      ['cabasa', 'cabaça'],
-    ],
-  },
-  {
-    id: 'agogo',
-    label: 'agogô',
-    defaultOption: 'short-bell',
-    preview: ['agogo'],
-    files: o => [`agogo-${o}`],
-    options: [
-      ['short-bell', 'agogô agudo'],
-      ['big-bell', 'agogô grave'],
-      ['stick-bell', 'agogô ressonante'],
-      ['low-agogo', 'agogô metálico'],
-    ],
-  },
-  {
-    id: 'pandeiro',
-    label: 'pandeiro',
-    defaultOption: 'sintetizado',
-    preview: ['pandeiro'],
-    files: () => ['pandeiro-grave', 'pandeiro-platinela'],
-    options: [['sintetizado', 'pandeiro sintetizado']],
-  },
-  {
-    id: 'palmas',
-    label: 'palmas',
-    defaultOption: 'sintetizado',
-    preview: ['palmas'],
-    files: () => ['palmas'],
-    options: [['sintetizado', 'palmas sintetizadas']],
-  },
-];
-// The second head is the alfaia's answer sample tuned up: a tighter, higher skin.
+// ---------- sound: recorded instruments in the studio (src/studio.js) ----------
+// Real recordings (CC0) with several takes per stroke; sources in CREDITS.md, choices in
+// docs/rhythms/studio.md. The low head leads; the ganzá swings its off-beat sixteenths about 56 %.
+const STEP_MS = (60 / BPM / STEPS_PER_BEAT) * 1000;
+const GANZA_LILT = 0.12;
+const HIGH_HEAD_LILT = 0.06;
+// The second head is the alfaia's answer recordings tuned up: a tighter, higher skin.
 const SECOND_HEAD_RATE = 1.26;
-
-// voice → [sample, gain, playback rate] for one hit
-const SAMPLE_FOR = {
-  low: (choice, velocity) => [`alfaia-${choice.alfaia}-main`, 1.1 * velocity, 1],
-  high: (choice, velocity) => [`alfaia-${choice.alfaia}-answer`, 0.9 * velocity, SECOND_HEAD_RATE],
-  caixa: (choice, velocity) => [`caixa-${choice.caixa}`, 0.45 * velocity ** 1.4, 1],
-  abe: (choice, velocity) => [`agbe-${choice.abe}`, 0.8 * velocity, 1],
-  ganza: (choice, velocity) => [`ganza-${choice.ganza}`, 0.7 * velocity, 1],
-  pandeiro: (_choice, velocity, tone) => [tone === 'jingle' ? 'pandeiro-platinela' : 'pandeiro-grave', 0.6 * velocity, 1],
-  palmas: (_choice, velocity) => ['palmas', 0.55 * velocity, 1],
-  agogo: (choice, velocity, tone) => [`agogo-${choice.agogo}`, 0.55 * velocity, tone === 'low' ? 1 : 1.19],
+const AGOGO_HIGH_RATE = 1.19; // the high bell: the same bell recording tuned up
+const STUDIO = {
+  room: 'sala-pequena',
+  roomLevel: 0.8,
+  lead: 'low',
+  voices: {
+    low: {
+      seed: 21,
+      role: 'lead',
+      gain: 1.1,
+      send: 0.12,
+      bright: [900, 10000],
+      strokes: () => ({
+        hit: [
+          { file: 'alfaia-deep-main', layer: 0.9 },
+          { file: 'alfaia-deep-click-main', layer: 0.9 },
+          { file: 'alfaia-deep-short-main', layer: 0.5 },
+          ...takes(['zabumba-aberto', { gain: 0.8 }]).filter(take => take.layer >= 0.8),
+        ],
+      }),
+    },
+    high: {
+      seed: 22,
+      role: 'follower',
+      gain: 0.9,
+      pan: -0.1,
+      send: 0.14,
+      template: lilt(STEPS_PER_BAR, STEP_MS, HIGH_HEAD_LILT),
+      ghosts: [{ step: 7, velocity: 0.28, probability: 0.6 }], // a soft pick-up into the next bar, most bars
+      strokes: () => ({
+        hit: ['alfaia-deep-answer', 'alfaia-deep-click-answer', 'alfaia-deep-short-answer', 'alfaia-dry-body-answer'].map(file => ({
+          file,
+          rate: SECOND_HEAD_RATE,
+        })),
+      }),
+    },
+    caixa: {
+      seed: 23,
+      role: 'follower',
+      gain: 0.65,
+      pan: 0.2,
+      send: 0.16,
+      bright: [2500, 16000],
+      strokes: () => ({ hit: [...takes('caixa'), { file: 'caixa-aro', layer: 0.9 }] }),
+    },
+    abe: {
+      seed: 24,
+      role: 'follower',
+      gain: 1.2,
+      pan: -0.4,
+      send: 0.2,
+      strokes: () => ({ hit: ['agbe-maracatu', 'agbe-played-shekere', 'agbe-soft-shekere', 'agbe-cabasa'].map(file => ({ file })) }),
+    },
+    ganza: {
+      seed: 25,
+      role: 'follower',
+      gain: 1.3,
+      pan: 0.4,
+      send: 0.2,
+      template: lilt(STEPS_PER_BAR, STEP_MS, GANZA_LILT),
+      strokes: () => ({ hit: ['ganza-rice', 'ganza-dry', 'ganza-caxixi'].map(file => ({ file })) }),
+    },
+    pandeiro: {
+      seed: 26,
+      role: 'follower',
+      gain: 0.6,
+      pan: -0.25,
+      send: 0.18,
+      strokes: () => ({ grave: takes('pandeiro-grave'), jingle: takes('pandeiro-platinela') }),
+      shape: tone => ({ stroke: tone === 'jingle' ? 'jingle' : 'grave' }),
+    },
+    palmas: { seed: 27, role: 'follower', gain: 0.9, pan: 0.15, send: 0.35, strokes: () => ({ hit: takes('palmas') }) },
+    agogo: {
+      seed: 28,
+      role: 'follower',
+      gain: 0.7,
+      pan: 0.3,
+      send: 0.22,
+      strokes: () => ({ low: [{ file: 'agogo-short-bell' }], high: [{ file: 'agogo-short-bell', rate: AGOGO_HIGH_RATE }] }),
+      shape: tone => ({ stroke: tone === 'low' ? 'low' : 'high' }),
+    },
+  },
 };
+const SOUND_CHOICES = recordedChoices(STUDIO, [
+  ['alfaia', 'alfaia', ALFAIA, 'alfaia gravada'],
+  ['caixa', 'caixa', ['caixa'], 'caixa gravada'],
+  ['ganza', 'ganzá', ['ganza'], 'ganzá gravado'],
+  ['abe', 'abê', ['abe'], 'abê gravado'],
+  ['agogo', 'agogô', ['agogo'], 'agogô gravado'],
+  ['pandeiro', 'pandeiro', ['pandeiro'], 'pandeiro gravado'],
+  ['palmas', 'palmas', ['palmas'], 'palmas gravadas'],
+]);
 
 // ---------- copy ----------
 const DRUMMING_INSTRUMENTS = new Set(VOICE_ORDER.map(voice => VOICES[voice].instrument)).size;
@@ -351,15 +352,10 @@ export const COCO_XAMBA = {
   shapeVoices: ['agogo', 'high', 'low'],
   barHits,
   sceneDefaults: { phrase: always('base') },
+  sounds: studioSounds(STUDIO, SOUND_CHOICES, 'caixa'), // every instrument plays its basic part there
   scenes: SCENE_LIST,
   looks: SCENE_LOOKS,
   readout,
   waves: null,
-  sounds: {
-    choices: SOUND_CHOICES,
-    fixedFiles: [],
-    sampleFor: SAMPLE_FOR,
-    previewScene: 'caixa', // every instrument plays its basic part there
-  },
   copy: COPY,
 };

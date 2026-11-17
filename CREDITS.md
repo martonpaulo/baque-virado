@@ -14,18 +14,13 @@ trimmed, mixed or retuned.
 - Caixa snares: Uberproduktion · Roll: bigjoedrummer · Stick: LudwigMueller
 - Whistles: juliojunior77, SpliceSound, strongbot, Rosa-Orenes256, LudwigMueller
 
-The forró triângulo, sanfona, rabeca, bandolim, cavaquinho and baixo are synthesized for this
-project by `tools/synth-forro.mjs`; its zabumba reuses the alfaia, surdo and stick recordings above
-([`docs/rhythms/forro.md`](docs/rhythms/forro.md)).
-
 Alfaia patterns: the table at lansdownsoftware.com. Swing measured on a Batuk Nagô workshop recording.
 
 ## Coco da Xambá
 
 - Alfaia, caixa, ganzá, agogô and abê reuse the samples above; the second alfaia head is the
   answer sample played at a higher pitch.
-- Pandeiro and palmas are synthesized by `tools/make-coco-sounds.mjs` (original to this project,
-  2026-11): no CC0 recording could be fetched for them.
+- Pandeiro and palmas are recordings listed under «Studio instruments» below.
 - Sources: Tainá Menezes Castro, «Nação Xambá: identidade negra, tradição religiosa e estratégias
   de difusão da sua cultura», ANPPOM 2018
   (<https://anppom.org.br/anais/anaiscongresso_anppom_2018/5434/public/5434-18196-1-PB.pdf>);
@@ -34,8 +29,33 @@ Alfaia patterns: the table at lansdownsoftware.com. Swing measured on a Batuk Na
 
 The score renderer (`src/score.js`) is original to this project, written in 2026-11.
 
-The brega funk sounds are synthesized in the page by `src/rhythms/brega-funk-sounds.js`, original to
-this project; its «tarol» lata choice reuses the tarol rim recording above.
+## Studio instruments
+
+The forró, coco and brega funk play recorded takes through the studio (`src/studio.js`,
+[`docs/rhythms/studio.md`](docs/rhythms/studio.md)). `tools/prepare-takes.mjs` cut, trimmed and
+normalised each take from its source and names every source file. All are CC0.
+
+From the orchestral library VSCO 2 Community Edition (CC0, Versilian Studios and Sam Gossner):
+triângulo (Triangle 3 and 6, open and muted), the zabumba's open head (concert bass drum), caixa
+(Snare 2 with snares), pandeiro jingles (Tambourine 1), atabaques of the tamborzão (conga and
+quinto), rabeca (solo violin, arco with vibrato and spiccato), keys (Upright Nr1 piano), lead
+trumpet (sustained with vibrato and staccato) and the horns (trumpet and tenor trombone staccato).
+
+From Freesound:
+
+- Sanfona notes and bass buttons: Miles_Thompson
+- Zabumba: Sassaby (alfaia hits), sgossner (muted bass drum), gilblack1234 (short surdo)
+- Bacalhau: Sassaby, sgossner, DanVGC++, KEVOY
+- Bandolim: lucasgonze, gollybob
+- Cavaquinho chords: Sadiquecat (ukulele)
+- Baixo: Ixwolf, mat_the_glad, SirBagel
+- Pandeiro: katusm, Ilson_Junior, menegass, MeanRaccoon
+- Palmas: steeltowngaming, semccab, launchsite, junioraragaki, pomeroyjoshua
+- Atabaques: la.terror, sgossner, menegass
+- 808 kicks and subs: menegass, voxlab, derickgtwk, Simonaudiosuite, rorymceachan, darealwollen
+- Latas: RemyMarshal, lartti, lmr9, Anthousai, KJose
+- Hi-hats: blakengouda
+- Rooms (impulse responses): Tim_Verberne (small room), Nox_Sound (living room)
 
 ## Fonts
 

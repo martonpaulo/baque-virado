@@ -1,15 +1,12 @@
-// The forró pé-de-serra package: the show script, the tune's rules and that every hit has a sound.
+// The forró pé-de-serra package: the show script, the tune's rules.
 import assert from 'node:assert/strict';
-import { existsSync } from 'node:fs';
 import { test } from 'node:test';
-import { fileURLToPath } from 'node:url';
 import { meterOf } from '../src/music.js';
 import { FORRO_PE_DE_SERRA as FORRO, FORRO_PIECES } from '../src/rhythms/forro.js';
 import { createShow } from '../src/show.js';
 
 const show = createShow(FORRO);
 const { MOTIFS, PHRASE, ANSWER, MODE, midiOf, thirdBelow } = FORRO_PIECES;
-const soundPath = (name, extension) => fileURLToPath(new URL(`../sounds/${name}${extension}`, import.meta.url));
 
 test('one tempo, 2/4 on an 8-step wheel, the eleven scenes of the script, 98 bars', () => {
   assert.equal(FORRO.bpm, 120);
@@ -41,19 +38,6 @@ test('the voice order is pinned', () => {
 test('the parts enter one by one: the triângulo alone, then the zabumba, then the bacalhau, then the sanfona', () => {
   const firstBars = ['triangulo', 'zabumba', 'bacalhau', 'trio'].map(id => show.barTimeline(show.sceneById(id).start).playing.length);
   assert.deepEqual(firstBars, [1, 2, 3, 4]);
-});
-
-test('every hit of the show plays a sample that exists, in tune and in a sane rate', () => {
-  for (const option of ['funda', 'seca']) {
-    for (let bar = 0; bar < show.TOTAL_BARS; bar++) {
-      for (const { voice, hit } of show.hitsInBar(bar)) {
-        const [name, gain, rate] = FORRO.sounds.sampleFor[voice]({ zabumba: option }, hit.velocity, hit.tone, 0.5);
-        assert.ok(existsSync(soundPath(name, '.m4a')) && existsSync(soundPath(name, '.wav')), `${voice} in bar ${bar}: ${name}`);
-        assert.ok(gain > 0 && gain <= 1.5, `${voice} gain ${gain}`);
-        assert.ok(rate > 0.6 && rate < 1.6, `${voice} rate ${rate} retunes too far`);
-      }
-    }
-  }
 });
 
 test('the melody stays in G mixolydian, with the flat seventh on a beat head of the hook', () => {

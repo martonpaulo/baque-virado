@@ -6,6 +6,7 @@
 import { label, row, stat, stats } from '../readout-markup.js';
 import { FORRO } from '../theme.js';
 import { drawForroBackdrop } from './forro-backdrop.js';
+import { lilt, recordedChoices, studioSounds, takes } from './studio-kit.js';
 
 const BPM = 120;
 const BEATS_PER_BAR = 2;
@@ -253,103 +254,139 @@ const SCENE_LIST = [
 const LOOK = { zoom: 0, rot: 0, hue: 0, keep: 0, seg: 1, warp: 0, speed: 1, pal: 0 };
 const SCENE_LOOKS = Object.fromEntries(SCENE_LIST.map(scene => [scene.id, LOOK]));
 
-// ---------- sound ----------
-// The zabumba reuses the repository's alfaia and stick recordings; every other instrument is
-// synthesized by tools/synth-forro.mjs. A melodic sample is one note at its base pitch, retuned by
-// the playback rate.
-const BASE_MIDI = { sanfona: 74, rabeca: 74, bandolim: 72, baixo: 43, fole: 43 };
-const rateFor = (note, base) => 2 ** ((midiOf(note) - base) / MIDI_OCTAVE);
-const ZABUMBA_FILES = {
-  funda: { aberto: 'alfaia-deep-main', abafada: 'alfaia-deep-short-main' },
-  seca: { aberto: 'alfaia-dry-surdo-main', abafada: 'alfaia-dry-body-answer' },
+// ---------- sound: recorded instruments in the studio (src/studio.js) ----------
+// Every instrument is a set of real recordings (CC0): several takes per stroke, velocity layers, and
+// melodic takes retuned from the nearest recorded note. Sources: CREDITS.md; choices:
+// docs/rhythms/studio.md. The zabumba leads; the others follow it, a little behind on the off-beats.
+const STEP_MS = (60 / BPM / STEPS_PER_BEAT) * 1000;
+const STEP_SECONDS = STEP_MS / 1000;
+const TRIANGLE_LILT = 0.1; // the triângulo «dances»: off-beat sixteenths about 10 % of a sixteenth late
+const OCTAVE = 12;
+const BELLOWS_ATTACK = 0.045; // a held note or a motif's first note starts with the bellows
+const FINGER_ATTACK = 0.006; // the others with a finger on a button
+const SHORT_STEPS = 1.7; // an unheld melody note, in sixteenths
+const HELD_STEPS = 3.8;
+const CHORD_NOTES = { G: ['G3', 'B3', 'D4'], F: ['F3', 'A3', 'C4'], C: ['C4', 'E4', 'G4'] };
+const melodyNote = tone => (tone.endsWith(LONG) ? tone.slice(0, -LONG.length) : tone);
+const lengthOf = tone => (tone.endsWith(LONG) ? HELD_STEPS : SHORT_STEPS) * STEP_SECONDS;
+/** A melodic voice: the stroke for a short or held note, retuned to its pitch. */
+const melodic = (short, held) => tone => ({ stroke: tone.endsWith(LONG) ? held : short, notes: [midiOf(melodyNote(tone))], length: lengthOf(tone) });
+const STUDIO = {
+  room: 'sala-pequena',
+  roomLevel: 0.9,
+  lead: 'grave',
+  phraseBars: PHRASE_BARS,
+  voices: {
+    grave: {
+      seed: 11,
+      role: 'lead',
+      gain: 1.05,
+      pan: 0,
+      send: 0.12,
+      bright: [900, 9000],
+      strokes: () => ({ aberto: takes('zabumba-aberto'), abafada: takes('zabumba-abafada') }),
+      ghosts: [{ step: 6, velocity: 0.3, probability: 0.5, tone: SAMPLE.abafada }], // a pressed ghost before the bar line, half the bars
+    },
+    bacalhau: {
+      seed: 12,
+      role: 'follower',
+      gain: 1.5,
+      pan: 0.12,
+      send: 0.12,
+      template: lilt(STEPS_PER_BAR, STEP_MS, 0.04),
+      strokes: () => ({ hit: takes('bacalhau') }),
+    },
+    triangulo: {
+      seed: 13,
+      role: 'follower',
+      gain: 0.8,
+      pan: 0.35,
+      send: 0.22,
+      template: lilt(STEPS_PER_BAR, STEP_MS, TRIANGLE_LILT),
+      bright: [4000, 18000],
+      strokes: () => ({ aberto: takes('triangulo-aberto'), fechado: takes('triangulo-fechado') }),
+      shape: tone => ({ length: tone === SAMPLE.fechado ? 0.12 : null }),
+    },
+    fole: {
+      seed: 14,
+      role: 'follower',
+      gain: 0.7,
+      pan: -0.3,
+      send: 0.2,
+      attack: FINGER_ATTACK,
+      strokes: () => ({ baixo: takes('sanfona-baixo'), acorde: takes('sanfona') }),
+      shape: tone => {
+        const [kind, value] = tone.split(':');
+        return kind === 'b'
+          ? { stroke: 'baixo', notes: [midiOf(value) + OCTAVE], length: 0.22 }
+          : { stroke: 'acorde', notes: CHORD_NOTES[value].map(midiOf), length: 0.14, gain: 0.6 };
+      },
+    },
+    baixo: {
+      seed: 15,
+      role: 'follower',
+      gain: 0.8,
+      pan: 0,
+      send: 0.06,
+      bright: [700, 5000],
+      strokes: () => ({ nota: takes('baixo') }),
+      shape: tone => ({ stroke: 'nota', notes: [midiOf(tone)], length: 0.34 }),
+    },
+    cavaquinho: {
+      seed: 16,
+      role: 'follower',
+      gain: 0.6,
+      pan: 0.45,
+      send: 0.18,
+      template: lilt(STEPS_PER_BAR, STEP_MS, 0, 3),
+      strokes: () => ({ C: takes('cavaquinho-c'), F: takes('cavaquinho-f'), G: takes('cavaquinho-g') }),
+      shape: () => ({ length: 0.2 }),
+    },
+    sanfona: {
+      seed: 17,
+      role: 'follower',
+      gain: 0.5,
+      pan: -0.15,
+      send: 0.25,
+      release: 0.06,
+      strokes: () => ({ nota: takes('sanfona') }),
+      shape: (tone, _choice, at) => ({
+        stroke: 'nota',
+        notes: [midiOf(melodyNote(tone))],
+        length: lengthOf(tone),
+        attack: tone.endsWith(LONG) || (at.step === 0 && at.bar % BARS_PER_MOTIF === 0) ? BELLOWS_ATTACK : FINGER_ATTACK,
+      }),
+    },
+    rabeca: {
+      seed: 18,
+      role: 'follower',
+      gain: 0.45,
+      pan: 0.25,
+      send: 0.3,
+      attack: 0.012,
+      strokes: () => ({ curta: takes('rabeca-spic'), longa: takes('rabeca-arco') }),
+      shape: melodic('curta', 'longa'),
+    },
+    bandolim: {
+      seed: 19,
+      role: 'follower',
+      gain: 0.5,
+      pan: 0.55,
+      send: 0.22,
+      strokes: () => ({ curta: takes('bandolim'), longa: takes('bandolim') }),
+      shape: melodic('curta', 'longa'),
+    },
+  },
 };
-const BACALHAU = { file: 'stick', rate: 1.2 };
-const melodicFiles = instrument => [`${instrument}-curta`, `${instrument}-longa`];
-const CHORD_FILES = instrument => Object.keys(CHORD_NAMES).map(chord => `${instrument}-${chord.toLowerCase()}`);
-const SOUND_CHOICES = [
-  {
-    id: 'zabumba',
-    label: 'zabumba',
-    defaultOption: 'funda',
-    preview: ['grave', 'bacalhau'],
-    files: o => Object.values(ZABUMBA_FILES[o]),
-    options: [
-      ['funda', 'zabumba funda'],
-      ['seca', 'zabumba seca'],
-    ],
-  },
-  {
-    id: 'triangulo',
-    label: 'triângulo',
-    defaultOption: 'aco',
-    preview: ['triangulo'],
-    files: () => ['triangulo-aberto', 'triangulo-fechado'],
-    options: [['aco', 'triângulo de aço']],
-  },
-  {
-    id: 'sanfona',
-    label: 'sanfona',
-    defaultOption: 'oito-baixos',
-    preview: ['fole', 'sanfona'],
-    files: () => [...melodicFiles('sanfona'), 'sanfona-baixo', ...CHORD_FILES('sanfona-acorde')],
-    options: [['oito-baixos', 'sanfona']],
-  },
-  { id: 'rabeca', label: 'rabeca', defaultOption: 'rabeca', preview: ['rabeca'], files: () => melodicFiles('rabeca'), options: [['rabeca', 'rabeca']] },
-  {
-    id: 'bandolim',
-    label: 'bandolim',
-    defaultOption: 'bandolim',
-    preview: ['bandolim'],
-    files: () => melodicFiles('bandolim'),
-    options: [['bandolim', 'bandolim']],
-  },
-  {
-    id: 'cavaquinho',
-    label: 'cavaquinho',
-    defaultOption: 'cavaquinho',
-    preview: ['cavaquinho'],
-    files: () => CHORD_FILES('cavaquinho'),
-    options: [['cavaquinho', 'cavaquinho']],
-  },
-  { id: 'baixo', label: 'baixo', defaultOption: 'baixo', preview: ['baixo'], files: () => ['baixo'], options: [['baixo', 'baixo']] },
-];
-
-/** A melody note: the short or the long sample, retuned to the note. */
-const melodic = (instrument, gain) => (_choice, velocity, tone) => {
-  const held = tone.endsWith(LONG),
-    note = held ? tone.slice(0, -LONG.length) : tone;
-  return [`${instrument}-${held ? 'longa' : 'curta'}`, gain * velocity, rateFor(note, BASE_MIDI[instrument])];
-};
-const GAIN = {
-  grave: 1.05,
-  abafada: 0.9,
-  bacalhau: 0.45,
-  triangulo: 0.32,
-  fole: 0.36,
-  foleBass: 0.42,
-  baixo: 0.75,
-  cavaquinho: 0.4,
-  sanfona: 0.42,
-  rabeca: 0.24,
-  bandolim: 0.3,
-};
-// voice → [sample, gain, playback rate] for one hit
-const SAMPLE_FOR = {
-  grave: (choice, velocity, tone) => [ZABUMBA_FILES[choice.zabumba][tone], (tone === SAMPLE.abafada ? GAIN.abafada : GAIN.grave) * velocity, 1],
-  bacalhau: (_choice, velocity) => [BACALHAU.file, GAIN.bacalhau * velocity, BACALHAU.rate],
-  triangulo: (_choice, velocity, tone) => [`triangulo-${tone}`, GAIN.triangulo * velocity, 1],
-  fole: (_choice, velocity, tone) => {
-    const [kind, value] = tone.split(':');
-    return kind === 'b'
-      ? ['sanfona-baixo', GAIN.foleBass * velocity, rateFor(value, BASE_MIDI.fole)]
-      : [`sanfona-acorde-${value.toLowerCase()}`, GAIN.fole * velocity, 1];
-  },
-  baixo: (_choice, velocity, tone) => ['baixo', GAIN.baixo * velocity, rateFor(tone, BASE_MIDI.baixo)],
-  cavaquinho: (_choice, velocity, tone) => [`cavaquinho-${tone.toLowerCase()}`, GAIN.cavaquinho * velocity, 1],
-  sanfona: melodic('sanfona', GAIN.sanfona),
-  rabeca: melodic('rabeca', GAIN.rabeca),
-  bandolim: melodic('bandolim', GAIN.bandolim),
-};
+const SOUND_CHOICES = recordedChoices(STUDIO, [
+  ['zabumba', 'zabumba', ['grave', 'bacalhau'], 'zabumba gravada'],
+  ['triangulo', 'triângulo', ['triangulo'], 'triângulo de aço'],
+  ['sanfona', 'sanfona', ['fole', 'sanfona'], 'sanfona gravada'],
+  ['rabeca', 'rabeca', ['rabeca'], 'rabeca (violino gravado)'],
+  ['bandolim', 'bandolim', ['bandolim'], 'bandolim gravado'],
+  ['cavaquinho', 'cavaquinho', ['cavaquinho'], 'cavaquinho gravado'],
+  ['baixo', 'baixo', ['baixo'], 'baixo gravado'],
+]);
 
 // ---------- copy ----------
 const READ = {
@@ -496,16 +533,11 @@ export const FORRO_PE_DE_SERRA = {
   shapeVoices: ['bacalhau', 'grave'],
   barHits,
   sceneDefaults: { tune: PHRASE, zabumba: 'base', fole: 'base' },
+  sounds: studioSounds(STUDIO, SOUND_CHOICES, 'final'), // its first bar: every instrument plays its basic part
   scenes: SCENE_LIST,
   looks: SCENE_LOOKS,
   background: { create: () => ({ draw: drawForroBackdrop }) },
   readout,
   waves: null,
-  sounds: {
-    choices: SOUND_CHOICES,
-    fixedFiles: [BACALHAU.file],
-    sampleFor: SAMPLE_FOR,
-    previewScene: 'final', // its first bar: every instrument plays its basic part
-  },
   copy: COPY,
 };
