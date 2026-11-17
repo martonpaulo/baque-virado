@@ -23,6 +23,12 @@ level-matched; the frevo show also uses the dry surdo and two caixas above:
 - Tenor saxophone, rope-tension snare (tarol), bass drum (surdo), small frame drum and tambourine
   (pandeiro): [VCSL](https://github.com/sgossner/VCSL) (CC0). The caixa's rufo is built from the
   same snare's strokes.
+- Sustained tenor saxophone (`frevo-sax-longo-*`, the loud layer):
+  [FreePats Tenor Saxophone](https://freepats.zenvoid.org/Reed/saxophone.html), version 2020-07-17,
+  assembled by Roberto from the VCSL samples (CC0). Each note cut to 1.55 s with a fade.
+- Clarinet (`frevo-clarinete-*`): [FreePats Clarinet](https://freepats.zenvoid.org/Reed/clarinet.html),
+  version 2019-08-18, played by Kaili Dence and recorded by Tyler Dence (CC0). Each note retuned,
+  cut to 1.55 s with a fade.
 
 Alfaia patterns: the table at lansdownsoftware.com. Swing measured on a Batuk Nagô workshop recording.
 
