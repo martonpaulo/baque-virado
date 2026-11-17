@@ -173,7 +173,8 @@ const A_BARS = PART_A.length + 1;
 const A_CHORDS = ['Gm', 'Gm', 'D7', 'D7', 'D7', 'D7', 'Gm', 'Gm', 'G7', 'G7', 'Cm', 'Cm', 'Gm', 'A7|D7', 'Gm'];
 const ALTO_DA_SE = { from: 8, to: 12 }; // bars 9 to 12 of each part
 const A_END = '- - - - . . . .';
-const A_TO_B = '- - - . f4 - bb4 c5'; // the pickup of the second part
+const PICKUP_B = '. . . . f4 - bb4 c5'; // into the second part
+const PICKUP_PEAK = '. . . . bb4 - d5 f5'; // into its Alto da Sé, as bar 8 of the part has it
 // Part B, 16 bars in B♭ major: the same breath, in the 3 + 3 + 2 of the caixa; the top note (G) on
 // the IV chord (E♭) in bars 9 and 10.
 const PART_B = [
@@ -237,51 +238,62 @@ const ANSWERS_B = [
 
 // ---------- the show script ----------
 // Each scene: id, bars, mode per bar, voices per bar, lanes (rows under the wheel), named (the
-// centre names its tópica), pad (the trombones mark the harmony where the trompetes rest), the
-// chords per bar ('A7|D7': a chord per beat) and each melodic voice's line. A line's `pickup`
+// centre names its tópica), pad (the trombones mark the harmony where the trompetes rest), walk
+// (the tuba walks every bar), gain (a level per voice, for this scene), the chords per bar ('A7|D7': a chord per beat) and each melodic voice's line. A line's `pickup`
 // sounds in the last bar of the scene before, so that scene lets the voice play there.
-const always = value => () => value;
 const lastBarAlso = (bars, voices, more) => bar => (bar === bars - 1 ? [...voices, ...more] : voices);
-const TEACH_BARS = 4; // a part alone, for its cell to be heard twice
-const tune = bars => ({ pickup: PICKUP_A, bars });
+const HALF = A_BARS / 2; // a feature lasts half a part
+const tune = (bars, pickup = PICKUP_A) => ({ pickup, bars });
 const THEME = tune([...PART_A, A_END]);
+const SECOND_HALF = tune([...PART_A.slice(HALF), A_END], '. . . . . g4 b4 d5'); // from the Alto da Sé
+const FEATURED = 1.4; // the level of the part a scene is about, against its usual level
+const BACK = 0.65; // the level of the parts that step back for it
+const LOUDER = 1.15; // everyone, for a repeat that lifts
+// The orchestra plays from the first bars. Each scene is about one trait of the frevo, and shows
+// it the way an orchestra does: a section rests or plays softer, the featured part plays louder,
+// then everyone returns. Part A is heard three times and part B once and a half:
+// A (Tema) · A in two halves, thinned (Surdo, Caixa) · A (Lá e cá) · a bridge (Tuba) · B (Segunda
+// parte) · the end of B again (Síncope) · the stop (Fotografia) · A (Final).
 const SCENE_LIST = [
   {
     id: 'introducao',
-    bars: TEACH_BARS,
+    bars: HALF / 2,
     mode: bar => ['roll', 'roll', 'normal', 'cut'][bar],
     lanes: ['tarol', 'trompete', 'surdo'],
     chords: ['Gm', 'Gm', 'Gm', 'Gm'],
     lines: { trompete: [REST, REST, ANSWERS_A[1], 'bb5! - - . . . . .'] },
   },
-  { id: 'surdo', bars: TEACH_BARS, voices: always(['surdo']), lanes: ['surdo'] },
-  { id: 'caixa', bars: TEACH_BARS * 2, voices: always(['surdo', 'tarol']), lanes: ['surdo', 'tarol'], focus: 'tarol' },
-  { id: 'pandeiro', bars: TEACH_BARS, voices: always(RHYTHM_SECTION), lanes: RHYTHM_SECTION },
   {
-    id: 'tuba',
-    bars: TEACH_BARS * 2,
-    voices: lastBarAlso(TEACH_BARS * 2, BASE, ['sax']),
-    lanes: ['surdo', 'tuba'],
-    chords: [...A_CHORDS.slice(0, TEACH_BARS * 2 - 1), 'Gm|D7'],
-  },
-  {
-    id: 'palhetas',
+    id: 'tema',
     bars: A_BARS,
-    // the saxofones sing the first half alone; the clarinete joins them for the second
-    voices: bar => [...BASE, 'sax', ...(bar >= ALTO_DA_SE.from - 1 ? ['clarinete'] : [])],
-    lanes: ['sax', 'clarinete', 'tuba'],
+    lanes: ['sax', 'trompete', 'tuba'],
     focus: 'sax',
+    pad: true,
     chords: [...A_CHORDS, 'Gm'],
-    lines: { sax: THEME, clarinete: [...Array(ALTO_DA_SE.from - 1).fill(REST), '. . . . . g4 b4 d5', ...PART_A.slice(ALTO_DA_SE.from), A_END] },
+    lines: { sax: THEME, clarinete: THEME, trompete: ANSWERS_A },
   },
   {
-    id: 'metais',
-    bars: TEACH_BARS * 2,
-    voices: lastBarAlso(TEACH_BARS * 2, [...BASE, ...METAIS], PALHETAS),
-    lanes: ['trompete', 'trombone', 'tuba'],
+    // the palhetas rest: the march is heard, the surdo in front, the metais still answering
+    id: 'surdo',
+    bars: HALF,
+    voices: lastBarAlso(HALF, [...BASE, ...METAIS], PALHETAS),
+    lanes: ['surdo', 'tuba', 'trompete'],
+    focus: 'surdo',
     pad: true,
-    chords: [...A_CHORDS.slice(0, TEACH_BARS * 2 - 1), 'Gm|D7'],
-    lines: { trompete: ANSWERS_A.slice(0, TEACH_BARS * 2) },
+    gain: { surdo: FEATURED, tarol: BACK, pandeiro: BACK },
+    chords: A_CHORDS.slice(0, HALF),
+    lines: { trompete: ANSWERS_A.slice(0, HALF) },
+  },
+  {
+    // the palhetas come back softly with the second half of the tune, under the caixa
+    id: 'caixa',
+    bars: HALF,
+    lanes: ['tarol', 'surdo', 'sax'],
+    focus: 'tarol',
+    pad: true,
+    gain: { tarol: FEATURED, sax: BACK, clarinete: BACK, trompete: BACK },
+    chords: [...A_CHORDS.slice(HALF), 'Gm'],
+    lines: { sax: SECOND_HALF, clarinete: SECOND_HALF, trompete: ANSWERS_A.slice(HALF) },
   },
   {
     id: 'la-e-ca',
@@ -289,8 +301,21 @@ const SCENE_LIST = [
     lanes: ['sax', 'trompete', 'trombone'],
     named: true,
     pad: true,
-    chords: [...A_CHORDS, 'Gm|F7'],
-    lines: { sax: tune([...PART_A, A_TO_B]), clarinete: tune([...PART_A, A_TO_B]), trompete: ANSWERS_A },
+    chords: [...A_CHORDS, 'Gm'],
+    lines: { sax: THEME, clarinete: THEME, trompete: ANSWERS_A },
+  },
+  {
+    // a bridge to the second part: the palhetas rest and the tuba walks every bar, in front
+    id: 'tuba',
+    bars: HALF,
+    voices: lastBarAlso(HALF, [...BASE, ...METAIS], PALHETAS),
+    lanes: ['tuba', 'surdo', 'trombone'],
+    focus: 'tuba',
+    pad: true,
+    walk: true,
+    gain: { tuba: FEATURED, tarol: BACK, pandeiro: BACK },
+    chords: ['Gm', 'Gm', 'Cm', 'Cm', 'D7', 'D7', 'Gm', 'F7'],
+    lines: { trompete: [REST, ANSWERS_A[1], REST, ANSWERS_A[11], REST, ANSWERS_A[3], REST, REST] },
   },
   {
     id: 'segunda',
@@ -298,11 +323,25 @@ const SCENE_LIST = [
     lanes: ['sax', 'trompete', 'tuba'],
     pad: true,
     chords: B_CHORDS,
-    lines: { sax: PART_B, clarinete: PART_B, trompete: ANSWERS_B },
+    lines: { sax: tune(PART_B, PICKUP_B), clarinete: tune(PART_B, PICKUP_B), trompete: ANSWERS_B },
+  },
+  {
+    // the second half of part B again, everyone louder: its 3 + 3 + 2 against the surdo's march
+    id: 'sincope',
+    bars: HALF,
+    lanes: ['sax', 'trompete', 'surdo'],
+    pad: true,
+    gain: { sax: LOUDER, clarinete: LOUDER, trompete: LOUDER, trombone: LOUDER, surdo: LOUDER },
+    chords: B_CHORDS.slice(HALF),
+    lines: {
+      sax: tune(PART_B.slice(HALF), PICKUP_PEAK),
+      clarinete: tune(PART_B.slice(HALF), PICKUP_PEAK),
+      trompete: tune(ANSWERS_B.slice(HALF), ANSWERS_B[HALF - 1]),
+    },
   },
   {
     id: 'fotografia',
-    bars: TEACH_BARS,
+    bars: HALF / 2,
     mode: bar => ['cut', 'cut', 'normal', 'roll'][bar],
     lanes: ['trompete', 'tarol', 'surdo'],
     named: true,
@@ -494,15 +533,16 @@ const pandeiroBar = () => [
 const WALK_EVERY = 4; // bars: the tuba walks up the chord in the last bar of each four
 /**
  * The tuba marks the beats: the root on 1 and the fifth on 2. It leads into a new chord from a
- * semitone below, on the last eighth, and walks root, third, fifth at the end of a phrase.
+ * semitone below, on the last eighth, and walks root, third, fifth at the end of a phrase, or in
+ * every bar of a scene that features it.
  */
-function tubaBar(bar, barInScene) {
+function tubaBar(bar, barInScene, everyBar) {
   const first = chordAt(bar, 0),
     second = chordAt(bar, STEPS_PER_BEAT),
     next = chordAt(bar + 1, 0);
   if (!first) return [];
   const out = [hit(0, ACCENT, first.root)];
-  const walks = barInScene % WALK_EVERY === WALK_EVERY - 1 && second === first;
+  const walks = (everyBar || barInScene % WALK_EVERY === WALK_EVERY - 1) && second === first;
   if (walks) out.push(hit(EIGHTH, SOFT, first.third));
   out.push(hit(STEPS_PER_BEAT, PLAIN, second === first ? first.fifth : second.root));
   if (next && next !== second) out.push(hit(LAST_EIGHTH, PLAIN, noteName(midiOf(next.root) - 1)));
@@ -544,7 +584,7 @@ function barHits(scene, barInScene) {
   hits.surdo = surdoBar(cellBar);
   hits.tarol = caixaBar(cellBar);
   hits.pandeiro = pandeiroBar();
-  if (scene.chords) hits.tuba = tubaBar(bar, barInScene);
+  if (scene.chords) hits.tuba = tubaBar(bar, barInScene, Boolean(scene.walk));
   return hits;
 }
 
@@ -553,15 +593,14 @@ function barHits(scene, barInScene) {
 // `speed` for the visual clock and blends zoom, rot, hue and keep, which this painter does not use.
 const LOOK = { zoom: 0, rot: 0, hue: 0, keep: 0, speed: 1 };
 const SCENE_LOOKS = {
-  introducao: { ...LOOK, inner: 2, outer: 0, glow: 0.4, fury: 0 },
-  surdo: { ...LOOK, inner: 2, outer: 0, glow: 0.5, fury: 0 },
-  caixa: { ...LOOK, inner: 3, outer: 0, glow: 0.6, fury: 0 },
-  pandeiro: { ...LOOK, inner: 4, outer: 0, glow: 0.6, fury: 0 },
-  tuba: { ...LOOK, inner: 4, outer: 2, glow: 0.7, fury: 0 },
-  palhetas: { ...LOOK, inner: 5, outer: 4, glow: 0.7, fury: 0 },
-  metais: { ...LOOK, inner: 6, outer: 4, glow: 0.8, fury: 0.1 },
+  introducao: { ...LOOK, inner: 3, outer: 0, glow: 0.5, fury: 0 },
+  tema: { ...LOOK, inner: 6, outer: 4, glow: 0.8, fury: 0.1 },
+  surdo: { ...LOOK, inner: 4, outer: 2, glow: 0.6, fury: 0 },
+  caixa: { ...LOOK, inner: 5, outer: 4, glow: 0.7, fury: 0 },
   'la-e-ca': { ...LOOK, inner: 6, outer: 6, glow: 0.8, fury: 0.1 },
+  tuba: { ...LOOK, inner: 4, outer: 4, glow: 0.7, fury: 0 },
   segunda: { ...LOOK, inner: 7, outer: 8, glow: 0.9, fury: 0.2 },
+  sincope: { ...LOOK, inner: 8, outer: 8, glow: 1, fury: 0.3 },
   fotografia: { ...LOOK, inner: 6, outer: 8, glow: 0.5, fury: 0 },
   final: { ...LOOK, inner: 8, outer: 10, glow: 1, fury: 0.3 },
 };
@@ -752,21 +791,19 @@ const READ = {
       .split(' ')
       .filter(t => t === 'X' || t === 'x').length
   } semicolcheias + rufo`,
-  grave: 'grave',
-  platinela: 'platinela',
   progression: 'harmonia',
-  bassLine: 'baixo',
-  bassLineValue: 'fundamental no tempo 1, quinta no tempo 2',
   approach: 'passagem',
   approachValue: 'um semitom abaixo do acorde que chega',
   altoDaSe: 'Alto da Sé',
   altoDaSeValue: `compassos ${ALTO_DA_SE.from + 1} a ${ALTO_DA_SE.to}, no IV grau (Cm)`,
   theme: 'tema',
   themeValue: `${A_BARS} compassos com anacruse`,
-  call: 'resposta',
-  callValue: 'staccato, no fim de cada frase',
-  under: 'trombones',
-  underValue: 'marcam 3 + 3 + 2 e fecham o acorde',
+  walk: 'baixo',
+  walkValue: 'fundamental, terça e quinta, em colcheias',
+  groups: 'melodia',
+  groupsValue: 'notas de 3 + 3 + 2 semicolcheias',
+  march: 'surdo',
+  marchValue: 'tempos 1 e 2, a marcha',
   question: 'pergunta',
   metais: 'metais',
   answer: 'resposta',
@@ -786,18 +823,17 @@ const READ = {
 const COPY = {
   name: 'frevo',
   description:
-    'Frevo lírico em tom menor: surdo, caixa, pandeiro, tuba, saxofones, clarinete, trombones e trompetes, um de cada vez e depois juntos, com som de instrumentos reais.', // the page's search and preview description
+    'Frevo lírico em tom menor, tocado por orquestra: a anacruse, a pergunta e resposta de palhetas e metais, a célula da caixa, o surdo, a tuba e a síncope, com som de instrumentos reais.', // the page's search and preview description
   feminineInstruments: ['caixa', 'tuba'],
   scenes: {
     introducao: { chip: 'Introdução', eyebrow: 'frevo lírico, de orquestra', title: 'Frevo' },
-    surdo: { chip: 'Surdo', eyebrow: 'acento no tempo 2', title: 'Surdo' },
+    tema: { chip: 'Tema', eyebrow: 'a melodia entra na anacruse', title: 'Tema' },
+    surdo: { chip: 'Surdo', eyebrow: 'o segundo tempo, aberto', title: 'Surdo' },
     caixa: { chip: 'Caixa', eyebrow: READ.caixaCount, title: 'Caixa' },
-    pandeiro: { chip: 'Pandeiro', eyebrow: 'semicolcheias', title: 'Pandeiro' },
-    tuba: { chip: 'Tuba', eyebrow: 'baixo nos tempos', title: 'Tuba' },
-    palhetas: { chip: 'Palhetas', eyebrow: 'saxofones e clarinete cantam o tema', title: 'Palhetas' },
-    metais: { chip: 'Metais', eyebrow: 'trompetes e trombones respondem', title: 'Metais' },
     'la-e-ca': { chip: 'Lá e cá', eyebrow: 'pergunta e resposta', title: 'Lá e cá' },
+    tuba: { chip: 'Tuba', eyebrow: 'o baixo caminha', title: 'Tuba' },
     segunda: { chip: 'Segunda parte', eyebrow: 'o tom maior', title: 'Segunda parte' },
+    sincope: { chip: 'Síncope', eyebrow: '3 + 3 + 2 contra a marcha', title: 'Síncope' },
     fotografia: { chip: 'Fotografia', eyebrow: 'parada da orquestra', title: 'Fotografia' },
     final: { chip: 'Final', eyebrow: 'o tema volta com todos', title: 'Fim' },
   },
@@ -867,21 +903,13 @@ const LAYOUTS = {
   caixa: () =>
     `<div class="notation">${CAIXA_CELL.map((text, i) => seqRow(i ? '' : T.cell, marks(text, ['X'], ['x']), COLOR.tarol, 'tarol')).join('')}</div>` +
     row(label(`● ${T.accent} · ○ ${T.soft} · ≈ ${T.rufo}`), T.caixaCount, 'tarol'),
-  pandeiro: () =>
-    `<div class="notation">${seqRow('', marks(PANDEIRO_BAR, ['X'], ['x']), COLOR.pandeiro, 'pandeiro')}</div>` +
-    row(label(`● ${T.grave}`, COLOR.pandeiro), countFromOne(cellSteps(PANDEIRO_BAR, 'X')), 'pandeiro') +
-    row(label(`○ ${T.platinela}`), countFromOne(cellSteps(PANDEIRO_BAR, 'x')), 'pandeiro'),
   tuba: scene =>
-    row(label(T.progression), progression(scene), 'tuba') + row(label(T.bassLine), T.bassLineValue, 'tuba') + row(label(T.approach), T.approachValue, 'tuba'),
+    row(label(T.progression), progression(scene), 'tuba') + row(label(T.walk), T.walkValue, 'tuba') + row(label(T.approach), T.approachValue, 'tuba'),
 };
 const ROLLS = {
-  palhetas: scene => ({
-    ...sceneRoll(scene, ['sax', 'clarinete'], ALTO_DA_SE),
+  tema: scene => ({
+    ...sceneRoll(scene, ['sax', 'trompete'], ALTO_DA_SE),
     rows: row(label(T.theme, COLOR.sax), T.themeValue) + row(label(T.altoDaSe), T.altoDaSeValue),
-  }),
-  metais: scene => ({
-    ...sceneRoll(scene, ['trompete', 'trombone']),
-    rows: row(label(T.call, COLOR.trompete), T.callValue) + row(label(T.under, COLOR.trombone), T.underValue),
   }),
   'la-e-ca': scene => ({
     ...sceneRoll(scene, ['sax', 'trompete']),
@@ -890,6 +918,10 @@ const ROLLS = {
   segunda: scene => ({
     ...sceneRoll(scene, ['sax', 'trompete'], ALTO_DA_SE),
     rows: row(label(T.major), T.majorValue) + row(label(T.peak), T.peakValue),
+  }),
+  sincope: scene => ({
+    ...sceneRoll(scene, ['sax', 'trompete']),
+    rows: row(label(T.groups, COLOR.sax), T.groupsValue) + row(label(T.march, COLOR.surdo), T.marchValue),
   }),
 };
 const FINAL = () =>
@@ -907,7 +939,7 @@ const FOTOGRAFIA = scene => {
  * instrument the whole readout is about (`focus`, '' for none), so a muted one shows disabled.
  */
 function readout(scene) {
-  const focus = scene.focus || (['surdo', 'pandeiro', 'tuba'].includes(scene.id) ? scene.id : '');
+  const focus = scene.focus || '';
   if (ROLLS[scene.id]) {
     const { markup, score, rows } = ROLLS[scene.id](scene);
     return { markup: rows + markup, score, focus };

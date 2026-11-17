@@ -17,7 +17,7 @@ const soundPath = (name, extension) => fileURLToPath(new URL(`../sounds/${name}$
 const allFiles = choices => [...FREVO.sounds.choices.flatMap(c => c.files(choices[c.id])), ...FREVO.sounds.fixedFiles];
 const PHONE_BYTES = 880_000; // every default sample of the melodic show, before Play (docs/frevo.md)
 
-test('frevo is 2/4 at one tempo on an 8-step wheel, eleven scenes as the script lists them', () => {
+test('frevo is 2/4 at one tempo on an 8-step wheel, ten scenes as the script lists them', () => {
   const meter = meterOf(FREVO);
   assert.equal(FREVO.bpm, 125); // the reference's tempo, inside the frevo-canção range (docs/frevo.md)
   assert.equal(meter.stepsPerBar, 8);
@@ -25,14 +25,13 @@ test('frevo is 2/4 at one tempo on an 8-step wheel, eleven scenes as the script 
     show.SCENES.map(scene => [scene.id, scene.bars]),
     [
       ['introducao', 4],
-      ['surdo', 4],
+      ['tema', 16],
+      ['surdo', 8],
       ['caixa', 8],
-      ['pandeiro', 4],
-      ['tuba', 8],
-      ['palhetas', 16],
-      ['metais', 8],
       ['la-e-ca', 16],
+      ['tuba', 8],
       ['segunda', 16],
+      ['sincope', 8],
       ['fotografia', 4],
       ['final', 16],
     ],
@@ -44,16 +43,36 @@ test('frevo is 2/4 at one tempo on an 8-step wheel, eleven scenes as the script 
     }
 });
 
-test('the parts enter one by one: surdo, caixa, pandeiro, tuba, the palhetas, then the metais', () => {
-  const firstBar = voice => {
-    for (let bar = FREVO.scenes[0].bars; bar < show.TOTAL_BARS; bar++) if (show.hitsInBar(bar).some(h => h.voice === voice)) return bar;
-    return null;
-  };
-  const order = ['surdo', 'tarol', 'pandeiro', 'tuba', 'sax', 'clarinete', 'trompete'].map(firstBar);
-  assert.deepEqual(
-    [...order].sort((a, b) => a - b),
-    order,
-  );
+test('the orchestra plays from the first bars: a scene features a part, it never leaves one alone', () => {
+  const voicesIn = bar => new Set(show.hitsInBar(bar).map(h => h.voice));
+  const tema = show.sceneById('tema');
+  assert.equal(tema.start, FREVO.scenes[0].bars, 'the tune follows the introduction');
+  assert.equal(voicesIn(tema.start).size, Object.keys(FREVO.voices).length - 1, 'everyone but the trompetes, who answer in the next bar');
+  assert.ok(voicesIn(tema.start + 1).has('trompete'));
+  assert.ok((FREVO_LINES.sax.get(tema.start - 1) || []).length > 0, 'the tune starts on its anacrusis');
+  const MIN_VOICES = 5; // the rhythm section, the tuba and one horn section at least
+  for (const scene of show.SCENES.slice(1))
+    for (let bar = 0; bar < scene.bars; bar++) {
+      if (scene.mode(bar) !== 'normal') continue;
+      const playing = new Set(show.hitsInBar(scene.start + bar).map(h => h.voice));
+      const allowed = new Set(scene.voices(bar));
+      const sounding = [...playing].filter(voice => allowed.has(voice));
+      const pair = [...sounding, ...[...voicesIn(scene.start + bar + (bar % 2 ? -1 : 1))].filter(voice => allowed.has(voice))];
+      assert.ok(new Set(pair).size >= MIN_VOICES, `${scene.id}, bar ${bar + 1}: ${[...new Set(pair)]}`);
+    }
+  // a featured part is louder in its scene, and something steps back for it
+  for (const [id, voice] of [
+    ['surdo', 'surdo'],
+    ['caixa', 'tarol'],
+    ['tuba', 'tuba'],
+  ]) {
+    const { gain } = show.sceneById(id);
+    assert.ok(gain[voice] > 1, `${id} does not feature ${voice}`);
+    assert.ok(
+      Object.values(gain).some(level => level < 1),
+      `${id}: nothing steps back`,
+    );
+  }
 });
 
 test('the caixa cell is twelve sixteenths, then the rufo, over two bars', () => {
@@ -63,7 +82,7 @@ test('the caixa cell is twelve sixteenths, then the rufo, over two bars', () => 
 });
 
 test('the pandeiro plays a sixteenth-note ostinato: every step of the bar, grave on each beat', () => {
-  const bar = show.sceneById('pandeiro').start;
+  const bar = show.sceneById('tema').start;
   const steps = show
     .hitsInBar(bar)
     .filter(h => h.voice === 'pandeiro')
@@ -101,18 +120,26 @@ test('every sound option has its files beside their WAV masters; the phone set s
   assert.ok(bytes < PHONE_BYTES, `the default samples weigh ${bytes} bytes`);
 });
 
-test('the tune is played three times, each with its pickup, and the second part moves to the relative major', () => {
-  const sax = (scene, bar) => JSON.stringify((FREVO_LINES.sax.get(show.sceneById(scene).start + bar) || []).map(note => [note.step, note.note, note.steps]));
+test('the tune is played three times whole, each with its pickup, and the second part moves to the relative major', () => {
+  const sax = (scene, bar) =>
+    JSON.stringify(
+      (FREVO_LINES.sax.get(show.sceneById(scene).start + bar) || [])
+        .filter(note => note.bar >= show.sceneById(scene).start || bar < 0)
+        .map(note => [note.step, note.note, note.steps]),
+    );
   const THEME_BARS = 14; // the bars every statement shares; the last two lead somewhere else each time
   for (const scene of ['la-e-ca', 'final']) {
-    for (let bar = 0; bar < THEME_BARS; bar++) assert.equal(sax(scene, bar), sax('palhetas', bar), `${scene}, bar ${bar + 1}`);
+    for (let bar = 0; bar < THEME_BARS; bar++) assert.equal(sax(scene, bar), sax('tema', bar), `${scene}, bar ${bar + 1}`);
   }
-  for (const scene of ['palhetas', 'la-e-ca', 'final']) assert.notEqual(sax(scene, -1), '[]', `no pickup into ${scene}`);
-  assert.notEqual(sax('segunda', 0), sax('palhetas', 0));
+  for (const scene of ['tema', 'la-e-ca', 'final', 'segunda']) assert.notEqual(sax(scene, -1), '[]', `no pickup into ${scene}`);
+  assert.notEqual(sax('segunda', 0), sax('tema', 0));
   const scenes = Object.fromEntries(FREVO.scenes.map(scene => [scene.id, scene]));
-  assert.equal(scenes.palhetas.chords[0], 'Gm');
+  assert.equal(scenes.tema.chords[0], 'Gm');
   assert.equal(scenes.segunda.chords[0], 'Bb');
   assert.equal(scenes.final.chords.at(-1), 'Gm', 'the show ends on the tonic');
+  // the tuba's scene: a walk in every bar, where the other scenes walk once in four
+  const eighths = scene => show.hitsInBar(show.sceneById(scene).start).filter(h => h.voice === 'tuba').length;
+  assert.ok(eighths('tuba') > eighths('tema'));
 });
 
 test('the horns sing: held notes of many lengths, sections of several players, the metais in the gaps of the tune', () => {
