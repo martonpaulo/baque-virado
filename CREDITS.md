@@ -16,6 +16,18 @@ trimmed, mixed or retuned.
 
 Alfaia patterns: the table at lansdownsoftware.com. Swing measured on a Batuk Nagô workshop recording.
 
+## Coco da Xambá
+
+- Alfaia, caixa, ganzá, agogô and abê reuse the samples above; the second alfaia head is the
+  answer sample played at a higher pitch.
+- Pandeiro and palmas are synthesized by `tools/make-coco-sounds.mjs` (original to this project,
+  2026-11): no CC0 recording could be fetched for them.
+- Sources: Tainá Menezes Castro, «Nação Xambá: identidade negra, tradição religiosa e estratégias
+  de difusão da sua cultura», ANPPOM 2018
+  (<https://anppom.org.br/anais/anaiscongresso_anppom_2018/5434/public/5434-18196-1-PB.pdf>);
+  Revista Continente, «O coco ancestral do Bongar». Neither writes the parts out: the patterns
+  in `src/rhythms/coco-xamba.js` are this project's reading.
+
 The score renderer (`src/score.js`) is original to this project, written in 2026-11.
 
 ## Fonts

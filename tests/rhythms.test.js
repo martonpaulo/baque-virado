@@ -9,10 +9,10 @@ import { TWO_FOUR } from './support/rhythm-two-four.js';
 
 const BOTH = [MARACATU, TWO_FOUR];
 
-test('the site ships one rhythm, maracatu, and shows it by default', () => {
+test('the site ships maracatu and the coco, and shows maracatu by default', () => {
   assert.deepEqual(
     RHYTHMS.map(rhythm => rhythm.id),
-    ['maracatu'],
+    ['maracatu', 'coco-xamba'],
   );
   assert.equal(RHYTHM, MARACATU);
 });
@@ -25,9 +25,9 @@ test('?ritmo=<id> picks a rhythm; an unknown or missing id falls back to maracat
 });
 
 test('the selector has no entry with one rhythm, and one link per rhythm with two', () => {
-  assert.deepEqual(rhythmChoices(MARACATU), []);
+  assert.deepEqual(rhythmChoices(MARACATU, [MARACATU]), []);
   assert.deepEqual(rhythmChoices(TWO_FOUR, BOTH), [
-    { id: 'maracatu', label: 'maracatu de baque virado', href: '?ritmo=maracatu', current: false },
+    { id: 'maracatu', label: 'Baque virado', href: '?ritmo=maracatu', current: false },
     { id: 'dois-por-quatro', label: 'dois por quatro', href: '?ritmo=dois-por-quatro', current: true },
   ]);
 });
