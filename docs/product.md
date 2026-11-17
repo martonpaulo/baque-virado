@@ -81,6 +81,11 @@ The rules every rhythm package in `src/rhythms/` follows.
 - **Feeling.** Each rhythm has its own feeling, from
   [`pernambuco-rhythms-feeling.md`](research/pernambuco-rhythms-feeling.md); no show copies
   another's mood.
+- **Script.** Only the maracatu brings its instruments in one at a time. Every other show starts
+  with the band already playing, as a track of the genre does, and each scene gives a highlight to
+  one characteristic of the rhythm (an accent, a cell, a call and response, a break), not
+  necessarily to an instrument: the other parts drop back for a few bars, then the band returns. A
+  show never leaves one instrument alone for long: some rhythms sound empty that way.
 - **Music.** Instrumental only. Every melody is original. Each show follows the owner's
   reference in [`references.md`](research/references.md), which also lists similar songs. One tempo for the whole show. A 2/4
   rhythm draws its bar on an 8-step wheel.
