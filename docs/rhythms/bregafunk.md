@@ -206,3 +206,40 @@ Each is optional, and maracatu, which uses none, is unchanged:
 - `voices[voice].pitched`: a melodic voice keeps its tuning, without the per-hit pitch jitter.
 - `background.create()`: a rhythm draws its own background layer in place of the kaleidoscope.
 - `wheelMotion(position, recent)`: the wheel leans and swells with the pulse.
+
+## Round two: a first reading of the references
+
+A reading made on 2026-11-17 from thirty-second previews, before the full recordings are in the lab
+([#48](https://github.com/martonpaulo/baque-virado/issues/48)). Three of the four references were
+read: «Viciou na Flauta» (two releases), «Tuf Tuf Pof Pof» (MC Reino) and «Dally» (Shevchenko e
+Elloco); the fourth is not named yet. Nothing here is built. The method is in
+[`../research/round-two.md`](../research/round-two.md).
+
+What the three share, by how far the measurement can be trusted:
+
+| Trait                | Evidence                                                                                                                                                                                                                   | Trust  |
+| :------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :----- |
+| Two tempos           | 171 BPM felt («Viciou na Flauta», «Dally») and 150 («Tuf Tuf Pof Pof» and the second release of «Viciou na Flauta»)                                                                                                        | High   |
+| Riffs of three notes | The melodic stem of each sits on a minor triad: A with B flat and D in «Viciou na Flauta», C sharp, E and G sharp in «Tuf Tuf Pof Pof», B flat, D flat and F in «Dally». Three pitch classes hold 90 % or more of the time | High   |
+| The drums stop       | The drum stem falls by 15 to 60 dB for one or two bars, about every eight bars, and comes back whole; the bass is absent for whole stretches and enters as an event                                                        | High   |
+| A short, low grave   | Bass notes of 1.3 to 2.5 sixteenths, from E1 to B flat 2: plucked, not held                                                                                                                                                | Medium |
+| Few hits a bar       | «Tuf Tuf Pof Pof» folds to three strong strokes a bar and three soft ones                                                                                                                                                  | Medium |
+| The cell             | Bumbo on 1 and 9, lata on 7 and 13 with a pick-up on 15: clean in «Tuf Tuf Pof Pof», and what the first round read in «Viciou na Flauta»                                                                                   | Medium |
+
+What the reading could not do: the bar fold came out smeared for three of the four excerpts (the
+bar line was not found reliably in thirty seconds that start mid-song), so the cell rests on one
+clean excerpt and the first round; and the length of a riff before it repeats did not measure. Both
+need the full recordings.
+
+Proposed elements for the show to exalt, for the owner to approve:
+
+1. **The beat as the hook**: bumbo and lata, few strokes, hard.
+2. **The grave**: short, tuned, following the bumbo.
+3. **A riff of three notes**, two bars long, repeated: the eight-bar tune of the first round is the
+   wrong shape for the genre.
+4. **The stop and the drop**: the drums vanish for a bar or two and come back whole.
+5. **Space**: what is left out.
+
+Proposed form, about 1:30, with a 30-second cut that loops: the riff alone for two bars; the beat
+drops; riff and beat; a stop; the grave enters; a longer stop with a rise; the drop with everything;
+a last stop and the end on the riff.
