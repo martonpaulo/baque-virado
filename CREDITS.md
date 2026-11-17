@@ -18,6 +18,9 @@ Alfaia patterns: the table at lansdownsoftware.com. Swing measured on a Batuk Na
 
 The score renderer (`src/score.js`) is original to this project, written in 2026-11.
 
+The brega funk sounds are synthesized in the page by `src/rhythms/brega-funk-sounds.js`, original to
+this project; its «tarol» lata choice reuses the tarol rim recording above.
+
 ## Fonts
 
 Space Grotesk (Copyright 2020 The Space Grotesk Project Authors) and JetBrains Mono (Copyright 2020
