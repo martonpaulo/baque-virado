@@ -67,6 +67,24 @@ From Freesound:
 - Hi-hats: blakengouda
 - Rooms (impulse responses): Tim_Verberne (small room), Nox_Sound (living room)
 
+## Manguebeat
+
+The manguebeat show (`sounds/manguebeat-*`, [`docs/rhythms/manguebeat.md`](docs/rhythms/manguebeat.md))
+reuses the alfaia recordings above, two alfaia hits of the zabumba group, and the studio's caixa and
+baixo groups. Its own files were trimmed to start on the stroke, faded, normalised to −1 dBFS and,
+for the guitar, retuned to equal temperament after measuring each chord's spectrum. All are CC0.
+
+- Distorted guitar power chords, from Freesound: SpeedY (E5, E5 up-strum, E5 two strings, D5 and
+  C5 palm-muted; freesound.org/s/11970, 11971, 11982, 11966, 11950) and stomachache (G5 and D♯5
+  held, the D♯5 retuned up to E5; freesound.org/s/49280, 49277).
+- Ganzá: the small shaker of [VCSL](https://github.com/sgossner/VCSL) (CC0, Sam Gossner), faster
+  strokes forward and back, two takes each.
+- Echo returns: the VCSL rope-tension snare (low, snares on, loudest layer, two takes) band-passed
+  from 500 Hz to 2.6 kHz; the repository's deep alfaia main and answer strokes band-passed from
+  90 Hz to 700 Hz.
+- Sampler: a worn record's crackle, hiss and rumble, synthesized for this project from a seeded noise
+  source (original, 2026-11).
+
 ## Fonts
 
 Space Grotesk (Copyright 2020 The Space Grotesk Project Authors) and JetBrains Mono (Copyright 2020
