@@ -15,6 +15,7 @@ here is built yet: the owner asked to record, research and understand first, and
 - [Order of work](#order-of-work)
 - [What the owner answered](#what-the-owner-answered)
 - [What is still missing](#what-is-still-missing)
+- [Musical graphics per rhythm](#musical-graphics-per-rhythm)
 - [Unfinished work kept](#unfinished-work-kept)
 
 ## What the owner asked
@@ -233,6 +234,36 @@ Per rhythm, pictures that belong to it:
 | Coco       | The roda seen from above; feet raising dust; hands meeting on the off-beat                         |
 
 Flashes stay within WCAG 2.3.1 and reduced motion is respected, as today.
+
+## Musical graphics per rhythm
+
+The owner, on 2026-11-17 (translated): «Vary the musical graphics: you are always using the same
+ones. You can show a score, tablature, other musical notations, the strings that are played,
+vibrations, comparisons between instruments, the position of the hands, the valves pressed on the
+instruments. You were using exactly the same things as for the maracatu, and we should not use the
+same in every rhythm.» ([#49](https://github.com/martonpaulo/baque-virado/issues/49), D36)
+
+Today every show draws the wheel of sixteenths, the scrolling lanes and a readout of counts; frevo,
+manguebeat and brega add a melody roll. They were made for the maracatu, a show of percussion parts
+on a cycle.
+
+A starting list to choose from with the owner, each tied to the rhythm's own instruments:
+
+| Rhythm     | Graphics                                                                                                                                                                                             |
+| :--------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Forró      | The sanfona's keyboard and bass buttons lighting as pressed, and its bellows opening and closing; the zabumba's two heads, maceta above and bacalhau below; the triângulo's hand closing and opening |
+| Frevo      | A score of the tune with a cursor; the trumpet's three valves pressed for each note; the trombone's slide position; the saxophone's keys; brass and reeds as two staves answering                    |
+| Manguebeat | Bass tablature and the guitar's fretboard with the power-chord shapes; the echo's repeats as fading copies; the alfaia's two hands                                                                   |
+| Brega      | The guitar's tablature for the thirds and sixths; the keyboard's keys for the theme; a map of the drum kit lighting; the chord symbols as they change                                                |
+| Bregafunk  | A producer's step grid and piano roll; the grave's pitch curve with its slides; the bumbo's waveform; the bar's 3 + 3 + 2 as blocks                                                                  |
+| Coco       | The hand on the pandeiro (thumb, fingers, slap); the feet of the pisada; the three atabaques side by side, compared by pitch and role; palmas as two hands meeting                                   |
+
+Across rhythms: a string or a drum head vibrating at the note's pitch; two instruments' waveforms
+or spectra side by side; the same cell in two notations.
+
+Each graphic stays a function of the show position, so the video export matches playback, reads on
+a phone and respects reduced motion. Open for the owner: whether the wheel stays in every show as
+the site's common ground, or a rhythm may replace it.
 
 ## Unfinished work kept
 
