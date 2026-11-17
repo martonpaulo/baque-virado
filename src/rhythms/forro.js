@@ -420,6 +420,14 @@ const REED_BRIGHT = [5000, 18000];
 // 95 Hz and dies sooner. Played faster, the takes come up to it; the one take already there stays.
 const ZABUMBA_TUNING = 1.45;
 const ZABUMBA_IN_TUNE = 'zabumba-aberto-8';
+// The whole band against the reference's long-term spectrum: more below 120 Hz, less around 750 Hz
+// and 3 kHz, more air above 9 kHz.
+const BUS_TONE = [
+  { type: 'lowshelf', frequency: 130, gain: 5.5 },
+  { type: 'peaking', frequency: 750, gain: -3.5, Q: 0.8 },
+  { type: 'peaking', frequency: 3000, gain: -2, Q: 1 },
+  { type: 'highshelf', frequency: 9000, gain: 6 },
+];
 const RETURN_STRINGS = 3;
 const RING = 1.6; // a plucked note rings past its written length
 /** A hit's tone read back: its notes (MIDI), its length in seconds and whether it slides in. */
@@ -434,7 +442,7 @@ const STUDIO = {
   output: 0.55, // under the master compressor, so the zabumba keeps its punch
   lead: 'grave',
   phraseBars: PHRASE_BARS,
-  tone: [{ type: 'lowshelf', frequency: 110, gain: 2.5 }], // the reference carries more below 120 Hz
+  tone: BUS_TONE,
   voices: {
     grave: {
       seed: 11,
@@ -461,7 +469,7 @@ const STUDIO = {
     triangulo: {
       seed: 13,
       role: 'follower',
-      gain: 0.45,
+      gain: 0.23,
       pan: 0.35,
       send: 0.22,
       template: lilt(STEPS_PER_BAR, STEP_MS, TRIANGLE_LILT),
@@ -492,7 +500,7 @@ const STUDIO = {
     baixo: {
       seed: 15,
       role: 'follower',
-      gain: 0.7,
+      gain: 0.5,
       pan: 0,
       send: 0.06,
       bright: [700, 5000],
@@ -505,7 +513,7 @@ const STUDIO = {
     cavaquinho: {
       seed: 16,
       role: 'follower',
-      gain: 0.4,
+      gain: 0.7,
       pan: 0.45,
       send: 0.18,
       template: lilt(STEPS_PER_BAR, STEP_MS, 0, 3),
@@ -546,8 +554,8 @@ const STUDIO = {
     rabeca: {
       seed: 18,
       role: 'follower',
-      gain: 0.4,
-      pan: 0.25,
+      gain: 0.62,
+      pan: -0.4,
       send: 0.3,
       vibrato: BOW.vibrato,
       strokes: () => ({ curta: takes('rabeca-spic'), longa: takes('rabeca-arco') }),
