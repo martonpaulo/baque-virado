@@ -339,12 +339,15 @@ for (const scene of SCENE_LIST) if (scene.named) scene.pattern = scene.id;
 const { starts: SCENE_STARTS, total: TOTAL_BARS } = sceneStarts(SCENE_LIST);
 const sceneOfBar = bar => SCENE_LIST.findLastIndex((_, i) => SCENE_STARTS[i] <= bar);
 
-/** The written hits of an absolute bar, before the echoes. */
+/** The written hits of an absolute bar, before the echoes: only the voices the scene plays in that bar. */
 const sourceCache = new Map();
 function sourceHits(bar) {
   if (!sourceCache.has(bar)) {
-    const index = sceneOfBar(bar);
-    sourceCache.set(bar, { ...silentBar(), ...SCENE_LIST[index].parts(bar - SCENE_STARTS[index]) });
+    const scene = SCENE_LIST[sceneOfBar(bar)],
+      barInScene = bar - SCENE_STARTS[sceneOfBar(bar)],
+      playing = scene.voices ? scene.voices(barInScene) : ALL,
+      parts = scene.parts(barInScene);
+    sourceCache.set(bar, { ...silentBar(), ...Object.fromEntries(playing.filter(voice => parts[voice]).map(voice => [voice, parts[voice]])) });
   }
   return sourceCache.get(bar);
 }
