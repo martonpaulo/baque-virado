@@ -435,7 +435,8 @@ test('on phones only the stage shows, and a tap on it plays and pauses', async (
   );
   assert.deepEqual(visible, []);
   assert.equal(await page.$eval('#tapLabel', element => element.textContent), COPY.controls.play);
-  await page.click('#stage');
+  // the rhythm links sit under Play on a stopped phone stage, so a viewer taps Play itself
+  await page.click('#tapLabel');
   await page.waitForFunction(() => document.getElementById('tap').dataset.state === 'pause');
   await page.click('#stage');
   // paused at the start the stage offers «Tocar», after the first frame «Continuar»: either is paused
@@ -555,7 +556,7 @@ test('with a second rhythm, ?ritmo= plays it on its own wheel and the selector s
     ['/maracatu', null],
     ['/dois-por-quatro', 'true'],
   ]);
-  await page.click('#tap');
+  await page.click('#tapLabel'); // the rhythm links fill the middle of the stopped stage
   await page.waitForFunction(() => document.getElementById('tap').dataset.state === 'pause');
   assert.equal(await visible(page, '.rhythms-stage'), false);
   await page.click('#tap');

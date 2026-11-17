@@ -575,13 +575,24 @@ a:focus-visible {
   overflow: hidden;
   text-overflow: ellipsis;
 }
+/* phones: Play and its time, then the rhythms one per line under them; the pair stays centred on
+   the stage (owner, 2026-11-17). --tap-lift moves Play up by half the selector's height. */
+.tap,
+.rhythms-stage {
+  --tap-lift: 32cqw;
+}
+.tap:where(:not([data-state="pause"])) {
+  padding-bottom: calc(2 * var(--tap-lift));
+}
 .rhythms-stage {
   position: absolute;
   left: 0;
   right: 0;
-  top: calc(50% + 18cqw);
+  top: calc(50% - var(--tap-lift) + 16cqw);
   z-index: 6;
-  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
 }
 .tap:where([data-state="pause"]) ~ .rhythms-stage {
   display: none;
