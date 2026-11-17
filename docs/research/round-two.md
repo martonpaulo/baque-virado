@@ -176,7 +176,9 @@ two agents run at once, and the rendered audio goes to the owner before each dep
 
 ## What the owner answered
 
-- **Brega:** four references, after the owner took «Ainda Bem» out (2026-11-17).
+- **Brega:** five references. The owner took «Ainda Bem» out and put it back the same day
+  (2026-11-17), in Banda Lapada's performance on SuperStar; «Diz na Minha Cara» is Banda Torpedo's
+  recording (D40).
 - **Bregafunk:** the fourth reference is «Cafajeste», MC Cego Abusado.
 - **In the background a show pauses, as a video does**, and resumes where it stopped when the viewer
   comes back ([#45](https://github.com/martonpaulo/baque-virado/issues/45), D35).

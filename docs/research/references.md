@@ -6,7 +6,7 @@ removed on 2026-11-17.
 
 How to use this list:
 
-- A rhythm has four references and they weigh the same: none is «the main one» and none is only a
+- A rhythm has four references (the brega has five) and they weigh the same: none is «the main one» and none is only a
   «similar song». What the four share is the rhythm; what only one has is that song.
 - Listen to, or measure, the whole of each recording, every section of it (introduction, verse,
   chorus, breaks, solos, ending), not a thirty-second excerpt.
@@ -67,6 +67,7 @@ whole video, especially from 18:00.
    (https://youtu.be/pWJ6B1rP7IY); other versions count too.
 3. «Novo Namorado», Priscila Senna. [search](https://www.youtube.com/results?search_query=Priscila+Senna+Novo+Namorado)
 4. «Milk Shake», Nega do Babado. [search](https://www.youtube.com/results?search_query=Nega+do+Babado+Milk+Shake)
+5. «Ainda Bem», Banda Lapada, as played on the television show SuperStar (Globo).
 
 ## Bregafunk (`/bregafunk`)
 
