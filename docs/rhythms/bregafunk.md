@@ -278,5 +278,6 @@ What the whole recordings add to the first reading:
 
 What this changes in the accepted plan: the grave follows the riff, not only the bumbo; and the
 form may tease for a few bars before the first drop, as the references do, while still opening on
-the hook ([`../research/round-two.md`](../research/round-two.md), «What is still missing»). Both are
-for the owner to confirm.
+the hook ([`../research/round-two.md`](../research/round-two.md), «What is still missing»). The owner
+approved both on 2026-11-17 (D39): the grave plays the riff's notes, and four to eight bars tease
+before the first drop, no longer, because the show has no voice to hold a listener.
