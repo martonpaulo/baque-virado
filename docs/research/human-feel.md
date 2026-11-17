@@ -13,31 +13,31 @@ or a secondary summary was reached, the entry says so.
   dynamics, emotion, random variation, motion-like shapes and stylistic surprise (the GERMS model).
   Random variation is one of five layers, not the whole of "human". Source: Juslin, P. N. (2003),
   "Five facets of musical expression: a psychologist's perspective on musical expression",
-  *Psychology of Music* 31. Secondary summaries only:
+  _Psychology of Music_ 31. Secondary summaries only:
   https://eprints.whiterose.ac.uk/id/eprint/43014/1/WRRO_43014.pdf
 - Performers shape timing and loudness from musical structure (phrase, meter, grouping). Listeners
   recover the intended interpretation from these cues. Source: Palmer, C. (1997), "Music
-  performance", *Annual Review of Psychology* 48:115-138, https://doi.org/10.1146/annurev.psych.48.1.115
+  performance", _Annual Review of Psychology_ 48:115-138, https://doi.org/10.1146/annurev.psych.48.1.115
   (abstract).
 - The KTH rule system models phrasing, micro-timing, metrical patterns and grooves, articulation,
   tonal tension, intonation, ensemble timing and **performance noise** as separate rules, each
-  scaled by a quantity *k*. "Medium" *k* was the musically preferred level; exaggerated values
+  scaled by a quantity _k_. "Medium" _k_ was the musically preferred level; exaggerated values
   sounded wrong. Sources: Friberg, A., Bresin, R. & Sundberg, J. (2006), "Overview of the KTH rule
-  system for musical performance", *Advances in Cognitive Psychology* 2(2-3):145-161,
+  system for musical performance", _Advances in Cognitive Psychology_ 2(2-3):145-161,
   https://doaj.org/article/b9777deda14d4bfd918b6112f9f21c85 (abstract); KTH rule demo page,
   https://www.speech.kth.se/music/performance/performance_intro.html
 - Final ritardandi follow the deceleration curve of runners stopping (constant braking power).
   Source: Friberg, A. & Sundberg, J. (1999), "Does music performance allude to locomotion? A model
-  of final ritardandi derived from measurements of stopping runners", *JASA*,
+  of final ritardandi derived from measurements of stopping runners", _JASA_,
   https://doi.org/10.1121/1.426687 (abstract and secondary summaries).
 - Timing detection threshold in an isochronous sequence: about **6 ms** absolute for inter-onset
   intervals under ~240 ms, about **2.5 %** of the interval above that. Source: Friberg, A. &
-  Sundberg, J. (1995), "Time discrimination in a monotonic, isochronous sequence", *JASA*
+  Sundberg, J. (1995), "Time discrimination in a monotonic, isochronous sequence", _JASA_
   98(5):2524-2531, https://doi.org/10.1121/1.413218 (abstract).
 - A repeated, identical drum stroke is heard as less alive: in a 100-person study, drumming with
   small random loudness and timing variation produced more vivid mental imagery than identical
   strokes. Source: Ayyildiz, C., Milne, A. J., Irish, M. & Herff, S. A. (2025), "Micro-variations
-  in timing and loudness affect music-evoked mental imagery", *Scientific Reports*,
+  in timing and loudness affect music-evoked mental imagery", _Scientific Reports_,
   https://doi.org/10.1038/s41598-025-12604-4 (abstract).
 
 ### Inference
@@ -63,7 +63,7 @@ or a secondary summary was reached, the entry says so.
   first recording repeated 20 times scored median **0** ("very unrealistic"). Stimuli were
   time-quantized and loudness-normalized, so the gap is timbre alone. Filter-generated variants
   of one sample scored only "slightly realistic" (median 40-60). Source: Fagerström, J., Schlecht,
-  S. J. & Välimäki, V. (2021), "One-to-many conversion for percussive samples", *Proc. DAFx20in21*
+  S. J. & Välimäki, V. (2021), "One-to-many conversion for percussive samples", _Proc. DAFx20in21_
   129-135, https://dafx2020.mdw.ac.at/proceedings/papers/DAFx20in21_paper_22.pdf (full text).
 - The same paper's variation filter: a velvet-noise filter (8 pulses, 2-30 ms long, 20 dB decay)
   added to the dry sample, with a first-order low shelf that keeps low frequencies stable (snare:
@@ -72,18 +72,18 @@ or a secondary summary was reached, the entry says so.
 - Strokes on a drum are not perceptually identical even when the player intends them to be, and a
   pilot study found these differences change the character of a pattern. Source: Rath, M. &
   Wältermann, M. (2007), "Exploring the perceptual relevance of inherent variability of drum
-  sounds", *CMMR 2007*, https://researchr.org/publication/RathW07 (abstract).
+  sounds", _CMMR 2007_, https://researchr.org/publication/RathW07 (abstract).
 - Drummers change the sound, not only the time: laid-back strokes were louder than on-beat
   strokes, and faster tempo raised level and lowered spectral centroid. Source: Danielsen, A.,
   Waadeland, C. H., Sundt, H. G. & Witek, M. A. G. (2015), "Effects of instructed timing and tempo
-  on snare drum sound in drum kit performance", *JASA* 138(4):2301-2316,
+  on snare drum sound in drum kit performance", _JASA_ 138(4):2301-2316,
   https://doi.org/10.1121/1.4930950 (abstract).
 - Velocity mode picks a layer by velocity. Example split for 4 layers: 0-63, 64-90, 91-117, 118-127; very soft velocities are
-  rare in playing. Source: "Larry the O" (2015), "Studio One: Impact", *Sound On Sound*,
+  rare in playing. Source: "Larry the O" (2015), "Studio One: Impact", _Sound On Sound_,
   https://www.soundonsound.com/techniques/rinse-repeat
 - Roger Linn: a drummer who played every hi-hat note at the same volume "would sound like a bad
   drum machine". Source: Scarth, G. (2013), "Roger Linn on swing, groove and the magic of the MPC's
-  timing", *Attack Magazine*,
+  timing", _Attack Magazine_,
   https://www.attackmagazine.com/features/interview/roger-linn-swing-groove-magic-mpc-timing/
 
 ### Inference
@@ -108,12 +108,12 @@ or a secondary summary was reached, the entry says so.
   significantly preferred a song humanized with 1/f-type deviations over the same song with white
   noise deviations of the same size, and judged it more precise. Commercial humanize functions
   "generally apply white noise". Source: Hennig, H. et al. (2011), "The nature and perception of
-  fluctuations in human musical rhythms", *PLoS ONE* 6(10):e26457,
+  fluctuations in human musical rhythms", _PLoS ONE_ 6(10):e26457,
   https://doi.org/10.1371/journal.pone.0026457 (full text; numeric values were not in the
   extracted text).
 - Two players' timing errors are long-range **cross**-correlated: each follows the other's drift.
   Source: Hennig, H. (2014), "Synchronization in human musical rhythms and mutually interacting
-  complex systems", *PNAS* 111(36):12974-12979, https://doi.org/10.1073/pnas.1324142111 (abstract).
+  complex systems", _PNAS_ 111(36):12974-12979, https://doi.org/10.1073/pnas.1324142111 (abstract).
 - Jeff Porcaro, one-handed hi-hat, 96 BPM: 16th-note interval SD **8.7 ms** (about 5.5 % of
   157 ms), roughly Gaussian. Short range: anticorrelated (DFA alpha 0.31, lag-1 r = -0.48), so a
   long interval tends to be followed by a short one. Long range (beyond ~2 bars, 5-8 s): correlated
@@ -122,9 +122,9 @@ or a secondary summary was reached, the entry says so.
   tempo drift, no click. Accents on every second 16th; the pattern reads high, low, medium, low,
   very high, low, medium, low. Source: Räsänen, E., Pulkkinen, O., Virtanen, T., Zollner, M. &
   Hennig, H. (2015), "Fluctuations of hi-hat timing and dynamics in a virtuoso drum track of a
-  popular music recording", *PLoS ONE* 10(6):e0127902,
+  popular music recording", _PLoS ONE_ 10(6):e0127902,
   https://doi.org/10.1371/journal.pone.0127902 (full text).
-- Systematic microtiming applied to synthesized jazz, funk and samba patterns *lowered* groove,
+- Systematic microtiming applied to synthesized jazz, funk and samba patterns _lowered_ groove,
   liking and naturalness ratings, except a simple jazz shuffle; experts were more sensitive.
   Source: Davies, M., Madison, G., Silva, P. & Gouyon, F. (2013), "The effect of microtiming
   deviations on the perception of groove in short rhythms" (2013; venue not confirmed by me),
@@ -134,14 +134,14 @@ or a secondary summary was reached, the entry says so.
   timing grid", https://doi.org/10.1177/1029864913486793 (abstract).
 - Original expert microtiming and full quantization got equally high groove ratings; exaggerated
   microtiming lowered them. Experts moved more to microtiming reduced by 60 % than to quantized.
-  Sources: Senn, O., Kilchenmann, L., von Georgi, R. & Bullerjahn, C. (2016), *Frontiers in
-  Psychology* 7:1487, https://doi.org/10.3389/fpsyg.2016.01487; Kilchenmann, L. & Senn, O. (2015),
+  Sources: Senn, O., Kilchenmann, L., von Georgi, R. & Bullerjahn, C. (2016), _Frontiers in
+  Psychology_ 7:1487, https://doi.org/10.3389/fpsyg.2016.01487; Kilchenmann, L. & Senn, O. (2015),
   "Microtiming in swing and funk affects the body movement behavior of music expert listeners",
-  *Frontiers in Psychology* 6:1232, https://doi.org/10.3389/fpsyg.2015.01232 (abstracts).
+  _Frontiers in Psychology_ 6:1232, https://doi.org/10.3389/fpsyg.2015.01232 (abstracts).
 - Across 248 sample-rebuilt drum patterns and 665 listeners, residual microtiming had no effect on
   groove; syncopation and event density had small effects; liking the style had the largest.
   Source: Senn, O. et al. (2018), "Groove in drum patterns as a function of both rhythmic
-  properties and listeners' attitudes", *PLoS ONE* 13(6):e0199604,
+  properties and listeners' attitudes", _PLoS ONE_ 13(6):e0199604,
   https://doi.org/10.1371/journal.pone.0199604 (abstract).
 - Linn: 50 % is straight, 66 % is triplet swing, 54 % "will loosen up the feel without it sounding
   like swing"; random timing variations "never ... do much good" if swing and dynamics are right.
@@ -149,7 +149,7 @@ or a secondary summary was reached, the entry says so.
 - Samba: systematic anticipation of the **3rd and 4th 16th** of each beat; a slight delay of the
   1st 16th in the low register; accelerando-ritardando over two- and four-beat groups. Sources:
   Naveda, L., Gouyon, F., Guedes, C. & Leman, M. (2011), "Microtiming patterns and interactions
-  with musical properties in samba music", *JNMR* 40(3):225-238,
+  with musical properties in samba music", _JNMR_ 40(3):225-238,
   https://doi.org/10.1080/09298215.2011.603833 (abstract); Haugen, M. R. (2014), Sysmus14,
   https://journals.gold.ac.uk/sysmus14/article/view/233 (confirms the 3rd/4th anticipation in
   audio, heel taps and dance steps).
@@ -157,14 +157,14 @@ or a secondary summary was reached, the entry says so.
   16ths; never an isochronous counterexample. Two baque virado nações (Encanto da Alegria, Leão
   Coroado) **4 km apart have different profiles**. The gonguê works as an explicit time line,
   varied in most nações but a fixed ostinato in Leão Coroado. Source: Guillot, G. (2015/2020),
-  "Multi-level anisochrony in Afro-Brazilian music", *GMTH Proceedings 2015* 406-421,
+  "Multi-level anisochrony in Afro-Brazilian music", _GMTH Proceedings 2015_ 406-421,
   https://storage.gmth.de/proceedings/articles/200/pdf/gmth-proceedings-artikel-200.pdf (full
   text; the profiles are figures, no numbers in text).
 - **Maracatu de baque solto**: microtiming is dynamic, no single profile fits; it depends on which
   instrument is taken as time-keeper (porca and gonguê as keepers, tarol and bombo as expressive);
   profiles differ substantially from samba. Source: Davies, M., Fuentes, M., Fonseca, J., Aly, L.,
   Jerónimo, M. & Bonini Baraldi, F. (2020), "Moving in time: computational analysis of microtiming
-  in maracatu de baque solto", *ISMIR 2020*, https://program.ismir2020.net/poster_6-04.html
+  in maracatu de baque solto", _ISMIR 2020_, https://program.ismir2020.net/poster_6-04.html
   (abstract).
 
 ### Inference
@@ -194,10 +194,10 @@ or a secondary summary was reached, the entry says so.
 - In string quartets each player corrects a fraction of the asynchrony with the others; optimal
   gain about 0.25; a leader corrects less (0.1) than followers (0.2). Sources: Wing, A. M., Endo,
   S., Bradbury, A. & Vorberg, D. (2014), "Optimal feedback correction in string quartet
-  synchronization", *J. R. Soc. Interface* 11:20131125,
-  https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3928944/; Wing et al. (2014), *Frontiers*,
+  synchronization", _J. R. Soc. Interface_ 11:20131125,
+  https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3928944/; Wing et al. (2014), _Frontiers_,
   https://pmc.ncbi.nlm.nih.gov/articles/PMC4196478
-- Ensemble onset spread: principal players 30-50 ms ahead in trios (Rasch 1979, *Acustica*
+- Ensemble onset spread: principal players 30-50 ms ahead in trios (Rasch 1979, _Acustica_
   43:121-131, via Goebl et al. 2010); asynchrony SD 32-49 ms in trios (Wing et al., Frontiers).
 
 ### Inference
@@ -218,7 +218,7 @@ or a secondary summary was reached, the entry says so.
 - Simulated snare and kick bleed into tom microphones, plus tom sympathetic resonance, could not be
   told apart from real recordings in a listening test. Source: Clifford, A., Lindsay-Smith, H. &
   Reiss, J. (2012), "Simulating microphone bleed and tom-tom resonance in multisampled drum
-  workstations", *Proc. DAFx-12*, https://dafx.de/paper-archive/details/BgAqKJIXpWvXj8K5x2uAHg
+  workstations", _Proc. DAFx-12_, https://dafx.de/paper-archive/details/BgAqKJIXpWvXj8K5x2uAHg
   (abstract).
 
 ### Inference
@@ -239,11 +239,11 @@ or a secondary summary was reached, the entry says so.
 
 - Singer vibrato: rate about **5-7 Hz**, extent about 6-8 % of F0 (secondary attribution); rate
   rises near the end of long notes. Source: Prame, E. (1994), "Measurements of the vibrato rate of
-  ten singers", *JASA* 96:1979-1984 (secondary summaries,
+  ten singers", _JASA_ 96:1979-1984 (secondary summaries,
   https://pubs.asha.org/doi/10.1044/2014_JSLHR-H-13-0219).
 - Accordion players distinguish bellows attacks from finger attacks, with different harmonic
   build-up; a downward pitch bend comes from more bellows pressure with a partly opened pallet.
-  Source: *Acoustics in Practice* 2021 article on accordion acoustics,
+  Source: _Acoustics in Practice_ 2021 article on accordion acoustics,
   https://www.euracoustics.org/documents/14/AiP_2021_02_Accordion_acoustics.pdf (search summary
   only; authors not confirmed by me).
 
@@ -270,7 +270,7 @@ Numbers marked [src] come from a source above; [set] are starting values to tune
    band. Louder layers should be brighter, not only louder [src: Danielsen 2015].
 3. **Synthetic fallback.** When only one take exists, add a short velvet-noise filter (8 pulses,
    2-4 ms for skins, ~30 ms for metals) behind a low shelf so lows stay stable [src: Fagerström
-   2021]. Add ±1-2 % random playback rate (about ±20-35 cents) [set].
+2021]. Add ±1-2 % random playback rate (about ±20-35 cents) [set].
 4. **Dynamics follow the meter, then wander.** Each voice has a per-step accent map over one or
    two bars (for example high, low, medium, low ... on 16ths) [src: Räsänen 2015]. On top, add
    amplitude variation of about ±1.5-3 dB [set], **long-range correlated** (1/f-type, e.g. sum of
@@ -284,7 +284,7 @@ Numbers marked [src] come from a source above; [set] are starting values to tune
    that keep time.
 6. **Never white jitter alone.** Hennig 2011 and Linn both reject it; quantized can rate as well
    as original timing [src: Senn 2016], and exaggerated microtiming rates worse [src: Davies 2013,
-   Frühauf 2013]. Cap any single offset at about 20 ms [set; Räsänen bounded at ±20 ms].
+Frühauf 2013]. Cap any single offset at about 20 ms [set; Räsänen bounded at ±20 ms].
 7. **Couple players.** Each follower corrects 0.2-0.25 of its asynchrony to the time-keeper per
    beat; the lead corrects ~0.1 [src: Wing 2014]. The time-keeper is the gonguê in baque virado
    [src: Guillot]; agogô or ganzá style shakers elsewhere [set].
@@ -294,7 +294,7 @@ Numbers marked [src] come from a source above; [set] are starting values to tune
 9. **Pattern variation every 2-4 bars.** Each voice holds several variants of its pattern (from
    transcriptions); pick a variant every 2 or 4 bars, weighted so the core pattern plays most of
    the time and the core onsets almost never drop [src for the "emergent core": Guillot; rates
-   are set]. Add a fill on the last bar of each 4- or 8-bar phrase.
+are set]. Add a fill on the last bar of each 4- or 8-bar phrase.
 10. **Lead drum improvises inside rules.** The lead voice (mestre's alfaia, zabumba lead, caixa
     lead) plays from a larger variant pool, varies every bar, answers calls (whistle or voice)
     with the next downbeat, and has the largest dynamic range. Followers keep variation low [set].
@@ -329,7 +329,7 @@ Numbers marked [src] come from a source above; [set] are starting values to tune
     [set]; accordion bellows as a slow envelope over several notes, with bellows versus finger
     attacks as different samples [src: accordion acoustics 2021].
 15. **Test by A/B with players.** Expertise and taste change ratings most [src: Senn 2018; Davies
-    2013]; validate each style with Pernambuco musicians or recordings, not with lab norms.
+2013]; validate each style with Pernambuco musicians or recordings, not with lab norms.
 
 Not found this session: Gerischer (2006) and Clarke (1989) full texts, ms values for any Brazilian
 microtiming profile, and any study of coco, frevo, forró or brega timing. Engine note: the

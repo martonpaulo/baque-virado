@@ -12,20 +12,20 @@ Source access caveat: most academic items were checked through abstracts, catalo
 
 ### Confirmed
 
-- A perfect grid is not the enemy of groove in listeners' ears. Davies, Madison, Silva and Gouyon (2013, "The Effect of Microtiming Deviations on the Perception of Groove in Short Rhythms", Music Perception; record: https://repositorio.inesctec.pt/items/38083482-243e-4090-bfa6-735d148ee1ff) found that added systematic microtiming *lowered* groove, liking and naturalness ratings for jazz, funk and samba patterns, except a simple short-long jazz shuffle. Experts penalised it more. A later review (Frontiers in Psychology 2016, https://pmc.ncbi.nlm.nih.gov/articles/PMC5050221) summarises that fully quantized stimuli got the highest groove ratings.
-- The quantized beat is a historical aesthetic, not an accident. Danielsen (ed., 2010, *Musical Rhythm in the Age of Digital Reproduction*, Ashgate; contents: https://find.library.upenn.edu/catalog/9977069895303681) collects studies on this. Relevant chapters: Zeiner-Henriksen on bass-drum sounds and movement in electronic dance music, Brøvig-Hanssen on the "cut-and-paste groove", Harkins on microsampling in UK garage, Bjerke on timbre and microrhythmic tension, Kvifte on the analogue experience in digital production.
-- Brøvig-Hanssen and Danielsen (2016, *Digital Signatures: The Impact of Digitization on Popular Music Sound*, MIT Press; review record: https://cambridge.org/core/journals/popular-music/article/digital-signatures-the-impact-of-digitization-on-popular-music-sound-by-ragnhild-brovighanssen-and-anne-danielsen-cambridge-ma-the-mit-press-2016-188-pp-isbn-9780262034142/A012476F8D37DAD9DD49BE0F822D3AAB) argue that audible digital traces (MIDI and sampling, cut-and-paste, digital silence, glitches, microrhythmic manipulation, autotune) became expressive signatures in their own right. They contrast digital silence with tape hiss in Portishead's "Stranger".
-- Butler (2006, *Unlocking the Groove: Rhythm, Meter, and Musical Design in Electronic Dance Music*, Indiana UP; https://search.worldcat.org/title/61162077) locates EDM's interest in metrical ambiguity, metrical dissonance and multi-measure patterning, not in timing deviation. Interest comes from how layers line up against each other over many bars.
+- A perfect grid is not the enemy of groove in listeners' ears. Davies, Madison, Silva and Gouyon (2013, "The Effect of Microtiming Deviations on the Perception of Groove in Short Rhythms", Music Perception; record: https://repositorio.inesctec.pt/items/38083482-243e-4090-bfa6-735d148ee1ff) found that added systematic microtiming _lowered_ groove, liking and naturalness ratings for jazz, funk and samba patterns, except a simple short-long jazz shuffle. Experts penalised it more. A later review (Frontiers in Psychology 2016, https://pmc.ncbi.nlm.nih.gov/articles/PMC5050221) summarises that fully quantized stimuli got the highest groove ratings.
+- The quantized beat is a historical aesthetic, not an accident. Danielsen (ed., 2010, _Musical Rhythm in the Age of Digital Reproduction_, Ashgate; contents: https://find.library.upenn.edu/catalog/9977069895303681) collects studies on this. Relevant chapters: Zeiner-Henriksen on bass-drum sounds and movement in electronic dance music, Brøvig-Hanssen on the "cut-and-paste groove", Harkins on microsampling in UK garage, Bjerke on timbre and microrhythmic tension, Kvifte on the analogue experience in digital production.
+- Brøvig-Hanssen and Danielsen (2016, _Digital Signatures: The Impact of Digitization on Popular Music Sound_, MIT Press; review record: https://cambridge.org/core/journals/popular-music/article/digital-signatures-the-impact-of-digitization-on-popular-music-sound-by-ragnhild-brovighanssen-and-anne-danielsen-cambridge-ma-the-mit-press-2016-188-pp-isbn-9780262034142/A012476F8D37DAD9DD49BE0F822D3AAB) argue that audible digital traces (MIDI and sampling, cut-and-paste, digital silence, glitches, microrhythmic manipulation, autotune) became expressive signatures in their own right. They contrast digital silence with tape hiss in Portishead's "Stranger".
+- Butler (2006, _Unlocking the Groove: Rhythm, Meter, and Musical Design in Electronic Dance Music_, Indiana UP; https://search.worldcat.org/title/61162077) locates EDM's interest in metrical ambiguity, metrical dissonance and multi-measure patterning, not in timing deviation. Interest comes from how layers line up against each other over many bars.
 - Swing is a quantized parameter. Roger Linn (Scarth and Linn, 2013, "Roger Linn on Swing, Groove & the Magic of the MPC's Timing", Attack Magazine, https://www.attackmagazine.com/features/interview/roger-linn-swing-groove-magic-mpc-timing/): swing is applied to quantized 16ths; 50% is straight; 66% is perfect triplet swing; 54% "will loosen up the feel without it sounding like swing"; "a 90 BPM swing groove will feel looser at 62% than at a perfect swing setting of 66%"; useful settings live between 50% and about 70%. He introduced swing and record quantization in the LM-1 (1979), and his software plays notes exactly on their computed position.
 - Frane (2017, "Swing Rhythm in Classic Drum Breaks From Hip-Hop's Breakbeat Canon", Music Perception 34(3), https://www.sciencegate.app/document/10.1525/mp.2017.34.3.291) measured 16th-note swing in 30 canonical breaks; sampled breaks carry their swing into machine music.
-- J Dilla's "drunk" feel combined unquantized pad playing with MPC swing (MusicRadar, "How J Dilla and his MPC changed beatmaking forever", https://www.musicradar.com/artists/djs-producers/every-producer-bows-down-to-dilla-whether-they-like-it-or-not-how-j-dilla-and-his-mpc-changed-beatmaking-forever). Ethan Hein (2022, "Dilla Time", https://ethanhein.com/wp/2022/dilla-time/) stresses that the deviations *repeat* every loop, and repetition magnifies them. Book-length source: Dan Charnas, *Dilla Time* (2022).
+- J Dilla's "drunk" feel combined unquantized pad playing with MPC swing (MusicRadar, "How J Dilla and his MPC changed beatmaking forever", https://www.musicradar.com/artists/djs-producers/every-producer-bows-down-to-dilla-whether-they-like-it-or-not-how-j-dilla-and-his-mpc-changed-beatmaking-forever). Ethan Hein (2022, "Dilla Time", https://ethanhein.com/wp/2022/dilla-time/) stresses that the deviations _repeat_ every loop, and repetition magnifies them. Book-length source: Dan Charnas, _Dilla Time_ (2022).
 - Funk carioca was built on a machine loop. Early baile funk sampled DJ Battery Brain's "8 Volt Mix"; in 1998 DJ Luciano added capoeira, candomblé and maculelê drum samples over the 808 bass and named the result tamborzão (García, 2017, "What Is Funk Proibidão?", RBMA Daily, https://daily.redbullmusicacademy.com/2017/04/what-is-funk-proibidao). Caceres, Ferrari and Palombini (2014; Redalyc, https://www.redalyc.org/pdf/4056/405641280009.pdf) frame funk carioca by three beats: Volt Mix (1990s), Tamborzão (2000s), Beatbox (2010s).
 
 ### Inference
 
-- A grid sounds good when the *pattern* carries the tension (syncopation, cross-accents, layer phase) and the *sound* carries the life (section 2). It sounds dead when a simple pattern on a grid is also played with identical samples at identical velocity.
+- A grid sounds good when the _pattern_ carries the tension (syncopation, cross-accents, layer phase) and the _sound_ carries the life (section 2). It sounds dead when a simple pattern on a grid is also played with identical samples at identical velocity.
 - Machine genres (techno, house, trap, funk carioca, brega funk) want a tight grid on kick and bass; looseness belongs in hats, shakers, percussion samples and swing.
-- Dilla-style timing works because it is *consistent per loop*, not random per hit. A fixed per-step offset table beats per-note jitter.
+- Dilla-style timing works because it is _consistent per loop_, not random per hit. A fixed per-step offset table beats per-note jitter.
 
 ### Uncertain
 
@@ -69,7 +69,7 @@ Source access caveat: most academic items were checked through abstracts, catalo
 
 ### Inference
 
-- The loop is fine; *unchanging* is the problem. Change something audible at least every 8 bars, and something structural every 16 to 32.
+- The loop is fine; _unchanging_ is the problem. Change something audible at least every 8 bars, and something structural every 16 to 32.
 - Removal is as strong as addition. Silence (dropping the kick for one bar, or a full-stop beat before the drop) is the cheapest big event.
 - Call and response between two timbres (e.g. alfaia vs. caixa; synth lead vs. vocal chop) gives the listener a conversation to track.
 
@@ -84,12 +84,12 @@ Source access caveat: most academic items were checked through abstracts, catalo
 - Brega funk: beats are made on home computers, many in FL Studio; producers use sliding bass lines, complex changing drum patterns with an offbeat "clinking" rhythm, and MIDI horn sounds echoing frevo brass, plus Casio-like MIDI brass and guitar (Loftin, 2019, "Brega funk is the music of Recife that's taking over Brazil", Mixmag, https://mixmag.net/feature/brega-funk-recife-brazil-feature).
 - Brega funk grew from MC battles and the fusion of electrobrega with funk carioca in Recife's peripheries, around 2008 to 2009, mostly in independent home studios (Revista Caboré, UFRPE, https://journals.ufrpe.br/index.php/revistacabore/article/download/5270/482484855; Billboard Brasil, https://billboard.com.br/brega-e-chique-a-saga-do-brega-funk-para-se-tornar-filho-prodigo-de-recife/; Diário de Pernambuco 2020, https://www.diariodepernambuco.com.br/noticia/viver/2020/02/como-o-brega-funk-que-surgiu-periferia-do-recife-emplacou-tres-hits.html).
 - Producer Marley No Beat said brega funk tempos rose over time, reaching 165 to 170 BPM (Diário de Pernambuco, per search excerpt). A 2025 viral beat by Gordinho Bolado reportedly used only bass, kick and a "can-sounding" snare (Diário de Pernambuco, 2025, https://www.diariodepernambuco.com.br/amp/viver/2025/07/7795294-brega-funk-viral-de-gordinho-bolado-mc-daninho-e-trovao-no-beat-vira-febre-nas-redes-sociais.html).
-- Manguebeat: *Da Lama ao Caos* (1994), produced by Liminha, fused maracatu alfaias with hip hop, funk rock and metal; Chico Science is credited with samplers on "Lixo do Mangue" (Wikipedia album credits, https://en.wikipedia.org/wiki/Da_Lama_ao_Caos; Rolling Stone Brasil, https://rollingstone.com.br/?p=9665).
+- Manguebeat: _Da Lama ao Caos_ (1994), produced by Liminha, fused maracatu alfaias with hip hop, funk rock and metal; Chico Science is credited with samplers on "Lixo do Mangue" (Wikipedia album credits, https://en.wikipedia.org/wiki/Da_Lama_ao_Caos; Rolling Stone Brasil, https://rollingstone.com.br/?p=9665).
 
 ### Inference
 
 - Brega funk's life comes from minimal, loud, specific sounds (sub bass, tinny snare, MIDI brass), fast tempo and constant drum-pattern change, not from humanised timing.
-- Manguebeat's model is a live alfaia section *under* a programmed or sampled layer: the human layer carries the maracatu baque, the machine layer carries the hip-hop pulse.
+- Manguebeat's model is a live alfaia section _under_ a programmed or sampled layer: the human layer carries the maracatu baque, the machine layer carries the hip-hop pulse.
 
 ### Uncertain
 
@@ -101,15 +101,15 @@ Source access caveat: most academic items were checked through abstracts, catalo
 
 ### Confirmed
 
-- Eno framed generative music as setting rules and letting a system produce ever-different output; he used SSEYO Koan for *Generative Music 1* (1996) (Eno, 1996, talk at the Imagination Conference, San Francisco, In Motion Magazine, https://inmotionmagazine.com/eno1.html).
-- Game audio uses "dynamic audio": decision points that turn parts on or off, transpose, change instrumentation or jump sections, as in LucasArts' iMUSE (Collins, 2008, *Game Sound*, MIT Press; review at https://muse.jhu.edu/article/445561).
+- Eno framed generative music as setting rules and letting a system produce ever-different output; he used SSEYO Koan for _Generative Music 1_ (1996) (Eno, 1996, talk at the Imagination Conference, San Francisco, In Motion Magazine, https://inmotionmagazine.com/eno1.html).
+- Game audio uses "dynamic audio": decision points that turn parts on or off, transpose, change instrumentation or jump sections, as in LucasArts' iMUSE (Collins, 2008, _Game Sound_, MIT Press; review at https://muse.jhu.edu/article/445561).
 - Ableton Live 11 gives each note a Chance value (100% always plays) and a Velocity Chance range (Ableton Help, above).
 - Elektron trig conditions: per-step conditions such as percentage probability, FILL (plays only in fill mode), A:B (plays on pass A of every B), 1ST (first pass only), PRE/NEI (depends on the previous condition on the same or neighbour track); conditions combine with trig probability and fill state (Elektron Cycles manual page, https://manualslib.com/manual/1790470/Elektron-Cycles.html?page=32; Elektronauts threads, https://www.elektronauts.com/t/nei-and-pre-trig-conditions/51959; official Digitakt manual not retrieved).
 
 ### Inference
 
 - Controlled randomness works when the skeleton is fixed and only ornaments vary: kick and the rhythm's identifying cell at 100%, ghost notes and ornaments at 30 to 80%.
-- A:B conditions are better than raw probability for structure: they make variation *periodic*, so the listener can learn it.
+- A:B conditions are better than raw probability for structure: they make variation _periodic_, so the listener can learn it.
 - PRE/NEI-style coupling avoids incoherent clashes (two fills at once).
 - Weighted transitions between a small set of pattern variants (a first-order Markov chain) stay recognisable if every variant shares the core cell.
 
@@ -122,8 +122,8 @@ Source access caveat: most academic items were checked through abstracts, catalo
 - Inverted-U of preference: Chmiel and Schubert (2017, "Back to the inverted-U for music preference: A review of the literature", Psychology of Music 45(6), https://researchers.westernsydney.edu.au/en/publications/back-to-the-inverted-u-for-music-preference-a-review-of-the-liter/) found 50 of 57 studies compatible with Berlyne's inverted-U. A follow-up found it breaks down for extreme stimuli (Empirical Studies of the Arts, 2018, https://journals.sagepub.com/doi/10.1177/0276237417732683).
 - Syncopation and groove: medium syncopation maximised wanting to move and pleasure in funk drum breaks (Witek, Clarke, Wallentin, Kringelbach and Vuust, 2014, "Syncopation, Body-Movement and Pleasure in Groove Music", PLOS ONE 9(4) e94446, https://research.birmingham.ac.uk/en/publications/syncopation-body-movement-and-pleasure-in-groove-music/).
 - Predictability and pleasure: listeners prefer moderate surprise and uncertainty; in uncertain contexts they prefer more predictable events (Gold, Pearce, Mas-Herrero, Dagher and Zatorre, 2019, "Predictability and Uncertainty in the Pleasure of Music: A Reward for Learning?", J. Neuroscience 39(47), https://pmc.ncbi.nlm.nih.gov/articles/PMC6867811).
-- Expectation theory: Huron (2006, *Sweet Anticipation*, MIT Press; https://core.ac.uk/download/159563876.pdf for a review) proposes ITPRA (Imagination, Tension, Prediction, Reaction, Appraisal): correct predictions are rewarded, delayed resolution builds tension.
-- Repetition is central to intelligibility and pleasure, and identical repetitions are heard differently in context (Margulis, 2014, *On Repeat: How Music Plays the Mind*, Oxford UP, https://academic.oup.com/book/9924/chapter/157250514).
+- Expectation theory: Huron (2006, _Sweet Anticipation_, MIT Press; https://core.ac.uk/download/159563876.pdf for a review) proposes ITPRA (Imagination, Tension, Prediction, Reaction, Appraisal): correct predictions are rewarded, delayed resolution builds tension.
+- Repetition is central to intelligibility and pleasure, and identical repetitions are heard differently in context (Margulis, 2014, _On Repeat: How Music Plays the Mind_, Oxford UP, https://academic.oup.com/book/9924/chapter/157250514).
 - EDM break routines raise physiological arousal (Solberg and Dibben 2019, above).
 
 ### Inference

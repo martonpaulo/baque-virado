@@ -1,5 +1,20 @@
 # O Baque Virado — product definition
 
+## Contents
+
+- [What it is](#what-it-is)
+- [Who it is for](#who-it-is-for)
+- [The job](#the-job)
+- [What it does](#what-it-does)
+- [What it will never do](#what-it-will-never-do)
+- [How you know it worked](#how-you-know-it-worked)
+- [Constraints](#constraints)
+- [Rhythm shows](#rhythm-shows)
+- [Limits the owner set](#limits-the-owner-set)
+- [Alternatives considered](#alternatives-considered)
+- [Evidence on hand](#evidence-on-hand)
+- [Accepted evidence gaps](#accepted-evidence-gaps)
+
 ## What it is
 
 A one-page, animated and audible explainer of maracatu de baque virado: it plays the band with real
@@ -56,13 +71,48 @@ and the page plays smoothly to the end on a recent iPhone and an Android phone.
   the frames before it, so `tools/export-video.mjs` warms up for 4 s before the first frame
   ([#7](https://github.com/martonpaulo/baque-virado/issues/7)).
 
+## Rhythm shows
+
+The rules every rhythm package in `src/rhythms/` follows.
+
+- **Feeling.** Each rhythm has its own feeling, from
+  [`pernambuco-rhythms-feeling.md`](research/pernambuco-rhythms-feeling.md); no show copies
+  another's mood.
+- **Music.** Instrumental only. Every melody is original. One tempo for the whole show. A 2/4
+  rhythm draws its bar on an 8-step wheel.
+- **Felt tempo.** The tempo a listener feels sits inside the genre's researched range in
+  [`brega-forro.md`](research/brega-forro.md) and
+  [`frevo-manguebeat-coco.md`](research/frevo-manguebeat-coco.md), and the agent checks it before
+  the owner listens.
+- **Background.** Circular, coming out of the central wheel, in the rhythm's palette from section 5
+  of [`colour-and-visuals.md`](research/colour-and-visuals.md): brega romântico in desaturated blue
+  and muted rose, brega funk in purple, magenta and gold. The approved backgrounds are a sketch to
+  improve, not a finished design. Flashes stay within WCAG 2.3.1.
+- **Sound.** Real CC0 recordings first. A synthesized voice must sound like the real instrument.
+  One sample repeated unchanged is not acceptable: use round robin, velocity layers, humanised
+  timing and a mix bus, as [`human-feel.md`](research/human-feel.md) and
+  [`software-music-feel.md`](research/software-music-feel.md) describe.
+- **Coco.** The pandeiro and the palmas are viewer options, like the maracatu caixa options, with
+  `couro` and `roda` as defaults. The atabaques are a trio: rum, rumpi and lê. Rufadas open the
+  show.
+- **Page.** Every rhythm is public, finished or not. The desktop left column shows the Roteiro on
+  top and the rhythm selector at the bottom. Each rhythm has its own path: `/maracatu`, `/coco`,
+  `/frevo`, `/forro`, `/manguebeat`, `/brega`, `/bregafunk`.
+- **Video export.** Parked ([#19](https://github.com/martonpaulo/baque-virado/issues/19),
+  [#20](https://github.com/martonpaulo/baque-virado/issues/20)).
+
 ## Limits the owner set
 
-| Limit                      | Value                                                                                           | Owned by                     | Decision                                                                      | Status                                                         |
-| :------------------------- | :---------------------------------------------------------------------------------------------- | :--------------------------- | :---------------------------------------------------------------------------- | :------------------------------------------------------------- |
-| Samples a phone downloads  | the 11 default files, under 100 KB ([#3](https://github.com/martonpaulo/baque-virado/issues/3)) | `tests/sounds.test.js`       | owner, 2026-11-13                                                             | current                                                        |
-| Title transition           | ≈0.12 s out, ≈0.25 s in                                                                         | `src/title.js`               | owner, 2026-11-12                                                             | current                                                        |
-| Stage label size on phones | at least 11 px                                                                                  | `styles.css` `--label-floor` | owner, 2026-11-13, [#4](https://github.com/martonpaulo/baque-virado/issues/4) | replaced, 2026-11-16: a phone draws the desktop stage, smaller |
+| Limit                      | Value                                                                                           | Owned by                       | Decision                                                                      | Status                                                         |
+| :------------------------- | :---------------------------------------------------------------------------------------------- | :----------------------------- | :---------------------------------------------------------------------------- | :------------------------------------------------------------- |
+| Samples a phone downloads  | the 11 default files, under 100 KB ([#3](https://github.com/martonpaulo/baque-virado/issues/3)) | `tests/sounds.test.js`         | owner, 2026-11-13                                                             | current                                                        |
+| Title transition           | ≈0.12 s out, ≈0.25 s in                                                                         | `src/title.js`                 | owner, 2026-11-12                                                             | current                                                        |
+| Stage label size on phones | at least 11 px                                                                                  | `styles.css` `--label-floor`   | owner, 2026-11-13, [#4](https://github.com/martonpaulo/baque-virado/issues/4) | replaced, 2026-11-16: a phone draws the desktop stage, smaller |
+| Instruments in a show      | percussion and instruments only, no voice                                                       | `docs/product.md` Rhythm shows | owner, 2026-11-17                                                             | current                                                        |
+| Reference recordings       | the repository names no song, recording or performer as a model for a show                      | `docs/product.md` Rhythm shows | owner, 2026-11-17                                                             | current                                                        |
+| Flashes                    | WCAG 2.3.1, three flashes or below threshold                                                    | `docs/product.md` Rhythm shows | owner, 2026-11-17                                                             | current                                                        |
+| Felt tempo                 | inside the genre's researched range, checked before the owner listens                           | `docs/product.md` Rhythm shows | owner, 2026-11-17                                                             | current                                                        |
+| Sound                      | real CC0 recordings first; a synthesized voice sounds like the instrument; no identical repeats | `docs/product.md` Rhythm shows | owner, 2026-11-17                                                             | current                                                        |
 
 ## Alternatives considered
 
