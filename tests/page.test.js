@@ -12,7 +12,7 @@ import { openBrowser } from './support/browser.js';
 // The shipped rhythm registry with its list replaced, served in its place: maracatu and the
 // tests-only 2/4 fixture, or maracatu alone.
 const SHIPPED_REGISTRY = readFileSync(new URL('../src/rhythms/index.js', import.meta.url), 'utf8');
-const SHIPPED_LIST = 'export const RHYTHMS = [MARACATU, COCO_XAMBA];';
+const SHIPPED_LIST = /export const RHYTHMS = \[.*\];/;
 const REGISTRIES = {
   twoFour: SHIPPED_REGISTRY.replace(
     SHIPPED_LIST,
@@ -463,6 +463,21 @@ test('the rhythm selector stays out of the page with one rhythm', async () => {
   }
 });
 
+test('?ritmo=forro shows the forró on an 8-step wheel, over its own background, with no error', async () => {
+  for (const viewport of [PHONES[0], DESKTOP]) {
+    const { page, errors } = await openPage(viewport, { query: '?ritmo=forro' });
+    assert.equal(await page.evaluate(() => window.baque.TOTAL), 98);
+    assert.equal(await page.$$eval('#scope text[fill-opacity]', texts => texts.filter(t => /^\d+$/.test(t.textContent)).length), 8);
+    assert.deepEqual(await page.$$eval('.rhythms-stage a[aria-current]', links => links.map(a => a.textContent)), ['forró']);
+    for (let at = 0; at < 98; at += 0.37) await page.evaluate(position => window.baque.render(position), at);
+    // the backdrop paints the whole canvas: its dusk sky leaves no transparent pixel at a corner
+    const corner = await page.$eval('#bg', canvas => [...canvas.getContext('2d').getImageData(1, 1, 1, 1).data]);
+    assert.equal(corner[3], 255, `corner pixel ${corner}`);
+    assert.deepEqual(errors, []);
+    await page.close();
+  }
+});
+
 test('?ritmo=coco-xamba shows the coco on an 8-step wheel, its 12 scenes and the selector', async () => {
   const { page, errors } = await openPage(DESKTOP, { query: '?ritmo=coco-xamba' });
   const steps = await page.$$eval('#scope text[fill-opacity]', texts => texts.map(t => t.textContent).filter(t => /^\d+$/.test(t)));
@@ -470,8 +485,9 @@ test('?ritmo=coco-xamba shows the coco on an 8-step wheel, its 12 scenes and the
   assert.equal(await page.evaluate(() => window.baque.TOTAL), 104);
   assert.equal(await page.$$eval('#scenes li', items => items.length), 12);
   assert.deepEqual(await page.$$eval('.rhythms-side a', links => links.map(a => [a.textContent, a.getAttribute('aria-current')])), [
-    ['Baque virado', null],
-    ['Coco da Xambá', 'true'],
+    ['maracatu', null],
+    ['coco', 'true'],
+    ['forró', null],
   ]);
   assert.deepEqual(errors, []);
   await page.close();

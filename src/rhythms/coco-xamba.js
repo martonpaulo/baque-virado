@@ -263,7 +263,7 @@ const READ = {
 };
 const COPY = {
   name: 'Coco da Xambá',
-  selector: 'Coco da Xambá',
+  selector: 'coco', // the rhythm selector's chip
   feminineInstruments: ['alfaia', 'caixa', 'palmas'],
   scenes: {
     intro: { chip: 'Introdução', eyebrow: 'Nação Xambá, Olinda', title: 'Coco da Xambá' },
@@ -316,18 +316,16 @@ const LAYOUTS = {
   palmas: entry,
   agogoAbe: entry,
   caixa: entry,
-  phrases: () => `<div class="notation tight">${PHRASE_ORDER.map(phraseRow).join('')}</div>` + row(label(T.sameTempo), T.sameTempoValue),
+  phrases: () => `<div class="notation tight">${PHRASE_ORDER.map(phraseRow).join('')}</div>${row(label(T.sameTempo), T.sameTempoValue)}`,
   toque: () => {
     const phrase = PHRASES.toque,
       all = allHits(phrase);
-    return (
-      stats(
-        'small',
-        stat(phrase.low.length, T.hitsLow, ROLES.mainHand),
-        stat(phrase.high.length, T.hitsHigh, ROLES.answerHand),
-        stat(`${all.filter(isOffbeat).length}<small>/${all.length}</small>`, T.onOffbeat, COLORS.fg),
-      ) + `<div class="notation tight">${phraseRow('base')}${phraseRow('toque')}</div>`
-    );
+    return `${stats(
+      'small',
+      stat(phrase.low.length, T.hitsLow, ROLES.mainHand),
+      stat(phrase.high.length, T.hitsHigh, ROLES.answerHand),
+      stat(`${all.filter(isOffbeat).length}<small>/${all.length}</small>`, T.onOffbeat, COLORS.fg),
+    )}<div class="notation tight">${phraseRow('base')}${phraseRow('toque')}</div>`;
   },
   rufo: () => row(label(T.hitsPerBar), `${STEPS_PER_BAR} / ${STEPS_PER_BAR}`, 'alfaia') + row(label(T.sameTempo), T.sameTempoValue),
   finale: show =>

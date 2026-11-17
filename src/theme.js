@@ -13,6 +13,27 @@ export const COLORS = {
   white: '#ffffff', // whistle
 };
 
+/**
+ * The forró pé-de-serra palette (docs/research/colour-and-visuals.md): a dusk sky from bonfire
+ * orange to night indigo, and each instrument's material colour. Canvas and SVG only: the interface
+ * keeps the colours above, so styles.css does not mirror these.
+ */
+export const FORRO = {
+  night: '#0e0f1f', // the sertão sky after dusk
+  dusk: '#7d8fd6', // the blue that comes in as the light leaves: the bass
+  ember: '#e08a2e', // the bonfire
+  flame: '#f2c14e',
+  red: '#c4473a', // the sanfona's red body
+  teal: '#6fb7c2', // the faded teal of saudade: the cavaquinho
+  paper: '#e9dcc0', // cordel paper
+  leather: '#d9a066', // the zabumba's goat skin
+  bamboo: '#c8b273', // the bacalhau's rod
+  steel: '#b9c4cf', // the triângulo
+  pearl: '#efe6ef', // the sanfona's mother-of-pearl buttons: the left hand
+  varnish: '#e0904a', // the rabeca's varnished wood
+  spruce: '#f2c14e', // the bandolim's spruce top
+};
+
 /** What a colour means, pointing at the palette (styles.css: --accent, --main-hand, --answer-hand). */
 export const ROLES = {
   accent: COLORS.amber, // the interface's highlight: Play, the picked chip, the eyebrow, the wheel's cue
