@@ -104,6 +104,19 @@ for the guitar, retuned to equal temperament after measuring each chord's spectr
 - Sampler: a worn record's crackle, hiss and rumble, synthesized for this project from a seeded noise
   source (original, 2026-11).
 
+## Brega
+
+The brega show (`sounds/brega-*`, cut by `tools/prepare-takes.mjs`: trimmed to the hit, faded and
+normalised; each pitched note measured) also reuses the bumbo, caixa, chimbal, baixo, trompete,
+trombone and small-room takes above. All CC0.
+
+- Toms (high and low, stick, two dynamics) and the keyboard (Yamaha TX81Z «FM Piano», five notes, two
+  dynamics each): [VCSL](https://github.com/sgossner/VCSL) by Versilian Studios
+- String pad (viola and violin sections, sustained with vibrato):
+  [VSCO 2 Community Edition](https://github.com/sgossner/VSCO-2-CE) by Versilian Studios
+- Guitar (clean Stratocaster notes): guitarmaster; two sustained notes: owstu (Freesound)
+- Horn falls (five-horn section, unison A and E major): flakdemier (Freesound)
+
 ## Fonts
 
 Space Grotesk (Copyright 2020 The Space Grotesk Project Authors) and JetBrains Mono (Copyright 2020
