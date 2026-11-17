@@ -183,6 +183,76 @@ export const TAKES = {
       root: 76.03,
     },
   ],
+  'sanfona-hohner': [
+    {
+      file: 'sanfona-hohner-1',
+      root: 47.1,
+    },
+    {
+      file: 'sanfona-hohner-2',
+      root: 50.18,
+    },
+    {
+      file: 'sanfona-hohner-3',
+      root: 53.98,
+    },
+    {
+      file: 'sanfona-hohner-4',
+      root: 55,
+    },
+    {
+      file: 'sanfona-hohner-5',
+      root: 57.22,
+    },
+    {
+      file: 'sanfona-hohner-6',
+      root: 59,
+    },
+    {
+      file: 'sanfona-hohner-7',
+      root: 60.05,
+    },
+    {
+      file: 'sanfona-hohner-8',
+      root: 62,
+    },
+    {
+      file: 'sanfona-hohner-9',
+      root: 64.21,
+    },
+    {
+      file: 'sanfona-hohner-10',
+      root: 66.17,
+    },
+    {
+      file: 'sanfona-hohner-11',
+      root: 67.14,
+    },
+    {
+      file: 'sanfona-hohner-12',
+      root: 69.19,
+    },
+    {
+      file: 'sanfona-hohner-13',
+      root: 71.12,
+    },
+    {
+      file: 'sanfona-hohner-14',
+      root: 72.11,
+    },
+    {
+      file: 'sanfona-hohner-15',
+      root: 74.11,
+    },
+    {
+      file: 'sanfona-hohner-16',
+      root: 76.19,
+    },
+    {
+      file: 'sanfona-hohner-17',
+      root: 79.06,
+    },
+  ],
   'sanfona-baixo': [
     {
       file: 'sanfona-baixo-1',
