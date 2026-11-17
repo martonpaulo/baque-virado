@@ -5,9 +5,10 @@ import { existsSync, readFileSync, statSync } from 'node:fs';
 import { test } from 'node:test';
 import { fileURLToPath } from 'node:url';
 import { meterOf } from '../src/music.js';
-import { ATABAQUES, COCO_XAMBA, GOLPE, RUFADA } from '../src/rhythms/coco-xamba.js';
+import { ATABAQUES, CLEAR, COCO_PALETTE, COCO_XAMBA, createCocoPainter, GOLPE, MIN_FLASH_GAP, RUFADA } from '../src/rhythms/coco-xamba.js';
 import { createShow } from '../src/show.js';
 import { planStudio } from '../src/studio.js';
+import { COLORS, TINTS } from '../src/theme.js';
 
 const show = createShow(COCO_XAMBA);
 const { stepsPerBar, beatSeconds } = meterOf(COCO_XAMBA);
@@ -176,6 +177,101 @@ test('the human feel is seeded and correlated: the same plan every time, no Math
   assert.ok(lagged / variance > 0.3, `beat-to-beat correlation ${(lagged / variance).toFixed(2)}`);
   const spread = Math.sqrt(variance / offsets.length) * 1000;
   assert.ok(spread > 3 && spread < 12, `the low head spreads ${spread.toFixed(1)} ms`); // Räsänen 2015: about 8.7 ms
+});
+
+// ---------- the background ----------
+const FPS = 30;
+const RADIUS = 120; // the wheel's radius on the test canvas
+const GEOMETRY = { width: 400, height: 800, centreX: 200, centreY: 330, scopeRadius: RADIUS, dpr: 1, shapes: [] };
+const rgb = hex => [1, 3, 5].map(i => parseInt(hex.slice(i, i + 2), 16));
+const channel = c => {
+  const v = c / 255;
+  return v <= 0.04045 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4;
+};
+const luminance = ([r, g, b]) => 0.2126 * channel(r) + 0.7152 * channel(g) + 0.0722 * channel(b);
+const contrast = (a, b) => (Math.max(luminance(a), luminance(b)) + 0.05) / (Math.min(luminance(a), luminance(b)) + 0.05);
+const FACE_ALPHA = Number(/[\d.]+\)$/.exec(TINTS.scopeFace)[0].slice(0, -1)); // the wheel's dark disc
+/** Draw every frame of `bars` (all the show by default) at 30 fps on a recording context. */
+function paint(record = {}, bars = [0, show.TOTAL_BARS]) {
+  const painter = createCocoPainter({
+    stepsPerBar,
+    angleOf: step => (step / stepsPerBar) * Math.PI * 2 - Math.PI / 2,
+    barSeconds: meterOf(COCO_XAMBA).barSeconds,
+    beatsPerBar: COCO_XAMBA.beatsPerBar,
+    rufada: RUFADA,
+    golpe: GOLPE,
+  });
+  const noop = () => {};
+  const ctx = new Proxy({}, { get: (_target, key) => record[key] || (key.startsWith('create') ? () => ({ addColorStop: noop }) : noop), set: () => true });
+  const { barSeconds } = meterOf(COCO_XAMBA);
+  for (let frame = Math.round(bars[0] * barSeconds * FPS); frame < bars[1] * barSeconds * FPS; frame++) {
+    const position = frame / FPS / barSeconds,
+      blend = show.blendAt(position, 1.5);
+    const params = { from: COCO_XAMBA.looks[blend.from.id], to: COCO_XAMBA.looks[blend.to.id], mix: blend.amount, sceneId: blend.scene.id };
+    painter.draw(ctx, { ...GEOMETRY, position, params, recent: show.recentHits(position, 1.2), fresh: frame === 0 });
+  }
+  return painter;
+}
+
+test('the background flashes at most 3 times in any second (WCAG 2.3.1), on the golpes only', () => {
+  const flashes = paint().flashTimes();
+  assert.ok(flashes.length >= show.SCENES.length, `${flashes.length} golpe blooms`);
+  for (const start of flashes) assert.ok(flashes.filter(t => t >= start && t < start + 1).length <= 3, `flashes from ${start.toFixed(2)} s`);
+  for (let i = 1; i < flashes.length; i++) assert.ok(flashes[i] - flashes[i - 1] >= MIN_FLASH_GAP - 1e-9, `blooms ${flashes[i - 1]} and ${flashes[i]}`);
+});
+
+test('nothing is drawn under the wheel, so every wheel colour keeps 3:1 there; no red passes R/(R+G+B) 0.8', () => {
+  let innermost = Infinity;
+  const under = [];
+  const record = {
+    arc: (x, y, radius) => {
+      // a ring round the centre lies at its radius; a spark elsewhere comes as near as its edge
+      const away = Math.hypot(x - GEOMETRY.centreX, y - GEOMETRY.centreY);
+      innermost = Math.min(innermost, away < 1e-9 ? radius : away - radius);
+    },
+    createRadialGradient: (_x0, _y0, r0, _x1, _y1, r1) => ({
+      addColorStop: (offset, colour) => {
+        const at = r0 + offset * (r1 - r0);
+        if (at <= RADIUS || offset === 0) under.push({ at, colour }); // the first stop also paints inside r0
+      },
+    }),
+  };
+  paint(record);
+  assert.ok(innermost >= CLEAR * RADIUS - 1e-9, `a shape reaches ${(innermost / RADIUS).toFixed(2)} wheel radii`);
+  const ground = rgb(COCO_PALETTE.ground);
+  for (const { colour } of under) {
+    const [r, g, b, a] = colour.match(/[\d.]+/g).map(Number);
+    assert.equal(a, 0, `${colour} shows inside the wheel's edge`);
+    assert.ok([r, g, b].every(Number.isFinite));
+  }
+  const face = ground.map((c, i) => FACE_ALPHA * rgb(COLORS.void)[i] + (1 - FACE_ALPHA) * c);
+  for (const [voice, { color }] of Object.entries(COCO_XAMBA.voices)) {
+    assert.ok(contrast(rgb(color), face) >= 3, `${voice} ${color}: ${contrast(rgb(color), face).toFixed(2)}:1`);
+    assert.ok(contrast(rgb(color), ground) >= 3, `${voice} ${color} on the ground`);
+  }
+  for (const hex of [...Object.values(COCO_PALETTE), ...Object.values(COCO_XAMBA.voices).map(v => v.color)]) {
+    const [r, g, b] = rgb(hex);
+    assert.ok(r / (r + g + b) < 0.8, hex);
+  }
+});
+
+test('with reduced motion the background drops every pulse and turns at half speed', () => {
+  const saved = globalThis.matchMedia;
+  globalThis.matchMedia = () => ({ matches: true });
+  try {
+    let strokes = 0;
+    const angles = [];
+    const record = {
+      stroke: () => strokes++,
+      arc: (_x, _y, _r, from) => angles.push(from),
+    };
+    const painter = paint(record, [8, 9]);
+    assert.deepEqual(painter.flashTimes(), [], 'no golpe bloom');
+    assert.equal(strokes, 0, 'no ring');
+    assert.ok(angles.length > 0, 'the skirts still turn');
+  } finally {
+    globalThis.matchMedia = saved;
+  }
 });
 
 test('the coco keeps its felt tempo in the researched coco range, 2/4 on an 8-step wheel', () => {

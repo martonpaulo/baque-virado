@@ -4,10 +4,177 @@
 // cultura», ANPPOM 2018 (the alfaia sits on a chair and is played on both heads; the coco is made of
 // rhythmic phrases that join and end in a «rufo»); Revista Continente, «O coco ancestral do Bongar».
 // Neither source writes the parts out: the patterns below are this project's reading, kept simple.
-// Choices and reasons: docs/rhythms/coco.md.
+// Choices and reasons: docs/rhythms/coco.md. Its background painter is the section below the imports.
 import { label, row, stat, stats } from '../readout-markup.js';
-import { COLORS, ROLES } from '../theme.js';
+import { COLORS } from '../theme.js';
 import { lilt, recordedChoices, studioFiles, studioSounds, takes } from './studio-kit.js';
+
+// ---------- the background ----------
+// The coco background: a roda in the terreiro yard at night, seen from above the wheel. Everything
+// comes out of the wheel and stays circular: a burgundy glow of the beaten earth, the skirts of the
+// dancers turning steadily around the wheel (one turn every 16 beats, the trance of repetition),
+// copper rings thrown outward by the alfaia and the atabaques, copper sparks on the rufadas, and a
+// bright cloth-white bloom on each golpe, the stroke a rufada lands on.
+// Safety (docs/research/colour-and-visuals.md, rule 6; WCAG 2.3.1): the golpe blooms are the only
+// bright changes, never closer than MIN_FLASH_GAP, so at most three in any second; reduced motion
+// drops every pulse and halves the turn. Nothing is drawn under the wheel, so its dots keep their
+// contrast. Palette and reasons: docs/rhythms/coco.md.
+
+/** Coco da Xambá, trance and devotion: ground, earth, burgundy, copper and cloth, from section 5. */
+export const COCO_PALETTE = {
+  ground: '#140b08', // the beaten-earth floor at night
+  earth: '#5a3523',
+  burgundy: '#9e2b25', // the wine red of the skirts
+  copper: '#c7793a', // the alfaia's leather and the yard's lamps
+  cloth: '#efe6d6', // the initiates' white cloth
+};
+
+const TAU = Math.PI * 2;
+const HEX = /^#(..)(..)(..)$/;
+/** `rgba()` of a palette colour. */
+const alphaOf = (hex, alpha) =>
+  `rgba(${HEX.exec(hex)
+    .slice(1)
+    .map(pair => parseInt(pair, 16))
+    .join(',')},${alpha})`;
+
+export const CLEAR = 1.12; // wheel radii: nothing is drawn inside, where the wheel and its numbers sit
+const TRAIL_ALPHA = 0.32; // how much of the last frame each frame paints over
+const GLOW = { outer: 3.2, alpha: 0.42, rise: 0.15 }; // full strength `rise` of the way out // the burgundy glow of the earth, in wheel radii
+const SKIRTS = { inner: 1.3, outer: 1.72, beatsPerTurn: 16, alpha: 0.55, folds: 2 }; // each skirt: burgundy, then earth
+const RINGS = { life: 1.4, from: CLEAR + 0.04, travel: 1.7, width: 2.2, alpha: 0.5 }; // copper, in wheel radii and CSS px
+const SPARK = { life: 0.18, radius: 1.2, size: 1.6, alpha: 0.7 };
+export const BLOOM = { life: 0.28, from: CLEAR, to: 2.3, alpha: 0.85, white: 0.1, copper: 0.45 }; // where its cloth white peaks, then copper
+export const MIN_FLASH_GAP = 0.34; // seconds between golpe blooms: under three a second
+const CALM_TURN = 0.5; // reduced motion halves the turn
+const RINGING = new Set(['low', 'rum']); // the drums whose strokes throw a ring
+const ROLL_SPARKING = new Set(['low', 'high']);
+const VIGNETTE_STOPS = [
+  [0, 0.85],
+  [0.12, 0.45],
+  [0.26, 0],
+  [0.52, 0],
+  [0.66, 0.82],
+  [1, 0.95],
+];
+
+/**
+ * The background of the coco show. `angleOf(step)`: a step's angle on the wheel; `barSeconds`: one
+ * bar; `beatsPerBar`; `rufada` and `golpe`: the tones of the alfaia's rolls and of their landing.
+ */
+export function createCocoPainter({ stepsPerBar, angleOf, barSeconds, beatsPerBar, rufada, golpe }) {
+  const reduced = globalThis.matchMedia?.('(prefers-reduced-motion: reduce)');
+  const calm = () => Boolean(reduced?.matches);
+  const flashes = new Set(); // the start (seconds of the show) of every bloom drawn, for the flash limit's test
+  const angleAt = h => angleOf((h.at % 1) * stepsPerBar);
+  const secondsOf = h => h.at * barSeconds;
+
+  /** The golpes that bloom: one per moment, none within MIN_FLASH_GAP after the one before. */
+  function blooms(recent) {
+    const golpes = [...new Set(recent.filter(h => h.hit.tone === golpe).map(secondsOf))].sort((a, b) => a - b);
+    const kept = [];
+    for (const at of golpes) if (!kept.length || at - kept.at(-1) >= MIN_FLASH_GAP) kept.push(at);
+    return kept;
+  }
+
+  function annulus(ctx, g, inner, outer, from, to) {
+    const { centreX: x, centreY: y, scopeRadius: r } = g;
+    ctx.beginPath();
+    ctx.arc(x, y, outer * r, from, to);
+    ctx.arc(x, y, inner * r, to, from, true);
+    ctx.closePath();
+    ctx.fill();
+  }
+
+  /** `frame`: the canvas geometry plus { position, params, recent, fresh } (src/background.js). */
+  function draw(ctx, frame) {
+    const g = frame,
+      { position, params, recent } = frame,
+      { centreX: x, centreY: y, scopeRadius: r } = g;
+    const look = key => params.from[key] + (params.to[key] - params.from[key]) * params.mix;
+    ctx.save();
+    ctx.globalAlpha = frame.fresh ? 1 : TRAIL_ALPHA;
+    ctx.fillStyle = COCO_PALETTE.ground;
+    ctx.fillRect(0, 0, g.width, g.height);
+    ctx.globalAlpha = 1;
+
+    // the earth's glow, from the wheel's edge outward
+    const glow = ctx.createRadialGradient(x, y, CLEAR * r, x, y, GLOW.outer * r);
+    glow.addColorStop(0, alphaOf(COCO_PALETTE.burgundy, 0));
+    glow.addColorStop(GLOW.rise, alphaOf(COCO_PALETTE.burgundy, GLOW.alpha * look('glow')));
+    glow.addColorStop(1, alphaOf(COCO_PALETTE.ground, 0));
+    ctx.fillStyle = glow;
+    ctx.fillRect(0, 0, g.width, g.height);
+
+    // the skirts turn steadily, one turn every 16 beats; `skirts` of them, fading in one by one
+    const turn = ((position * beatsPerBar) / SKIRTS.beatsPerTurn) * TAU * (calm() ? CALM_TURN : 1),
+      count = look('skirts'),
+      shown = Math.ceil(count);
+    for (let i = 0; i < shown; i++) {
+      const start = turn + (i / Math.max(1, shown)) * TAU,
+        width = TAU / Math.max(1, shown) / SKIRTS.folds;
+      ctx.globalAlpha = SKIRTS.alpha * Math.min(1, count - i);
+      ctx.fillStyle = COCO_PALETTE.burgundy;
+      annulus(ctx, g, SKIRTS.inner, SKIRTS.outer, start, start + width);
+      ctx.fillStyle = COCO_PALETTE.earth;
+      annulus(ctx, g, SKIRTS.inner, SKIRTS.outer, start + width, start + 2 * width);
+    }
+    ctx.globalAlpha = 1;
+
+    if (!calm()) {
+      ctx.lineWidth = RINGS.width * g.dpr;
+      for (const h of recent) {
+        // copper rings from the low head and the rum; a rufada stroke throws a spark instead
+        if (h.hit.tone === rufada && ROLL_SPARKING.has(h.voice) && h.age < SPARK.life) {
+          const a = angleAt(h);
+          ctx.globalAlpha = SPARK.alpha * (1 - h.age / SPARK.life) * h.hit.velocity;
+          ctx.fillStyle = COCO_PALETTE.copper;
+          ctx.beginPath();
+          ctx.arc(x + Math.cos(a) * SPARK.radius * r, y + Math.sin(a) * SPARK.radius * r, SPARK.size * g.dpr, 0, TAU);
+          ctx.fill();
+        } else if (RINGING.has(h.voice) && h.hit.tone !== rufada && h.age < RINGS.life) {
+          const life = 1 - h.age / RINGS.life;
+          ctx.globalAlpha = RINGS.alpha * life * Math.min(1, h.hit.velocity);
+          ctx.strokeStyle = h.voice === 'rum' ? COCO_PALETTE.burgundy : COCO_PALETTE.copper;
+          ctx.beginPath();
+          ctx.arc(x, y, (RINGS.from + RINGS.travel * (1 - life * life)) * r, 0, TAU);
+          ctx.stroke();
+        }
+      }
+      // a golpe: the one bright bloom, born at the wheel's edge
+      const now = position * barSeconds;
+      for (const at of blooms(recent)) {
+        const age = now - at;
+        if (age < 0 || age >= BLOOM.life) continue;
+        flashes.add(at);
+        const bloom = ctx.createRadialGradient(x, y, BLOOM.from * r, x, y, BLOOM.to * r);
+        const strength = BLOOM.alpha * (1 - age / BLOOM.life);
+        bloom.addColorStop(0, alphaOf(COCO_PALETTE.cloth, 0));
+        bloom.addColorStop(BLOOM.white, alphaOf(COCO_PALETTE.cloth, strength));
+        bloom.addColorStop(BLOOM.copper, alphaOf(COCO_PALETTE.copper, strength / 2));
+        bloom.addColorStop(1, alphaOf(COCO_PALETTE.burgundy, 0));
+        ctx.globalAlpha = 1;
+        ctx.fillStyle = bloom;
+        ctx.fillRect(0, 0, g.width, g.height);
+      }
+    }
+    ctx.restore();
+  }
+
+  /** Darken top and bottom, where the title and the lanes sit, in the coco's own ground colour. */
+  function vignette(ctx, g) {
+    const gradient = ctx.createLinearGradient(0, 0, 0, g.height);
+    for (const [stop, alpha] of VIGNETTE_STOPS) gradient.addColorStop(stop, alphaOf(COCO_PALETTE.ground, alpha));
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, g.width, g.height);
+  }
+  return {
+    draw,
+    vignette,
+    /** The start (seconds of the show) of every golpe bloom drawn so far, in order. */
+    flashTimes: () => [...flashes].sort((a, b) => a - b),
+  };
+}
 
 const BPM = 132;
 const BEATS_PER_BAR = 2;
@@ -23,19 +190,33 @@ const SWING = {};
 
 // The alfaia has two voices, one per head: the low head on the beats, the second head on the
 // off-beats. The roles are the ones src/rhythms/maracatu.js documents. The atabaques are the
-// terreiro's trio, low to high: rum, rumpi and lé.
+// terreiro's trio, low to high: rum, rumpi and lé. Each takes its material's colour inside the coco
+// palette (COCO_PALETTE above), lifted until it reads at 3:1 on the wheel.
+const COLOR = {
+  low: COCO_PALETTE.copper, // raw leather
+  high: '#e3a86a', // the second head: a lighter, tighter leather
+  caixa: '#b8c2cc', // steel
+  abe: '#d9b46a', // gourd
+  ganza: '#a9b89c', // tin
+  pandeiro: '#c9956a', // wood
+  palmas: COCO_PALETTE.cloth, // the white cloth of the roda
+  agogo: '#9aa3ad', // iron
+  rum: '#d0523f', // the burgundy of the trio, deepest for the low drum
+  rumpi: '#e07a5f',
+  le: '#eda58f',
+};
 const VOICES = {
-  low: { instrument: 'alfaia', ring: 98, size: 5.4, swing: null, color: ROLES.mainHand, hand: true, boom: 1 },
-  high: { instrument: 'alfaia', ring: 91, size: 4.6, swing: null, color: ROLES.answerHand, hand: true, boom: 0.6 },
-  caixa: { instrument: 'caixa', ring: 63, size: 2.8, swing: null, color: COLORS.ice, crack: true },
-  abe: { instrument: 'abe', ring: 57, size: 2.8, swing: null, color: COLORS.magenta },
-  ganza: { instrument: 'ganza', ring: 51, size: 2.4, swing: null, color: COLORS.violet },
-  pandeiro: { instrument: 'pandeiro', ring: 45, size: 3.2, swing: null, color: COLORS.bone, toneScale: { jingle: 0.6 } },
-  palmas: { instrument: 'palmas', ring: 39, size: 3.2, swing: null, color: COLORS.white },
-  agogo: { instrument: 'agogo', ring: 34, size: 3.4, swing: null, color: COLORS.acid, spark: true, toneScale: { high: 0.7 } },
-  rum: { instrument: 'atabaque', ring: 84, size: 4.6, swing: null, color: COLORS.ember, boom: 0.5 },
-  rumpi: { instrument: 'atabaque', ring: 77, size: 3.8, swing: null, color: COLORS.amber },
-  le: { instrument: 'atabaque', ring: 70, size: 3.2, swing: null, color: COLORS.fg },
+  low: { instrument: 'alfaia', ring: 98, size: 5.4, swing: null, color: COLOR.low, hand: true, boom: 1 },
+  high: { instrument: 'alfaia', ring: 91, size: 4.6, swing: null, color: COLOR.high, hand: true, boom: 0.6 },
+  caixa: { instrument: 'caixa', ring: 63, size: 2.8, swing: null, color: COLOR.caixa, crack: true },
+  abe: { instrument: 'abe', ring: 57, size: 2.8, swing: null, color: COLOR.abe },
+  ganza: { instrument: 'ganza', ring: 51, size: 2.4, swing: null, color: COLOR.ganza },
+  pandeiro: { instrument: 'pandeiro', ring: 45, size: 3.2, swing: null, color: COLOR.pandeiro, toneScale: { jingle: 0.6 } },
+  palmas: { instrument: 'palmas', ring: 39, size: 3.2, swing: null, color: COLOR.palmas },
+  agogo: { instrument: 'agogo', ring: 34, size: 3.4, swing: null, color: COLOR.agogo, spark: true, toneScale: { high: 0.7 } },
+  rum: { instrument: 'atabaque', ring: 84, size: 4.6, swing: null, color: COLOR.rum, boom: 0.5 },
+  rumpi: { instrument: 'atabaque', ring: 77, size: 3.8, swing: null, color: COLOR.rumpi },
+  le: { instrument: 'atabaque', ring: 70, size: 3.2, swing: null, color: COLOR.le },
 };
 // The order also seeds the per-hit variation of the sound: keep it stable, and add a voice at the end.
 const VOICE_ORDER = Object.keys(VOICES);
@@ -193,22 +374,24 @@ const SCENE_LIST = [
   { id: 'finale', bars: 8, mode: bar => (bar === 7 ? 'cut' : 'normal'), lanes: ALFAIA, isEnd: true, landsOnGolpe: true },
 ];
 
-// How the background behaves in each scene (the keys src/rhythms/maracatu.js documents): slower,
-// rounder turns than the maracatu, for the trance of the terreiro.
+// How the background behaves in each scene (createCocoPainter above): how many skirts turn around the
+// wheel (a fraction fades one in), one more as the roda fills, and the glow of the earth. The engine
+// reads `speed` for the visual clock and blends zoom, rot, hue and keep, which this painter does not use.
+const LOOK = { zoom: 0, rot: 0, hue: 0, keep: 0, speed: 1 };
 const SCENE_LOOKS = {
-  intro: { zoom: 0.9, rot: 0.12, hue: 30, keep: 0.94, seg: 8, warp: 1.0, speed: 0.6, pal: 0.1 },
-  alfaia: { zoom: 0.6, rot: 0.08, hue: 25, keep: 0.92, seg: 6, warp: 0.8, speed: 0.5, pal: 0.15 },
-  heads: { zoom: 0.7, rot: -0.1, hue: 45, keep: 0.93, seg: 6, warp: 0.9, speed: 0.6, pal: 0.2 },
-  ganza: { zoom: 0.5, rot: 0.14, hue: 60, keep: 0.92, seg: 8, warp: 0.8, speed: 0.6, pal: 0.3 },
-  pandeiro: { zoom: 0.6, rot: -0.16, hue: 80, keep: 0.93, seg: 9, warp: 0.9, speed: 0.7, pal: 0.35 },
-  palmas: { zoom: 0.5, rot: 0.12, hue: 100, keep: 0.92, seg: 10, warp: 0.9, speed: 0.7, pal: 0.4 },
-  agogoAbe: { zoom: 0.4, rot: -0.3, hue: 90, keep: 0.94, seg: 10, warp: 0.7, speed: 0.6, pal: 0.45 },
-  caixa: { zoom: 0.8, rot: 0.2, hue: 120, keep: 0.93, seg: 12, warp: 1.1, speed: 0.8, pal: 0.5 },
-  atabaques: { zoom: 0.9, rot: -0.22, hue: 110, keep: 0.93, seg: 12, warp: 1.1, speed: 0.8, pal: 0.55 },
-  phrases: { zoom: 1.0, rot: -0.18, hue: 70, keep: 0.94, seg: 7, warp: 1.2, speed: 0.9, pal: 0.6 },
-  toque: { zoom: 1.4, rot: 0.3, hue: 140, keep: 0.95, seg: 9, warp: 1.4, speed: 1.2, pal: 0.7 },
-  rufo: { zoom: 1.6, rot: -0.35, hue: 160, keep: 0.95, seg: 16, warp: 1.5, speed: 1.4, pal: 0.8 },
-  finale: { zoom: 1.2, rot: 0.25, hue: 50, keep: 0.95, seg: 16, warp: 1.2, speed: 1.0, pal: 0.05 },
+  intro: { ...LOOK, skirts: 1, glow: 0.35 },
+  alfaia: { ...LOOK, skirts: 2, glow: 0.4 },
+  heads: { ...LOOK, skirts: 2, glow: 0.45 },
+  ganza: { ...LOOK, skirts: 3, glow: 0.5 },
+  pandeiro: { ...LOOK, skirts: 4, glow: 0.55 },
+  palmas: { ...LOOK, skirts: 5, glow: 0.6 },
+  agogoAbe: { ...LOOK, skirts: 6, glow: 0.65 },
+  caixa: { ...LOOK, skirts: 6, glow: 0.7 },
+  atabaques: { ...LOOK, skirts: 8, glow: 0.8 },
+  phrases: { ...LOOK, skirts: 8, glow: 0.85 },
+  toque: { ...LOOK, skirts: 8, glow: 1 },
+  rufo: { ...LOOK, skirts: 8, glow: 1 },
+  finale: { ...LOOK, skirts: 8, glow: 0.8 },
 };
 
 // ---------- sound: recorded instruments in the studio (src/studio.js) ----------
@@ -498,12 +681,8 @@ const LAYOUTS = {
   },
   rufo: () => row(label(T.rufada), T.rufadaValue, 'alfaia') + row(label(T.sameTempo), T.sameTempoValue),
   finale: show =>
-    stats(
-      '',
-      stat(PHRASE_ORDER.length, T.phrases, ROLES.accent),
-      stat(DRUMMING_INSTRUMENTS, T.instruments, COLORS.ember),
-      stat(show.totalBars, T.bars, COLORS.fg),
-    ) + row(label(T.howItEnds), T.rufoAndCut),
+    stats('', stat(PHRASE_ORDER.length, T.phrases, COLOR.low), stat(DRUMMING_INSTRUMENTS, T.instruments, COLOR.rum), stat(show.totalBars, T.bars, COLORS.fg)) +
+    row(label(T.howItEnds), T.rufoAndCut),
 };
 const FOCUS = { alfaia: 'alfaia', heads: 'alfaia', phrases: 'alfaia', toque: 'alfaia', rufo: 'alfaia', atabaques: 'atabaque' };
 
@@ -523,6 +702,9 @@ export const COCO_XAMBA = {
   sounds: studioSounds(STUDIO, SOUND_CHOICES, 'atabaques'), // every instrument plays its basic part there
   scenes: SCENE_LIST,
   looks: SCENE_LOOKS,
+  background: {
+    create: options => createCocoPainter({ ...options, barSeconds: BAR_SECONDS, beatsPerBar: BEATS_PER_BAR, rufada: RUFADA, golpe: GOLPE }),
+  },
   readout,
   waves: null,
   copy: COPY,
