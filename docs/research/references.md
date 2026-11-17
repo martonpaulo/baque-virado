@@ -68,6 +68,7 @@ Similar:
   is on YouTube); other versions of the song count too.
 - «Ainda Bem», Banda Lapada, from the same show.
 - «Novo Namorado», Priscila Senna.
+- «Milk Shake», Nega do Babado.
 
 ## Bregafunk (`/bregafunk`)
 
