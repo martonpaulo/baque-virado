@@ -288,3 +288,12 @@ test('with reduced motion the background has no bloom and nothing travels', () =
     globalThis.matchMedia = previous;
   }
 });
+
+// Found by the desktop page test: the vinheta's roll read a melodic line the horns do not have.
+test('every scene renders its readout; the rolls keep a cursor', () => {
+  for (const scene of show.SCENES) {
+    const { markup, score } = BREGA.readout(scene, { totalBars: show.TOTAL_BARS });
+    assert.ok(markup.length > 0, scene.id);
+    if (score) assert.equal(score.slotX.length, scene.bars * meter.stepsPerBar, scene.id);
+  }
+});

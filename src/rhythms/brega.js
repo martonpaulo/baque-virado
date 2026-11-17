@@ -632,7 +632,7 @@ const SHORT = 1;
 
 /** The melody roll of a scene: its melodic voices, bar by bar (the guitar's two lines alike). */
 function sceneRoll(scene, voices, band) {
-  const lines = voices.flatMap(voice => {
+  const lines = voices.filter(voice => LINES[voice]).flatMap(voice => {
     const notesOf = pick =>
       [...Array(scene.bars).keys()].flatMap(bar =>
         (LINES[voice].get(scene.start + bar) || []).map(note => ({ slot: bar * STEPS_PER_BAR + note.step, midi: pick(note), length: note.length || SHORT })),
