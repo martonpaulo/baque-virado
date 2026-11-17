@@ -569,6 +569,11 @@ a:focus-visible {
 }
 .rhythms .chip {
   text-decoration: none;
+  /* a long name in a narrow column ends in an ellipsis instead of leaving the column */
+  box-sizing: border-box;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .rhythms-stage {
   position: absolute;
