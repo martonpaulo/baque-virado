@@ -1,108 +1,78 @@
-# O Baque Virado
+# Batuque
 
-An interactive, animated explainer of maracatu de baque virado, the drum music of Recife, played
-with real one-shot drum samples. It walks through the instruments, the measured swing, the
-offbeat and the seven baques, then ends on the unison virada. The interface is in Brazilian
-Portuguese.
+Batuque é um site que mostra e toca ritmos de Pernambuco. Cada ritmo é um show animado de um a
+dois minutos. Você vê o que cada instrumento toca, ouve um de cada vez e depois todos juntos.
 
-Live: <https://batuque.martonpaulo.com>
+Endereço: <https://batuque.martonpaulo.com>
 
-## Run locally
+## O que tem no site
 
-There is no build step: the page is plain HTML, CSS and ES modules.
+- Maracatu de baque virado: <https://batuque.martonpaulo.com/maracatu>
+- Coco: <https://batuque.martonpaulo.com/coco>
+- Frevo: <https://batuque.martonpaulo.com/frevo>
+- Forró pé-de-serra: <https://batuque.martonpaulo.com/forro>
+- Manguebeat: <https://batuque.martonpaulo.com/manguebeat>
+- Brega: <https://batuque.martonpaulo.com/brega>
+- Bregafunk: <https://batuque.martonpaulo.com/bregafunk>
+
+## Como usar
+
+1. Abra o endereço de um ritmo no navegador.
+2. Toque em Play. No celular, um toque na tela toca ou pausa.
+3. A roda mostra os tempos do compasso. Cada anel é um instrumento, e cada ponto é uma batida.
+4. Embaixo da roda aparecem a partitura e os números da cena: quantas batidas, onde fica o
+   balanço, qual padrão está tocando.
+5. No computador, a coluna da esquerda tem o Roteiro com as cenas do show. Clique numa cena para
+   ir direto a ela.
+6. No computador, a coluna da direita tem o volume de cada instrumento e a escolha de som de
+   alguns deles. O site guarda essas escolhas no seu navegador.
+
+## Exportar vídeo
+
+No computador, o botão «Exportar vídeo», no meio da coluna da esquerda, grava o show do ritmo
+aberto num vídeo vertical, com som. O vídeo é feito no próprio navegador e nada é enviado para
+um servidor. O arquivo sai em MP4 quando o navegador consegue, ou em WebM.
+
+## De onde vêm os sons
+
+Os sons são gravações de instrumentos de verdade, em domínio público (CC0). Quem gravou cada som
+está em [CREDITS.md](CREDITS.md). Alguns sons do bregafunk são feitos no próprio navegador, como
+os produtores do gênero fazem no computador.
+
+## Pesquisa
+
+As escolhas de andamento, instrumentos, cores e animação vêm de pesquisa escrita em inglês na
+pasta [docs/research](docs/research):
+
+- [Os ritmos de Pernambuco e o que eles fazem sentir](docs/research/pernambuco-rhythms-feeling.md)
+- [Frevo, manguebeat e coco](docs/research/frevo-manguebeat-coco.md)
+- [Brega, bregafunk e forró](docs/research/brega-forro.md)
+- [Cores e animação](docs/research/colour-and-visuals.md)
+- [Como um som programado parece tocado por gente](docs/research/human-feel.md)
+
+## Para quem programa
+
+O site é HTML, CSS e JavaScript, sem etapa de build. O mapa do código está em
+[docs/architecture.md](docs/architecture.md), e as regras do projeto em [AGENTS.md](AGENTS.md).
 
 ```sh
 pnpm install
 pnpm serve
 ```
 
-Then open <http://127.0.0.1:8000>. A server is needed because the modules and the sounds are fetched.
+Depois abra <http://127.0.0.1:8000>.
 
-Sounds load on demand: a phone downloads only the default sounds (11 AAC files, about 92 KB); the alternative
-sounds a desktop viewer can pick are fetched when chosen.
+- `pnpm validate` roda as mesmas verificações do CI: Biome, os testes, `scripts/text_check.py` e
+  `scripts/dry_check.py`. Os testes de página usam o Chromium sem janela: `CHROME_PATH`, se
+  definido, ou o que `node tools/install-browser.mjs` baixa.
+- `node tools/build-site.mjs <pasta> <commit>` monta o site publicado, com uma página por ritmo
+  e cada arquivo marcado com o commit, para que uma página nunca misture duas versões.
+- `node tools/encode-sounds.mjs` converte cada WAV de `sounds/` para AAC (precisa do `ffmpeg`).
+- `pnpm export index.html out/maracatu.mp4` exporta o vídeo pela linha de comando, com o Chrome
+  sem janela e o `ffmpeg`. `--from` e `--to` escolhem o trecho em segundos; `--loudnorm`
+  normaliza o volume para -14 LUFS. Como root, numa sessão na nuvem, o Chrome abre sem sandbox.
 
-## Project structure
+## Licença
 
-- `index.html`, `styles.css` - the page and its layout.
-- `src/rhythms/maracatu.js` - the maracatu package: tempo, voices, swing, patterns (`barHits`), the show script, readout layouts, background looks, sounds and its copy.
-- `src/rhythms/coco-xamba.js` - the Coco da Xambá package, in 2/4 (open it at `/coco`).
-- `src/rhythms/index.js` - the rhythms the site ships, their paths (`/<id>`) and the one a page shows.
-- `src/rhythms/preparing.js` - the rhythms that have a path but no show yet.
-- `tools/build-site.mjs` - builds the deployed site, with one page per rhythm path.
-- `src/music.js` - the meter, voices and swing of the rhythm on show, as the engine reads them.
-- `src/show.js` - a rhythm's scenes, its timeline and what sounds at any moment.
-- `src/audio.js` - sound choices, the lazy sample bank, the live player and the offline WAV render.
-- `src/copy.js` - the interface's words around the rhythm's own (Brazilian Portuguese).
-- `src/util.js` - small helpers, including the deterministic `hash` that seeds per-hit variation.
-- `src/theme.js` - the shared colour palette and fonts.
-- `src/score.js` - one-line percussion notation as an SVG string.
-- `src/scope.js` - the rhythm wheel.
-- `src/readout.js` and `src/readout-markup.js` - the readout under the wheel.
-- `src/title.js` - scene titles and labels.
-- `src/background.js` - the animated WebGL background.
-- `src/lanes.js` - the per-voice hit lanes.
-- `src/controls.js` - the keyboard, the scene timeline and the sound controls.
-- `src/main.js` - wires everything together and exposes `window.baque` for the exporter.
-- `fonts/` - Space Grotesk and JetBrains Mono (Latin subsets, SIL Open Font License; see [CREDITS.md](CREDITS.md)).
-- `sounds/` - the samples: WAV masters and the AAC (`.m4a`) files the page fetches (see [CREDITS.md](CREDITS.md)).
-- `tools/encode-sounds.mjs` - encodes each WAV to AAC at 96 kbps (`node tools/encode-sounds.mjs`, needs `ffmpeg`).
-- `tools/prepare-takes.mjs` - cuts and normalises the studio instruments' recorded takes and writes `src/rhythms/recorded-takes.js` (needs `ffmpeg` and the CC0 sources it names).
-- `tests/` - unit tests of the DOM-free modules, and browser tests of the page in headless Chromium (`tests/page.test.js`, `tests/sounds-decode.test.js`).
-- `tools/static-server.mjs` - the local static server (`pnpm serve`).
-- `src/export.js`, `src/stage-capture.js` - the video export in the page.
-- `tools/export-video.mjs` - the vertical video exporter on the command line.
-- [docs/research/expansion-decisions.md](docs/research/expansion-decisions.md) - the decisions for growing from one rhythm show to seven.
-- [docs/research/frevo-manguebeat-coco.md](docs/research/frevo-manguebeat-coco.md) - research on frevo, manguebeat and coco da Xambá.
-- [docs/research/brega-forro.md](docs/research/brega-forro.md) - research on brega, bregafunk and forró pé-de-serra.
-- [docs/research/pernambuco-rhythms-feeling.md](docs/research/pernambuco-rhythms-feeling.md) - why Pernambuco rhythms move people.
-- [docs/research/music-cognition.md](docs/research/music-cognition.md) - music cognition and semiotics for the shows.
-- [docs/research/colour-and-visuals.md](docs/research/colour-and-visuals.md) - colour and animation evidence for the rhythm backgrounds.
-- [docs/research/human-feel.md](docs/research/human-feel.md) - how to make a sample engine sound played by people.
-- [docs/research/software-music-feel.md](docs/research/software-music-feel.md) - why software-made music can feel alive, and how producers do it.
-- [docs/sketches/scripts.html](docs/sketches/scripts.html) - throwaway sketch of the show scripts.
-- [docs/sketches/backgrounds.html](docs/sketches/backgrounds.html) - throwaway sketch of the rhythm backgrounds.
-
-## Tests
-
-```sh
-pnpm test
-pnpm validate
-```
-
-`pnpm validate` runs exactly what CI runs: Biome, the tests, `scripts/text_check.py` and
-`scripts/dry_check.py`. The tests use `node:test` and cover the timeline, the special bars, the patterns, the sound files
-and the pinned `hash` values. The browser tests load the page in headless Chromium: `CHROME_PATH`
-if set, else the pinned Chrome headless shell that `node tools/install-browser.mjs` downloads to
-`.scratch/browsers` (CI does this), else a Chrome or Chromium found on the machine.
-
-## Video export
-
-On desktop, «Exportar vídeo» in the left column, between the Roteiro and the rhythm selector,
-exports the rhythm on show in the browser, with no server: `src/export.js` loads the page as the
-9:16 reel in a hidden frame, renders the sound offline, draws each frame with `window.baque.frame`
-(`src/stage-capture.js` copies the stage into a canvas), and encodes them with WebCodecs and the
-vendored [Mediabunny](https://mediabunny.dev) (`vendor/`, MPL-2.0). The file is `<rhythm id>.mp4`
-(H.264 and AAC) where the browser encodes both, as Chrome on macOS and Windows does, else
-`<rhythm id>.webm` (VP9 or VP8 and Opus); the status line names the format. The page the viewer
-watches does not change.
-
-The command line drives the same `window.baque.frame` with headless Chrome and `ffmpeg`.
-It renders the page to a 1080x1920, 30 fps H.264 MP4 with the offline-rendered audio (AAC 320k).
-It needs Google Chrome for Testing and `ffmpeg`; set `CHROME_PATH` and `FFMPEG_PATH` when they are
-not at the macOS defaults. Run as root (a cloud session), it starts Chrome without its sandbox
-([#20](https://github.com/martonpaulo/baque-virado/issues/20)).
-
-```sh
-pnpm export index.html out/baque-virado.mp4
-pnpm export index.html out/clip.mp4 --from 10 --to 25 --loudnorm
-```
-
-- `--from` / `--to` - the segment to export, in seconds.
-- `--loudnorm` - two-pass loudness normalisation to -14 LUFS, true peak -1.5 dBTP.
-
-## Sources
-
-- Alfaia hand patterns: the pattern table published at
-  [lansdownsoftware.com](https://lansdownsoftware.com).
-- Swing: the median offset of each sixteenth, measured on a workshop recording by Batuk Nagô.
-- Sounds: Freesound, public domain (CC0); authors in [CREDITS.md](CREDITS.md).
+Código sob a licença MIT ([LICENSE](LICENSE)). Sons, fontes e a biblioteca de vídeo têm as
+licenças listadas em [CREDITS.md](CREDITS.md) e [NOTICE.md](NOTICE.md).

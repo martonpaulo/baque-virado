@@ -20,7 +20,7 @@ test('every rhythm path answers 200 from the built site; a shipped one is the sh
     const page = id => readFileSync(path.join(out, `${id}.html`), 'utf8');
     const index = readFileSync(path.join(out, 'index.html'), 'utf8');
     // a shipped rhythm: index.html with its own title and address, so the show is the same page
-    assert.match(page('forro'), /<title>Forró · O Baque Virado<\/title>/);
+    assert.match(page('forro'), /<title>Forró · Batuque<\/title>/);
     assert.match(page('forro'), /<link rel="canonical" href="https:\/\/batuque\.martonpaulo\.com\/forro">/);
     const showOnly = html =>
       html
@@ -30,7 +30,7 @@ test('every rhythm path answers 200 from the built site; a shipped one is the sh
     assert.equal(showOnly(page('maracatu')), showOnly(index));
     // a rhythm being prepared: its name in the title, one line, the selector, and no show
     const manguebeat = page('manguebeat');
-    assert.match(manguebeat, /<title>Manguebeat · O Baque Virado<\/title>/);
+    assert.match(manguebeat, /<title>Manguebeat · Batuque<\/title>/);
     assert.match(manguebeat, /<p>O show de manguebeat está sendo preparado\.<\/p>/);
     assert.match(manguebeat, /<a class="chip" href="\/manguebeat" aria-current="true">manguebeat<\/a>/);
     assert.equal((manguebeat.match(/class="chip"/g) || []).length, ROUTES.length);

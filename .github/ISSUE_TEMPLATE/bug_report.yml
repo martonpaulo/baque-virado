@@ -1,5 +1,5 @@
 name: Bug report
-description: Report something in O Baque Virado that does not work as expected.
+description: Report something in Batuque that does not work as expected.
 title: "bug: "
 labels: ["type: bug"]
 body:

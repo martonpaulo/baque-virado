@@ -2,17 +2,17 @@
 
 ## Project identity and policy
 
-- Display name: `O Baque Virado`
-- Code name: `baque-virado`
-- Slug: `baque-virado`
-- Identifier name: `baqueVirado`
+- Display name: `Batuque` (was `O Baque Virado`, [#38](https://github.com/martonpaulo/baque-virado/issues/38))
+- Code name: `batuque`
+- Slug: `batuque`
+- Identifier name: `batuque`
 - Benefit-first description: See and hear what each maracatu instrument plays, where the swing sits and how seven baques differ, in a two-minute animated show.
-- Repository: `martonpaulo/baque-virado` (public)
-- Public identifiers: the domain `batuque.martonpaulo.com` (moved from `baquevirado.martonpaulo.com`, which 301-redirects to it with the same path and query, [#28](https://github.com/martonpaulo/baque-virado/issues/28)), the repository name and the localStorage prefix `baque-virado:`, kept unchanged so viewers keep their settings
+- Repository: `martonpaulo/baque-virado` (public), to be renamed `martonpaulo/batuque` by the owner: the cloud proxy refuses repository settings writes (HTTP 403, [#38](https://github.com/martonpaulo/baque-virado/issues/38)); GitHub then redirects the old URLs and remote, so the links in the docs keep working. The owner's local checkout moves to `~/proj/batuque`
+- Public identifiers: the domain `batuque.martonpaulo.com` (moved from `baquevirado.martonpaulo.com`, which 301-redirects to it with the same path and query, [#28](https://github.com/martonpaulo/baque-virado/issues/28)), the localStorage prefix `baque-virado:` and the `window.baque` page contract, kept unchanged so viewers keep their settings and the exporter keeps working
 - Landing page: the site itself is the product, served by GitHub Pages at https://batuque.martonpaulo.com
 - License: `MIT`
 - Copyright: 2026 Marton Paulo
-- Development language: English.
+- Development language: English. One exception the owner set ([#38](https://github.com/martonpaulo/baque-virado/issues/38)): `README.md` is in Brazilian Portuguese, for readers who do not program.
 - Product copy: Brazilian Portuguese only; dynamic copy lives in `src/copy.js` and, for a rhythm's own words, in its package under `src/rhythms/`; static copy in `index.html`; no localization.
 - Branch policy: work directly on `main`; a branch only when the owner asks.
 - Commit policy: the agent commits each verified change, signed, Conventional Commits.

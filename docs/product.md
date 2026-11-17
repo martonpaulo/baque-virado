@@ -1,4 +1,4 @@
-# O Baque Virado — product definition
+# Batuque — product definition
 
 ## Contents
 

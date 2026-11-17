@@ -16,7 +16,7 @@ import { MOVED, RHYTHMS, ROUTES, rhythmChoices } from '../src/rhythms/index.js';
 import { PREPARING, preparingLine } from '../src/rhythms/preparing.js';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const SITE_NAME = 'O Baque Virado';
+const SITE_NAME = 'Batuque';
 const COPIED = ['index.html', '404.html', 'styles.css', 'src', 'vendor', 'social.png', 'apple-touch-icon.png', 'icon.svg', 'icons', 'CNAME', '.nojekyll'];
 
 const escapeHtml = text => text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');

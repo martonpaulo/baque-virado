@@ -1,6 +1,6 @@
-# Contributing to O Baque Virado
+# Contributing to Batuque
 
-O Baque Virado favors small changes that keep the page light on a phone and the show
+Batuque favors small changes that keep the page light on a phone and the show
 deterministic. Read [`docs/product.md`](docs/product.md) for what belongs in it.
 
 ## Report a bug
