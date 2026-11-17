@@ -14,6 +14,10 @@ trimmed, mixed or retuned.
 - Caixa snares: Uberproduktion · Roll: bigjoedrummer · Stick: LudwigMueller
 - Whistles: juliojunior77, SpliceSound, strongbot, Rosa-Orenes256, LudwigMueller
 
+The forró triângulo, sanfona, rabeca, bandolim, cavaquinho and baixo are synthesized for this
+project by `tools/synth-forro.mjs`; its zabumba reuses the alfaia, surdo and stick recordings above
+([`docs/rhythms/forro.md`](docs/rhythms/forro.md)).
+
 Alfaia patterns: the table at lansdownsoftware.com. Swing measured on a Batuk Nagô workshop recording.
 
 The score renderer (`src/score.js`) is original to this project, written in 2026-11.

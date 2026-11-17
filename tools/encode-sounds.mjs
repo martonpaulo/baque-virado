@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 // Encode every sounds/<name>.wav to sounds/<name>.m4a: AAC-LC at 96 kbps, which the page fetches (#3).
 // The WAVs stay as the masters; run this again after a WAV changes.
-// Usage: node tools/encode-sounds.mjs   (needs ffmpeg; set FFMPEG_PATH when it is not on PATH)
+// Usage: node tools/encode-sounds.mjs [name…]   (needs ffmpeg; set FFMPEG_PATH when it is not on PATH)
+// With names, only those files are encoded, so the other AAC files stay byte for byte as they are.
 //
 // The MP4 muxer writes an edit list that skips the AAC encoder's priming samples, so a decoder that
 // honours it (Chrome, Safari) starts each sample on the same audio frame as the WAV;
@@ -16,9 +17,12 @@ const FFMPEG = process.env.FFMPEG_PATH || 'ffmpeg';
 // Pinned: change these only together with a fresh encode of every file.
 const ENCODE_ARGS = ['-c:a', 'aac', '-b:a', '96k', '-map_metadata', '-1', '-fflags', '+bitexact', '-flags:a', '+bitexact', '-movflags', '+faststart'];
 
-const names = readdirSync(SOUNDS)
-  .filter(file => file.endsWith('.wav'))
-  .map(file => file.slice(0, -'.wav'.length));
+const requested = process.argv.slice(2);
+const names = requested.length
+  ? requested
+  : readdirSync(SOUNDS)
+      .filter(file => file.endsWith('.wav'))
+      .map(file => file.slice(0, -'.wav'.length));
 for (const name of names) {
   const result = spawnSync(
     FFMPEG,
