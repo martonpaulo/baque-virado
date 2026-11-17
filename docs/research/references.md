@@ -63,7 +63,8 @@ whole video, especially from 18:00.
 ## Brega (`/brega`)
 
 1. «Uma Mulher É Igual uma Flor», Banda Musa do Calipso; other bands' versions count too. [search](https://www.youtube.com/results?search_query=Banda+Musa+Uma+Mulher+%C3%89+Igual+uma+Flor)
-2. «Diz na Minha Cara», as Banda Lapada played it on the television show SuperStar (Globo); other versions count too. [search](https://www.youtube.com/results?search_query=Banda+Lapada+Diz+na+Minha+Cara+SuperStar)
+2. «Diz na Minha Cara», in Banda Torpedo's recording, the one the owner pointed to
+   (https://youtu.be/pWJ6B1rP7IY); other versions count too.
 3. «Novo Namorado», Priscila Senna. [search](https://www.youtube.com/results?search_query=Priscila+Senna+Novo+Namorado)
 4. «Milk Shake», Nega do Babado. [search](https://www.youtube.com/results?search_query=Nega+do+Babado+Milk+Shake)
 
