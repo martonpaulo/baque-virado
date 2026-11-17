@@ -1,0 +1,175 @@
+
+# ../refs/coco/00-3257365401.stems bpm=176.5 key=C poly=1.25
+   drums low  1.00 0.32 0.73 0.41 0.99 0.36 0.65 0.34
+   drums mid  1.00 0.20 0.55 0.32 0.97 0.22 0.47 0.32
+   drums high 1.00 0.28 0.54 0.33 0.99 0.30 0.46 0.35
+   bass  {'notes_per_beat': 0.33, 'dur_beats_median': 0.34, 'pitch_p10': 30, 'pitch_med': 39, 'pitch_p90': 67, 'step_share': 0.32, 'leap_share': 0.54, 'repeat_share': 0.18}
+   other {'notes_per_beat': 1.12, 'dur_beats_median': 0.34, 'pitch_p10': 48, 'pitch_med': 69, 'pitch_p90': 72, 'step_share': 0.38, 'leap_share': 0.55, 'repeat_share': 0.31}
+
+# ../refs/coco/10-3257365371.stems bpm=90.9 key=F# poly=2.91
+   drums low  1.00 0.18 0.31 0.64 0.48 0.42 0.34 0.29
+   drums mid  1.00 0.11 0.23 0.35 0.39 0.45 0.19 0.12
+   drums high 1.00 0.08 0.23 0.38 0.33 0.35 0.27 0.15
+   bass  {'notes_per_beat': 1.96, 'dur_beats_median': 0.32, 'pitch_p10': 30, 'pitch_med': 37, 'pitch_p90': 44, 'step_share': 0.48, 'leap_share': 0.49, 'repeat_share': 0.32}
+   other {'notes_per_beat': 7.79, 'dur_beats_median': 0.28, 'pitch_p10': 44, 'pitch_med': 59, 'pitch_p90': 78, 'step_share': 0.09, 'leap_share': 0.87, 'repeat_share': 0.06}
+
+# ../refs/coco/11-3257365381.stems bpm=181.8 key=B poly=1.17
+   drums low  1.00 0.33 0.49 0.31 0.79 0.50 0.46 0.32
+   drums mid  1.00 0.19 0.37 0.23 0.84 0.32 0.34 0.23
+   drums high 1.00 0.19 0.32 0.23 0.80 0.31 0.33 0.24
+   bass  {'notes_per_beat': 0.35, 'dur_beats_median': 0.3, 'pitch_p10': 29, 'pitch_med': 60, 'pitch_p90': 66, 'step_share': 0.39, 'leap_share': 0.55, 'repeat_share': 0.23}
+   other {'notes_per_beat': 0.59, 'dur_beats_median': 0.32, 'pitch_p10': 59, 'pitch_med': 67, 'pitch_p90': 78, 'step_share': 0.4, 'leap_share': 0.57, 'repeat_share': 0.28}
+
+# ../refs/frevo/00-87759193.stems bpm=120.0 key=Fm poly=2.11
+   drums low  1.00 0.96 0.89 0.82 0.98 0.94 0.91 0.91
+   drums mid  0.97 0.78 0.95 0.76 1.00 0.82 0.96 0.88
+   drums high 0.88 0.66 0.99 0.73 1.00 0.71 0.88 0.84
+   bass  {'notes_per_beat': 1.6, 'dur_beats_median': 0.35, 'pitch_p10': 40, 'pitch_med': 41, 'pitch_p90': 44, 'step_share': 0.64, 'leap_share': 0.11, 'repeat_share': 0.44}
+   other {'notes_per_beat': 4.9, 'dur_beats_median': 0.3, 'pitch_p10': 44, 'pitch_med': 65, 'pitch_p90': 77, 'step_share': 0.12, 'leap_share': 0.81, 'repeat_share': 0.08}
+
+# ../refs/frevo/01-392722422.stems bpm=125.0 key=Gm poly=3.2
+   drums low  1.00 0.16 0.38 0.26 0.55 0.26 0.48 0.69
+   drums mid  1.00 0.14 0.57 0.30 0.75 0.33 0.47 0.72
+   drums high 1.00 0.16 0.73 0.35 0.88 0.31 0.57 0.82
+   bass  {'notes_per_beat': 0.67, 'dur_beats_median': 0.29, 'pitch_p10': 43, 'pitch_med': 44, 'pitch_p90': 57, 'step_share': 0.71, 'leap_share': 0.29, 'repeat_share': 0.39}
+   other {'notes_per_beat': 7.35, 'dur_beats_median': 0.29, 'pitch_p10': 58, 'pitch_med': 69, 'pitch_p90': 76, 'step_share': 0.09, 'leap_share': 0.74, 'repeat_share': 0.04}
+
+# ../refs/frevo/02-1709760857.stems bpm=125.0 key=Fm poly=2.53
+   drums low  1.00 0.07 0.21 0.06 0.21 0.24 0.06 0.34
+   drums mid  1.00 0.15 0.72 0.13 0.56 0.60 0.13 0.63
+   drums high 1.00 0.12 0.90 0.11 0.68 0.58 0.29 0.62
+   bass  {'notes_per_beat': 2.32, 'dur_beats_median': 0.39, 'pitch_p10': 36, 'pitch_med': 43, 'pitch_p90': 55, 'step_share': 0.27, 'leap_share': 0.69, 'repeat_share': 0.19}
+   other {'notes_per_beat': 5.55, 'dur_beats_median': 0.34, 'pitch_p10': 43, 'pitch_med': 58, 'pitch_p90': 70, 'step_share': 0.11, 'leap_share': 0.79, 'repeat_share': 0.05}
+
+# ../refs/forro/00-13267496.stems bpm=96.8 key=Bm poly=2.87
+   drums low  0.71 0.34 0.17 1.00 0.68 0.27 0.31 0.74
+   drums mid  0.87 0.44 0.28 0.86 1.00 0.33 0.44 0.53
+   drums high 0.61 0.86 0.62 0.82 1.00 0.70 0.65 0.54
+   bass  {'notes_per_beat': 2.46, 'dur_beats_median': 0.22, 'pitch_p10': 35, 'pitch_med': 40, 'pitch_p90': 51, 'step_share': 0.36, 'leap_share': 0.48, 'repeat_share': 0.23}
+   other {'notes_per_beat': 11.91, 'dur_beats_median': 0.22, 'pitch_p10': 59, 'pitch_med': 71, 'pitch_p90': 79, 'step_share': 0.11, 'leap_share': 0.75, 'repeat_share': 0.06}
+
+# ../refs/forro/01-422333422.stems bpm=103.4 key=Bm poly=2.86
+   drums low  0.31 0.24 0.17 0.47 0.26 0.12 0.13 1.00
+   drums mid  0.97 0.21 0.27 0.38 0.39 0.19 0.25 1.00
+   drums high 1.00 0.12 0.53 0.37 0.36 0.18 0.54 0.62
+   bass  {'notes_per_beat': 3.21, 'dur_beats_median': 0.22, 'pitch_p10': 33, 'pitch_med': 40, 'pitch_p90': 52, 'step_share': 0.39, 'leap_share': 0.52, 'repeat_share': 0.28}
+   other {'notes_per_beat': 9.86, 'dur_beats_median': 0.24, 'pitch_p10': 52, 'pitch_med': 66, 'pitch_p90': 76, 'step_share': 0.06, 'leap_share': 0.8, 'repeat_share': 0.05}
+
+# ../refs/forro/10-136767360.stems bpm=130.4 key=Dm poly=3.5
+   drums low  0.98 0.12 0.12 1.00 0.33 0.10 0.40 0.28
+   drums mid  0.99 0.13 0.29 1.00 0.45 0.14 0.61 0.32
+   drums high 0.84 0.18 0.60 0.82 0.61 0.26 1.00 0.32
+   bass  {'notes_per_beat': 1.93, 'dur_beats_median': 0.4, 'pitch_p10': 31, 'pitch_med': 43, 'pitch_p90': 48, 'step_share': 0.22, 'leap_share': 0.75, 'repeat_share': 0.1}
+   other {'notes_per_beat': 8.77, 'dur_beats_median': 0.33, 'pitch_p10': 52, 'pitch_med': 62, 'pitch_p90': 70, 'step_share': 0.06, 'leap_share': 0.77, 'repeat_share': 0.04}
+
+# ../refs/forro/11-82779880.stems bpm=166.7 key=B poly=2.82
+   drums low  1.00 0.14 0.13 0.08 0.64 0.13 0.37 0.12
+   drums mid  1.00 0.07 0.10 0.09 0.79 0.07 0.13 0.08
+   drums high 1.00 0.03 0.20 0.06 0.88 0.04 0.25 0.03
+   bass  {'notes_per_beat': 2.3, 'dur_beats_median': 0.39, 'pitch_p10': 35, 'pitch_med': 42, 'pitch_p90': 51, 'step_share': 0.42, 'leap_share': 0.48, 'repeat_share': 0.34}
+   other {'notes_per_beat': 5.11, 'dur_beats_median': 0.42, 'pitch_p10': 55, 'pitch_med': 66, 'pitch_p90': 75, 'step_share': 0.09, 'leap_share': 0.7, 'repeat_share': 0.04}
+
+# ../refs/forro/12-105734498.stems bpm=68.2 key=Em poly=2.63
+   drums low  1.00 0.80 0.73 0.80 0.87 0.80 0.80 0.72
+   drums mid  1.00 0.62 0.82 0.75 0.73 0.64 0.71 0.57
+   drums high 1.00 0.45 0.69 0.66 0.58 0.46 0.57 0.41
+   bass  {'notes_per_beat': 1.56, 'dur_beats_median': 0.74, 'pitch_p10': 40, 'pitch_med': 47, 'pitch_p90': 52, 'step_share': 0.33, 'leap_share': 0.54, 'repeat_share': 0.25}
+   other {'notes_per_beat': 6.87, 'dur_beats_median': 0.24, 'pitch_p10': 40, 'pitch_med': 52, 'pitch_p90': 64, 'step_share': 0.1, 'leap_share': 0.74, 'repeat_share': 0.07}
+
+# ../refs/manguebeat/00-13359636.stems bpm=107.1 key=Am poly=1.48
+   drums low  1.00 0.37 0.23 0.74 0.23 0.36 0.79 0.51
+   drums mid  1.00 0.45 0.25 0.80 0.33 0.44 0.91 0.32
+   drums high 1.00 0.58 0.31 0.78 0.42 0.39 0.90 0.27
+   bass  {'notes_per_beat': 1.74, 'dur_beats_median': 0.23, 'pitch_p10': 38, 'pitch_med': 49, 'pitch_p90': 50, 'step_share': 0.6, 'leap_share': 0.4, 'repeat_share': 0.42}
+   other {'notes_per_beat': 3.19, 'dur_beats_median': 0.27, 'pitch_p10': 48, 'pitch_med': 67, 'pitch_p90': 84, 'step_share': 0.42, 'leap_share': 0.56, 'repeat_share': 0.32}
+
+# ../refs/manguebeat/10-380244351.stems bpm=157.9 key=E poly=1.53
+   drums low  0.93 0.31 0.89 0.49 0.77 0.36 1.00 0.42
+   drums mid  1.00 0.14 0.83 0.34 0.81 0.19 0.83 0.20
+   drums high 1.00 0.13 0.70 0.26 0.81 0.14 0.75 0.15
+   bass  {'notes_per_beat': 1.43, 'dur_beats_median': 0.37, 'pitch_p10': 38, 'pitch_med': 40, 'pitch_p90': 47, 'step_share': 0.63, 'leap_share': 0.33, 'repeat_share': 0.58}
+   other {'notes_per_beat': 2.22, 'dur_beats_median': 0.34, 'pitch_p10': 42, 'pitch_med': 52, 'pitch_p90': 68, 'step_share': 0.57, 'leap_share': 0.37, 'repeat_share': 0.39}
+
+# ../refs/manguebeat/11-1418854532.stems bpm=96.8 key=F#m poly=1.75
+   drums low  1.00 0.13 0.68 0.13 0.78 0.20 0.19 0.15
+   drums mid  1.00 0.07 0.88 0.24 0.91 0.22 0.22 0.25
+   drums high 1.00 0.10 0.94 0.44 0.90 0.29 0.54 0.54
+   bass  {'notes_per_beat': 2.66, 'dur_beats_median': 0.24, 'pitch_p10': 30, 'pitch_med': 42, 'pitch_p90': 49, 'step_share': 0.27, 'leap_share': 0.73, 'repeat_share': 0.2}
+   other {'notes_per_beat': 4.01, 'dur_beats_median': 0.22, 'pitch_p10': 49, 'pitch_med': 61, 'pitch_p90': 73, 'step_share': 0.21, 'leap_share': 0.65, 'repeat_share': 0.17}
+
+# ../refs/manguebeat/12-1418854502.stems bpm=142.9 key=A poly=2.22
+   drums low  1.00 0.20 0.97 0.25 0.71 0.25 0.74 0.34
+   drums mid  1.00 0.07 0.94 0.10 0.71 0.10 0.63 0.20
+   drums high 1.00 0.05 0.95 0.07 0.85 0.06 0.57 0.12
+   bass  {'notes_per_beat': 1.93, 'dur_beats_median': 0.39, 'pitch_p10': 36, 'pitch_med': 45, 'pitch_p90': 52, 'step_share': 0.39, 'leap_share': 0.49, 'repeat_share': 0.15}
+   other {'notes_per_beat': 4.32, 'dur_beats_median': 0.33, 'pitch_p10': 48, 'pitch_med': 59, 'pitch_p90': 73, 'step_share': 0.11, 'leap_share': 0.84, 'repeat_share': 0.08}
+
+# ../refs/brega/00-2750872611.stems bpm=136.4 key=Cm poly=3.73
+   drums low  1.00 0.23 0.99 0.23 0.97 0.21 0.26 0.18
+   drums mid  0.96 0.11 1.00 0.14 0.92 0.16 0.37 0.13
+   drums high 1.00 0.05 0.89 0.09 0.95 0.09 0.32 0.12
+   bass  {'notes_per_beat': 2.36, 'dur_beats_median': 0.37, 'pitch_p10': 32, 'pitch_med': 43, 'pitch_p90': 51, 'step_share': 0.35, 'leap_share': 0.52, 'repeat_share': 0.21}
+   other {'notes_per_beat': 7.91, 'dur_beats_median': 0.4, 'pitch_p10': 52, 'pitch_med': 63, 'pitch_p90': 77, 'step_share': 0.05, 'leap_share': 0.82, 'repeat_share': 0.03}
+
+# ../refs/brega/01-2192663417.stems bpm=136.4 key=Cm poly=3.08
+   drums low  0.96 0.16 0.29 0.27 0.77 0.21 1.00 0.21
+   drums mid  1.00 0.12 0.21 0.18 0.91 0.12 0.81 0.12
+   drums high 1.00 0.07 0.31 0.12 0.81 0.08 0.67 0.07
+   bass  {'notes_per_beat': 3.52, 'dur_beats_median': 0.34, 'pitch_p10': 32, 'pitch_med': 48, 'pitch_p90': 60, 'step_share': 0.06, 'leap_share': 0.82, 'repeat_share': 0.04}
+   other {'notes_per_beat': 6.66, 'dur_beats_median': 0.37, 'pitch_p10': 53, 'pitch_med': 62, 'pitch_p90': 77, 'step_share': 0.09, 'leap_share': 0.77, 'repeat_share': 0.06}
+
+# ../refs/brega/02-2421993995.stems bpm=136.4 key=Cm poly=2.94
+   drums low  0.90 0.35 1.00 0.41 0.89 0.33 0.45 0.35
+   drums mid  0.91 0.14 1.00 0.23 0.88 0.17 0.51 0.20
+   drums high 0.92 0.04 0.82 0.16 1.00 0.08 0.57 0.11
+   bass  {'notes_per_beat': 1.92, 'dur_beats_median': 0.32, 'pitch_p10': 33, 'pitch_med': 36, 'pitch_p90': 47, 'step_share': 0.43, 'leap_share': 0.49, 'repeat_share': 0.29}
+   other {'notes_per_beat': 7.28, 'dur_beats_median': 0.32, 'pitch_p10': 50, 'pitch_med': 67, 'pitch_p90': 79, 'step_share': 0.06, 'leap_share': 0.78, 'repeat_share': 0.05}
+
+# ../refs/brega/05-3257317101.stems bpm=142.9 key=F poly=2.76
+   drums low  1.00 0.31 0.77 0.38 0.77 0.36 0.31 0.25
+   drums mid  1.00 0.09 0.94 0.12 0.55 0.11 0.28 0.20
+   drums high 0.96 0.05 1.00 0.10 0.74 0.04 0.33 0.22
+   bass  {'notes_per_beat': 2.76, 'dur_beats_median': 0.44, 'pitch_p10': 36, 'pitch_med': 48, 'pitch_p90': 57, 'step_share': 0.13, 'leap_share': 0.81, 'repeat_share': 0.05}
+   other {'notes_per_beat': 5.98, 'dur_beats_median': 0.39, 'pitch_p10': 55, 'pitch_med': 65, 'pitch_p90': 76, 'step_share': 0.08, 'leap_share': 0.83, 'repeat_share': 0.05}
+
+# ../refs/brega/10-1945568217.stems bpm=136.4 key=Em poly=3.77
+   drums low  1.00 0.12 0.53 0.16 0.54 0.17 0.39 0.10
+   drums mid  1.00 0.09 0.51 0.10 0.52 0.10 0.49 0.10
+   drums high 1.00 0.06 0.71 0.09 0.66 0.08 0.63 0.08
+   bass  {'notes_per_beat': 1.78, 'dur_beats_median': 0.45, 'pitch_p10': 30, 'pitch_med': 43, 'pitch_p90': 54, 'step_share': 0.17, 'leap_share': 0.79, 'repeat_share': 0.1}
+   other {'notes_per_beat': 5.65, 'dur_beats_median': 0.5, 'pitch_p10': 50, 'pitch_med': 62, 'pitch_p90': 72, 'step_share': 0.05, 'leap_share': 0.8, 'repeat_share': 0.03}
+
+# ../refs/brega/11-100351390.stems bpm=130.4 key=G poly=2.71
+   drums low  1.00 0.13 0.83 0.15 0.77 0.13 0.16 0.10
+   drums mid  1.00 0.11 0.97 0.14 0.94 0.11 0.31 0.13
+   drums high 1.00 0.20 0.97 0.13 0.97 0.14 0.41 0.27
+   bass  {'notes_per_beat': 3.14, 'dur_beats_median': 0.33, 'pitch_p10': 31, 'pitch_med': 43, 'pitch_p90': 52, 'step_share': 0.2, 'leap_share': 0.74, 'repeat_share': 0.12}
+   other {'notes_per_beat': 6.07, 'dur_beats_median': 0.3, 'pitch_p10': 47, 'pitch_med': 62, 'pitch_p90': 79, 'step_share': 0.07, 'leap_share': 0.88, 'repeat_share': 0.06}
+
+# ../refs/brega/12-3939465101.stems bpm=130.4 key=G poly=2.75
+   drums low  0.78 0.16 0.46 0.29 0.78 0.17 1.00 0.25
+   drums mid  0.82 0.13 0.58 0.29 0.92 0.17 1.00 0.24
+   drums high 1.00 0.10 0.64 0.34 0.88 0.18 0.95 0.23
+   bass  {'notes_per_beat': 3.21, 'dur_beats_median': 0.35, 'pitch_p10': 34, 'pitch_med': 43, 'pitch_p90': 57, 'step_share': 0.14, 'leap_share': 0.81, 'repeat_share': 0.1}
+   other {'notes_per_beat': 5.97, 'dur_beats_median': 0.36, 'pitch_p10': 55, 'pitch_med': 67, 'pitch_p90': 85, 'step_share': 0.09, 'leap_share': 0.81, 'repeat_share': 0.05}
+
+# ../refs/brega/13-96298700.stems bpm=136.4 key=A poly=4.79
+   drums low  1.00 0.11 0.79 0.15 0.62 0.08 0.25 0.08
+   drums mid  1.00 0.07 0.62 0.10 0.61 0.07 0.34 0.09
+   drums high 1.00 0.03 0.49 0.05 0.44 0.04 0.52 0.15
+   bass  {'notes_per_beat': 2.08, 'dur_beats_median': 0.42, 'pitch_p10': 32, 'pitch_med': 38, 'pitch_p90': 45, 'step_share': 0.34, 'leap_share': 0.55, 'repeat_share': 0.2}
+   other {'notes_per_beat': 6.6, 'dur_beats_median': 0.55, 'pitch_p10': 45, 'pitch_med': 57, 'pitch_p90': 69, 'step_share': 0.06, 'leap_share': 0.79, 'repeat_share': 0.04}
+
+# ../refs/bregafunk/00-1777313497.stems bpm=85.7 key=Am poly=1.33
+   drums low  1.00 0.24 0.21 0.20 0.49 0.27 0.44 0.17
+   drums mid  1.00 0.28 0.41 0.43 0.60 0.27 0.83 0.18
+   drums high 1.00 0.35 0.59 0.55 0.66 0.30 0.95 0.31
+   bass  {'notes_per_beat': 1.05, 'dur_beats_median': 0.32, 'pitch_p10': 30, 'pitch_med': 36, 'pitch_p90': 46, 'step_share': 0.25, 'leap_share': 0.57, 'repeat_share': 0.2}
+   other {'notes_per_beat': 2.99, 'dur_beats_median': 0.18, 'pitch_p10': 62, 'pitch_med': 70, 'pitch_p90': 91, 'step_share': 0.25, 'leap_share': 0.71, 'repeat_share': 0.21}
+
+# ../refs/bregafunk/01-2108005847.stems bpm=150.0 key=Bb poly=1.76
+   drums low  1.00 0.15 0.17 0.25 0.80 0.09 0.43 0.17
+   drums mid  1.00 0.22 0.29 0.20 0.90 0.09 0.44 0.13
+   drums high 1.00 0.24 0.43 0.18 1.00 0.09 0.45 0.11
+   bass  {'notes_per_beat': 1.55, 'dur_beats_median': 0.38, 'pitch_p10': 28, 'pitch_med': 33, 'pitch_p90': 43, 'step_share': 0.45, 'leap_share': 0.54, 'repeat_share': 0.45}
+   other {'notes_per_beat': 3.19, 'dur_beats_median': 0.46, 'pitch_p10': 57, 'pitch_med': 64, 'pitch_p90': 70, 'step_share': 0.25, 'leap_share': 0.56, 'repeat_share': 0.24}

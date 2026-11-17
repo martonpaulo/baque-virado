@@ -48,6 +48,8 @@ pasta [docs/research](docs/research):
 - [Brega, bregafunk e forró](docs/research/brega-forro.md)
 - [Cores e animação](docs/research/colour-and-visuals.md)
 - [Como um som programado parece tocado por gente](docs/research/human-feel.md)
+- [As músicas de referência de cada ritmo](docs/research/references.md)
+- [O laboratório de som: como medimos um show contra as referências](docs/research/sound-lab.md)
 
 ## Para quem programa
 

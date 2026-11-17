@@ -7,3 +7,7 @@ node_modules/
 *.mp4
 *.wav
 !sounds/*.wav
+
+# the sound lab's reference audio, stems and caches (copyrighted previews, never versioned)
+lab/.data/
+lab/__pycache__/
