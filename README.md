@@ -50,6 +50,7 @@ pasta [docs/research](docs/research):
 - [Como um som programado parece tocado por gente](docs/research/human-feel.md)
 - [As músicas de referência de cada ritmo](docs/research/references.md)
 - [O laboratório de som: como medimos um show contra as referências](docs/research/sound-lab.md)
+- [A segunda rodada: o que falta melhorar e como](docs/research/round-two.md)
 
 ## Para quem programa
 
