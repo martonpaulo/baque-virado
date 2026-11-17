@@ -29,74 +29,78 @@ const WHEEL_Y = 0.42; // the wheel's centre on the site's stage, as a share of i
 function wheel(c, cx, cy, w, color) { c.strokeStyle = color; c.lineWidth = 1.5; c.beginPath(); c.arc(cx, cy, w * 0.12, 0, TAU); c.stroke(); for (let k = 0; k < 16; k++) { const a = k / 16 * TAU - Math.PI / 2; c.beginPath(); c.moveTo(cx + Math.cos(a) * w * 0.105, cy + Math.sin(a) * w * 0.105); c.lineTo(cx + Math.cos(a) * w * 0.12, cy + Math.sin(a) * w * 0.12); c.stroke(); } }
 const SKETCHES = [
  { key: 'coco', name: 'Coco da Xambá', feel: 'Transe e devoção do terreiro', bpm: 132, steps: 8, hits: [0, 4], accent: [0],
-   init(w, h) { return { rings: [] }; },
+   init(w, h) { return { rings: [], cloth: Array.from({ length: 50 }, () => ({ a: rnd(0, TAU), r: rnd(0.15, 1), s: rnd(1, 2.5) })) }; },
    draw(c, w, h, t, p, s, step, hit) {
-     c.fillStyle = 'rgba(28,14,8,0.2)'; c.fillRect(0, 0, w, h);
-     const cx = w / 2, cy = h * WHEEL_Y;
-     if (hit) s.rings.push({ r: w * 0.12, life: 1, a: rnd(0, TAU), dir: Math.random() < 0.5 ? 1 : -1 });
-     for (const g of s.rings) { g.a += 0.01 * g.dir; c.strokeStyle = `hsla(${24 + (1 - g.life) * 20},65%,${35 + g.life * 25}%,${g.life})`; c.lineWidth = 2; c.beginPath(); for (let k = 0; k <= 8; k++) { const a = g.a + k / 8 * TAU; k ? c.lineTo(cx + Math.cos(a) * g.r, cy + Math.sin(a) * g.r) : c.moveTo(cx + Math.cos(a) * g.r, cy + Math.sin(a) * g.r); } c.stroke(); g.r += 0.9; g.life -= 0.006; }
-     s.rings = s.rings.filter(g => g.life > 0);
-     wheel(c, cx, cy, w, `rgba(232,170,90,${0.5 + p * 0.5})`);
+     c.fillStyle = 'rgba(20,11,8,0.18)'; c.fillRect(0, 0, w, h);
+     const cx = w / 2, cy = h * WHEEL_Y, cols = ['#5a3523', '#9e2b25', '#c7793a'];
+     if (hit) s.rings.push({ r: w * 0.12, life: 1, a: t * 0.4, k: s.rings.length % 3 });
+     for (const g of s.rings) { c.strokeStyle = cols[g.k]; c.globalAlpha = g.life; c.lineWidth = 3; c.beginPath(); for (let k = 0; k <= 8; k++) { const a = g.a + k / 8 * TAU; k ? c.lineTo(cx + Math.cos(a) * g.r, cy + Math.sin(a) * g.r) : c.moveTo(cx + Math.cos(a) * g.r, cy + Math.sin(a) * g.r); } c.stroke(); g.r += 0.7; g.life -= 0.005; }
+     c.globalAlpha = 1; s.rings = s.rings.filter(g => g.life > 0);
+     for (const d of s.cloth) { d.r += 0.0015; if (d.r > 1) d.r = 0.15; const a = d.a + t * 0.25, rr = d.r * w * 0.75; c.fillStyle = `rgba(239,230,214,${0.5 * (1 - d.r)})`; c.fillRect(cx + Math.cos(a) * rr, cy + Math.sin(a) * rr, d.s, d.s); }
+     wheel(c, cx, cy, w, `rgba(199,121,58,${0.6 + p * 0.4})`);
    } },
  { key: 'bfunk', name: 'Brega funk', feel: 'Sensualidade e provocação', bpm: 85, steps: 16, hits: [3, 6, 11, 14], accent: [0, 8],
-   init(w, h) { return { rays: [] }; },
+   init(w, h) { return { rays: [], bloom: 0 }; },
    draw(c, w, h, t, p, s, step, hit) {
-     c.fillStyle = 'rgba(6,2,12,0.3)'; c.fillRect(0, 0, w, h);
-     const cx = w / 2, cy = h * WHEEL_Y;
-     if (hit) { const a0 = rnd(0, TAU); for (let i = 0; i < 5; i++) s.rays.push({ a: a0 + i * TAU / 5, life: 1, hue: i % 2 ? 320 : 185 }); }
-     for (const r of s.rays) { c.strokeStyle = `hsla(${r.hue},100%,60%,${r.life})`; c.lineWidth = 3 * r.life + 1; const r0 = (1 - r.life) * w * 0.9; c.beginPath(); c.moveTo(cx + Math.cos(r.a) * r0, cy + Math.sin(r.a) * r0); c.lineTo(cx + Math.cos(r.a) * (r0 + w * 0.25), cy + Math.sin(r.a) * (r0 + w * 0.25)); c.stroke(); r.life -= 0.05; }
-     s.rays = s.rays.filter(r => r.life > 0);
-     const pulse = Math.max(0, 1 - ((t * this.bpm / 60) % 4) / 4);
-     for (let k = 0; k < 3; k++) { c.strokeStyle = `rgba(255,40,160,${0.15 + 0.35 * pulse})`; c.lineWidth = 2; c.beginPath(); c.arc(cx, cy, w * (0.12 + k * 0.1) * (1 + pulse * 0.08), 0, TAU); c.stroke(); }
-     const g = c.createRadialGradient(cx, cy, 0, cx, cy, w * 0.8); g.addColorStop(0, `rgba(255,40,160,${0.22 * pulse + 0.05})`); g.addColorStop(1, 'rgba(0,0,0,0)'); c.fillStyle = g; c.fillRect(0, 0, w, h);
-     wheel(c, cx, cy, w, 'rgba(255,90,190,0.6)');
+     c.fillStyle = 'rgba(13,6,18,0.28)'; c.fillRect(0, 0, w, h);
+     const cx = w / 2, cy = h * WHEEL_Y, beat = t * this.bpm / 60;
+     if (hit) { const a0 = rnd(0, TAU); for (let i = 0; i < 4; i++) s.rays.push({ a: a0 + i * TAU / 4, life: 1, col: i % 2 ? '#ff2e88' : '#b81fd6' }); }
+     if (hit && (step === 0 || step === 8)) s.bloom = 1;
+     s.bloom *= 0.94;
+     const g = c.createRadialGradient(cx, cy, 0, cx, cy, w * (0.3 + 0.5 * s.bloom)); g.addColorStop(0, `rgba(120,10,70,${0.45 * s.bloom})`); g.addColorStop(1, 'rgba(0,0,0,0)'); c.fillStyle = g; c.fillRect(0, 0, w, h);
+     for (const r of s.rays) { c.strokeStyle = r.col; c.globalAlpha = r.life; c.lineWidth = 3; const r0 = w * 0.13 + (1 - r.life) * w * 0.7; c.beginPath(); c.moveTo(cx + Math.cos(r.a) * r0, cy + Math.sin(r.a) * r0); c.lineTo(cx + Math.cos(r.a) * (r0 + w * 0.2), cy + Math.sin(r.a) * (r0 + w * 0.2)); c.stroke(); r.life -= 0.04; }
+     c.globalAlpha = 1; s.rays = s.rays.filter(r => r.life > 0);
+     const sway = Math.sin(beat * Math.PI) * 0.18;
+     for (let k = 0; k < 3; k++) { c.strokeStyle = k === 2 ? 'rgba(255,210,63,0.55)' : 'rgba(184,31,214,0.5)'; c.lineWidth = 2; c.beginPath(); c.ellipse(cx, cy, w * (0.17 + k * 0.09) * (1 + sway), w * (0.17 + k * 0.09) * (1 - sway), 0, 0, TAU); c.stroke(); }
+     wheel(c, cx, cy, w, 'rgba(255,46,136,0.8)');
    } },
  { key: 'mangue', name: 'Manguebeat', feel: 'Raiva e peso, em tom menor', bpm: 108, steps: 16, hits: [0, 3, 6, 10, 13], accent: [0],
    init(w, h) { return { rings: [] }; },
    draw(c, w, h, t, p, s, step, hit) {
-     c.fillStyle = 'rgba(30,26,22,0.07)'; c.fillRect(0, 0, w, h);
+     c.fillStyle = 'rgba(11,10,7,0.08)'; c.fillRect(0, 0, w, h);
      const cx = w / 2, cy = h * WHEEL_Y;
-     if (hit) s.rings.push({ r: w * 0.05, life: 1, wob: rnd(0, TAU) });
-     for (const g of s.rings) { c.strokeStyle = `rgba(${150 + 60 * g.life},${70 + 20 * g.life},35,${g.life})`; c.lineWidth = 3; c.beginPath(); for (let k = 0; k <= 40; k++) { const a = k / 40 * TAU, rr = g.r * (1 + 0.06 * Math.sin(a * 5 + g.wob)); k ? c.lineTo(cx + Math.cos(a) * rr, cy + Math.sin(a) * rr) : c.moveTo(cx + Math.cos(a) * rr, cy + Math.sin(a) * rr); } c.stroke(); g.r += 1.6; g.life -= 0.008; }
-     s.rings = s.rings.filter(g => g.life > 0);
+     if (hit) s.rings.push({ r: w * 0.12, life: 1, rust: step === 0 });
+     for (const g of s.rings) { c.strokeStyle = g.rust ? '#b3261e' : (g.life > 0.5 ? '#4f6b3a' : '#3b2f22'); c.globalAlpha = Math.min(1, g.life * 1.4); c.lineWidth = g.rust ? 5 : 3; c.beginPath(); for (let k = 0; k <= 48; k++) { const a = k / 48 * TAU, rr = g.r * (1 + rnd(-0.04, 0.04)); k ? c.lineTo(cx + Math.cos(a) * rr, cy + Math.sin(a) * rr) : c.moveTo(cx + Math.cos(a) * rr, cy + Math.sin(a) * rr); } c.stroke(); g.r += 1.8; g.life -= 0.009; }
+     c.globalAlpha = 1; s.rings = s.rings.filter(g => g.life > 0);
      const img = c.getImageData(0, 0, w, h), d = img.data;
-     for (let i = 0; i < d.length; i += 4 * 7) { const n = (Math.random() - 0.5) * 40; d[i] += n; d[i + 1] += n; d[i + 2] += n; }
+     for (let i = 0; i < d.length; i += 4 * 7) { const n = (Math.random() - 0.5) * 36; d[i] += n; d[i + 1] += n * 1.1; d[i + 2] += n * 0.8; }
      c.putImageData(img, 0, 0);
-     c.fillStyle = `rgba(200,200,190,${0.25 + p * 0.5})`; c.beginPath(); c.arc(cx, cy, 4 + p * 5, 0, TAU); c.fill();
-     wheel(c, cx, cy, w, 'rgba(210,200,190,0.5)');
+     c.strokeStyle = '#d9d2b8'; c.lineWidth = 2; c.beginPath(); c.moveTo(cx, cy - w * 0.12); c.lineTo(cx, cy - w * (0.2 + p * 0.06)); c.stroke(); c.beginPath(); c.arc(cx, cy - w * (0.2 + p * 0.06), w * 0.035, Math.PI, TAU); c.stroke();
+     wheel(c, cx, cy, w, 'rgba(217,210,184,0.6)');
    } },
  { key: 'forro', name: 'Forró pé-de-serra', feel: 'Saudade do sertão no meio da festa', bpm: 120, steps: 8, hits: [0, 3, 6], accent: [0],
-   init(w, h) { return { dust: Array.from({ length: 160 }, () => ({ a: rnd(0, TAU), r: rnd(0, 1), v: rnd(0.002, 0.006), s: rnd(0.5, 2) })) }; },
-   draw(c, w, h, t, p, s) {
+   init(w, h) { return { flags: [] }; },
+   draw(c, w, h, t, p, s, step, hit) {
      const cx = w / 2, cy = h * WHEEL_Y;
-     const g = c.createRadialGradient(cx, cy, 0, cx, cy, h * 0.6); g.addColorStop(0, '#d9822b'); g.addColorStop(0.45, '#7a3a10'); g.addColorStop(1, '#1e0b04'); c.fillStyle = g; c.fillRect(0, 0, w, h);
-     const open = 0.75 + 0.25 * Math.sin(t * this.bpm / 60 * Math.PI / 2) + p * 0.1, folds = 24;
-     c.strokeStyle = 'rgba(40,12,4,0.8)'; c.lineWidth = 2;
-     c.beginPath(); for (let k = 0; k <= folds; k++) { const a = k / folds * TAU, rr = w * 0.3 * open * (k % 2 ? 1 : 0.86); k ? c.lineTo(cx + Math.cos(a) * rr, cy + Math.sin(a) * rr) : c.moveTo(cx + Math.cos(a) * rr, cy + Math.sin(a) * rr); } c.stroke();
-     for (let k = 0; k < folds; k += 2) { const a = k / folds * TAU; c.beginPath(); c.moveTo(cx + Math.cos(a) * w * 0.1, cy + Math.sin(a) * w * 0.1); c.lineTo(cx + Math.cos(a) * w * 0.26 * open, cy + Math.sin(a) * w * 0.26 * open); c.stroke(); }
-     c.fillStyle = `rgba(255,200,110,${0.85 + p * 0.15})`; c.beginPath(); c.arc(cx, cy, w * 0.09 * (1 + p * 0.1), 0, TAU); c.fill();
-     for (const d of s.dust) { d.r += d.v * (1 + p); if (d.r > 1) { d.r = 0; d.a = rnd(0, TAU); } const rr = (0.12 + d.r) * w * 0.9; c.fillStyle = `rgba(255,220,160,${0.25 + p * 0.3})`; c.fillRect(cx + Math.cos(d.a) * rr, cy + Math.sin(d.a) * rr, d.s, d.s); }
-     wheel(c, cx, cy, w, 'rgba(60,20,6,0.8)');
+     const g = c.createRadialGradient(cx, cy, 0, cx, cy, h * 0.65); g.addColorStop(0, '#f2c14e'); g.addColorStop(0.18, '#e08a2e'); g.addColorStop(0.45, '#3f7f8c'); g.addColorStop(1, '#0e0f1f'); c.fillStyle = g; c.fillRect(0, 0, w, h);
+     const open = 0.8 + 0.2 * Math.sin(t * this.bpm / 60 * Math.PI / 2), folds = 24;
+     c.strokeStyle = '#c4473a'; c.lineWidth = 2; c.beginPath(); for (let k = 0; k <= folds; k++) { const a = k / folds * TAU, rr = w * 0.24 * open * (k % 2 ? 1 : 0.86); k ? c.lineTo(cx + Math.cos(a) * rr, cy + Math.sin(a) * rr) : c.moveTo(cx + Math.cos(a) * rr, cy + Math.sin(a) * rr); } c.stroke();
+     if (hit) { const a = rnd(0, TAU); s.flags.push({ a, r: w * 0.14, col: ['#c4473a', '#f2c14e', '#3f7f8c', '#e9dcc0'][s.flags.length % 4], life: 1 }); }
+     for (const f of s.flags) { f.r += 1.3; f.life -= 0.006; const x = cx + Math.cos(f.a) * f.r, y = cy + Math.sin(f.a) * f.r, z = 9; c.fillStyle = f.col; c.globalAlpha = f.life; c.beginPath(); c.moveTo(x - z, y - z * 0.6); c.lineTo(x + z, y - z * 0.6); c.lineTo(x, y + z); c.closePath(); c.fill(); }
+     c.globalAlpha = 1; s.flags = s.flags.filter(f => f.life > 0);
+     wheel(c, cx, cy, w, 'rgba(14,15,31,0.85)');
    } },
- { key: 'brega', name: 'Brega romântico', feel: 'Saudade e dor de amor', bpm: 140, steps: 16, hits: [0, 8], accent: [0],
-   init(w, h) { return { b: Array.from({ length: 22 }, (_, i) => ({ a: rnd(0, TAU), r: rnd(0.15, 0.8), size: rnd(14, 50), v: rnd(0.0008, 0.003) * (i % 2 ? 1 : -1), al: rnd(0.06, 0.2) })) }; },
-   draw(c, w, h, t, p, s) {
+ { key: 'brega', name: 'Brega romântico', feel: 'Dor de amor', bpm: 140, steps: 16, hits: [0, 8], accent: [0],
+   init(w, h) { return { b: [] }; },
+   draw(c, w, h, t, p, s, step, hit) {
+     c.fillStyle = 'rgba(10,11,24,0.06)'; c.fillRect(0, 0, w, h);
      const cx = w / 2, cy = h * WHEEL_Y;
-     const g = c.createRadialGradient(cx, cy, 0, cx, cy, h * 0.6); g.addColorStop(0, '#4a0e2e'); g.addColorStop(1, '#14040e'); c.fillStyle = g; c.fillRect(0, 0, w, h);
-     for (const b of s.b) { b.a += b.v; b.r += Math.abs(b.v) * 0.6; if (b.r > 1.1) { b.r = 0.12; b.a = rnd(0, TAU); } const x = cx + Math.cos(b.a) * b.r * w * 0.8, y = cy + Math.sin(b.a) * b.r * w * 0.8; const gg = c.createRadialGradient(x, y, 0, x, y, b.size); gg.addColorStop(0, `rgba(255,120,170,${b.al + p * 0.05})`); gg.addColorStop(1, 'rgba(255,120,170,0)'); c.fillStyle = gg; c.beginPath(); c.arc(x, y, b.size, 0, TAU); c.fill(); }
-     const heart = c.createRadialGradient(cx, cy, 0, cx, cy, w * 0.25); heart.addColorStop(0, `rgba(255,170,200,${0.12 + p * 0.12})`); heart.addColorStop(1, 'rgba(255,170,200,0)'); c.fillStyle = heart; c.fillRect(0, 0, w, h);
-     wheel(c, cx, cy, w, 'rgba(255,170,200,0.45)');
+     const halo = c.createRadialGradient(cx, cy, 0, cx, cy, w * 0.45); halo.addColorStop(0, 'rgba(43,53,102,0.3)'); halo.addColorStop(1, 'rgba(43,53,102,0)'); c.fillStyle = halo; c.fillRect(0, 0, w, h);
+     if (hit) s.b.push({ a: rnd(0, TAU), r: w * 0.13, size: rnd(18, 40), col: Math.random() < 0.6 ? '201,139,160' : '140,59,90' });
+     for (const b of s.b) { b.r += 0.35; b.a += 0.0012; const x = cx + Math.cos(b.a) * b.r, y = cy + Math.sin(b.a) * b.r + (b.r - w * 0.13) * 0.25, al = Math.max(0, 0.22 * (1 - b.r / (w * 0.9))); const gg = c.createRadialGradient(x, y, 0, x, y, b.size); gg.addColorStop(0, `rgba(${b.col},${al})`); gg.addColorStop(1, `rgba(${b.col},0)`); c.fillStyle = gg; c.beginPath(); c.arc(x, y, b.size, 0, TAU); c.fill(); }
+     s.b = s.b.filter(b => b.r < w * 0.9);
+     wheel(c, cx, cy, w, 'rgba(216,212,232,0.5)');
    } },
  { key: 'frevo', name: 'Frevo', feel: 'Euforia de carnaval, com a fúria do abafo', bpm: 140, steps: 8, hits: [0, 2, 4, 6], accent: [4],
    init(w, h) { return { conf: [] }; },
    draw(c, w, h, t, p, s, step, hit) {
-     c.fillStyle = 'rgba(10,6,20,0.3)'; c.fillRect(0, 0, w, h);
-     const cx = w / 2, cy = h * 0.45, cols = ['#e5262d', '#f7c52b', '#1fa64a', '#1f6fd6', '#f7f7f7', '#e5262d', '#f7c52b', '#1fa64a'];
-     for (let ring = 0; ring < 2; ring++) { const n = ring ? 10 : 6, R = w * (ring ? 0.36 : 0.2), spin = t * (ring ? -0.9 : 1.4); for (let i = 0; i < n; i++) { const a = spin + i / n * TAU, x = cx + Math.cos(a) * R, y = cy + Math.sin(a) * R, r = w * (ring ? 0.05 : 0.07) * (1 + p * 0.25); for (let k = 0; k < 8; k++) { c.fillStyle = cols[k]; c.beginPath(); c.moveTo(x, y); c.arc(x, y, r, t * 6 + k / 8 * TAU, t * 6 + (k + 1) / 8 * TAU); c.fill(); } } }
-     if (hit) for (let i = 0; i < 18; i++) { const a = rnd(0, TAU); s.conf.push({ x: cx, y: cy, vx: Math.cos(a) * rnd(1.5, 4), vy: Math.sin(a) * rnd(1.5, 4), c: cols[i % 4], life: 1 }); }
+     c.fillStyle = 'rgba(10,18,48,0.3)'; c.fillRect(0, 0, w, h);
+     const cx = w / 2, cy = h * WHEEL_Y, cols = ['#ffd400', '#e8312a', '#1fa463', '#2a6fdb', '#ffd400', '#e8312a', '#1fa463', '#2a6fdb'];
+     for (let ring = 0; ring < 2; ring++) { const n = ring ? 10 : 6, R = w * (ring ? 0.36 : 0.22), spin = t * (ring ? -0.9 : 1.4); for (let i = 0; i < n; i++) { const a = spin + i / n * TAU, x = cx + Math.cos(a) * R, y = cy + Math.sin(a) * R, r = w * (ring ? 0.045 : 0.06) * (1 + p * 0.2); for (let k = 0; k < 8; k++) { c.fillStyle = cols[k]; c.beginPath(); c.moveTo(x, y); c.arc(x, y, r, t * 6 + k / 8 * TAU, t * 6 + (k + 1) / 8 * TAU); c.fill(); } } }
+     if (hit) for (let i = 0; i < 16; i++) { const a = rnd(0, TAU); s.conf.push({ x: cx + Math.cos(a) * w * 0.12, y: cy + Math.sin(a) * w * 0.12, vx: Math.cos(a) * rnd(1.5, 4), vy: Math.sin(a) * rnd(1.5, 4), c: i % 5 === 4 ? '#ffffff' : cols[i % 4], life: 1 }); }
      for (const f of s.conf) { f.x += f.vx; f.y += f.vy; f.life -= 0.015; c.fillStyle = f.c; c.globalAlpha = f.life; c.fillRect(f.x, f.y, 3, 5); }
      c.globalAlpha = 1; s.conf = s.conf.filter(f => f.life > 0);
-     wheel(c, cx, cy, w, 'rgba(255,255,255,0.6)');
+     wheel(c, cx, cy, w, 'rgba(255,255,255,0.75)');
    } },
 ];
 const grid = document.getElementById('grid');
