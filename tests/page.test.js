@@ -11,8 +11,8 @@ import { openBrowser } from './support/browser.js';
 
 // The shipped rhythm registry with the tests-only 2/4 fixture added, served in its place.
 const TWO_FOUR_REGISTRY = readFileSync(new URL('../src/rhythms/index.js', import.meta.url), 'utf8').replace(
-  'export const RHYTHMS = [MARACATU];',
-  "import { TWO_FOUR } from '../../tests/support/rhythm-two-four.js';\nexport const RHYTHMS = [MARACATU, TWO_FOUR];",
+  'export const RHYTHMS = [MARACATU, FORRO_PE_DE_SERRA];',
+  "import { TWO_FOUR } from '../../tests/support/rhythm-two-four.js';\nexport const RHYTHMS = [MARACATU, FORRO_PE_DE_SERRA, TWO_FOUR];",
 );
 
 const PHONES = [
@@ -448,10 +448,16 @@ test('the video export lays out the stage alone, 9:16 and the full window height
   await page.close();
 });
 
-test('the rhythm selector stays out of the page while one rhythm ships', async () => {
+test('?ritmo=forro shows the forró on an 8-step wheel, over its own background, with no error', async () => {
   for (const viewport of [PHONES[0], DESKTOP]) {
-    const { page, errors } = await openPage(viewport, { query: '?ritmo=desconhecido' });
-    assert.equal(await page.$$eval('.rhythms', list => list.length), 0);
+    const { page, errors } = await openPage(viewport, { query: '?ritmo=forro' });
+    assert.equal(await page.evaluate(() => window.baque.TOTAL), 98);
+    assert.equal(await page.$$eval('#scope text[fill-opacity]', texts => texts.filter(t => /^\d+$/.test(t.textContent)).length), 8);
+    assert.deepEqual(await page.$$eval('.rhythms-stage a[aria-current]', links => links.map(a => a.textContent)), ['forró']);
+    for (let at = 0; at < 98; at += 0.37) await page.evaluate(position => window.baque.render(position), at);
+    // the backdrop paints the whole canvas: its dusk sky leaves no transparent pixel at a corner
+    const corner = await page.$eval('#bg', canvas => [...canvas.getContext('2d').getImageData(1, 1, 1, 1).data]);
+    assert.equal(corner[3], 255, `corner pixel ${corner}`);
     assert.deepEqual(errors, []);
     await page.close();
   }
@@ -476,6 +482,7 @@ test('with a second rhythm, ?ritmo= plays it on its own wheel and the selector s
   assert.ok(await visible(page, '.rhythms-stage'));
   assert.deepEqual(await page.$$eval('.rhythms-stage a', links => links.map(a => [a.getAttribute('href'), a.getAttribute('aria-current')])), [
     ['?ritmo=maracatu', null],
+    ['?ritmo=forro', null],
     ['?ritmo=dois-por-quatro', 'true'],
   ]);
   await page.click('#tap');
