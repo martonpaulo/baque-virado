@@ -348,26 +348,51 @@ function cutBar(scene) {
 }
 
 // ---------- the show script ----------
-// Eleven scenes after docs/sketches/scripts.html: the parts enter one by one, the band plays the
-// tune's two parts, the bellows shake, the zabumba changes its cell, a breque, and the end.
-// 86 bars at 100 BPM: 1:43.
+// The band plays from the first bar and the tune runs like a forró through the whole show. Each
+// scene features one trait of the rhythm the way a band does it: a two-bar break where the others
+// stop, then the band comes back with the featured part louder (`gain`) and the others a step back.
+// 98 bars at 100 BPM: 1:58.
 const always = value => () => value;
 const TRIO = ['triangulo', 'grave', 'bacalhau'];
 const LEFT_HAND = [...TRIO, 'fole'];
+const PE_DE_SERRA = [...LEFT_HAND, 'sanfona']; // the trio: sanfona (both hands), zabumba and triângulo
 const BAND = [...LEFT_HAND, 'baixo', 'cavaquinho', 'sanfona'];
 const EVERYONE = [...BAND, 'rabeca', 'bandolim'];
-const INTRO_BARS = 4;
 const TWO_PARTS = PHRASE_BARS * 2;
 const BREQUE_BARS = 2;
+const BREAK_BARS = 2;
+/** A scene's voices: `alone` for its opening break, then `all`. */
+const afterBreak = (alone, all) => bar => (bar < BREAK_BARS ? alone : all);
 const SCENE_LIST = [
-  { id: 'triangulo', bars: INTRO_BARS, voices: always(['triangulo']), lanes: ['triangulo'] },
-  { id: 'zabumba', bars: INTRO_BARS, voices: always(['triangulo', 'grave']), lanes: ['triangulo', 'grave'] },
-  { id: 'bacalhau', bars: INTRO_BARS, voices: always(TRIO), lanes: ['triangulo', 'grave', 'bacalhau'] },
-  { id: 'trio', bars: PHRASE_BARS, voices: always(LEFT_HAND), lanes: ['fole', 'grave', 'triangulo'] },
-  { id: 'sanfona', bars: PHRASE_BARS, voices: always([...LEFT_HAND, 'sanfona']), lanes: ['sanfona', 'fole', 'grave'] },
-  { id: 'baixo', bars: PHRASE_BARS, tune: ['B'], voices: always(BAND), lanes: ['cavaquinho', 'baixo', 'grave'] },
-  { id: 'rabeca', bars: TWO_PARTS, tune: ['A', 'B'], voices: always(EVERYONE), lanes: ['sanfona', 'rabeca', 'bandolim'] },
-  { id: 'fole', bars: PHRASE_BARS, tune: ['jogo'], fole: 'jogo', voices: always([...LEFT_HAND, 'baixo']), lanes: ['fole', 'grave'] },
+  { id: 'trio', bars: PHRASE_BARS, voices: always(PE_DE_SERRA), lanes: ['sanfona', 'grave', 'triangulo'] },
+  {
+    id: 'zabumba',
+    bars: PHRASE_BARS,
+    tune: ['B'],
+    voices: afterBreak(['grave', 'triangulo'], [...PE_DE_SERRA, 'baixo']),
+    gain: { grave: 1.2, sanfona: 0.7, fole: 0.7 },
+    lanes: ['grave', 'bacalhau', 'triangulo'],
+  },
+  { id: 'bacalhau', bars: PHRASE_BARS, voices: afterBreak(TRIO, BAND), gain: { bacalhau: 1.5, sanfona: 0.8 }, lanes: ['bacalhau', 'grave', 'triangulo'] },
+  {
+    id: 'triangulo',
+    bars: PHRASE_BARS,
+    tune: ['B'],
+    voices: afterBreak(TRIO, BAND),
+    gain: { triangulo: 2.2, sanfona: 0.8, cavaquinho: 0.8 },
+    lanes: ['triangulo', 'bacalhau', 'grave'],
+  },
+  { id: 'sanfona', bars: PHRASE_BARS, voices: always(BAND), gain: { sanfona: 1.15, cavaquinho: 0.8, baixo: 0.9 }, lanes: ['sanfona', 'fole', 'grave'] },
+  {
+    id: 'baixo',
+    bars: PHRASE_BARS,
+    tune: ['B'],
+    voices: afterBreak([...TRIO, 'baixo', 'cavaquinho'], BAND),
+    gain: { baixo: 1.5, cavaquinho: 1.25, sanfona: 0.75, fole: 0.7 },
+    lanes: ['cavaquinho', 'baixo', 'grave'],
+  },
+  { id: 'rabeca', bars: TWO_PARTS, tune: ['A', 'B'], voices: always(EVERYONE), gain: { rabeca: 1.2, bandolim: 1.3 }, lanes: ['sanfona', 'rabeca', 'bandolim'] },
+  { id: 'fole', bars: PHRASE_BARS, tune: ['jogo'], fole: 'jogo', voices: always([...LEFT_HAND, 'baixo', 'cavaquinho']), lanes: ['fole', 'grave'] },
   {
     id: 'baiao',
     bars: TWO_PARTS,
@@ -375,7 +400,8 @@ const SCENE_LIST = [
     zabumba: 'baiao',
     named: true,
     pattern: 'baiao',
-    voices: bar => (bar < PHRASE_BARS ? BAND : EVERYONE), // the rabeca and the bandolim come back for the second part
+    voices: always(EVERYONE),
+    gain: { grave: 1.15 },
     lanes: ['grave', 'bacalhau', 'baixo'],
   },
   {
@@ -500,7 +526,7 @@ const STUDIO = {
     baixo: {
       seed: 15,
       role: 'follower',
-      gain: 0.5,
+      gain: 0.58,
       pan: 0,
       send: 0.06,
       bright: [700, 5000],
@@ -645,12 +671,12 @@ const COPY = {
   description: 'Forró pé-de-serra: triângulo, zabumba e sanfona, um de cada vez e depois juntos, com o baião em 3 + 3 + 2.', // the page's search and preview description
   feminineInstruments: ['zabumba', 'sanfona', 'rabeca'], // "som da zabumba", "som do triângulo"
   scenes: {
-    triangulo: { chip: 'Triângulo', eyebrow: 'forró pé-de-serra', title: 'Triângulo' },
-    zabumba: { chip: 'Zabumba', eyebrow: 'pele grave', title: 'Zabumba' },
-    bacalhau: { chip: 'Bacalhau', eyebrow: 'bacalhau no contratempo', title: 'Bacalhau' },
     trio: { chip: 'Trio', eyebrow: 'sanfona, zabumba e triângulo', title: 'Trio' },
-    sanfona: { chip: 'Sanfona', eyebrow: 'melodia na sanfona', title: 'Sanfona' },
-    baixo: { chip: 'Baixo e cavaquinho', eyebrow: 'a segunda parte, com a banda', title: 'Baixo e cavaquinho' },
+    zabumba: { chip: 'Zabumba', eyebrow: 'a célula da pele grave e sua anacruse', title: 'Zabumba' },
+    bacalhau: { chip: 'Bacalhau', eyebrow: 'a vareta no contratempo', title: 'Bacalhau' },
+    triangulo: { chip: 'Triângulo', eyebrow: 'fechado, e aberto no contratempo', title: 'Triângulo' },
+    sanfona: { chip: 'Sanfona', eyebrow: 'corridas, terças e nota antecipada', title: 'Sanfona' },
+    baixo: { chip: 'Baixo e cavaquinho', eyebrow: 'o baixo caminha com a zabumba', title: 'Baixo e cavaquinho' },
     rabeca: { chip: 'Rabeca e bandolim', eyebrow: 'as duas partes, melodia dobrada', title: 'Rabeca e bandolim' },
     fole: { chip: 'Fole', eyebrow: 'acentos de fole em 3 + 3 + 2', title: 'Jogo de fole' },
     baiao: { chip: 'Baião', eyebrow: 'levada de baião na zabumba', title: 'Baião' },

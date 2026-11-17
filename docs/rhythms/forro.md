@@ -19,12 +19,17 @@ The owner's reference is «Forró no Malagueta» (Forróçacana), studio and liv
 and balance from it, measured on the recordings; the tune is original. Where the recording and an
 earlier study disagree, the recording decides and the line below says so.
 
+The owner also named two similar songs: «Forrobodó» (Fulô de Mandacaru), a fast dance forró, and
+«Meu Cenário» (Petrúcio Amorim), a slower, lyrical forró pé-de-serra where the sanfona sings. The
+main reference still decides tempo and groove; these two inform the sanfona's phrasing and the
+band's sound, and the mix is measured against all of them.
+
 - **Tempo and metre.** 100 BPM for the whole show, counted on the quarter note: the felt pulse, one
   dance step per beat. A beat tracker gives 97 BPM for the studio recording and 103 for the live
   one, and 100 sits inside the researched baião range of 85 to 110
   ([`pernambuco-rhythms-feeling.md`](../research/pernambuco-rhythms-feeling.md)). The show ran at
   120 before, the top of another source's range. 2/4 on an 8-step wheel, one bar per turn: 1.2 s
-  per turn. 86 bars, 1:43.
+  per turn. 98 bars, 1:58.
 - **Swing.** None on the grid. No forró timing study exists here, so the wheel stays straight; the
   triângulo's off-beat sixteenths sit about 10 % late in the sound only.
 - **Mode and harmony.** A dorian: a minor mode with a major sixth (F sharp). The reference is in a
@@ -36,8 +41,17 @@ earlier study disagree, the recording decides and the line below says so.
   G, E7, Am): a run of sixteenths up to a held top note that arrives a sixteenth early, with a
   slide into it; the same shape over IV; the bellows rebounding on thirds; V7 to i. Part B (D, C,
   D, C, G, D, E7, E7): the flat seventh held on the first beat, chords in 3 + 3 + 2, and two bars
-  of V7 that lead back. No bar of a part repeats another. The show plays A, B, then A and B with
-  everyone, the jogo de fole, A and B over the baião cell, the breque, and A to the end.
+  of V7 that lead back. No bar of a part repeats another. The parts alternate from the
+  first bar to the last, around the jogo de fole and the breque.
+- **Script.** The band plays from the first bar: the trio (sanfona with both hands, zabumba,
+  triângulo) opens with the tune, and the tune runs through the show as in a forró. The parts do
+  not enter one at a time; that was the maracatu's idea, and alone they sounded empty (owner,
+  2026-11-17). Each scene features one trait the way a band does: the others stop for a two-bar
+  break, then come back with the featured part louder and the tune a step back. In order: the
+  trio, the zabumba's cell and its pick-up, the bacalhau on the off-beat, the triângulo's open
+  accent, the sanfona's runs, the walking bass with the cavaquinho, the tune doubled by rabeca and
+  bandolim, the jogo de fole, the baião in 3 + 3 + 2, the breque, the end. No stretch without the
+  band lasts more than two bars; the forró test holds that.
 - **Density and register.** Measured on the reference with a transcription model: about 10 to 12
   note onsets per beat in the melodic instruments, their median pitch between F sharp 4 and B 4;
   the bass 2.5 to 3.2 notes per beat around E2. The show's tutti measures 11 notes per beat at a
@@ -129,7 +143,7 @@ The zabumba leads the timing; the triângulo's off-beat sixteenths sit about 10 
   two bars of the Rabeca e bandolim scene: the largest change of mean relative luminance in any
   eighth of the screen's width and height is 0.004 per frame, far below the 0.10 of a flash.
 - **Only what sounds.** The wheel draws only the voices the scene plays, with no ghost of the ones
-  to come (the maracatu draws them faint): the parts enter one by one on the wheel too, and the key
+  to come (the maracatu draws them faint): a break shows on the wheel too, and the key
   over the lanes, one line, names at most six voices; nine names did not fit a phone's width.
 - **Widgets.** The wheel, the lanes and the readout stay; the maracatu score, swing table and
   waves do not, as forró has no measured swing and no notated baques here. The readout shows what

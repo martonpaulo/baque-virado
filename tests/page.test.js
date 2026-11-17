@@ -532,10 +532,10 @@ test('an unknown ?ritmo= shows maracatu, marked in the selector of every rhythm 
 test('?ritmo=forro shows the forró on an 8-step wheel, over its own background, with no error', async () => {
   for (const viewport of [PHONES[0], DESKTOP]) {
     const { page, errors } = await openPage(viewport, { query: '?ritmo=forro' });
-    assert.equal(await page.evaluate(() => window.baque.TOTAL), 86);
+    assert.equal(await page.evaluate(() => window.baque.TOTAL), 98);
     assert.equal(await page.$$eval('#scope text[fill-opacity]', texts => texts.filter(t => /^\d+$/.test(t.textContent)).length), 8);
     assert.deepEqual(await page.$$eval('.rhythms-stage a[aria-current]', links => links.map(a => a.textContent)), ['forró']);
-    for (let at = 0; at < 86; at += 0.37) await page.evaluate(position => window.baque.render(position), at);
+    for (let at = 0; at < 98; at += 0.37) await page.evaluate(position => window.baque.render(position), at);
     // the backdrop paints the whole canvas: its dusk sky leaves no transparent pixel at a corner
     const corner = await page.$eval('#bg', canvas => [...canvas.getContext('2d').getImageData(1, 1, 1, 1).data]);
     assert.equal(corner[3], 255, `corner pixel ${corner}`);

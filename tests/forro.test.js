@@ -22,10 +22,10 @@ test('one tempo inside the researched range, 2/4 on an 8-step wheel, the eleven 
   assert.deepEqual(
     show.SCENES.map(scene => [scene.id, scene.bars]),
     [
-      ['triangulo', 4],
-      ['zabumba', 4],
-      ['bacalhau', 4],
       ['trio', 8],
+      ['zabumba', 8],
+      ['bacalhau', 8],
+      ['triangulo', 8],
       ['sanfona', 8],
       ['baixo', 8],
       ['rabeca', 16],
@@ -35,7 +35,7 @@ test('one tempo inside the researched range, 2/4 on an 8-step wheel, the eleven 
       ['final', 8],
     ],
   );
-  assert.equal(show.TOTAL_BARS, 86);
+  assert.equal(show.TOTAL_BARS, 98);
   assert.ok(show.TOTAL_SECONDS > 80 && show.TOTAL_SECONDS < 130, `${show.TOTAL_SECONDS} s`);
 });
 
@@ -44,9 +44,29 @@ test('the voice order is pinned', () => {
   assert.deepEqual(Object.keys(FORRO.voices), ['grave', 'bacalhau', 'triangulo', 'fole', 'baixo', 'cavaquinho', 'sanfona', 'rabeca', 'bandolim']);
 });
 
-test('the parts enter one by one: the triângulo alone, then the zabumba, the bacalhau, the left hand, the tune', () => {
-  const firstBars = ['triangulo', 'zabumba', 'bacalhau', 'trio', 'sanfona'].map(id => show.barTimeline(show.sceneById(id).start).playing.length);
-  assert.deepEqual(firstBars, [1, 2, 3, 4, 5]);
+// Owner, 2026-11-17: the band plays from the first bars, and a scene features one trait of the
+// rhythm by arrangement (a short break, a louder featured part); never a long stretch of one
+// instrument alone (docs/rhythms/forro.md).
+test('the band plays from the first bar: the trio with the tune, never one instrument alone, breaks of two bars at most', () => {
+  const first = show.barTimeline(0).playing;
+  for (const voice of ['grave', 'bacalhau', 'triangulo', 'fole', 'sanfona']) assert.ok(first.includes(voice), `${voice} in bar 1`);
+  assert.ok(hitsOf(0, 'sanfona').length >= 5, 'the tune starts in bar 1');
+  const BAND_VOICES = 5,
+    MAX_BREAK = 2;
+  let thin = 0;
+  for (let bar = 0; bar < show.TOTAL_BARS - 1; bar++) {
+    const { playing, scene, barInScene } = show.barTimeline(bar);
+    if (scene.mode(barInScene) === 'cut') continue; // the breque is a stop
+    assert.ok(playing.length >= 2, `bar ${bar}: ${playing}`);
+    thin = playing.length < BAND_VOICES ? thin + 1 : 0;
+    assert.ok(thin <= MAX_BREAK, `bar ${bar}: more than ${MAX_BREAK} bars without the band`);
+  }
+});
+
+test('a scene that features a part plays it louder than written, and the tune steps back under a featured rhythm part', () => {
+  const featured = { zabumba: 'grave', bacalhau: 'bacalhau', triangulo: 'triangulo', sanfona: 'sanfona', baixo: 'baixo', rabeca: 'rabeca', baiao: 'grave' };
+  for (const [id, voice] of Object.entries(featured)) assert.ok(show.sceneById(id).gain[voice] > 1, `${id} does not raise ${voice}`);
+  for (const id of ['zabumba', 'bacalhau', 'triangulo', 'baixo']) assert.ok(show.sceneById(id).gain.sanfona < 1, `${id} keeps the tune in front`);
   assert.equal(show.barTimeline(show.sceneById('rabeca').start).playing.length, Object.keys(FORRO.voices).length);
 });
 
@@ -139,7 +159,7 @@ test('the bandolim doubles the tune a third below, inside the mode', () => {
 
 test('the zabumba plays its cell with the pick-up, a fill at each phrase end, and 3 + 3 + 2 in the Baião scene', () => {
   const steps = bar => hitsOf(bar, 'grave').map(h => h.hit.step);
-  const trio = show.sceneById('trio').start;
+  const trio = show.sceneById('trio').start; // the first bar of the show
   assert.deepEqual(steps(trio), [0, 3, 4, 7]);
   assert.equal(hitsOf(trio, 'grave')[2].hit.tone, 'abafada');
   assert.deepEqual(steps(trio + 7), [0, 2, 3, 4, 6, 7]);
