@@ -28,6 +28,8 @@ the instruments, the register, the density and the mood; no melody is taken from
   versions of the song were measured with it.
 - «Ainda Bem», Banda Lapada: measured on the band's live recording («Áudio da Live»), not on the
   television performance (SuperStar, Globo) the owner named.
+  The owner took this song out of the brega's references on 2026-11-17, after this round; the
+  current list is in [`../research/references.md`](../research/references.md).
 - «Diz na Minha Cara», Banda Lapada (SuperStar): no recording of the band's was reachable; the
   versions by Banda Torpedo and Tayara Andreza stand in for it.
 - «Novo Namorado», Priscila Senna.

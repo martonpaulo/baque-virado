@@ -1,15 +1,51 @@
 {
-  "maracatu/00-764736232": {
-    "deezer": 764736232,
-    "track": "Nação do Maracatu Estrela Dalva | Machado Brilhante (Ao Vivo)"
+  "brega/00-2750872611": {
+    "deezer": 2750872611,
+    "track": "Musa | Uma Mulher É Igual uma Flor"
   },
-  "maracatu/01-547356242": {
-    "deezer": 547356242,
-    "track": "Nacao Do Maracatu Porto Rico | Xeu Epa Baba!"
+  "brega/01-2192663417": {
+    "deezer": 2192663417,
+    "track": "Banda Saíra | Toda Mulher É Igual uma Flor"
   },
-  "maracatu/02-942668722": {
-    "deezer": 942668722,
-    "track": "Maracatu Leão Coroado | Nação de África, Nação de Mina"
+  "brega/02-2421993995": {
+    "deezer": 2421993995,
+    "track": "Banda Amores | Toda Mulher É Igual a uma Flor"
+  },
+  "brega/05-3257317101": {
+    "deezer": 3257317101,
+    "track": "Priscila Senna | Novo Namorado"
+  },
+  "brega/11-100351390": {
+    "deezer": 100351390,
+    "track": "Banda Torpedo | Diz na Minha Cara"
+  },
+  "brega/12-3939465101": {
+    "deezer": 3939465101,
+    "track": "Tayara Andreza | Diz na Minha Cara"
+  },
+  "brega/13-96298700": {
+    "deezer": 96298700,
+    "track": "Nega do Babado | Milk Shake"
+  },
+  "bregafunk/00-1777313497": {
+    "deezer": 1777313497,
+    "track": "Mc Mari | Viciou na Flauta"
+  },
+  "bregafunk/01-2108005847": {
+    "deezer": 2108005847,
+    "track": "Barca Na Batida | Viciou na Flauta"
+  },
+  "bregafunk/10-1612565412": {
+    "deezer": 1612565412,
+    "track": "Mc Reino | Tuf Tuf Pof Pof"
+  },
+  "bregafunk/11-684590472": {
+    "deezer": 684590472,
+    "track": "Shevchenko e Elloco | Dally"
+  },
+  "bregafunk/12-795636172": {
+    "deezer": 795636172,
+    "track": "MC Cego Abusado | Cafajeste"
   },
   "coco/00-3257365401": {
     "deezer": 3257365401,
@@ -22,18 +58,6 @@
   "coco/11-3257365381": {
     "deezer": 3257365381,
     "track": "Grupo Bongar | Arreia"
-  },
-  "frevo/00-87759193": {
-    "deezer": 87759193,
-    "track": "Bloco Mocambinho na Folia | Madeira Que Cupim Não Rói"
-  },
-  "frevo/01-392722422": {
-    "deezer": 392722422,
-    "track": "Antonio Nóbrega | Madeira Que Cupim Não Rói"
-  },
-  "frevo/02-1709760857": {
-    "deezer": 1709760857,
-    "track": "Matolão | Madeira Que Cupim Não Rói"
   },
   "forro/00-13267496": {
     "deezer": 13267496,
@@ -55,6 +79,18 @@
     "deezer": 105734498,
     "track": "Petrúcio Amorim | Meu Cenário"
   },
+  "frevo/00-87759193": {
+    "deezer": 87759193,
+    "track": "Bloco Mocambinho na Folia | Madeira Que Cupim Não Rói"
+  },
+  "frevo/01-392722422": {
+    "deezer": 392722422,
+    "track": "Antonio Nóbrega | Madeira Que Cupim Não Rói"
+  },
+  "frevo/02-1709760857": {
+    "deezer": 1709760857,
+    "track": "Matolão | Madeira Que Cupim Não Rói"
+  },
   "manguebeat/00-13359636": {
     "deezer": 13359636,
     "track": "Chico Science | Coco Dub (Afrociberdelia)"
@@ -71,44 +107,16 @@
     "deezer": 1418854502,
     "track": "Nação Zumbi | Cicatriz"
   },
-  "brega/00-2750872611": {
-    "deezer": 2750872611,
-    "track": "Musa | Uma Mulher É Igual uma Flor"
+  "maracatu/00-764736232": {
+    "deezer": 764736232,
+    "track": "Nação do Maracatu Estrela Dalva | Machado Brilhante (Ao Vivo)"
   },
-  "brega/01-2192663417": {
-    "deezer": 2192663417,
-    "track": "Banda Saíra | Toda Mulher É Igual uma Flor"
+  "maracatu/01-547356242": {
+    "deezer": 547356242,
+    "track": "Nacao Do Maracatu Porto Rico | Xeu Epa Baba!"
   },
-  "brega/02-2421993995": {
-    "deezer": 2421993995,
-    "track": "Banda Amores | Toda Mulher É Igual a uma Flor"
-  },
-  "brega/05-3257317101": {
-    "deezer": 3257317101,
-    "track": "Priscila Senna | Novo Namorado"
-  },
-  "brega/10-1945568217": {
-    "deezer": 1945568217,
-    "track": "Banda Lapada | Ainda Bem"
-  },
-  "brega/11-100351390": {
-    "deezer": 100351390,
-    "track": "Banda Torpedo | Diz na Minha Cara"
-  },
-  "brega/12-3939465101": {
-    "deezer": 3939465101,
-    "track": "Tayara Andreza | Diz na Minha Cara"
-  },
-  "brega/13-96298700": {
-    "deezer": 96298700,
-    "track": "Nega do Babado | Milk Shake"
-  },
-  "bregafunk/00-1777313497": {
-    "deezer": 1777313497,
-    "track": "Mc Mari | Viciou na Flauta"
-  },
-  "bregafunk/01-2108005847": {
-    "deezer": 2108005847,
-    "track": "Barca Na Batida | Viciou na Flauta"
+  "maracatu/02-942668722": {
+    "deezer": 942668722,
+    "track": "Maracatu Leão Coroado | Nação de África, Nação de Mina"
   }
 }
