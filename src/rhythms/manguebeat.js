@@ -127,6 +127,13 @@ export const LICK = [
   '. . . . . . . . . G4 . A4! B4 . A4 G4',
   '. . . . E4! - - . G4 - - . A4! - B4 -',
 ];
+// Its answers to the second part.
+export const LICK_B = [
+  '. . . . . . . . . C5! . A4 G4 . E4 .',
+  '. . . . . . . . . B4! . G4 . D4 - .',
+  '. . . . . . . . . G4 . A4! B4 . . .',
+  '. . . . D4! - - . G4 - - . A4! - - .',
+];
 // In the dub it leads, and each phrase rings on in the echo.
 const LICK_DUB = [
   'B4! - . A4 . G4 - . . . . . . . . .',
@@ -314,12 +321,7 @@ const SCENE_LIST = [
     bars: BAND_BARS,
     lanes: ['guitarra', 'baixo', 'main', 'caixa'],
     echo: { voices: ['caixa'], repeats: SHORT_ECHO, bars: lastOfPhrase },
-    parts: bar =>
-      bar < PHRASE_BARS
-        ? bandBar(bar, { lick: bar % 2 ? null : LICK })
-        : bar < 2 * PHRASE_BARS
-          ? bandBar(bar, { bass: BASS_B, riff: RIFF_B })
-          : bandBar(bar, { lick: LICK }),
+    parts: bar => (bar >= PHRASE_BARS && bar < 2 * PHRASE_BARS ? bandBar(bar, { bass: BASS_B, riff: RIFF_B, lick: LICK_B }) : bandBar(bar, { lick: LICK })),
   },
   {
     id: 'final',
@@ -418,7 +420,7 @@ const SCENE_LOOKS = {
 // The mix follows the reference recording's balance (docs/rhythms/manguebeat.md, Sound): the drums
 // lead and crack, the bass sits about five decibels under them, round, and the guitars are wide.
 // The alfaia's hands take the repository's maracatu recordings and two alfaia hits of the forró's
-// zabumba, as velocity layers, and the main hand is doubled, left and right: a section, not one drum.
+// zabumba, as velocity layers, tuned down: the band's drums are large and low.
 // The caixa and the bass take the recorded groups the other rhythms use; the guitar's power chords,
 // the ganzá and the sampler are this show's own files (sounds/manguebeat-*, CREDITS.md); the second
 // guitar takes the brega's clean notes through a drive and the echo. The main hand leads; the band
@@ -463,7 +465,7 @@ export const MAX_RETUNE = 2; // semitones: a note borrows a recorded one at most
 export const MAX_DOUBLE_RETUNE = 3; // a chord's double, or a chord played twice running, one more: a different take
 const LEGATO = 0.92; // a held note stops this share of its length in
 const BASS_SHORT = 1.3; // sixteenths a plain bass note sounds: short, as the reference's bass
-const CHORD_SHORT = 1.6; // sixteenths a stab rings
+const CHORD_SHORT = 2; // sixteenths a stab rings
 const CHUG = 0.6; // sixteenths a palm-muted chug lasts
 const CHUG_GAIN = 0.7;
 const LICK_SHORT = 1.5;
@@ -496,20 +498,19 @@ const STUDIO = {
   echo: { time: seconds(ECHO_STEPS), feedback: ECHO_FEEDBACK, lowpass: 2600, highpass: 350, level: 0.7, pan: -0.25, room: 0.4 },
   // the whole mix's tilt toward the reference: more air, a little more of the lowest octave
   tone: [
-    { type: 'lowshelf', frequency: 60, gain: 5 },
-    { type: 'peaking', frequency: 600, gain: -3, Q: 0.7 },
-    { type: 'peaking', frequency: 3000, gain: 2, Q: 0.7 },
+    { type: 'lowshelf', frequency: 60, gain: 6 },
+    { type: 'peaking', frequency: 600, gain: -2, Q: 0.7 },
+    { type: 'highshelf', frequency: 2500, gain: -1.5 },
   ],
   voices: {
     main: {
       seed: 61,
       role: 'lead',
-      gain: 1.25,
-      pan: -0.1,
+      gain: 1.4,
+      pan: -0.15,
       send: 0.14,
       bright: [1200, 14000],
       template: ALFAIA_TEMPLATE,
-      double: { spread: 0.15, delay: 0.009, gain: 0.85 },
       eq: [{ type: 'peaking', frequency: 3500, gain: 5, Q: 0.8 }], // the stick on the skin
       strokes: () => ({ hit: alfaiaHand('main', 'zabumba-aberto-7', MAIN_TUNING) }),
       shape: drumShape('main'),
@@ -565,7 +566,7 @@ const STUDIO = {
     baixo: {
       seed: 65,
       role: 'follower',
-      gain: 0.62,
+      gain: 0.7,
       send: 0.04,
       bright: [500, 3200],
       template: ALFAIA_TEMPLATE,
@@ -590,9 +591,9 @@ const STUDIO = {
       zone: MAX_RETUNE,
       maxZone: MAX_DOUBLE_RETUNE,
       release: 0.05,
-      drive: 3,
+      drive: 3.5,
       // two takes, hard left and right: how a rock guitar gets wide
-      double: { spread: 0.55, delay: 0.011, gain: 1, cents: 7 },
+      double: { spread: 0.9, delay: 0.011, gain: 1, cents: 7 },
       eq: [
         { type: 'highpass', frequency: 90 },
         { type: 'peaking', frequency: 550, gain: -6, Q: 0.7 },
@@ -606,7 +607,7 @@ const STUDIO = {
       seed: 68,
       role: 'follower',
       gain: 0.5,
-      pan: 0.35,
+      pan: 0.45,
       send: 0.3,
       bright: [900, 9000], // the velocity opens the tone, as a wah pedal does
       template: ALFAIA_TEMPLATE,
@@ -615,7 +616,8 @@ const STUDIO = {
       echo: 0.55,
       chorus: { rate: 0.6, depth: 0.003, mix: 0.4 },
       eq: [
-        { type: 'highpass', frequency: 180 },
+        { type: 'highpass', frequency: 250 },
+        { type: 'peaking', frequency: 400, gain: -5, Q: 0.9 }, // out of the caixa's and the chords' way
         { type: 'peaking', frequency: 1500, gain: 4, Q: 1.2 },
       ],
       strokes: () => ({ curta: takes('brega-guitarra'), longa: takes('brega-guitarra') }),

@@ -14,6 +14,7 @@ import {
   isEcho,
   isThrown,
   LICK,
+  LICK_B,
   MAIN,
   MANGUEBEAT,
   MAX_DOUBLE_RETUNE,
@@ -151,7 +152,7 @@ test('the riffs lock on the cell and leave space: guitar accents on the alfaia s
     assert.ok(new Set(phrase).size >= 3);
   }
   // the second guitar answers after the riff's first stabs, and rests for a third of each bar or more
-  for (const bar of LICK)
+  for (const bar of [...LICK, ...LICK_B])
     assert.ok(
       marked(bar, '.').length >= MIN_LICK_RESTS &&
         bar
@@ -163,7 +164,7 @@ test('the riffs lock on the cell and leave space: guitar accents on the alfaia s
 
 test('every line is in E minor, natural or harmonic, and the riffs start on the tonic', () => {
   const E_MINOR = new Set(['E', 'F#', 'G', 'A', 'B', 'C', 'D', 'D#']);
-  const notes = [BASS_A, BASS_B, RIFF_A, RIFF_B, LICK].flatMap(phrase =>
+  const notes = [BASS_A, BASS_B, RIFF_A, RIFF_B, LICK, LICK_B].flatMap(phrase =>
     phrase.flatMap(bar => bar.split(' ').filter(token => token !== '.' && token !== '-')).map(token => token.replace(/[!*\d]/g, '')),
   );
   assert.ok(notes.length > 100);
