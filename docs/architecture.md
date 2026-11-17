@@ -62,14 +62,14 @@ in different layers, told apart by their suffix. `<id>.js` is data; `<id>-sounds
 
 ## Where the code stands today
 
-Read on branch `ritmos` at `066315a`, with four rhythm packages merged and three more in `ROUTES` as being prepared. Each line breaks a rule
+Read on `main` at `35ca493` (2026-11-17), with all seven rhythm packages shipped and recorded instruments played through the studio. Each line breaks a rule
 above and becomes one allowlist entry of the check until its step lands.
 
 - Data imports presentation: `src/rhythms/maracatu.js` imports `readout-markup.js` and
-  `score.js`; `coco-xamba.js`, `forro.js` and `bregafunk.js` import `readout-markup.js`
-  (rule 4).
-- Data imports a background: `forro.js` imports `forro-backdrop.js` and `bregafunk.js` imports
-  `bregafunk-background.js` (rule 1).
+  `score.js`; `coco-xamba.js`, `forro.js` and `bregafunk.js` import `readout-markup.js`;
+  `frevo.js`, `manguebeat.js` and `brega.js` import `roll.js` (rule 4).
+- Data imports a background: `forro.js` imports `forro-backdrop.js`, and `bregafunk.js`,
+  `frevo.js`, `manguebeat.js` and `brega.js` import their `<id>-background.js` (rule 1).
 - The route lives in the data layer: `src/rhythms/index.js` reads `globalThis.location` (path and
   query) to export the `RHYTHM` singleton (rules 2 and 3).
 - The engine is a singleton of that route: `src/music.js` exports the meter of `RHYTHM`, and
@@ -80,6 +80,18 @@ above and becomes one allowlist entry of the check until its step lands.
   `scope.js` import `visualOf` from it. `src/util.js` holds pure helpers beside
   `document.createElement` (rule 2).
 - Presentation storage: `src/controls.js` reads and writes `localStorage` (rule 2).
+- The studio sits in the engine: `src/studio.js` (round robin, velocity layers, the seeded
+  correlated feel and the mix bus) imports only `music.js` and `util.js`, and the recorded takes
+  are data (`src/rhythms/recorded-takes.js`, written by `tools/prepare-takes.mjs`, and
+  `studio-kit.js`). It follows the rules; it only reads the meter of `RHYTHM` through `music.js`
+  (rule 3).
+- Backgrounds read the viewer's motion setting themselves: each `<id>-background.js` (and the coco
+  painter inside `coco-xamba.js`) calls `globalThis.matchMedia(REDUCED_MOTION_QUERY)` (rule 2). The
+  query and the `alphaOf` colour builder have one owner, `src/theme.js`.
+- The coco's painter lives inside its data file `coco-xamba.js` (rule 1): it moves to
+  `coco-background.js` with the readout step.
+- Shared readout helpers: `sceneStarts` (`src/rhythms/meter.js`) and `rollReadout`
+  (`src/roll.js`) serve frevo, manguebeat and brega.
 
 ## Ideas from Panoram and Ink Tools
 

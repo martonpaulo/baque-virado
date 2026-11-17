@@ -7,6 +7,7 @@
 // Safety (WCAG 2.3.1): the only bright change is the bloom, at most once per four bars; nothing is
 // drawn under the wheel but the ground, so the wheel's dots keep their contrast. Everything but the
 // trail is a function of the show position.
+import { REDUCED_MOTION_QUERY } from '../theme.js';
 import { hash, lerp } from '../util.js';
 
 export const BREGA_PALETTE = {
@@ -51,7 +52,7 @@ const VIGNETTE_STOPS = [
  * none); `accentBars`: the bars whose downbeat blooms; `barSeconds`: one bar's length.
  */
 export function createBregaPainter({ beatsPerBar, barSeconds, petalBars, accentBars }) {
-  const reduced = globalThis.matchMedia?.('(prefers-reduced-motion: reduce)');
+  const reduced = globalThis.matchMedia?.(REDUCED_MOTION_QUERY);
   const calm = () => Boolean(reduced?.matches);
   const accents = [...accentBars].sort((a, b) => a - b);
 
