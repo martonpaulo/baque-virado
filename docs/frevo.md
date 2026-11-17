@@ -82,8 +82,11 @@ Every sound is a real CC0 recording; nothing is synthesized. Sources and edits a
 - Every voice plays through the studio ([`rhythms/studio.md`](rhythms/studio.md)): the surdo and
   caixa alternate takes, the pandeiro adds one coco stroke per kind, and the band follows the
   surdo with a correlated drift.
-- The mix was set against the three reference recordings with the sound lab: the long-term
-  spectrum is within 2 dB of their mean in every band from 20 Hz to 16 kHz.
+- The mix was set against the three reference recordings with the sound lab, on the 16 bars of
+  Lá e cá: the long-term spectrum is within 3 dB of their mean in every band from 20 Hz to
+  16 kHz (a 3 dB cut at 1.8 kHz on the whole mix brought the horns' presence band there), and
+  the drum stem sits 4.7 dB under the whole, where the two stereo recordings have it 4.6 and
+  6.0 dB under.
 - Choices the lab's listening model (CLAP) decided, each measured on the same 16 bars:
   - two saxofones in close thirds, held, are heard as a sanfona (a forró band, 0.66 against 0.08
     for a frevo orchestra), so the saxofones sing in unison;
