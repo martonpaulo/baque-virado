@@ -107,8 +107,8 @@ for the guitar, retuned to equal temperament after measuring each chord's spectr
 ## Brega
 
 The brega show (`sounds/brega-*`, cut by `tools/prepare-takes.mjs`: trimmed to the hit, faded and
-normalised; each pitched note measured) also reuses the bumbo, caixa, chimbal, baixo, trompete,
-trombone and small-room takes above. All CC0.
+normalised; each pitched note measured) also reuses the bumbo, caixa, chimbal, baixo, trompete
+(sustained and staccato) and trombone takes above. All CC0.
 
 - Toms (high and low, stick, two dynamics) and the keyboard (Yamaha TX81Z «FM Piano», five notes, two
   dynamics each): [VCSL](https://github.com/sgossner/VCSL) by Versilian Studios
@@ -116,6 +116,8 @@ trombone and small-room takes above. All CC0.
   [VSCO 2 Community Edition](https://github.com/sgossner/VSCO-2-CE) by Versilian Studios
 - Guitar (clean Stratocaster notes): guitarmaster; two sustained notes: owstu (Freesound)
 - Horn falls (five-horn section, unison A and E major): flakdemier (Freesound)
+- Reverb (`sounds/brega-plate`): not a recording; the impulse response of a plate reverb, generated
+  for this project by `tools/make-brega-plate.mjs` (decaying noise from the site's own hash). CC0.
 
 ## Fonts
 

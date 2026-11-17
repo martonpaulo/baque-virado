@@ -504,7 +504,7 @@ const DOTTED_EIGHTH = 3 * STEP_SECONDS;
 const KICK_SECONDS = 0.13;
 const STUDIO = {
   room: PLATE,
-  roomLevel: 0.8,
+  roomLevel: 1.1,
   output: 0.5, // room for the drums' peaks: the band is not pressed against the master compressor
   lead: 'teclado',
   // one tape echo for the guitar and the lead, a dotted eighth long, to one side
@@ -520,8 +520,8 @@ const STUDIO = {
     bumbo: {
       seed: 51,
       role: 'grid',
-      gain: 0.9,
-      send: 0.03,
+      gain: 1.05,
+      send: 0.06,
       release: 0.07,
       bright: [5000, 16000],
       eq: [
@@ -535,7 +535,7 @@ const STUDIO = {
     caixa: {
       seed: 52,
       role: 'grid',
-      gain: 0.8,
+      gain: 0.95,
       pan: 0.06,
       send: 0.34, // the caixa's long plate is the sound of the genre's records
       eq: [{ type: 'peaking', frequency: 210, gain: 3, Q: 1 }],
@@ -544,7 +544,7 @@ const STUDIO = {
     chimbal: {
       seed: 53,
       role: 'grid',
-      gain: 0.85,
+      gain: 0.95,
       pan: 0.42,
       send: 0.12,
       bright: [7000, 18000],
@@ -589,7 +589,7 @@ const STUDIO = {
     cordas: {
       seed: 56,
       role: 'follower',
-      gain: 0.2,
+      gain: 0.16,
       pan: -0.1,
       send: 0.45,
       attack: 0.14, // the pad swells in
@@ -708,7 +708,7 @@ const READ = {
   groove: 'xacumbum',
   grooveValue: '3 + 3 + 2: bumbo, bumbo, caixa',
   withBumbo: 'com o bumbo',
-  bassValue: 'fundamental e quinta nos bumbos, depois anda até o próximo acorde',
+  bassValue: 'fundamental e quinta, depois anda',
   progression: 'harmonia',
   stabs: 'acordes curtos',
   pad: 'cordas',
@@ -719,7 +719,7 @@ const READ = {
   middle: 'médio',
   low: 'grave',
   chorus: 'refrão',
-  chorusValue: `${THEME.length} compassos; a guitarra responde nas pausas`,
+  chorusValue: `${THEME.length} compassos, a guitarra responde`,
   pause: 'compasso de pausa',
   heartbeat: 'bumbo sozinho',
   question: 'pergunta',
