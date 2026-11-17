@@ -14,3 +14,9 @@ normalised, with a 60 ms fade out. Credit them in CREDITS.md and encode them as 
 | palmas-abafada.wav | https://freesound.org/s/154399/ | semccab |
 | palmas-pulseira.wav | https://freesound.org/s/557368/ | launchsite |
 | palmas-roda.wav | https://freesound.org/s/531693/ | junioraragaki |
+| atabaque-rum.wav | https://freesound.org/s/49991/ | la.terror |
+| atabaque-rumpi.wav | https://freesound.org/s/373411/ | sgossner |
+| atabaque-le.wav | https://freesound.org/s/99740/ | menegass |
+
+The atabaques are the terreiro's trio: rum (low, 81 Hz), rumpi (mid, 161 Hz) and lé (high).
+`*.wav` is ignored in this repository, so these files are force-added like the other sounds.
