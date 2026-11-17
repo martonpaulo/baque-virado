@@ -1,10 +1,11 @@
 // The site icon (#30): every icon each built page links (index.html, 404.html and every rhythm path
-// tools/build-site.mjs writes) answers 200 from the built site, and a PNG has the size its link declares.
+// tools/build-site.mjs writes; a moved path's page only redirects and is never shown) answers 200 from the built site, and a PNG has the size its link declares.
 import assert from 'node:assert/strict';
 import { mkdtempSync, readdirSync, readFileSync, rmSync } from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { test } from 'node:test';
+import { MOVED } from '../src/rhythms/index.js';
 import { buildSite } from '../tools/build-site.mjs';
 import { startStaticServer } from '../tools/static-server.mjs';
 
@@ -17,7 +18,8 @@ test('every page of the built site links icons that it serves, at their declared
   buildSite(out);
   const server = await startStaticServer(out, 0);
   try {
-    for (const page of readdirSync(out).filter(name => name.endsWith('.html'))) {
+    const redirects = Object.keys(MOVED).map(id => `${id}.html`);
+    for (const page of readdirSync(out).filter(name => name.endsWith('.html') && !redirects.includes(name))) {
       const links = [...readFileSync(path.join(out, page), 'utf8').matchAll(ICON_LINK)];
       assert.ok(
         links.some(([tag]) => tag.includes('image/svg+xml')),
