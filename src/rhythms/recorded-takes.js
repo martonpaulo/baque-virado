@@ -1072,4 +1072,179 @@ export const TAKES = {
       file: 'sala-viva',
     },
   ],
+  'brega-tom-agudo': [
+    {
+      file: 'brega-tom-agudo-1',
+      layer: 0.6,
+    },
+    {
+      file: 'brega-tom-agudo-2',
+      layer: 0.95,
+    },
+  ],
+  'brega-tom-grave': [
+    {
+      file: 'brega-tom-grave-1',
+      layer: 0.6,
+    },
+    {
+      file: 'brega-tom-grave-2',
+      layer: 0.95,
+    },
+  ],
+  'brega-teclado': [
+    {
+      file: 'brega-teclado-1',
+      root: 64.01,
+      layer: 0.5,
+    },
+    {
+      file: 'brega-teclado-2',
+      root: 64.01,
+      layer: 0.9,
+    },
+    {
+      file: 'brega-teclado-3',
+      root: 68.01,
+      layer: 0.5,
+    },
+    {
+      file: 'brega-teclado-4',
+      root: 68.01,
+      layer: 0.9,
+    },
+    {
+      file: 'brega-teclado-5',
+      root: 72.01,
+      layer: 0.5,
+    },
+    {
+      file: 'brega-teclado-6',
+      root: 72.01,
+      layer: 0.9,
+    },
+    {
+      file: 'brega-teclado-7',
+      root: 76.01,
+      layer: 0.5,
+    },
+    {
+      file: 'brega-teclado-8',
+      root: 76.01,
+      layer: 0.9,
+    },
+    {
+      file: 'brega-teclado-9',
+      root: 80.01,
+      layer: 0.5,
+    },
+    {
+      file: 'brega-teclado-10',
+      root: 80.01,
+      layer: 0.9,
+    },
+  ],
+  'brega-cordas': [
+    {
+      file: 'brega-cordas-1',
+      root: 52.01,
+      layer: 0.7,
+    },
+    {
+      file: 'brega-cordas-2',
+      root: 54.93,
+      layer: 0.7,
+    },
+    {
+      file: 'brega-cordas-3',
+      root: 58.98,
+      layer: 0.7,
+    },
+    {
+      file: 'brega-cordas-4',
+      root: 62.03,
+      layer: 0.7,
+    },
+    {
+      file: 'brega-cordas-5',
+      root: 65.06,
+      layer: 0.7,
+    },
+    {
+      file: 'brega-cordas-6',
+      root: 54.95,
+      layer: 0.7,
+    },
+    {
+      file: 'brega-cordas-7',
+      root: 57.04,
+      layer: 0.7,
+    },
+    {
+      file: 'brega-cordas-8',
+      root: 59.05,
+      layer: 0.7,
+    },
+    {
+      file: 'brega-cordas-9',
+      root: 61.87,
+      layer: 0.7,
+    },
+    {
+      file: 'brega-cordas-10',
+      root: 65.96,
+      layer: 0.7,
+    },
+    {
+      file: 'brega-cordas-11',
+      root: 68.88,
+      layer: 0.7,
+    },
+  ],
+  'brega-guitarra': [
+    {
+      file: 'brega-guitarra-1',
+      root: 58.99,
+    },
+    {
+      file: 'brega-guitarra-2',
+      root: 59.95,
+    },
+    {
+      file: 'brega-guitarra-3',
+      root: 61.92,
+    },
+    {
+      file: 'brega-guitarra-4',
+      root: 63.93,
+    },
+    {
+      file: 'brega-guitarra-5',
+      root: 64.92,
+    },
+    {
+      file: 'brega-guitarra-6',
+      root: 67.05,
+    },
+    {
+      file: 'brega-guitarra-7',
+      root: 69.07,
+    },
+    {
+      file: 'brega-guitarra-8',
+      root: 62.21,
+    },
+    {
+      file: 'brega-guitarra-9',
+      root: 69.14,
+    },
+  ],
+  'brega-queda': [
+    {
+      file: 'brega-queda-1',
+    },
+    {
+      file: 'brega-queda-2',
+    },
+  ],
 };

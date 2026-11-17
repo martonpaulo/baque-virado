@@ -4,9 +4,10 @@
 // every group's files, with the measured pitch (MIDI, cents as a fraction) of a pitched take and the
 // velocity layer of each. Encode the new masters after: node tools/encode-sounds.mjs <names>.
 //
-// Usage: node tools/prepare-takes.mjs --library <dir> --vsco <dir> --coco <dir> [group…]
+// Usage: node tools/prepare-takes.mjs --library <dir> --vsco <dir> --vcsl <dir> --coco <dir> [group…]
 //   --library: the sounds/library folder of the old sound-library branch (Freesound previews)
 //   --vsco:    a checkout of github.com/sgossner/VSCO-2-CE
+//   --vcsl:    a checkout of github.com/sgossner/VCSL (the brega groups)
 //   --coco:    the sounds/incoming-coco folder of the old coco-sounds branch
 // Sources and authors: CREDITS.md. Without group names every group is rebuilt.
 import { spawnSync } from 'node:child_process';
@@ -30,6 +31,7 @@ const v = (file, layer, extra = {}) => ({ from: `vsco:${file}`, layer, ...extra 
 const lib = (file, extra = {}) => ({ from: `library:${file}`, ...extra });
 const files = (folder, names) => names.map(name => lib(`${folder}/${name}.mp3`));
 const coco = (file, extra = {}) => ({ from: `coco:${file}`, ...extra });
+const vcsl = (file, layer, extra = {}) => ({ from: `vcsl:${file}`, layer, ...extra });
 const rr = (make, ids, layers) => ids.flatMap(id => layers.map(([tag, layer]) => make(id, tag, layer)));
 const series = (file, count, extra = {}) => [...Array(count).keys()].map(hit => lib(file, { hit, ...extra }));
 // VSCO names some notes an octave below where they sound: `octave` moves the label to the real pitch.
@@ -319,6 +321,59 @@ export const GROUPS = {
       coco('atabaque-le.wav', { layer: 0.9 }),
     ],
   },
+  // ---- brega ----
+  'brega-tom-agudo': {
+    length: 0.5,
+    takes: ['v3_rr1', 'v4_rr2'].map(tag =>
+      vcsl(`Membranophones/Struck Membranophones/Tom 1/Stick/TomH_HitS_${tag}_Mid.wav`, tag.startsWith('v3') ? 0.6 : 0.95),
+    ),
+  },
+  'brega-tom-grave': {
+    length: 0.55,
+    takes: ['v3_rr1', 'v4_rr2'].map(tag =>
+      vcsl(`Membranophones/Struck Membranophones/Tom 2/Stick/TomL_HitS_${tag}_Mid.wav`, tag.startsWith('v3') ? 0.6 : 0.95),
+    ),
+  },
+  // the keyboard: a Yamaha TX81Z FM piano, two velocity layers per note
+  'brega-teclado': {
+    pitched: true,
+    length: 1.2,
+    takes: ['E4', 'G#4', 'C5', 'E5', 'G#5'].flatMap(note =>
+      [
+        ['vl2', 0.5],
+        ['vl3', 0.9],
+      ].map(([tag, layer]) => vcsl(`Electrophones/TX81Z/FM Piano/FMPiano_${note}_${tag}.wav`, layer, { label: note })),
+    ),
+  },
+  // the string pad: viola and violin sections with vibrato (VSCO names these an octave low)
+  'brega-cordas': {
+    pitched: true,
+    length: 1.6,
+    takes: [
+      ...notes('Strings/Viola Section/susvib', 'ViolaEns_susvib_', ['E2', 'G2', 'B2', 'D3', 'F3'], [['_v2_1', 0.7]], '.wav', 1),
+      ...notes('Strings/Violin Section/susVib', 'VlnEns_susVib_', ['G2', 'A2', 'B2', 'D3', 'F#3', 'A3'], [['_v2', 0.7]], '.wav', 1),
+    ],
+  },
+  // a clean electric guitar: short picked notes and two sustained ones
+  'brega-guitarra': {
+    pitched: true,
+    length: 1.2,
+    takes: [
+      ...[
+        ['B-low', 'B3'],
+        ['C', 'C4'],
+        ['D', 'D4'],
+        ['E', 'E4'],
+        ['F', 'F4'],
+        ['G', 'G4'],
+        ['A', 'A4'],
+      ].map(([name, label]) => lib(`guitar-clean/clean-${name}.mp3`, { label })),
+      lib('guitar-clean/clean-note-D-sustain.mp3', { label: 'D4' }),
+      lib('guitar-clean/clean-note-A-sustain.mp3', { label: 'A4' }),
+    ],
+  },
+  // a five-horn section falling off a note: on the tonic (unison) and on the dominant (major chord)
+  'brega-queda': { length: 1, takes: [lib('horn-section/horns-fall-A-unison.mp3'), lib('horn-section/horns-fall-Emaj.mp3')] },
   // ---- the rooms ----
   'sala-pequena': { length: 2.5, room: true, takes: [lib('reverb-ir/ir-room-01.mp3')] },
   'sala-viva': { length: 1.1, room: true, takes: [lib('reverb-ir/ir-living-room.mp3')] },
