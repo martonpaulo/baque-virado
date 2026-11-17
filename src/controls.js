@@ -4,7 +4,7 @@ import { DEFAULT_VOLUME, SOUND_CHOICES, VOLUME_LEVELS } from './audio.js';
 import { COPY } from './copy.js';
 import { BAR_SECONDS } from './music.js';
 import { SCENES } from './show.js';
-import { chipButton, formatClock } from './util.js';
+import { chipButton, formatClock, setText } from './util.js';
 
 const STORAGE_PREFIX = 'baque-virado:';
 const readStored = key => {
@@ -198,4 +198,62 @@ export function rhythmSelector(choices, className) {
     nav.appendChild(link);
   }
   return nav;
+}
+
+/**
+ * The video export control (desktop, left column): «Exportar vídeo», a progress bar, «Cancelar»
+ * and one status line. `run({ onProgress, signal })` does the export and resolves with
+ * `{ name, format }` once the file is downloaded; `supported` false disables the button.
+ */
+export function exportControl({ run, supported }) {
+  const words = COPY.exportVideo;
+  const section = document.createElement('section');
+  section.className = 'block export-video';
+  section.setAttribute('aria-label', words.region);
+  const status = document.createElement('p');
+  status.className = 'lbl export-status';
+  status.setAttribute('role', 'status');
+  const progress = document.createElement('progress');
+  progress.max = 1;
+  progress.value = 0;
+  progress.hidden = true;
+  progress.setAttribute('aria-label', words.progress);
+  let controller = null;
+  const cancel = chipButton(words.cancel, () => controller?.abort());
+  cancel.hidden = true;
+  const start = chipButton(words.start, async () => {
+    if (controller) return;
+    controller = new AbortController();
+    start.disabled = true;
+    cancel.hidden = false;
+    progress.hidden = false;
+    progress.value = 0;
+    let phase = null;
+    try {
+      const result = await run({
+        signal: controller.signal,
+        onProgress: ({ phase: next, done, total, format }) => {
+          progress.value = total ? done / total : 0;
+          if (next !== phase) setText(status, next === 'audio' ? words.audio : words.video(format));
+          phase = next;
+        },
+      });
+      setText(status, words.done(result.name, result.format));
+    } catch (error) {
+      setText(status, error?.name === 'AbortError' ? words.cancelled : words.failed);
+      if (error?.name !== 'AbortError') console.error(error);
+    } finally {
+      controller = null;
+      start.disabled = false;
+      cancel.hidden = true;
+      progress.hidden = true;
+    }
+  });
+  start.classList.add('export-start');
+  if (!supported) {
+    start.disabled = true;
+    status.textContent = words.unsupported;
+  }
+  section.append(start, progress, cancel, status);
+  return section;
 }

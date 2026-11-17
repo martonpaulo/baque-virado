@@ -38,7 +38,7 @@
         "number": 8
       },
       "tools/export-video.mjs": {
-        "number": 14
+        "number": 13
       },
       "tools/make-coco-sounds.mjs": {
         "number": 21
@@ -52,7 +52,7 @@
   },
   "duplicates": {
     "depth": 1,
-    "exclude": ["node_modules/**", "sounds/**"],
+    "exclude": ["node_modules/**", "sounds/**", "vendor/**"],
     "counts": {},
     "identical": {}
   },

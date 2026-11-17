@@ -72,7 +72,8 @@ async function openPage(viewport, { delaySounds = false, videoExport = false, qu
   await page.setRequestInterception(true);
   page.on('request', async request => {
     const url = request.url();
-    if (!url.startsWith(session.server.url)) {
+    // a data: URL never leaves the page (the video export draws each frame from one)
+    if (!url.startsWith(session.server.url) && !url.startsWith('data:')) {
       errors.push(`request off the site: ${url}`);
       await request.abort();
       return;
@@ -567,9 +568,120 @@ test('with a second rhythm, ?ritmo= plays it on its own wheel and the selector s
   const desktop = await openPage(DESKTOP, { registry: 'twoFour', query: '?ritmo=dois-por-quatro' });
   assert.ok(await visible(desktop.page, '.rhythms-side'));
   assert.equal(await visible(desktop.page, '.rhythms-stage'), false);
-  assert.equal(await desktop.page.$eval('.rhythms-side', nav => nav.previousElementSibling.contains(document.getElementById('scenes'))), true);
+  // the export control sits between the Roteiro and the selector (#19)
+  assert.equal(
+    await desktop.page.$eval(
+      '.rhythms-side',
+      nav =>
+        nav.previousElementSibling.matches('.export-video') && nav.previousElementSibling.previousElementSibling.contains(document.getElementById('scenes')),
+    ),
+    true,
+  );
   assert.equal(await desktop.page.$eval('.rhythms-side', nav => nav === nav.parentElement.lastElementChild), true);
   assert.equal(await desktop.page.$$eval('#scenes li', items => items.length), 2);
   assert.deepEqual(desktop.errors, []);
   await desktop.page.close();
+});
+
+// ---------- the video export in the page (#19) ----------
+
+test('desktop shows «Exportar vídeo» in the middle of the left column, between the Roteiro and the selector', async () => {
+  const { page, errors } = await openPage(DESKTOP);
+  const layout = await page.evaluate(() => {
+    const box = element => element.getBoundingClientRect();
+    const roteiro = document.getElementById('scenes').closest('.block'),
+      control = document.querySelector('.export-video'),
+      selector = document.querySelector('.rhythms-side');
+    const button = control.querySelector('button.export-start');
+    return {
+      order: [roteiro.nextElementSibling === control, control.nextElementSibling === selector, control.parentElement.matches('.side.left')],
+      above: box(control).top - box(roteiro).bottom,
+      below: box(selector).top - box(control).bottom,
+      button: { tag: button.localName, type: button.type, text: button.textContent, disabled: button.disabled, visible: button.checkVisibility() },
+      cancelHidden: [...control.querySelectorAll('button')].filter(b => b !== button).every(b => b.hidden),
+    };
+  });
+  assert.deepEqual(layout.order, [true, true, true]);
+  assert.ok(layout.above > 0 && layout.below > 0, `gaps ${layout.above} and ${layout.below}`);
+  assert.ok(Math.abs(layout.above - layout.below) <= 1, `centred: ${layout.above} px above, ${layout.below} px below`);
+  assert.deepEqual(layout.button, { tag: 'button', type: 'button', text: COPY.exportVideo.start, disabled: false, visible: true });
+  assert.ok(layout.cancelHidden);
+  // keyboard: Tab from the last Roteiro control reaches the button, then the selector
+  await page.evaluate(() => [...document.querySelectorAll('#scenes button, #scenes a')].at(-1).focus());
+  await page.keyboard.press('Tab');
+  assert.equal(await page.evaluate(() => document.activeElement.classList.contains('export-start')), true);
+  await page.keyboard.press('Tab');
+  assert.equal(await page.evaluate(() => document.activeElement.closest('.rhythms-side') !== null), true);
+  assert.deepEqual(errors, []);
+  await page.close();
+});
+
+test('phones have no video export', async () => {
+  for (const phone of PHONES) {
+    const { page, errors } = await openPage(phone);
+    assert.equal(await page.$('.export-video'), null);
+    assert.deepEqual(errors, []);
+    await page.close();
+  }
+});
+
+test('the export makes a short 9:16 video with sound, cancels on request, and leaves the live page as it was', async () => {
+  const { page, errors } = await openPage(DESKTOP);
+  const before = await page.evaluate(() => ({
+    html: document.documentElement.className,
+    zoom: document.getElementById('stage').style.zoom,
+    time: document.getElementById('hTime').textContent,
+  }));
+  const result = await page.evaluate(async () => {
+    const { exportVideo } = await import('/src/export.js');
+    const phases = [];
+    const { blob, format } = await exportVideo({ to: 0.2, onProgress: ({ phase, done, total }) => phases.push(`${phase} ${done}/${total}`) });
+    const head = [...new Uint8Array(await blob.slice(0, 12).arrayBuffer())];
+    return {
+      type: blob.type,
+      size: blob.size,
+      format: format.id,
+      phases: [phases[0], phases.at(-1)],
+      head,
+      frames: document.querySelectorAll('iframe').length,
+    };
+  });
+  assert.ok(['mp4', 'webm'].includes(result.format));
+  assert.equal(result.type, `video/${result.format}`);
+  assert.ok(result.size > 0);
+  // MP4 opens with an ftyp box; WebM with the EBML magic number
+  if (result.format === 'mp4') assert.equal(String.fromCharCode(...result.head.slice(4, 8)), 'ftyp');
+  else assert.deepEqual(result.head.slice(0, 4), [0x1a, 0x45, 0xdf, 0xa3]);
+  assert.deepEqual(result.phases, ['audio 0/6', 'video 6/6']); // 0.2 s at 30 frames per second
+  assert.equal(result.frames, 0, 'the hidden reel is removed');
+  assert.deepEqual(
+    await page.evaluate(() => ({
+      html: document.documentElement.className,
+      zoom: document.getElementById('stage').style.zoom,
+      time: document.getElementById('hTime').textContent,
+    })),
+    before,
+  );
+  // the control: disabled while it runs, Cancel stops it and says so
+  const control = await page.evaluate(async () => {
+    const start = document.querySelector('.export-start'),
+      cancel = start.parentElement.querySelectorAll('button')[1],
+      status = start.parentElement.querySelector('[role="status"]');
+    start.click();
+    const during = { disabled: start.disabled, cancelShown: !cancel.hidden };
+    cancel.click();
+    for (let i = 0; i < 600 && start.disabled; i++) await new Promise(resolve => setTimeout(resolve, 50));
+    return {
+      during,
+      after: { disabled: start.disabled, cancelShown: !cancel.hidden, status: status.textContent },
+      frames: document.querySelectorAll('iframe').length,
+    };
+  });
+  assert.deepEqual(control, {
+    during: { disabled: true, cancelShown: true },
+    after: { disabled: false, cancelShown: false, status: COPY.exportVideo.cancelled },
+    frames: 0,
+  });
+  assert.deepEqual(errors, []);
+  await page.close();
 });
