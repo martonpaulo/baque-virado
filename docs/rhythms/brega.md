@@ -149,37 +149,36 @@ band, or a cheap MIDI file» probe, Demucs for the balance of drums, bass and th
 long-term spectrum. The models are noisy: a difference under 0.02 in similarity or under 0.1 in
 the probe is nothing.
 
-| Measure                                | Before           | Now              | References                             |
-| :------------------------------------- | :--------------- | :--------------- | :------------------------------------- |
-| Tempo, by the beat tracker (BPM)       | 142.9            | 136.4            | 136.4                                  |
-| Bass notes per beat                    | 1.1              | 2.4              | 1.8 and 2.4                            |
-| Bass, median pitch (MIDI)              | 38               | 42               | 43                                     |
-| Notes per beat of the rest of the band | 5.5              | 6.1              | 5.7 and 7.9                            |
-| Similarity, whole show                 | 0.67             | 0.67             | 0.92 and 0.94                          |
-| Similarity, chorus                     | 0.63             | 0.71 to 0.73     |                                        |
-| Similarity, first eight bars           |                  | 0.74             |                                        |
-| «Live band, not MIDI», whole show      | 0.02             | 0.01             | 1.00                                   |
-| «Live band, not MIDI», chorus          | 0.00             | 0.13 to 0.60     |                                        |
-| Side against mid (dB), whole show      | −19.5            | −13.0            | −9.0 and −39.7                         |
-| Drums, bass, rest (dB of the sum)      | −2.6, −7.0, −6.0 | −2.7, −5.2, −7.9 | −3.5, −6.9, −4.6 and −1.6, −10.0, −6.9 |
+| Measure                                | Before           | Now              | References       |
+| :------------------------------------- | :--------------- | :--------------- | :--------------- |
+| Tempo, by the beat tracker (BPM)       | 142.9            | 136.4            | 136.4            |
+| Bass notes per beat                    | 1.1              | 2.6              | 1.8 to 3.5       |
+| Bass, median pitch (MIDI)              | 38               | 42               | 36 to 48         |
+| Notes per beat of the rest of the band | 5.5              | 6.6              | 5.7 to 7.9       |
+| Similarity, whole show                 | 0.76             | 0.76             | 0.93             |
+| Similarity, chorus                     | 0.71             | 0.79             |                  |
+| «Live band, not MIDI», whole show      | 0.02             | 0.01             | 0.90             |
+| «Live band, not MIDI», chorus          | 0.00             | 0.13             |                  |
+| «Brega band, not a toy keyboard»       | 0.03             | 0.01             | 0.52             |
+| Side against mid (dB), whole show      | −19.5            | −13.0            | −15.1            |
+| Drums, bass, rest (dB of the sum)      | −2.6, −7.0, −6.0 | −3.0, −5.0, −7.3 | −2.4, −6.6, −7.7 |
+| Largest gap in a spectrum band (dB)    | 3.8              | 3.0              |                  |
 
-The reference column holds «Uma Mulher É Igual uma Flor» and the live «Ainda Bem», the two
-recordings the lab's reference set held when the show was measured. The note counts and the
-balance were measured on the 59-bar script, before the band played from the first bar; the notes
-did not change. The two chorus values of the probe are two renders of the same bars with other
-takes: the probe sits on its edge and is no proof.
+The reference column is the mean of the seven recordings of [References](#references), or their
+range. An earlier render of the same chorus scored 0.60 on the «live band» probe with other takes
+of the same notes: that probe sits on its edge here and is no proof.
 
-The groove, the bass and the balance now sit on the references. The models still hear a show far
-from them: the similarity of the whole show did not move, and only the scenes where the trompete
-plays the theme come nearer. The drum sounds and the keyboard are the likely cause (see
-[Open points](#open-points)).
+The tempo, the groove, the bass, the width and the balance now sit on the references. The models
+still hear a show far from them: the similarity of the whole show did not move, both probes stay
+near zero, and only the scenes where the trompete plays the theme come nearer. The drum sounds and
+the keyboard are the likely cause (see [Open points](#open-points)).
 
 Tried and measured on the chorus, not kept:
 
 - The theme on a synthesized keyboard lead (two detuned sawtooths and a pulse, a filter envelope,
   a late vibrato, bends): further from the references than the recorded trompete on the same notes
-  (similarity 0.36 against 0.49 alone, 0.73 against 0.74 in the band) and judged less a live band
-  (0.29 against 0.81).
+  (similarity 0.36 against 0.49 alone, 0.73 against 0.74 in the band, against two of the
+  references) and judged less a live band (0.29 against 0.81).
 - A synthesized string pad: no nearer than the recorded strings (0.70 against 0.72).
 - The living-room impulse response the bregafunk uses: a little further than the plate (0.74
   against 0.75).
