@@ -9,11 +9,17 @@ import { COPY } from '../src/copy.js';
 import { SCENES } from '../src/show.js';
 import { openBrowser } from './support/browser.js';
 
-// The shipped rhythm registry with the tests-only 2/4 fixture added, served in its place.
-const TWO_FOUR_REGISTRY = readFileSync(new URL('../src/rhythms/index.js', import.meta.url), 'utf8').replace(
-  'export const RHYTHMS = [MARACATU];',
-  "import { TWO_FOUR } from '../../tests/support/rhythm-two-four.js';\nexport const RHYTHMS = [MARACATU, TWO_FOUR];",
-);
+// The shipped rhythm registry with its list replaced, served in its place: maracatu and the
+// tests-only 2/4 fixture, or maracatu alone.
+const SHIPPED_REGISTRY = readFileSync(new URL('../src/rhythms/index.js', import.meta.url), 'utf8');
+const SHIPPED_LIST = 'export const RHYTHMS = [MARACATU, COCO_XAMBA];';
+const REGISTRIES = {
+  twoFour: SHIPPED_REGISTRY.replace(
+    SHIPPED_LIST,
+    "import { TWO_FOUR } from '../../tests/support/rhythm-two-four.js';\nexport const RHYTHMS = [MARACATU, TWO_FOUR];",
+  ),
+  maracatuOnly: SHIPPED_REGISTRY.replace(SHIPPED_LIST, 'export const RHYTHMS = [MARACATU];'),
+};
 
 const PHONES = [
   { width: 375, height: 667 },
@@ -40,7 +46,7 @@ after(async () => {
  * errors and console errors; `contexts()` counts the audio contexts the page opened. `videoExport`
  * sets the class tools/export-video.mjs sets.
  */
-async function openPage(viewport, { delaySounds = false, videoExport = false, query = '', withTwoFour = false } = {}) {
+async function openPage(viewport, { delaySounds = false, videoExport = false, query = '', registry = null } = {}) {
   const page = await session.browser.newPage();
   // the same hook tools/export-video.mjs installs
   if (videoExport) await page.evaluateOnNewDocument(() => addEventListener('DOMContentLoaded', () => document.documentElement.classList.add('video-export')));
@@ -68,8 +74,8 @@ async function openPage(viewport, { delaySounds = false, videoExport = false, qu
       return;
     }
     if (delaySounds && url.includes('/sounds/')) await new Promise(resolve => setTimeout(resolve, SOUND_DELAY_MS));
-    if (withTwoFour && url.endsWith('/src/rhythms/index.js')) {
-      await request.respond({ contentType: 'text/javascript', body: TWO_FOUR_REGISTRY });
+    if (registry && url.endsWith('/src/rhythms/index.js')) {
+      await request.respond({ contentType: 'text/javascript', body: REGISTRIES[registry] });
       return;
     }
     await request.continue();
@@ -448,18 +454,32 @@ test('the video export lays out the stage alone, 9:16 and the full window height
   await page.close();
 });
 
-test('the rhythm selector stays out of the page while one rhythm ships', async () => {
+test('the rhythm selector stays out of the page with one rhythm', async () => {
   for (const viewport of [PHONES[0], DESKTOP]) {
-    const { page, errors } = await openPage(viewport, { query: '?ritmo=desconhecido' });
+    const { page, errors } = await openPage(viewport, { registry: 'maracatuOnly', query: '?ritmo=desconhecido' });
     assert.equal(await page.$$eval('.rhythms', list => list.length), 0);
     assert.deepEqual(errors, []);
     await page.close();
   }
 });
 
+test('?ritmo=coco-xamba shows the coco on an 8-step wheel, its 12 scenes and the selector', async () => {
+  const { page, errors } = await openPage(DESKTOP, { query: '?ritmo=coco-xamba' });
+  const steps = await page.$$eval('#scope text[fill-opacity]', texts => texts.map(t => t.textContent).filter(t => /^\d+$/.test(t)));
+  assert.equal(steps.length, 8);
+  assert.equal(await page.evaluate(() => window.baque.TOTAL), 104);
+  assert.equal(await page.$$eval('#scenes li', items => items.length), 12);
+  assert.deepEqual(await page.$$eval('.rhythms-side a', links => links.map(a => [a.textContent, a.getAttribute('aria-current')])), [
+    ['Baque virado', null],
+    ['Coco da Xambá', 'true'],
+  ]);
+  assert.deepEqual(errors, []);
+  await page.close();
+});
+
 test('with a second rhythm, ?ritmo= plays it on its own wheel and the selector shows', async () => {
   const visible = (page, selector) => page.$eval(selector, element => element.checkVisibility());
-  const { page, errors } = await openPage(PHONES[0], { withTwoFour: true, query: '?ritmo=dois-por-quatro' });
+  const { page, errors } = await openPage(PHONES[0], { registry: 'twoFour', query: '?ritmo=dois-por-quatro' });
   // a 2/4 bar: the wheel numbers its 8 steps, and the show is the fixture's 5 bars
   assert.deepEqual(await page.$$eval('#scope text[fill-opacity]', texts => texts.map(t => t.textContent).filter(t => /^\d+$/.test(t))), [
     '1',
@@ -486,7 +506,7 @@ test('with a second rhythm, ?ritmo= plays it on its own wheel and the selector s
   assert.deepEqual(errors, []);
   await page.close();
   // desktop: above the Roteiro in the left column; the stage copy stays hidden
-  const desktop = await openPage(DESKTOP, { withTwoFour: true, query: '?ritmo=dois-por-quatro' });
+  const desktop = await openPage(DESKTOP, { registry: 'twoFour', query: '?ritmo=dois-por-quatro' });
   assert.ok(await visible(desktop.page, '.rhythms-side'));
   assert.equal(await visible(desktop.page, '.rhythms-stage'), false);
   assert.equal(await desktop.page.$eval('.rhythms-side', nav => nav.nextElementSibling.contains(document.getElementById('scenes'))), true);
