@@ -58,7 +58,7 @@ jobs:
         if: steps.tip.outputs.current == 'true'
         run: |
           mkdir _site
-          cp -R index.html 404.html styles.css src social.png apple-touch-icon.png CNAME .nojekyll _site/
+          cp -R index.html 404.html styles.css src social.png apple-touch-icon.png icon.svg icons CNAME .nojekyll _site/
           # the page fetches only the AAC samples; the WAV masters stay in the repository
           mkdir _site/sounds
           cp sounds/*.m4a _site/sounds/
