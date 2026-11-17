@@ -4,9 +4,10 @@
 // cultura», ANPPOM 2018 (the alfaia sits on a chair and is played on both heads; the coco is made of
 // rhythmic phrases that join and end in a «rufo»); Revista Continente, «O coco ancestral do Bongar».
 // Neither source writes the parts out: the patterns below are this project's reading, kept simple.
+// Choices and reasons: docs/rhythms/coco.md.
 import { label, row, stat, stats } from '../readout-markup.js';
 import { COLORS, ROLES } from '../theme.js';
-import { lilt, recordedChoices, studioSounds, takes } from './studio-kit.js';
+import { lilt, recordedChoices, studioFiles, studioSounds, takes } from './studio-kit.js';
 
 const BPM = 132;
 const BEATS_PER_BAR = 2;
@@ -16,24 +17,30 @@ const BAR_SECONDS = (60 / BPM) * BEATS_PER_BAR;
 const STEPS = [...Array(STEPS_PER_BAR).keys()];
 const MS_PER_SECOND = 1000;
 
-// One tempo and the straight grid for the whole show: no swing was measured for this rhythm.
+// One tempo and the straight grid for the whole show: no swing was measured for this rhythm (the
+// studio adds the ganzá's lilt and the human feel, src/studio.js).
 const SWING = {};
 
 // The alfaia has two voices, one per head: the low head on the beats, the second head on the
-// off-beats. The roles are the ones src/rhythms/maracatu.js documents.
+// off-beats. The roles are the ones src/rhythms/maracatu.js documents. The atabaques are the
+// terreiro's trio, low to high: rum, rumpi and lé.
 const VOICES = {
-  low: { instrument: 'alfaia', ring: 98, size: 5.6, swing: null, color: ROLES.mainHand, hand: true, boom: 1 },
-  high: { instrument: 'alfaia', ring: 88, size: 4.8, swing: null, color: ROLES.answerHand, hand: true, boom: 0.6 },
-  caixa: { instrument: 'caixa', ring: 78, size: 3, swing: null, color: COLORS.ice, crack: true },
-  abe: { instrument: 'abe', ring: 69, size: 3, swing: null, color: COLORS.magenta },
-  ganza: { instrument: 'ganza', ring: 61, size: 2.6, swing: null, color: COLORS.violet },
-  pandeiro: { instrument: 'pandeiro', ring: 53, size: 3.4, swing: null, color: COLORS.bone, toneScale: { jingle: 0.6 } },
-  palmas: { instrument: 'palmas', ring: 45, size: 3.4, swing: null, color: COLORS.white },
-  agogo: { instrument: 'agogo', ring: 38, size: 4, swing: null, color: COLORS.acid, spark: true, toneScale: { high: 0.7 } },
+  low: { instrument: 'alfaia', ring: 98, size: 5.4, swing: null, color: ROLES.mainHand, hand: true, boom: 1 },
+  high: { instrument: 'alfaia', ring: 91, size: 4.6, swing: null, color: ROLES.answerHand, hand: true, boom: 0.6 },
+  caixa: { instrument: 'caixa', ring: 63, size: 2.8, swing: null, color: COLORS.ice, crack: true },
+  abe: { instrument: 'abe', ring: 57, size: 2.8, swing: null, color: COLORS.magenta },
+  ganza: { instrument: 'ganza', ring: 51, size: 2.4, swing: null, color: COLORS.violet },
+  pandeiro: { instrument: 'pandeiro', ring: 45, size: 3.2, swing: null, color: COLORS.bone, toneScale: { jingle: 0.6 } },
+  palmas: { instrument: 'palmas', ring: 39, size: 3.2, swing: null, color: COLORS.white },
+  agogo: { instrument: 'agogo', ring: 34, size: 3.4, swing: null, color: COLORS.acid, spark: true, toneScale: { high: 0.7 } },
+  rum: { instrument: 'atabaque', ring: 84, size: 4.6, swing: null, color: COLORS.ember, boom: 0.5 },
+  rumpi: { instrument: 'atabaque', ring: 77, size: 3.8, swing: null, color: COLORS.amber },
+  le: { instrument: 'atabaque', ring: 70, size: 3.2, swing: null, color: COLORS.fg },
 };
-// The order also seeds the per-hit variation of the sound: keep it stable.
+// The order also seeds the per-hit variation of the sound: keep it stable, and add a voice at the end.
 const VOICE_ORDER = Object.keys(VOICES);
 const ALFAIA = ['low', 'high'];
+export const ATABAQUES = ['rum', 'rumpi', 'le'];
 
 const isOffbeat = step => step % STEPS_PER_BEAT !== 0;
 const BEAT_STEPS = STEPS.filter(step => !isOffbeat(step));
@@ -52,12 +59,62 @@ const PHRASE_BARS = 4;
 
 const AGOGO = { low: [0, 3, 6], high: [2, 7] };
 
+// The atabaques: the lé keeps a steady figure, the rumpi answers on the off-beats, and the rum, the
+// lead, changes its phrase every two bars and plays a fill in the last bar of each four.
+const ATABAQUE = {
+  le: { steps: [0, 2, 3, 4, 6, 7], velocities: [0.7, 0.95, 0.5, 0.7, 0.95, 0.5] },
+  rumpi: { steps: [2, 4, 6], velocities: [0.95, 0.6, 0.95] },
+};
+const RUM_PHRASES = [
+  { steps: [0, 3, 6], velocities: [1, 0.7, 0.85] },
+  { steps: [0, 3, 4, 6, 7], velocities: [1, 0.7, 0.6, 0.85, 0.55] },
+];
+const RUM_FILL = { steps: [0, 2, 3, 5, 6, 7], velocities: [1, 0.6, 0.75, 0.6, 0.8, 0.95] };
+const RUM_PHRASE_BARS = 2;
+const RUM_FILL_EVERY = 4;
+const rumPart = bar => (bar % RUM_FILL_EVERY === RUM_FILL_EVERY - 1 ? RUM_FILL : RUM_PHRASES[Math.floor(bar / RUM_PHRASE_BARS) % RUM_PHRASES.length]);
+
+// Rufadas: the alfaia rolls in 32nds, the two heads in turn, swelling into a «golpe», a stroke of
+// both heads together. They open the show, close every scene into the next and make the Rufo.
+export const RUFADA = 'rufada';
+export const GOLPE = 'golpe';
+const RUFADA_FROM = 0.3; // the velocity a rufada starts at; it swells to 1
+const RUFADA_CURVE = 1.4;
+const SCENE_RUFADA_FROM = STEPS_PER_BAR / 2; // a scene's last bar rolls from its second beat
+// The opening, 32 sixteenths over four bars: two rufadas, each landing on a golpe, then a short one
+// into the first scene. [first step, last step] of each rufada, and the golpes.
+const OPENING = {
+  rufadas: [
+    [0, 11],
+    [16, 27],
+    [29, 31],
+  ],
+  golpes: [12, 28],
+};
+
 const hit = (step, velocity, tone) => (tone ? { step, velocity, tone } : { step, velocity });
 const silentBar = () => Object.fromEntries(VOICE_ORDER.map(voice => [voice, []]));
 const cycle = velocities => STEPS.map(step => hit(step, velocities[step % velocities.length]));
+const figure = ({ steps, velocities }) => steps.map((step, i) => hit(step, velocities[i]));
+/** A swell from RUFADA_FROM to 1 over `count` strokes, at stroke `i`. */
+const swellAt = (i, count) => RUFADA_FROM + (1 - RUFADA_FROM) * (i / Math.max(1, count - 1)) ** RUFADA_CURVE;
 
-/** The band's fixed parts under one alfaia phrase. */
-function phraseHits(phraseKey) {
+/**
+ * The alfaia's strokes from `first` to `last` (sixteenths counted from `origin`), kept to the
+ * steps of one bar: the low head on the even sixteenths, the second head on the odd ones.
+ */
+function rufada(first, last, origin, bothHeads = true) {
+  const out = { low: [], high: [] };
+  for (let at = first; at <= last; at++) {
+    const step = at - origin;
+    if (step < 0 || step >= STEPS_PER_BAR) continue;
+    out[at % 2 && bothHeads ? 'high' : 'low'].push(hit(step, swellAt(at - first, last - first + 1), RUFADA));
+  }
+  return out;
+}
+
+/** The band's parts under one alfaia phrase, in `bar` of the show (the rum's phrase follows it). */
+function phraseHits(phraseKey, bar) {
   const phrase = PHRASES[phraseKey];
   return {
     low: phrase.low.map(step => hit(step, 1)),
@@ -65,30 +122,43 @@ function phraseHits(phraseKey) {
     caixa: cycle([0.55, 0.32, 1, 0.4]),
     abe: STEPS.filter(step => step % 4 !== 1).map(step => hit(step, step % 4 === 2 ? 1 : 0.6)),
     ganza: cycle([0.8, 0.45, 1, 0.45]),
-    pandeiro: STEPS.map(step => (isOffbeat(step) ? hit(step, step % 4 === 2 ? 0.95 : 0.55, 'jingle') : hit(step, 1, 'low'))),
+    pandeiro: STEPS.map(step => (isOffbeat(step) ? hit(step, step % 4 === 2 ? 0.95 : 0.55, 'jingle') : hit(step, 1, 'pele'))),
     palmas: STEPS.filter(step => step % 4 === 2).map(step => hit(step, 1)),
     agogo: [...AGOGO.low.map(step => hit(step, 1, 'low')), ...AGOGO.high.map(step => hit(step, 0.85, 'high'))].sort((a, b) => a.step - b.step),
+    rum: figure(rumPart(bar)),
+    rumpi: figure(ATABAQUE.rumpi),
+    le: figure(ATABAQUE.le),
   };
 }
 
 // Special bars (the bar modes the engine knows):
-//   roll – the alfaia alone, the two heads in turn on every sixteenth, swelling
+//   roll – the alfaia alone in rufadas (the opening, then the Rufo)
 //   cut  – everyone on 1, then silence
+// A scene that hands over to the next (`rufadaOut`) rolls into it in its last bar, and a scene
+// entered that way lands on a golpe.
 function barHits(scene, barInScene) {
-  const mode = scene.mode(barInScene);
-  if (mode === 'roll') {
-    const swell = step => 0.3 + 0.7 * ((barInScene * STEPS_PER_BAR + step) / (scene.bars * STEPS_PER_BAR - 1)) ** 1.4;
-    return {
-      ...silentBar(),
-      low: STEPS.filter(step => step % 2 === 0).map(step => hit(step, swell(step))),
-      high: STEPS.filter(step => step % 2 === 1).map(step => hit(step, swell(step))),
-    };
+  const mode = scene.mode(barInScene),
+    bar = scene.start + barInScene;
+  if (mode === 'roll' && scene.id === 'intro') {
+    const origin = barInScene * STEPS_PER_BAR,
+      bars = OPENING.rufadas.map(([first, last]) => rufada(first, last, origin));
+    const golpes = OPENING.golpes.map(at => at - origin).filter(step => step >= 0 && step < STEPS_PER_BAR);
+    const heads = voice => [...bars.flatMap(part => part[voice]), ...golpes.map(step => hit(step, 1, GOLPE))].sort((a, b) => a.step - b.step);
+    return { ...silentBar(), low: heads('low'), high: heads('high') };
   }
-  if (mode === 'cut') {
-    const all = phraseHits('base');
-    return Object.fromEntries(VOICE_ORDER.map(voice => [voice, all[voice].filter(h => h.step === 0)]));
+  if (mode === 'roll') return { ...silentBar(), ...rufada(0, scene.bars * STEPS_PER_BAR - 1, barInScene * STEPS_PER_BAR) };
+  const hits = phraseHits(mode === 'cut' ? 'base' : scene.phrase(barInScene), bar);
+  if (barInScene === 0 && scene.landsOnGolpe) hits.low = hits.low.map(h => (h.step === 0 ? hit(0, 1, GOLPE) : h));
+  if (mode === 'cut')
+    return Object.fromEntries(
+      VOICE_ORDER.map(voice => [voice, hits[voice].filter(h => h.step === 0).map(h => (ALFAIA.includes(voice) ? hit(0, 1, GOLPE) : h))]),
+    );
+  if (scene.rufadaOut && barInScene === scene.bars - 1) {
+    // before the second head enters, the low head rolls alone
+    const roll = rufada(SCENE_RUFADA_FROM, STEPS_PER_BAR - 1, 0, scene.voices(barInScene).includes('high'));
+    for (const voice of ALFAIA) hits[voice] = [...hits[voice].filter(h => h.step < SCENE_RUFADA_FROM), ...roll[voice]];
   }
-  return phraseHits(scene.phrase(barInScene));
+  return hits;
 }
 
 // ---------- the show script ----------
@@ -97,7 +167,7 @@ const always = value => () => value;
 const entering = [];
 const adds = (id, voices, lanes = ['low', ...voices]) => {
   entering.push(...voices);
-  return { id, bars: 8, voices: always([...entering]), lanes };
+  return { id, bars: 8, voices: always([...entering]), lanes, rufadaOut: true, landsOnGolpe: true };
 };
 
 const SCENE_LIST = [
@@ -109,10 +179,18 @@ const SCENE_LIST = [
   adds('palmas', ['palmas']),
   adds('agogoAbe', ['agogo', 'abe'], ['agogo', 'abe']),
   adds('caixa', ['caixa'], ['caixa', ...ALFAIA]),
-  { id: 'phrases', bars: PHRASE_BARS * PHRASE_ORDER.length, phrase: bar => PHRASE_ORDER[Math.floor(bar / PHRASE_BARS)], lanes: ALFAIA },
-  { id: 'toque', bars: 16, phrase: always('toque'), pattern: 'toque', lanes: ALFAIA, named: true },
+  adds('atabaques', ATABAQUES, ['low', ...ATABAQUES]),
+  {
+    id: 'phrases',
+    bars: PHRASE_BARS * PHRASE_ORDER.length,
+    phrase: bar => PHRASE_ORDER[Math.floor(bar / PHRASE_BARS)],
+    lanes: ALFAIA,
+    rufadaOut: true,
+    landsOnGolpe: true,
+  },
+  { id: 'toque', bars: 16, phrase: always('toque'), pattern: 'toque', lanes: ALFAIA, named: true, landsOnGolpe: true },
   { id: 'rufo', bars: 4, mode: always('roll'), lanes: ALFAIA },
-  { id: 'finale', bars: 8, mode: bar => (bar === 7 ? 'cut' : 'normal'), lanes: ALFAIA, isEnd: true },
+  { id: 'finale', bars: 8, mode: bar => (bar === 7 ? 'cut' : 'normal'), lanes: ALFAIA, isEnd: true, landsOnGolpe: true },
 ];
 
 // How the background behaves in each scene (the keys src/rhythms/maracatu.js documents): slower,
@@ -126,6 +204,7 @@ const SCENE_LOOKS = {
   palmas: { zoom: 0.5, rot: 0.12, hue: 100, keep: 0.92, seg: 10, warp: 0.9, speed: 0.7, pal: 0.4 },
   agogoAbe: { zoom: 0.4, rot: -0.3, hue: 90, keep: 0.94, seg: 10, warp: 0.7, speed: 0.6, pal: 0.45 },
   caixa: { zoom: 0.8, rot: 0.2, hue: 120, keep: 0.93, seg: 12, warp: 1.1, speed: 0.8, pal: 0.5 },
+  atabaques: { zoom: 0.9, rot: -0.22, hue: 110, keep: 0.93, seg: 12, warp: 1.1, speed: 0.8, pal: 0.55 },
   phrases: { zoom: 1.0, rot: -0.18, hue: 70, keep: 0.94, seg: 7, warp: 1.2, speed: 0.9, pal: 0.6 },
   toque: { zoom: 1.4, rot: 0.3, hue: 140, keep: 0.95, seg: 9, warp: 1.4, speed: 1.2, pal: 0.7 },
   rufo: { zoom: 1.6, rot: -0.35, hue: 160, keep: 0.95, seg: 16, warp: 1.5, speed: 1.4, pal: 0.8 },
@@ -134,13 +213,46 @@ const SCENE_LOOKS = {
 
 // ---------- sound: recorded instruments in the studio (src/studio.js) ----------
 // Real recordings (CC0) with several takes per stroke; sources in CREDITS.md, choices in
-// docs/rhythms/studio.md. The low head leads; the ganzá swings its off-beat sixteenths about 56 %.
-const STEP_MS = (60 / BPM / STEPS_PER_BEAT) * 1000;
+// docs/rhythms/coco.md and docs/rhythms/studio.md. The low head leads; the ganzá swings its
+// off-beat sixteenths about 56 %.
+const STEP_SECONDS = 60 / BPM / STEPS_PER_BEAT;
+const STEP_MS = STEP_SECONDS * MS_PER_SECOND;
 const GANZA_LILT = 0.12;
 const HIGH_HEAD_LILT = 0.06;
 // The second head is the alfaia's answer recordings tuned up: a tighter, higher skin.
 const SECOND_HEAD_RATE = 1.26;
 const AGOGO_HIGH_RATE = 1.19; // the high bell: the same bell recording tuned up
+const RUFADA_GAIN = 0.8; // a rufada stroke sits under the phrase strokes
+const ROLL_STROKES = 2; // each rufada sixteenth is two 32nd strokes of its head
+
+// The coco's own recordings, by their place in their group of tools/prepare-takes.mjs: one take
+// each, so its round robin is three tunings of it (docs/research/human-feel.md, rule 3), never one
+// identical repeat.
+const take = (group, index) => takes(group)[index];
+const ROBIN_RATES = [1, 0.985, 1.015]; // about ±26 cents
+const tuned = one => ROBIN_RATES.map(rate => ({ ...one, rate: (one.rate ?? 1) * rate }));
+const PANDEIRO = {
+  couro: take('pandeiro-grave', 1),
+  platinela: take('pandeiro-platinela', 0),
+  seco: take('pandeiro-grave', 2),
+  grave: take('pandeiro-grave', 0),
+};
+const PALMAS = { uma: take('palmas', 0), roda: take('palmas', 1), abafada: take('palmas', 2), pulseira: take('palmas', 3) };
+const PALMAS_HANDS = [4, 5]; // the other clap recordings: more hands in the roda
+const RUM = take('atabaque-grave', 6);
+const RUMPI = take('atabaque-agudo', 6);
+const LE = take('atabaque-agudo', 7);
+const CONGA = takes('atabaque-grave').slice(0, 6); // a little higher than the rum: the rumpi's other takes
+const QUINTO = takes('atabaque-agudo').slice(0, 6); // higher again: the lé's other takes
+export const DEFAULT_PANDEIRO = 'couro';
+export const DEFAULT_PALMAS = 'roda';
+/** The palmas of one pick: the roda is many hands, so it takes every group clap in turn. */
+const palmasTakes = (option = DEFAULT_PALMAS) =>
+  option === DEFAULT_PALMAS ? [PALMAS.roda, ...PALMAS_HANDS.map(i => take('palmas', i))] : tuned(PALMAS[option]);
+/** The alfaia's strokes: a rufada sixteenth is two strokes a 32nd apart; a golpe is a full stroke. */
+const alfaiaShape = tone =>
+  tone === RUFADA ? { stroke: 'hit', notes: Array(ROLL_STROKES).fill(null), strum: STEP_SECONDS / ROLL_STROKES, gain: RUFADA_GAIN } : { stroke: 'hit' };
+
 const STUDIO = {
   room: 'sala-pequena',
   roomLevel: 0.8,
@@ -152,12 +264,13 @@ const STUDIO = {
       gain: 1.1,
       send: 0.12,
       bright: [900, 10000],
+      shape: alfaiaShape,
       strokes: () => ({
         hit: [
           { file: 'alfaia-deep-main', layer: 0.9 },
           { file: 'alfaia-deep-click-main', layer: 0.9 },
           { file: 'alfaia-deep-short-main', layer: 0.5 },
-          ...takes(['zabumba-aberto', { gain: 0.8 }]).filter(take => take.layer >= 0.8),
+          ...takes(['zabumba-aberto', { gain: 0.8 }]).filter(t => t.layer >= 0.8),
         ],
       }),
     },
@@ -169,6 +282,7 @@ const STUDIO = {
       send: 0.14,
       template: lilt(STEPS_PER_BAR, STEP_MS, HIGH_HEAD_LILT),
       ghosts: [{ step: 7, velocity: 0.28, probability: 0.6 }], // a soft pick-up into the next bar, most bars
+      shape: alfaiaShape,
       strokes: () => ({
         hit: ['alfaia-deep-answer', 'alfaia-deep-click-answer', 'alfaia-deep-short-answer', 'alfaia-dry-body-answer'].map(file => ({
           file,
@@ -208,10 +322,11 @@ const STUDIO = {
       gain: 0.6,
       pan: -0.25,
       send: 0.18,
-      strokes: () => ({ grave: takes('pandeiro-grave'), jingle: takes('pandeiro-platinela') }),
-      shape: tone => ({ stroke: tone === 'jingle' ? 'jingle' : 'grave' }),
+      // the pick plays the strokes on the beats; the platinelas between them are always the jingles
+      strokes: choice => ({ pele: tuned(PANDEIRO[choice.pandeiro ?? DEFAULT_PANDEIRO]), jingle: takes('pandeiro-platinela') }),
+      shape: tone => ({ stroke: tone === 'jingle' ? 'jingle' : 'pele' }),
     },
-    palmas: { seed: 27, role: 'follower', gain: 0.9, pan: 0.15, send: 0.35, strokes: () => ({ hit: takes('palmas') }) },
+    palmas: { seed: 27, role: 'follower', gain: 0.9, pan: 0.15, send: 0.35, strokes: choice => ({ hit: palmasTakes(choice.palmas) }) },
     agogo: {
       seed: 28,
       role: 'follower',
@@ -221,17 +336,44 @@ const STUDIO = {
       strokes: () => ({ low: [{ file: 'agogo-short-bell' }], high: [{ file: 'agogo-short-bell', rate: AGOGO_HIGH_RATE }] }),
       shape: tone => ({ stroke: tone === 'low' ? 'low' : 'high' }),
     },
+    // the trio sits around the low head: rum left, lé right
+    rum: { seed: 29, role: 'follower', gain: 0.85, pan: -0.3, send: 0.16, bright: [1200, 12000], strokes: () => ({ hit: tuned(RUM) }) },
+    rumpi: { seed: 30, role: 'follower', gain: 0.7, pan: 0.05, send: 0.16, strokes: () => ({ hit: [RUMPI, ...CONGA] }) },
+    le: { seed: 31, role: 'follower', gain: 0.6, pan: 0.35, send: 0.18, strokes: () => ({ hit: [LE, ...QUINTO] }) },
   },
 };
-const SOUND_CHOICES = recordedChoices(STUDIO, [
-  ['alfaia', 'alfaia', ALFAIA, 'alfaia gravada'],
-  ['caixa', 'caixa', ['caixa'], 'caixa gravada'],
-  ['ganza', 'ganzá', ['ganza'], 'ganzá gravado'],
-  ['abe', 'abê', ['abe'], 'abê gravado'],
-  ['agogo', 'agogô', ['agogo'], 'agogô gravado'],
-  ['pandeiro', 'pandeiro', ['pandeiro'], 'pandeiro gravado'],
-  ['palmas', 'palmas', ['palmas'], 'palmas gravadas'],
-]);
+
+/** A sound choice of the viewer's: four recordings, as the maracatu caixa offers. */
+const pickedChoice = (id, label, defaultOption, options) => ({
+  id,
+  label,
+  defaultOption,
+  preview: [id],
+  files: option => studioFiles(STUDIO, [id], { [id]: option }),
+  options,
+});
+const SOUND_CHOICES = [
+  ...recordedChoices(STUDIO, [
+    ['alfaia', 'alfaia', ALFAIA, 'alfaia gravada'],
+    ['caixa', 'caixa', ['caixa'], 'caixa gravada'],
+    ['ganza', 'ganzá', ['ganza'], 'ganzá gravado'],
+    ['abe', 'abê', ['abe'], 'abê gravado'],
+    ['agogo', 'agogô', ['agogo'], 'agogô gravado'],
+  ]),
+  pickedChoice('pandeiro', 'pandeiro', DEFAULT_PANDEIRO, [
+    ['couro', 'pandeiro de couro'],
+    ['platinela', 'pandeiro de platinela'],
+    ['seco', 'pandeiro seco'],
+    ['grave', 'pandeiro grave'],
+  ]),
+  pickedChoice('palmas', 'palmas', DEFAULT_PALMAS, [
+    ['roda', 'palmas da roda'],
+    ['uma', 'uma palma'],
+    ['abafada', 'palma abafada'],
+    ['pulseira', 'palma com pulseira'],
+  ]),
+  ...recordedChoices(STUDIO, [['atabaque', 'atabaque', ATABAQUES, 'rum, rumpi e lé']]),
+];
 
 // ---------- copy ----------
 const DRUMMING_INSTRUMENTS = new Set(VOICE_ORDER.map(voice => VOICES[voice].instrument)).size;
@@ -257,10 +399,16 @@ const READ = {
   phrases: 'frases',
   sameTempo: 'andamento',
   sameTempoValue: `${BPM} bpm, o mesmo`,
-  hitsPerBar: 'batidas / semicolcheias',
+  rufada: 'rufada',
+  rufadaValue: 'as duas peles em fusas, até o golpe',
   bars: 'compassos',
   howItEnds: 'como termina',
   rufoAndCut: 'rufo e corte',
+  rum: 'rum · grave',
+  rumpi: 'rumpi · médio',
+  le: 'lé · agudo',
+  trio: 'atabaques',
+  leadVaries: 'o rum varia a cada 2 compassos',
 };
 const COPY = {
   name: 'Coco da Xambá',
@@ -268,7 +416,7 @@ const COPY = {
   description: 'Coco da Xambá, de Olinda: alfaia, ganzá, pandeiro, palmas e atabaques, um de cada vez e depois juntos, com som de instrumentos reais.', // the page's search and preview description
   feminineInstruments: ['alfaia', 'caixa', 'palmas'],
   scenes: {
-    intro: { chip: 'Introdução', eyebrow: 'Nação Xambá, Olinda', title: 'Coco da Xambá' },
+    intro: { chip: 'Introdução', eyebrow: 'rufadas de alfaia', title: 'Coco da Xambá' },
     alfaia: { chip: 'Alfaia', eyebrow: 'pele grave nas cabeças do tempo', title: 'Alfaia' },
     heads: { chip: 'Duas peles', eyebrow: 'segunda pele no contratempo', title: 'Duas peles' },
     ganza: { chip: 'Ganzá', eyebrow: 'entra', title: 'Ganzá' },
@@ -276,16 +424,29 @@ const COPY = {
     palmas: { chip: 'Palmas', eyebrow: 'no contratempo', title: 'Palmas' },
     agogoAbe: { chip: 'Agogô e abê', eyebrow: 'entram', title: 'Agogô e abê' },
     caixa: { chip: 'Caixa', eyebrow: 'entra', title: 'Caixa' },
+    atabaques: { chip: 'Atabaques', eyebrow: 'rum, rumpi e lé', title: 'Atabaques' },
     phrases: { chip: 'Frases', eyebrow: `${PHRASE_ORDER.length} frases da alfaia`, title: 'Frases' },
     toque: { chip: 'Toque', eyebrow: 'mais batidas, o mesmo andamento', title: 'Toque' },
     rufo: { chip: 'Rufo', eyebrow: 'rufo final', title: 'Rufo' },
     finale: { chip: 'Final', eyebrow: '', title: 'Fim' },
   },
   patterns: { base: 'Base', dobrada: 'Dobrada', resposta: 'Resposta', corrida: 'Corrida', toque: 'Toque' },
-  voices: { low: 'pele grave', high: 'segunda pele', caixa: 'caixa', abe: 'abê', ganza: 'ganzá', pandeiro: 'pandeiro', palmas: 'palmas', agogo: 'agogô' },
+  voices: {
+    low: 'pele grave',
+    high: 'segunda pele',
+    caixa: 'caixa',
+    abe: 'abê',
+    ganza: 'ganzá',
+    pandeiro: 'pandeiro',
+    palmas: 'palmas',
+    agogo: 'agogô',
+    rum: 'rum',
+    rumpi: 'rumpi',
+    le: 'lé',
+  },
   instruments: { alfaia: 'alfaia' },
   hands: { low: READ.lowHead, high: READ.highHead },
-  centre: { roll: 'RUFO', cut: 'CORTE', end: 'FIM', offbeat: 'CONTRATEMPO' },
+  centre: { roll: 'RUFADA', cut: 'CORTE', end: 'FIM', offbeat: 'CONTRATEMPO' },
   read: READ,
 };
 
@@ -295,11 +456,14 @@ const beatSeparator = step => (step % STEPS_PER_BEAT === STEPS_PER_BEAT - 1 && s
 const marks = (low, high) =>
   STEPS.map(
     step =>
-      (low.includes(step) ? `<b style="color:${ROLES.mainHand}">●</b>` : high.includes(step) ? `<b style="color:${ROLES.answerHand}">●</b>` : '·') +
+      (low.includes(step) ? `<b style="color:${VOICES.low.color}">●</b>` : high.includes(step) ? `<b style="color:${VOICES.high.color}">●</b>` : '·') +
       beatSeparator(step),
   ).join('');
-const phraseRow = key =>
-  `${label(COPY.patterns[key])}<span class="seq" data-inst="alfaia">${marks(PHRASES[key].low, PHRASES[key].high)}</span><span class="n" data-inst="alfaia">${T.hits(phraseHitCount(key))}</span>`;
+const dots = (steps, color) => STEPS.map(step => (steps.includes(step) ? `<b style="color:${color}">●</b>` : '·') + beatSeparator(step)).join('');
+const seqRow = (name, color, inst, markup, count) =>
+  `${label(name, color)}<span class="seq" data-inst="${inst}">${markup}</span><span class="n" data-inst="${inst}">${T.hits(count)}</span>`;
+const phraseRow = key => seqRow(COPY.patterns[key], undefined, 'alfaia', marks(PHRASES[key].low, PHRASES[key].high), phraseHitCount(key));
+const atabaqueRow = (voice, steps) => seqRow(T[voice], VOICES[voice].color, 'atabaque', dots(steps, VOICES[voice].color), steps.length);
 const entry = () => `<div data-entry></div>`;
 const allHits = phrase => [...phrase.low, ...phrase.high];
 
@@ -308,28 +472,31 @@ const LAYOUTS = {
     row(label(T.cycle), T.cycleValue(BAR_SECONDS.toFixed(2).replace('.', ','))) +
     row(label(T.sixteenth), T.milliseconds(Math.round((BAR_SECONDS / STEPS_PER_BAR) * MS_PER_SECOND))) +
     row(label(T.meter), T.meterValue) +
-    row(label(T.instruments), DRUMMING_INSTRUMENTS),
+    row(label(T.rufada), T.rufadaValue, 'alfaia'),
   alfaia: entry,
   heads: () =>
-    stats('two', stat(BEAT_STEPS.length, T.beatHeads, ROLES.mainHand), stat(STEPS_PER_BAR - BEAT_STEPS.length, T.offbeats, ROLES.answerHand)) +
+    stats('two', stat(BEAT_STEPS.length, T.beatHeads, VOICES.low.color), stat(STEPS_PER_BAR - BEAT_STEPS.length, T.offbeats, VOICES.high.color)) +
     `<div class="notation tight">${phraseRow('base')}</div>`,
   ganza: entry,
   pandeiro: entry,
   palmas: entry,
   agogoAbe: entry,
   caixa: entry,
+  atabaques: () =>
+    `<div class="notation tight">${atabaqueRow('rum', RUM_PHRASES[0].steps)}${atabaqueRow('rumpi', ATABAQUE.rumpi.steps)}${atabaqueRow('le', ATABAQUE.le.steps)}</div>` +
+    row(label(T.trio), T.leadVaries, 'atabaque'),
   phrases: () => `<div class="notation tight">${PHRASE_ORDER.map(phraseRow).join('')}</div>${row(label(T.sameTempo), T.sameTempoValue)}`,
   toque: () => {
     const phrase = PHRASES.toque,
       all = allHits(phrase);
     return `${stats(
       'small',
-      stat(phrase.low.length, T.hitsLow, ROLES.mainHand),
-      stat(phrase.high.length, T.hitsHigh, ROLES.answerHand),
+      stat(phrase.low.length, T.hitsLow, VOICES.low.color),
+      stat(phrase.high.length, T.hitsHigh, VOICES.high.color),
       stat(`${all.filter(isOffbeat).length}<small>/${all.length}</small>`, T.onOffbeat, COLORS.fg),
     )}<div class="notation tight">${phraseRow('base')}${phraseRow('toque')}</div>`;
   },
-  rufo: () => row(label(T.hitsPerBar), `${STEPS_PER_BAR} / ${STEPS_PER_BAR}`, 'alfaia') + row(label(T.sameTempo), T.sameTempoValue),
+  rufo: () => row(label(T.rufada), T.rufadaValue, 'alfaia') + row(label(T.sameTempo), T.sameTempoValue),
   finale: show =>
     stats(
       '',
@@ -338,10 +505,10 @@ const LAYOUTS = {
       stat(show.totalBars, T.bars, COLORS.fg),
     ) + row(label(T.howItEnds), T.rufoAndCut),
 };
-const ALFAIA_FOCUS = new Set(['alfaia', 'heads', 'phrases', 'toque', 'rufo']);
+const FOCUS = { alfaia: 'alfaia', heads: 'alfaia', phrases: 'alfaia', toque: 'alfaia', rufo: 'alfaia', atabaques: 'atabaque' };
 
 /** The readout for a scene: its markup, no score (the score renderer is written for 4/4), and its focus. */
-const readout = (scene, show) => ({ markup: LAYOUTS[scene.id](show), score: null, focus: ALFAIA_FOCUS.has(scene.id) ? 'alfaia' : '' });
+const readout = (scene, show) => ({ markup: LAYOUTS[scene.id](show), score: null, focus: FOCUS[scene.id] || '' });
 
 export const COCO_XAMBA = {
   id: 'coco',
@@ -353,7 +520,7 @@ export const COCO_XAMBA = {
   shapeVoices: ['agogo', 'high', 'low'],
   barHits,
   sceneDefaults: { phrase: always('base') },
-  sounds: studioSounds(STUDIO, SOUND_CHOICES, 'caixa'), // every instrument plays its basic part there
+  sounds: studioSounds(STUDIO, SOUND_CHOICES, 'atabaques'), // every instrument plays its basic part there
   scenes: SCENE_LIST,
   looks: SCENE_LOOKS,
   readout,

@@ -557,13 +557,13 @@ test('?ritmo=forro shows the forró on an 8-step wheel, over its own background,
   }
 });
 
-test('?ritmo=coco moves to /coco and shows the coco on an 8-step wheel, its 12 scenes and the selector', async () => {
+test('?ritmo=coco moves to /coco and shows the coco on an 8-step wheel, its 13 scenes and the selector', async () => {
   const { page, errors } = await openPage(DESKTOP, { query: '?ritmo=coco' });
   assert.equal(await page.evaluate(() => location.pathname + location.search), '/coco');
   const steps = await page.$$eval('#scope text[fill-opacity]', texts => texts.map(t => t.textContent).filter(t => /^\d+$/.test(t)));
   assert.equal(steps.length, 8);
-  assert.equal(await page.evaluate(() => window.baque.TOTAL), 104);
-  assert.equal(await page.$$eval('#scenes li', items => items.length), 12);
+  assert.equal(await page.evaluate(() => window.baque.TOTAL), 112);
+  assert.equal(await page.$$eval('#scenes li', items => items.length), 13);
   assert.deepEqual(await page.$$eval('.rhythms-side a', links => links.map(a => [a.textContent, a.getAttribute('aria-current')])), [
     ['maracatu', null],
     ['coco', 'true'],
