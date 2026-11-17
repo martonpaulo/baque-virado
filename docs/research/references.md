@@ -75,4 +75,6 @@ The brega has five references: the owner said every song named counts (2026-11-1
 1. «Viciou na Flauta», MC Reino, Barca na Batida, Chefe Coringa and MC Mari (https://www.youtube.com/watch?v=Zju5BjqEgTY).
 2. «Tuf Tuf Pof Pof», MC Reino. [search](https://www.youtube.com/results?search_query=MC+Reino+Tuf+Tuf+Pof+Pof)
 3. «Dally», Shevchenko e Elloco. [search](https://www.youtube.com/results?search_query=Shevchenko+e+Elloco+Dally)
-4. «Abusado», MC Cego. [search](https://www.youtube.com/results?search_query=MC+Cego+Abusado+brega+funk)
+4. A song by MC Cego Abusado, not yet named: the owner wrote «MC Cego - Abusado», and the catalogue
+   lists «MC Cego Abusado» as the artist's name, so which song is an open question for the owner.
+   [search](https://www.youtube.com/results?search_query=MC+Cego+Abusado+brega+funk)

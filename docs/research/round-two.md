@@ -152,15 +152,26 @@ audio model may serve as a sketch pad to compare ideas, if the owner wants to tr
 
 ## Order of work
 
-1. The owner sends the full recordings ([#48](https://github.com/martonpaulo/baque-virado/issues/48)).
-2. Section maps and per-song facts for the four references of each rhythm; the common elements,
-   checked against the literature; the three to five elements each show exalts
+The owner agreed to this order on 2026-11-17.
+
+1. **Hook and form first, timbre after.** They change a listener's reaction the most and need no
+   new recording.
+2. **One rhythm at a time, until the owner approves it by ear.** The bregafunk is first: its hook
+   is the beat, every sound is synthesized in the page, and it waits for no recording.
+3. **A short cut that loops**, 20 to 40 seconds, as soon as a rhythm is approved.
+
+Before a rhythm's notes are written:
+
+1. Its full recordings are in the lab ([#48](https://github.com/martonpaulo/baque-virado/issues/48)).
+2. Section maps and per-song facts for its references; the common elements, checked against the
+   literature; the three to five elements the show exalts
    ([#47](https://github.com/martonpaulo/baque-virado/issues/47)).
-3. The owner approves each rhythm's elements and form before any note is written.
-4. Background playback ([#45](https://github.com/martonpaulo/baque-virado/issues/45)) and
-   transitions ([#46](https://github.com/martonpaulo/baque-virado/issues/46)) are engine and script
-   work that every rhythm shares; they come before the rewrites.
-5. One rhythm at a time, at most two agents, audio sent to the owner before each deploy.
+3. The owner approves the elements and the form.
+
+Background playback ([#45](https://github.com/martonpaulo/baque-virado/issues/45)), transitions
+([#46](https://github.com/martonpaulo/baque-virado/issues/46)) and the graphics
+([#49](https://github.com/martonpaulo/baque-virado/issues/49)) are work every rhythm shares. At most
+two agents run at once, and the rendered audio goes to the owner before each deploy.
 
 ## What the owner answered
 
