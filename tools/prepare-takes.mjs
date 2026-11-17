@@ -290,6 +290,26 @@ export const GROUPS = {
       1,
     ),
   },
+  // the bregafunk hook: a concert flute, tongued short (two dynamics, two round robins) and held with
+  // vibrato. VSCO names these an octave below where they sound; `hit: 0` trims the breath before the note.
+  'flauta-stac': {
+    pitched: true,
+    length: 0.45,
+    takes: ['A3', 'C4', 'E4', 'A4'].flatMap(note =>
+      [
+        ['v2_rr1', 0.6],
+        ['v3_rr1', 0.9],
+        ['v3_rr2', 0.9],
+      ].map(([tag, layer]) => v(`Woodwinds/Flute/stac/LDFlute_stac_${note}_${tag}.wav`, layer, { label: note[0] + (Number(note[1]) + 1), hit: 0 })),
+    ),
+  },
+  'flauta-sus': {
+    pitched: true,
+    length: 0.9,
+    takes: ['A3', 'C4', 'E4', 'A4'].map(note =>
+      v(`Woodwinds/Flute/susvib/LDFlute_susvib_${note}_v1_1.wav`, 0.8, { label: note[0] + (Number(note[1]) + 1), hit: 0 }),
+    ),
+  },
   'atabaque-grave': {
     length: 0.7,
     takes: [

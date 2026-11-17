@@ -34,6 +34,7 @@ test('every planned take exists, is retuned sanely and sits near its place', () 
       assert.ok(Math.abs(event.offset) < MAX_OFFSET + 0.5, `${rhythm.id} ${event.voice} offset ${event.offset}`);
       for (const source of event.sources) {
         assert.ok(files.has(source.file), `${rhythm.id} ${event.voice}: ${source.file} is not in the bank`);
+        if (rhythm.sounds.synth?.[source.file]) continue; // rendered in the page: no file, and its own test covers it
         assert.ok(existsSync(soundPath(source.file, '.m4a')) && existsSync(soundPath(source.file, '.wav')), source.file);
         assert.ok(source.rate > 1 / MAX_RATE && source.rate < MAX_RATE, `${rhythm.id} ${event.voice} ${source.file} rate ${source.rate}`);
       }
