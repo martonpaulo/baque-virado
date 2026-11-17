@@ -39,17 +39,16 @@ Measured on the reference's separated stems (drums, bass, other) with onset dete
 note transcription and spectrograms. The show takes groove, density, register, instrumentation and
 balance from it, never its melody.
 
-| Fact                            | Reference                                            | The show before        | The show now                        |
-| :------------------------------ | :--------------------------------------------------- | :--------------------- | :---------------------------------- |
-| Drum hits per bar of 170        | bumbo 1 and 9, lata 7 and 13, a clap with the 9      | the cell twice per bar | the reference's cell                |
-| Chimbal                         | a few strokes on the eighths                         | all 16 sixteenths      | 4 strokes, a roll at phrase ends    |
-| Onsets per second               | about 5                                              | about 10               | about 5 to 6                        |
-| Bumbo                           | a click, a fast pitch drop, a 0.35 s tail near 57 Hz | a 48 Hz sine, no click | synthesized to that shape           |
-| Bass                            | few clean harmonics, strongest at the octave         | a 32 Hz sine           | sine, octave and third, light drive |
-| Lata                            | a body near 450 Hz under a short noise burst         | cans, buckets and pots | synthesized to that shape           |
-| Hook                            | a flute: high, short notes, repeated notes, slides   | a trumpet              | a recorded flute                    |
-| Mode                            | A minor with a flat second (A Phrygian)              | A minor                | A Phrygian                          |
-| Melodic parts against the drums | about 8 dB under                                     | about 3 dB under       | about 8 dB under                    |
+| Fact                     | Reference                                            | The show before        | The show now                        |
+| :----------------------- | :--------------------------------------------------- | :--------------------- | :---------------------------------- |
+| Drum hits per bar of 170 | bumbo 1 and 9, lata 7 and 13, a clap with the 9      | the cell twice per bar | the reference's cell                |
+| Chimbal                  | a few strokes on the eighths                         | all 16 sixteenths      | 4 strokes, a roll at phrase ends    |
+| Onsets per second        | about 5                                              | about 10               | about 5 to 6                        |
+| Bumbo                    | a click, a fast pitch drop, a 0.35 s tail near 57 Hz | a 48 Hz sine, no click | synthesized to that shape           |
+| Bass                     | few clean harmonics, strongest at the octave         | a 32 Hz sine           | sine, octave and third, light drive |
+| Lata                     | a body near 450 Hz under a short noise burst         | cans, buckets and pots | synthesized to that shape           |
+| Hook                     | a flute: high, short notes, repeated notes, slides   | a trumpet              | a recorded flute                    |
+| Mode                     | A minor with a flat second (A Phrygian)              | A minor                | A Phrygian                          |
 
 The research's «bumbo on 1 and 9, lata on 4, 7, 12 and 15» wrote the dembow cell at twice the
 reference's speed: in the reference the cell fills the whole 1.41 s bar. That halves the density,
