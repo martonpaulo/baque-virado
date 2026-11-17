@@ -6,7 +6,7 @@ removed on 2026-11-17.
 
 How to use this list:
 
-- A rhythm has four references and they weigh the same: none is «the main one» and none is only a
+- A rhythm has four references (the brega has five) and they weigh the same: none is «the main one» and none is only a
   «similar song». What the four share is the rhythm; what only one has is that song.
 - Listen to, or measure, the whole of each recording, every section of it (introduction, verse,
   chorus, breaks, solos, ending), not a thirty-second excerpt.
@@ -62,8 +62,7 @@ whole video, especially from 18:00.
 
 ## Brega (`/brega`)
 
-The owner counts four references for the brega and has named five songs: which four count is an open
-question for the owner.
+The brega has five references: the owner said every song named counts (2026-11-17).
 
 1. «Uma Mulher É Igual uma Flor», Banda Musa do Calipso; other bands' versions count too. [search](https://www.youtube.com/results?search_query=Banda+Musa+Uma+Mulher+%C3%89+Igual+uma+Flor)
 2. «Diz na Minha Cara», as Banda Lapada played it on the television show SuperStar (Globo); other versions count too. [search](https://www.youtube.com/results?search_query=Banda+Lapada+Diz+na+Minha+Cara+SuperStar)

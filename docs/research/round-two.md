@@ -13,7 +13,8 @@ here is built yet: the owner asked to record, research and understand first, and
 - [Scene transitions](#scene-transitions)
 - [AI music software: what exists](#ai-music-software-what-exists)
 - [Order of work](#order-of-work)
-- [Open questions for the owner](#open-questions-for-the-owner)
+- [What the owner answered](#what-the-owner-answered)
+- [What is still missing](#what-is-still-missing)
 - [Unfinished work kept](#unfinished-work-kept)
 
 ## What the owner asked
@@ -100,8 +101,8 @@ Options to weigh when the code is written (none chosen yet):
 | Pause the show when the page is hidden, resume on return    | Never plays wrong                                       | No listening with the screen off                                                |
 | Play the offline render through a media element when hidden | Real background and lock-screen playback, with controls | Rendering a show takes minutes today; the choices and volumes are fixed in it   |
 
-What the page should do in the background is the owner's choice: keep playing (as a music app) or
-pause (as a video). It is asked in [#45](https://github.com/martonpaulo/baque-virado/issues/45).
+The owner chose: in the background a show pauses, as a video does
+([#45](https://github.com/martonpaulo/baque-virado/issues/45), D35).
 
 ## Scene transitions
 
@@ -160,10 +161,78 @@ audio model may serve as a sketch pad to compare ideas, if the owner wants to tr
    work that every rhythm shares; they come before the rewrites.
 5. One rhythm at a time, at most two agents, audio sent to the owner before each deploy.
 
-## Open questions for the owner
+## What the owner answered
 
-- The brega has five songs named and the owner counts four: which four?
-- In the background, should a show keep playing or pause?
+- **Brega:** all five songs named count.
+- **In the background a show pauses, as a video does**, and resumes where it stopped when the viewer
+  comes back ([#45](https://github.com/martonpaulo/baque-virado/issues/45), D35).
+
+## What is still missing
+
+The agent's own reading on 2026-11-17, after the first round, asked by the owner in two roles. It
+is judgement from the measurements, the references' facts and knowledge of the genres; nobody has
+listened, so each point is a hypothesis for the owner to accept or throw out. The maracatu is not
+part of it.
+
+### As a producer who only releases hits
+
+What every show lacks:
+
+1. **A hook.** The tunes were written to match style facts (density, register, harmony), so they
+   are correct and forgettable. A hit has one short idea a person hums after one hearing, stated in
+   the first ten seconds and brought back.
+2. **Someone singing.** Every one of these genres is sung, and the shows are instrumental by the
+   owner's rule. So one lead instrument has to take the singer's place and phrase like a voice
+   (breath, call and answer, a refrain), not play a line among others.
+3. **A shape.** Tension and release: an opening that grabs, a build, a break, a drop, a last chorus
+   bigger than the first, an ending that lands. The shows are a row of scenes at one level.
+4. **Played phrases.** The parts are single recorded hits placed on a grid. A groove lives in what
+   a player does between the hits (ghost notes, drags, the push of a bellows, a horn fall). Short
+   recorded phrases or loops by real players would carry more than any amount of humanising.
+5. **Weight and loudness.** A finished master: low end you feel, glue, level near the references.
+
+Per rhythm:
+
+| Rhythm     | What makes the crowd react in the genre                                                                                                                                    | What the show lacks                                                                                                         |
+| :--------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :-------------------------------------------------------------------------------------------------------------------------- |
+| Frevo      | The fanfare everyone knows by the second bar; brass and reeds answering each other at speed; the tarol's rolling rufo pushing; a key change that lifts; the final chord    | A section sound (four or five players per part, not one sample); the bite and falls of the brass; a driving tarol; the lift |
+| Forró      | The sanfona's opening riff, which the room sings; the resfolego of the bellows; zabumba and triângulo swinging together; a refrain as simple as a song                     | A sanfona that breathes and leads as a singer; an opening riff as the hook; percussion under the tune, not over it          |
+| Manguebeat | One riff of bass or guitar with an identity; alfaias as a wall of several drums; a snare with ghost notes in the pocket; stops and re-entries; noise and samples as colour | A riff to hum; the mass of many alfaias; dynamics between verse-level and chorus-level energy                               |
+| Brega      | The keyboard or sax solinho of the introduction; the weeping chorused guitar; dramatic breques before the chorus; the last chorus a tone higher                            | A real drum kit; a lead timbre with character; the introduction riff as the hook; drama in the stops                        |
+| Bregafunk  | The beat itself is the hook: the lata's pattern, the tuned grave with its slides, a two-bar riff repeated to hypnosis, silence before the drop                             | Sound design with punch and grit; a two-bar riff in place of an eight-bar tune; space; a drop that hits                     |
+| Coco       | The pisada (feet on the floor), palmas and the roda answering; the ganzá leading; the bombo's viradas; the roda heating up                                                 | The feet and the room; an answer to the call that is not a voice; a build; less brightness, more drum body                  |
+
+A question this raises for the owner: wordless voices (a shout, a chorus on «ê», a chopped syllable)
+are part of the sound of several of these genres and would give back much of what the rule against
+voice removes. The rule stands until the owner says otherwise.
+
+### As a maker of catchy music videos
+
+What every show lacks:
+
+1. **The first three seconds.** A show opens on a title and a quiet wheel. A clip opens on its
+   strongest picture and sound together.
+2. **One moment to share.** A drop where the picture answers the sound with everything it has.
+3. **A short cut.** Two minutes is long for a feed: a 20 to 40 second version of each show, built
+   around the hook and the drop, that loops cleanly from its end to its start.
+4. **A figure.** Something that moves as a body moves: a dancer's silhouette, feet, hands, an
+   umbrella. The wheel shows the rhythm; nothing shows what the rhythm does to people.
+5. **Camera.** Pushes, cuts and shakes on the accents, a new look every four or eight bars.
+6. **Fewer, bigger words.** One idea on screen at a time, set large, moving with the beat.
+7. **An end card.** The rhythm's name and the site, held long enough to read.
+
+Per rhythm, pictures that belong to it:
+
+| Rhythm     | Picture                                                                                            |
+| :--------- | :------------------------------------------------------------------------------------------------- |
+| Frevo      | The sombrinha's colours spinning; confetti and streamers bursting on brass hits; a passista's leap |
+| Forró      | A lamp-lit sala de reboco; the bellows opening and closing; a couple turning as one silhouette     |
+| Manguebeat | The antenna in the mud, crabs, a worn video-tape look; the picture hit by each alfaia stroke       |
+| Brega      | Neon, a mirror ball, a slow push in; a heart that breaks on the breque                             |
+| Bregafunk  | A paredão's speaker cones pumping; passinho footwork in silhouette; hard cuts and bold captions    |
+| Coco       | The roda seen from above; feet raising dust; hands meeting on the off-beat                         |
+
+Flashes stay within WCAG 2.3.1 and reduced motion is respected, as today.
 
 ## Unfinished work kept
 
