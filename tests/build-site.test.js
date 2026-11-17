@@ -26,6 +26,8 @@ test('every rhythm path answers 200 from the built site; a shipped one is the sh
       html
         .replace(/<title>.*<\/title>/, '')
         .replace(/<meta property="og:title"[^>]*>/, '')
+        .replace(/<meta (?:name|property)="(?:og:)?description"[^>]*>/g, '')
+        .replace(/<script type="application\/ld\+json">.*<\/script>/, '')
         .replace(/https:\/\/batuque\.martonpaulo\.com\/[a-z-]*/g, '');
     assert.equal(showOnly(page('maracatu')), showOnly(index));
     // a rhythm being prepared: its name in the title, one line, the selector, and no show
@@ -84,6 +86,35 @@ test('a versioned build loads only its own modules, stylesheet and sounds', () =
     }
     // the sounds take the version from the URL of src/audio.js
     assert.match(readFileSync(path.join(built[0][2], 'src/audio.js'), 'utf8'), /SOUND_EXTENSION\}\$\{BUILD_QUERY\}/);
+  } finally {
+    rmSync(parent, { recursive: true, force: true });
+  }
+});
+
+// #31: each path has its own title, description, address and structured data; the sitemap lists them.
+test('each rhythm path has its own description and structured data, and the sitemap lists every path', () => {
+  const parent = mkdtempSync(path.join(os.tmpdir(), 'baque-site-'));
+  const out = path.join(parent, 'site');
+  try {
+    buildSite(out);
+    const descriptions = new Set();
+    for (const id of ROUTES) {
+      const html = readFileSync(path.join(out, `${id}.html`), 'utf8');
+      const description = html.match(/<meta name="description" content="([^"]+)">/)[1];
+      assert.equal(html.match(/<meta property="og:description" content="([^"]+)">/)[1], description, id);
+      assert.match(html, /<title>[^<]+ · Batuque<\/title>/, id);
+      descriptions.add(description);
+      const data = html.match(/<script type="application\/ld\+json">(.*)<\/script>/);
+      if (data) assert.equal(JSON.parse(data[1]).url, `https://batuque.martonpaulo.com/${id}`, id);
+    }
+    assert.equal(descriptions.size, ROUTES.length, 'no two paths share a description');
+    const sitemap = readFileSync(path.join(out, 'sitemap.xml'), 'utf8');
+    assert.deepEqual(
+      [...sitemap.matchAll(/<loc>([^<]+)<\/loc>/g)].map(match => match[1]),
+      ['', ...ROUTES].map(id => `https://batuque.martonpaulo.com/${id}`),
+    );
+    for (const from of Object.keys(MOVED)) assert.doesNotMatch(sitemap, new RegExp(`/${from}<`));
+    assert.equal(readFileSync(path.join(out, 'robots.txt'), 'utf8'), 'User-agent: *\nAllow: /\n\nSitemap: https://batuque.martonpaulo.com/sitemap.xml\n');
   } finally {
     rmSync(parent, { recursive: true, force: true });
   }

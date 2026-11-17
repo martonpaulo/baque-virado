@@ -448,6 +448,7 @@ const READ = {
 const COPY = {
   name: 'forró pé-de-serra',
   selector: 'forró', // the rhythm selector's chip
+  description: 'Forró pé-de-serra: triângulo, zabumba e sanfona, um de cada vez e depois juntos, com o baião em 3 + 3 + 2.', // the page's search and preview description
   feminineInstruments: ['zabumba', 'sanfona', 'rabeca'], // "som da zabumba", "som do triângulo"
   scenes: {
     triangulo: { chip: 'Triângulo', eyebrow: 'forró pé-de-serra', title: 'Triângulo' },

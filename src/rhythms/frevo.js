@@ -580,6 +580,7 @@ const READ = {
 };
 const COPY = {
   name: 'frevo',
+  description: 'Frevo de rua: surdo, caixa, pandeiro, tuba, trombones, trompetes e saxofones, um de cada vez e depois juntos, com som de instrumentos reais.', // the page's search and preview description
   feminineInstruments: ['caixa', 'tuba'],
   scenes: {
     introducao: { chip: 'Introdução', eyebrow: 'frevo de rua', title: 'Frevo' },

@@ -265,6 +265,7 @@ const READ = {
 const COPY = {
   name: 'Coco da Xambá',
   selector: 'coco', // the rhythm selector's chip
+  description: 'Coco da Xambá, de Olinda: alfaia, ganzá, pandeiro, palmas e atabaques, um de cada vez e depois juntos, com som de instrumentos reais.', // the page's search and preview description
   feminineInstruments: ['alfaia', 'caixa', 'palmas'],
   scenes: {
     intro: { chip: 'Introdução', eyebrow: 'Nação Xambá, Olinda', title: 'Coco da Xambá' },

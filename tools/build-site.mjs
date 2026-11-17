@@ -22,16 +22,44 @@ const COPIED = ['index.html', '404.html', 'styles.css', 'src', 'vendor', 'social
 const escapeHtml = text => text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 const capitalized = text => text.charAt(0).toUpperCase() + text.slice(1);
 
-/** index.html with the title, the social title and the address of one route. */
-function withRoute(html, { id, title, origin }) {
+/** index.html with the title, description, address, preview and structured data of one route (#31). */
+function withRoute(html, { id, title, description, origin }) {
   const fullTitle = escapeHtml(`${title} · ${SITE_NAME}`);
   const url = `${origin}/${id}`;
+  const text = escapeHtml(description);
+  const data = {
+    '@context': 'https://schema.org',
+    '@type': 'WebPage',
+    name: `${title} · ${SITE_NAME}`,
+    description,
+    url,
+    inLanguage: 'pt-BR',
+    about: { '@type': 'Thing', name: title },
+    isPartOf: { '@type': 'WebSite', name: SITE_NAME, url: `${origin}/` },
+  };
   return html
     .replace(/<title>[^<]*<\/title>/, `<title>${fullTitle}</title>`)
     .replace(/(<meta property="og:title" content=")[^"]*"/, `$1${fullTitle}"`)
+    .replace(/(<meta name="description" content=")[^"]*"/, `$1${text}"`)
+    .replace(/(<meta property="og:description" content=")[^"]*"/, `$1${text}"`)
     .replace(/(<link rel="canonical" href=")[^"]*"/, `$1${url}"`)
-    .replace(/(<meta property="og:url" content=")[^"]*"/, `$1${url}"`);
+    .replace(/(<meta property="og:url" content=")[^"]*"/, `$1${url}"`)
+    .replace(
+      /<script type="application\/ld\+json">.*<\/script>/,
+      `<script type="application/ld+json">${JSON.stringify(data).replace(/</g, '\\u003c')}</script>`,
+    );
 }
+
+/** The sitemap: the home page and every route's own address. Moved paths are left out. */
+export const sitemap = origin =>
+  `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+${['', ...ROUTES].map(id => `  <url><loc>${origin}/${id}</loc></url>`).join('\n')}
+</urlset>
+`;
+
+/** robots.txt: everything may be crawled, and the sitemap is named. */
+export const robots = origin => `User-agent: *\nAllow: /\n\nSitemap: ${origin}/sitemap.xml\n`;
 
 /** The page of a rhythm being prepared: index.html's head without the show's scripts, and a body with
  * the rhythm's name, one line and the selector. It works without JavaScript. */
@@ -120,13 +148,19 @@ export function buildSite(out, root = ROOT, version = '') {
   for (const id of ROUTES) {
     const rhythm = RHYTHMS.find(candidate => candidate.id === id);
     if (rhythm) {
-      writeFileSync(path.join(out, `${id}.html`), finish(withRoute(html, { id, title: capitalized(rhythm.copy.selector || rhythm.copy.name), origin })));
+      const title = capitalized(rhythm.copy.selector || rhythm.copy.name);
+      writeFileSync(path.join(out, `${id}.html`), finish(withRoute(html, { id, title, description: rhythm.copy.description, origin })));
     } else if (PREPARING[id]) {
-      writeFileSync(path.join(out, `${id}.html`), finish(withRoute(preparingPage(html, id), { id, title: PREPARING[id].name, origin })));
+      writeFileSync(
+        path.join(out, `${id}.html`),
+        finish(withRoute(preparingPage(html, id), { id, title: PREPARING[id].name, description: PREPARING[id].description, origin })),
+      );
     } else {
       throw new Error(`route ${id} has neither a rhythm package nor an entry in src/rhythms/preparing.js`);
     }
   }
+  writeFileSync(path.join(out, 'sitemap.xml'), sitemap(origin));
+  writeFileSync(path.join(out, 'robots.txt'), robots(origin));
   for (const [from, to] of Object.entries(MOVED)) writeFileSync(path.join(out, `${from}.html`), movedPage(to, origin));
 }
 

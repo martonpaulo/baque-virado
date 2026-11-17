@@ -409,6 +409,7 @@ const SCENE_COPY = {
 };
 const COPY = {
   name: 'bregafunk',
+  description: 'Bregafunk do Recife a 170 BPM: bumbo, lata em 3 + 3 + 2, chimbal e grave, camada por camada, até a batida completa.', // the page's search and preview description
   feminineInstruments: ['lata'], // "som da lata", "som do bumbo"
   scenes: SCENE_COPY,
   patterns: {},
