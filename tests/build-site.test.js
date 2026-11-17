@@ -40,3 +40,44 @@ test('every rhythm path answers 200 from the built site; a shipped one is the sh
     rmSync(parent, { recursive: true, force: true });
   }
 });
+
+// #35: after a deploy, a page loaded the new HTML with modules cached from the previous build.
+test('a versioned build loads only its own modules, stylesheet and sounds', () => {
+  const parent = mkdtempSync(path.join(os.tmpdir(), 'baque-site-'));
+  try {
+    const pages = version => {
+      const out = path.join(parent, version);
+      buildSite(out, undefined, version);
+      assert.equal(readFileSync(path.join(out, 'build.txt'), 'utf8'), `${version}\n`);
+      return ['index', ...ROUTES].map(id => [id, readFileSync(path.join(out, `${id}.html`), 'utf8'), out]);
+    };
+    const [a, b] = ['aaaaaaa', 'bbbbbbb'];
+    const built = pages(a);
+    pages(b);
+    for (const [id, html, out] of built) {
+      assert.doesNotMatch(html, new RegExp(b), id);
+      // every local script, module and stylesheet carries this build's version
+      const refs = [...html.matchAll(/(?:src|href)="((?:src\/|styles)[^"]*)"/g)].map(match => match[1]);
+      assert.ok(refs.length > 0, id);
+      for (const ref of refs) assert.ok(ref.endsWith(`?v=${a}`), `${id}: ${ref}`);
+      if (!html.includes('<script type="module"')) continue;
+      // the import map comes before any module, and every relative import inside src/ resolves to a
+      // module the map sends to this build
+      const mapAt = html.indexOf('<script type="importmap">');
+      assert.ok(mapAt >= 0 && mapAt < html.search(/<script type="module"|<link rel="modulepreload"/), id);
+      const { imports } = JSON.parse(html.match(/<script type="importmap">(.*?)<\/script>/)[1]);
+      for (const value of Object.values(imports)) assert.ok(value.endsWith(`?v=${a}`), value);
+      for (const module of Object.keys(imports)) {
+        const source = readFileSync(path.join(out, module), 'utf8');
+        for (const [, spec] of source.matchAll(/(?:from|import)\s*'(\.[^']+)'/g)) {
+          const target = new URL(spec, `https://site${module}`).pathname;
+          assert.ok(imports[target], `${module} imports ${target}, which the import map misses`);
+        }
+      }
+    }
+    // the sounds take the version from the URL of src/audio.js
+    assert.match(readFileSync(path.join(built[0][2], 'src/audio.js'), 'utf8'), /SOUND_EXTENSION\}\$\{BUILD_QUERY\}/);
+  } finally {
+    rmSync(parent, { recursive: true, force: true });
+  }
+});
