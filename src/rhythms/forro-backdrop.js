@@ -10,11 +10,15 @@ import { FORRO } from '../theme.js';
 import { hash } from '../util.js';
 
 const TAU = Math.PI * 2;
-// The sky: [stop, colour] from the wheel's rim outward. `dusk` (0 → 1 over the show) pulls the warm
+// The wheel's outer edge in wheel radii: its step numbers end there (src/scope.js: VIEWBOX_RADIUS /
+// OUTER, 135 / 112). Inside it the sky stays night, so the numbers and the dots keep 3:1 contrast;
+// the light starts just outside.
+const WHEEL_EDGE = 1.21;
+// The sky: [stop, colour] from the wheel's edge outward. `dusk` (0 → 1 over the show) pulls the warm
 // stops in toward the wheel, so the night widens.
 const SKY = {
   start: [
-    [0, FORRO.flame],
+    [0.04, FORRO.flame],
     [0.12, FORRO.ember],
     [0.42, FORRO.dusk],
     [0.7, FORRO.night],
@@ -23,10 +27,10 @@ const SKY = {
   reach: 3.2, // the gradient's outer edge, in wheel radii from the rim
   dim: 0.82, // the sky's opacity over the night colour: it never reaches full brightness
 };
-const BELLOWS = { radius: 1.18, depth: 0.07, folds: 28, pleat: 0.08, width: 2, alpha: 0.75, innerAlpha: 0.35 };
+const BELLOWS = { radius: 1.45, depth: 0.07, folds: 28, pleat: 0.08, width: 2, alpha: 0.75, innerAlpha: 0.35 };
 const FLAGS = {
   voices: ['grave'], // the low end throws them
-  from: 1.32, // wheel radii
+  from: 1.6, // wheel radii, outside the bellows
   speed: 1.6, // wheel radii per second
   size: 7, // CSS px, half the base of the triangle
   colours: [FORRO.red, FORRO.flame, FORRO.teal, FORRO.paper],
@@ -40,8 +44,9 @@ function sky(ctx, { width, height, centreX, centreY, scopeRadius }, dusk) {
   ctx.fillStyle = FORRO.night;
   ctx.fillRect(0, 0, width, height);
   const outer = scopeRadius * (1 + SKY.reach),
-    gradient = ctx.createRadialGradient(centreX, centreY, scopeRadius, centreX, centreY, outer);
+    gradient = ctx.createRadialGradient(centreX, centreY, scopeRadius * WHEEL_EDGE, centreX, centreY, outer);
   const shrink = 1 - (1 - SKY.shrink) * dusk;
+  gradient.addColorStop(0, FORRO.night);
   for (const [stop, colour] of SKY.start) gradient.addColorStop(stop * shrink, colour);
   gradient.addColorStop(1, FORRO.night);
   ctx.globalAlpha = SKY.dim;

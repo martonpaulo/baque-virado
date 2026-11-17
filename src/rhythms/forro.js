@@ -122,7 +122,8 @@ const PATTERNS = {
 };
 const MUTED_STEP = 4; // in the base cell, the eighth on beat 2 is pressed by the hand (abafada)
 const TRIANGLE_OPEN = [2, 6];
-const TRIANGLE_VELOCITY = [0.9, 0.45, 1, 0.5, 0.85, 0.45, 1, 0.5];
+// closed strokes soft, the open off-beat the accent (brega-forro.md: closed about 60 %, open 100 %)
+const TRIANGLE_VELOCITY = [0.65, 0.45, 1, 0.5, 0.6, 0.45, 1, 0.5];
 const FOLE = {
   base: { bass: [0, 4], chord: [2, 6] }, // the left hand: bass button, then chord button
   jogo: { bass: [0], chord: [0, 3, 6] }, // jogo de fole: bellows accents in 3 + 3 + 2
@@ -160,8 +161,19 @@ function motifAt(scene, barInScene) {
   return { motif, half: barInScene % BARS_PER_MOTIF };
 }
 
-/** Every voice's hits for one bar of a scene; the scene's `voices` choose which ones sound. */
+/**
+ * Every voice's hits for one bar of a scene. A voice the scene does not play has none: the wheel
+ * draws no ghost of it, so the parts enter one by one on the wheel too, and the key under it names
+ * only what sounds (nine names do not fit its one line on a phone).
+ */
 function barHits(scene, barInScene) {
+  const hits = partHits(scene, barInScene),
+    playing = new Set(scene.voices(barInScene));
+  return Object.fromEntries(VOICE_ORDER.map(voice => [voice, playing.has(voice) ? hits[voice] : []]));
+}
+
+/** Every voice's part in one bar of a scene, played or not. */
+function partHits(scene, barInScene) {
   const { motif, half } = motifAt(scene, barInScene),
     chord = motif.chords[half],
     [root, fifth] = BASS[chord];
@@ -324,15 +336,15 @@ const melodic = (instrument, gain) => (_choice, velocity, tone) => {
 const GAIN = {
   grave: 1.05,
   abafada: 0.9,
-  bacalhau: 0.45,
+  bacalhau: 1,
   triangulo: 0.32,
   fole: 0.36,
   foleBass: 0.42,
   baixo: 0.75,
-  cavaquinho: 0.4,
+  cavaquinho: 0.8,
   sanfona: 0.42,
   rabeca: 0.24,
-  bandolim: 0.3,
+  bandolim: 0.55,
 };
 // voice → [sample, gain, playback rate] for one hit
 const SAMPLE_FOR = {

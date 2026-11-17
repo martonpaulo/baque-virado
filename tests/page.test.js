@@ -510,6 +510,19 @@ test('?ritmo=forro shows the forró on an 8-step wheel, over its own background,
     // the backdrop paints the whole canvas: its dusk sky leaves no transparent pixel at a corner
     const corner = await page.$eval('#bg', canvas => [...canvas.getContext('2d').getImageData(1, 1, 1, 1).data]);
     assert.equal(corner[3], 255, `corner pixel ${corner}`);
+    // the sky stays night under the wheel's step numbers, so they keep 3:1 contrast (docs/rhythms/forro.md)
+    await page.evaluate(() => window.baque.render(4.3));
+    const underNumbers = await page.evaluate(() => {
+      const bg = document.getElementById('bg'),
+        wheel = document.getElementById('scope').getBoundingClientRect(),
+        box = bg.getBoundingClientRect(),
+        scale = bg.width / box.width,
+        numberRadius = (wheel.width / 2) * (121 / 135); // src/scope.js NUMBER_RADIUS / VIEWBOX_RADIUS
+      const x = (wheel.left + wheel.width / 2 + numberRadius - box.left) * scale,
+        y = (wheel.top + wheel.height / 2 - box.top) * scale;
+      return [...bg.getContext('2d').getImageData(Math.round(x), Math.round(y), 1, 1).data];
+    });
+    assert.ok(Math.max(...underNumbers.slice(0, 3)) < 60, `sky under the numbers ${underNumbers}`);
     assert.deepEqual(errors, []);
     await page.close();
   }
