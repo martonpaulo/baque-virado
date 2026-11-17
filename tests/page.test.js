@@ -6,8 +6,8 @@ import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { after, before, test } from 'node:test';
 import { COPY } from '../src/copy.js';
-import { redirectFor } from '../src/rhythms/index.js';
-import { SCENES } from '../src/show.js';
+import { RHYTHMS, redirectFor } from '../src/rhythms/index.js';
+import { createShow, SCENES } from '../src/show.js';
 import { openBrowser } from './support/browser.js';
 
 // The shipped rhythm registry with its list replaced, served in its place: maracatu and the
@@ -219,6 +219,34 @@ test('on phones every stage label stays readable and every readout fits its box'
     assert.deepEqual(errors, []);
     await page.close();
   }
+});
+
+// #13: on desktop a baque scene's stats and score overflowed the readout by 8 px at 1440x900 and
+// by 19 px on a larger stage. The first and last bar of every scene (the waves show in the last) of
+// every rhythm, at that viewport and a larger stage.
+test('on desktop every readout fits its box in every rhythm', async () => {
+  const viewports = [DESKTOP, { width: 1146, height: 1330 }];
+  const problems = [];
+  for (const rhythm of RHYTHMS) {
+    const bars = createShow(rhythm).SCENES.flatMap(scene => [scene.start, scene.start + scene.bars - 1]);
+    for (const viewport of viewports) {
+      const { page, errors } = await openPage(viewport, { query: `?ritmo=${rhythm.id}` });
+      const found = await page.evaluate(bars => {
+        const overflows = [];
+        for (const bar of bars) {
+          window.baque.render(bar + 0.5);
+          const read = document.querySelector('.read');
+          const overflow = read.scrollHeight - read.clientHeight;
+          if (overflow > 0) overflows.push(`bar ${bar}: .read overflows by ${overflow}px`);
+        }
+        return overflows;
+      }, bars);
+      problems.push(...found.map(problem => `${rhythm.id} ${viewport.width}x${viewport.height} ${problem}`));
+      assert.deepEqual(errors, []);
+      await page.close();
+    }
+  }
+  assert.deepEqual(problems, []);
 });
 
 // Found by these tests: a stage measured at 0 px (before layout, or hidden) made the background
