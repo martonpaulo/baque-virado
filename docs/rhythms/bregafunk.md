@@ -111,7 +111,7 @@ measured as pure low sines and mixed objects, far from the reference.
 
 | Voice                | Sound                                                                                  | Takes      |
 | :------------------- | :------------------------------------------------------------------------------------- | :--------- |
-| bumbo                | synthesized: a sine dropping from about 230 to 58 Hz, a noise click, soft clipping     | 3 variants |
+| bumbo                | synthesized: a sine dropping from about 230 to 55 Hz, a noise click, soft clipping     | 3 variants |
 | lata                 | synthesized: six inharmonic partials from about 440 Hz under a band of noise           | 4 variants |
 | palma                | synthesized: three quick bursts of band-passed noise and a tail                        | 3 variants |
 | grave                | synthesized: sine, octave and third with a pitch blip at the attack, lightly driven    | 2 per root |
@@ -132,14 +132,20 @@ measured as pure low sines and mixed objects, far from the reference.
 
 ## Mix
 
-Tuned to the reference with the lab's measures (spectrum per band, Demucs stem balance, stereo
-width, onsets per second):
+Tuned to the reference with machine listening: the spectrum in nine bands, the balance of the
+separated drums, bass and other parts (Demucs), the stereo width, the onsets per second, and the
+similarity of CLAP embeddings to the reference. Muting one instrument at a time showed what moved
+the similarity, and the levels follow it.
 
-- The drums lead; the flute, the stab and the horns sit about 8 dB under them.
+- The drums lead, as in the reference: the bumbo carries the low end with its own 55 Hz tail, and
+  the lata and the palma are loud and dry. The grave sits under the bumbo.
+- The flute, the stab and the horns sit well under the drums; the horns and the chimbais are
+  quiet. Louder, each of them moved the mix away from the reference.
 - The bumbo ducks the grave, the stab, the flute and the horns by half for 60 ms.
 - Width: a slow stereo chorus on the lata, the palma, the stab and the horns; the chimbal to the
   right; the flute's echo, a dotted eighth behind, to the right.
-- The room (the recorded living room) stays low: the genre is dry.
+- The room (the recorded living room) stays low: the genre is dry. One bus filter lowers the
+  band around 1.8 kHz by 2 dB.
 
 ## Colours
 

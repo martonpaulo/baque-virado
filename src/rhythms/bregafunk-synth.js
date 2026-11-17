@@ -40,11 +40,11 @@ function render(rate, seconds, peak, sampleAt) {
 // `sweep`: time constant of the pitch drop; `hold` then `decay`: the body's envelope; `click`: level of
 // the noise tick at the attack; `drive`: clipping, which adds the odd harmonics a phone can play.
 const KICKS = [
-  { from: 230, to: 55, sweep: 0.03, hold: 0.07, decay: 0.12, click: 1.3, drive: 2.2, seed: 11 },
-  { from: 215, to: 54, sweep: 0.033, hold: 0.075, decay: 0.125, click: 1.2, drive: 2, seed: 12 },
-  { from: 245, to: 56, sweep: 0.028, hold: 0.065, decay: 0.115, click: 1.4, drive: 2.4, seed: 13 },
+  { from: 230, to: 55, sweep: 0.03, hold: 0.07, decay: 0.16, click: 1.3, drive: 2.2, seed: 11 },
+  { from: 215, to: 54, sweep: 0.033, hold: 0.075, decay: 0.17, click: 1.2, drive: 2, seed: 12 },
+  { from: 245, to: 56, sweep: 0.028, hold: 0.065, decay: 0.155, click: 1.4, drive: 2.4, seed: 13 },
 ];
-const KICK = { seconds: 0.6, clickDecay: 0.009, peak: 0.95 };
+const KICK = { seconds: 0.75, clickDecay: 0.009, peak: 0.95 };
 function kick(spec, rate) {
   const noise = noiseOf(spec.seed);
   let phase = 0,

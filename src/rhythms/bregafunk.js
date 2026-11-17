@@ -410,16 +410,16 @@ const STUDIO = {
   room: 'sala-viva',
   roomLevel: 0.55,
   lead: 'bumbo',
-  output: 0.85,
+  output: 1.15,
   duck: { by: 'bumbo', depth: 0.5, hold: 0.06, release: 0.07 },
   echo: { time: 3 * STEP_SECONDS, feedback: 0.34, level: 0.55, pan: 0.45, highpass: 500, lowpass: 4500 }, // a dotted eighth behind
-  tone: [],
+  tone: [{ type: 'peaking', frequency: 1800, gain: -2, Q: 0.4 }], // the bus balance, tilted to the reference's darker middle
   voices: {
     bumbo: { seed: 31, role: 'grid', gain: 1, send: 0.02, bright: [9000, 18000], strokes: () => ({ hit: SYNTH_TAKES.bumbo }) },
     grave: {
       seed: 32,
       role: 'grid',
-      gain: 0.7,
+      gain: 0.5,
       send: 0.02,
       ducked: true,
       bright: [900, 2400],
@@ -441,7 +441,7 @@ const STUDIO = {
     lata: {
       seed: 33,
       role: 'grid',
-      gain: 0.62,
+      gain: 0.95,
       pan: 0.1,
       send: 0.12,
       chorus: WIDE,
@@ -450,7 +450,7 @@ const STUDIO = {
     palma: {
       seed: 39,
       role: 'grid',
-      gain: 0.5,
+      gain: 0.9,
       pan: -0.08,
       send: 0.2,
       chorus: WIDER,
@@ -459,7 +459,7 @@ const STUDIO = {
     chimbal: {
       seed: 34,
       role: 'grid',
-      gain: 0.55,
+      gain: 0.18,
       pan: 0.3,
       send: 0.06,
       bright: [5000, 18000],
@@ -472,7 +472,7 @@ const STUDIO = {
     teclado: {
       seed: 35,
       role: 'grid',
-      gain: 0.18,
+      gain: 0.1,
       pan: -0.1,
       send: 0.18,
       echo: 0.2,
@@ -491,10 +491,10 @@ const STUDIO = {
     flauta: {
       seed: 36,
       role: 'grid',
-      gain: 0.24,
+      gain: 0.21,
       pan: -0.05,
-      send: 0.2,
-      echo: 0.3,
+      send: 0.28,
+      echo: 0.4,
       ducked: true,
       release: 0.05,
       bright: [6000, 16000],
@@ -513,7 +513,7 @@ const STUDIO = {
     metais: {
       seed: 37,
       role: 'grid',
-      gain: 0.28,
+      gain: 0.13,
       pan: 0.12,
       send: 0.22,
       ducked: true,
@@ -617,7 +617,7 @@ const SCENE_COPY = {
   tema: { chip: 'Tema', eyebrow: 'bregafunk', title: 'Tema' },
   bumbo: { chip: 'Bumbo', eyebrow: 'no 1 e no 3', title: 'Bumbo' },
   lata: { chip: 'Lata', eyebrow: READ.groupingValue, title: 'Lata' },
-  palmas: { chip: 'Palma', eyebrow: 'palma e chimbal', title: 'Palma e chimbal' },
+  palmas: { chip: 'Palma', eyebrow: 'palma e chimbal', title: 'Palma' },
   grave: { chip: 'Grave', eyebrow: 'grave 808', title: 'Grave' },
   teclado: { chip: 'Teclado', eyebrow: READ.withLata, title: 'Teclado' },
   batida: { chip: 'Batida', eyebrow: `${FULL.length} instrumentos`, title: 'Batida completa' },
