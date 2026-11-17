@@ -14,9 +14,28 @@ trimmed, mixed or retuned.
 - Caixa snares: Uberproduktion · Roll: bigjoedrummer · Stick: LudwigMueller
 - Whistles: juliojunior77, SpliceSound, strongbot, Rosa-Orenes256, LudwigMueller
 
+The forró triângulo, sanfona, rabeca, bandolim, cavaquinho and baixo are synthesized for this
+project by `tools/synth-forro.mjs`; its zabumba reuses the alfaia, surdo and stick recordings above
+([`docs/rhythms/forro.md`](docs/rhythms/forro.md)).
+
 Alfaia patterns: the table at lansdownsoftware.com. Swing measured on a Batuk Nagô workshop recording.
 
+## Coco da Xambá
+
+- Alfaia, caixa, ganzá, agogô and abê reuse the samples above; the second alfaia head is the
+  answer sample played at a higher pitch.
+- Pandeiro and palmas are synthesized by `tools/make-coco-sounds.mjs` (original to this project,
+  2026-11): no CC0 recording could be fetched for them.
+- Sources: Tainá Menezes Castro, «Nação Xambá: identidade negra, tradição religiosa e estratégias
+  de difusão da sua cultura», ANPPOM 2018
+  (<https://anppom.org.br/anais/anaiscongresso_anppom_2018/5434/public/5434-18196-1-PB.pdf>);
+  Revista Continente, «O coco ancestral do Bongar». Neither writes the parts out: the patterns
+  in `src/rhythms/coco-xamba.js` are this project's reading.
+
 The score renderer (`src/score.js`) is original to this project, written in 2026-11.
+
+The brega funk sounds are synthesized in the page by `src/rhythms/brega-funk-sounds.js`, original to
+this project; its «tarol» lata choice reuses the tarol rim recording above.
 
 ## Fonts
 

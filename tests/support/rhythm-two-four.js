@@ -52,6 +52,7 @@ export const TWO_FOUR = {
   },
   copy: {
     name: 'dois por quatro',
+    selector: 'dois por quatro',
     feminineInstruments: ['alfaia'],
     scenes: { entrada: { chip: 'Entrada', eyebrow: 'teste', title: 'Entrada' }, roda: { chip: 'Roda', eyebrow: 'teste', title: 'Roda' } },
     patterns: {},

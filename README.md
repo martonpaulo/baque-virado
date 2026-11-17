@@ -25,7 +25,10 @@ sounds a desktop viewer can pick are fetched when chosen.
 
 - `index.html`, `styles.css` - the page and its layout.
 - `src/rhythms/maracatu.js` - the maracatu package: tempo, voices, swing, patterns (`barHits`), the show script, readout layouts, background looks, sounds and its copy.
-- `src/rhythms/index.js` - the rhythms the site ships and the one `?ritmo=<id>` picks.
+- `src/rhythms/coco-xamba.js` - the Coco da Xambá package, in 2/4 (open it at `/coco`).
+- `src/rhythms/index.js` - the rhythms the site ships, their paths (`/<id>`) and the one a page shows.
+- `src/rhythms/preparing.js` - the rhythms that have a path but no show yet.
+- `tools/build-site.mjs` - builds the deployed site, with one page per rhythm path.
 - `src/music.js` - the meter, voices and swing of the rhythm on show, as the engine reads them.
 - `src/show.js` - a rhythm's scenes, its timeline and what sounds at any moment.
 - `src/audio.js` - sound choices, the lazy sample bank, the live player and the offline WAV render.
@@ -43,6 +46,7 @@ sounds a desktop viewer can pick are fetched when chosen.
 - `fonts/` - Space Grotesk and JetBrains Mono (Latin subsets, SIL Open Font License; see [CREDITS.md](CREDITS.md)).
 - `sounds/` - the samples: WAV masters and the AAC (`.m4a`) files the page fetches (see [CREDITS.md](CREDITS.md)).
 - `tools/encode-sounds.mjs` - encodes each WAV to AAC at 96 kbps (`node tools/encode-sounds.mjs`, needs `ffmpeg`).
+- `tools/make-coco-sounds.mjs` - synthesizes the coco's pandeiro and palmas WAV masters (`node tools/make-coco-sounds.mjs`).
 - `tests/` - unit tests of the DOM-free modules, and browser tests of the page in headless Chromium (`tests/page.test.js`, `tests/sounds-decode.test.js`).
 - `tools/static-server.mjs` - the local static server (`pnpm serve`).
 - `tools/export-video.mjs` - the vertical video exporter.

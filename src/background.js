@@ -7,7 +7,7 @@ import { SCOPE_GEOMETRY } from './scope.js';
 
 const { angleOf, radius: SCOPE_RADIUS } = SCOPE_GEOMETRY;
 
-import { blendAt, sceneAt } from './show.js';
+import { blendAt, sceneAt, TOTAL_BARS } from './show.js';
 import { boneAlpha, COLORS, fgAlpha, TINTS, voidAlpha } from './theme.js';
 
 const CROSSFADE_BARS = 1.5; // ≈3 s, centred on each scene boundary
@@ -195,7 +195,10 @@ function hitEnergy(recent) {
 }
 
 export function createBackground(fxCanvas, feedbackCanvas) {
-  const kaleidoscope = createKaleidoscope(fxCanvas);
+  // A rhythm with a background of its own draws it on the 2D canvas, over the frame before, in
+  // place of the kaleidoscope and the feedback tunnel (src/rhythms/, `background`).
+  const layer = RHYTHM.background?.create() ?? null;
+  const kaleidoscope = layer ? null : createKaleidoscope(fxCanvas);
   const ctx = feedbackCanvas.getContext('2d');
   const previous = document.createElement('canvas'),
     previousCtx = previous.getContext('2d');
@@ -341,8 +344,14 @@ export function createBackground(fxCanvas, feedbackCanvas) {
     const { width, height, centreX, centreY } = geometry;
     if (kaleidoscope) kaleidoscope.draw({ centreX: centreX * fxRatio(), centreY: centreY * fxRatio(), time: clock.time, params, ...hitEnergy(recent) });
     ctx.clearRect(0, 0, width, height);
-    if (clock.step > 0 && clock.step < FEEDBACK_MAX_STEP && hasFrame) drawFeedback(params, clock.step);
-    drawEmissions(recent, shapes, clock.time);
+    if (layer) {
+      const fresh = !hasFrame || clock.step >= FEEDBACK_MAX_STEP;
+      if (!fresh) ctx.drawImage(previous, 0, 0);
+      layer.draw(ctx, { ...geometry, position, totalBars: TOTAL_BARS, params, recent, shapes, time: clock.time, step: clock.step, fresh });
+    } else {
+      if (clock.step > 0 && clock.step < FEEDBACK_MAX_STEP && hasFrame) drawFeedback(params, clock.step);
+      drawEmissions(recent, shapes, clock.time);
+    }
     if (SCENE_LOOKS[params.sceneId].moire) drawMoire(position, clock.time);
     if (params.strobe)
       for (const h of recent)
@@ -353,11 +362,17 @@ export function createBackground(fxCanvas, feedbackCanvas) {
     // keep this frame for the feedback, then darken top and bottom for the viewer only
     previousCtx.globalCompositeOperation = 'copy';
     previousCtx.drawImage(feedbackCanvas, 0, 0);
+    drawVignette();
+    hasFrame = true;
+  }
+
+  /** Darken top and bottom for the viewer, so the title and the lanes stay readable. */
+  function drawVignette() {
+    const { width, height } = geometry;
     const vignette = ctx.createLinearGradient(0, 0, 0, height);
     for (const [stop, alpha] of VIGNETTE_STOPS) vignette.addColorStop(stop, voidAlpha(alpha));
     ctx.fillStyle = vignette;
     ctx.fillRect(0, 0, width, height);
-    hasFrame = true;
   }
 
   return {

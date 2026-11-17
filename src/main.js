@@ -8,11 +8,15 @@ import { COPY } from './copy.js';
 import { createKey, createLanes } from './lanes.js';
 import { BAR_SECONDS, BPM, STEPS_PER_BAR } from './music.js';
 import { createReadout } from './readout.js';
-import { RHYTHM, rhythmChoices } from './rhythms/index.js';
+import { RHYTHM, redirectFor, rhythmChoices } from './rhythms/index.js';
 import { createScope, SCOPE_GEOMETRY } from './scope.js';
 import { recentHits, SCENES, sceneAt, sceneIndexAt, TOTAL_BARS, TOTAL_SECONDS } from './show.js';
 import { createTitle } from './title.js';
 import { formatClock, formatPrecise, pad2, setText } from './util.js';
+
+// `?ritmo=<id>` names a rhythm that has its own path: move there, so each rhythm has one address
+const redirect = redirectFor(location.search);
+if (redirect) location.replace(redirect + location.hash);
 
 const $ = id => document.getElementById(id);
 const DESKTOP_QUERY = '(min-width: 900px)'; // also where styles.css switches to the side panels
@@ -208,11 +212,11 @@ const stepScene = direction => {
 
 showState('play');
 tapButton.addEventListener('click', toggle);
-// With two or more rhythms, a selector above the Roteiro (desktop) and under Play (phones, stopped);
-// a link reloads the page with `?ritmo=<id>`. With one rhythm nothing is added.
-const rhythms = rhythmChoices(RHYTHM);
+// With two or more rhythms, a selector at the bottom of the left column, under the Roteiro (desktop),
+// and under Play (phones, stopped); a link opens the rhythm's path. With one rhythm nothing is added.
+const rhythms = rhythmChoices(RHYTHM.id);
 if (rhythms.length) {
-  $('scenes').parentElement.before(rhythmSelector(rhythms, 'block rhythms-side'));
+  $('scenes').parentElement.after(rhythmSelector(rhythms, 'block rhythms-side'));
   tapButton.after(rhythmSelector(rhythms, 'rhythms-stage'));
 }
 bindKeyboard({ toggle, previousScene: () => stepScene(-1), nextScene: () => stepScene(1) });

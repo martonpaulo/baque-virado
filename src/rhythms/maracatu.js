@@ -356,6 +356,7 @@ const READ = {
 };
 const COPY = {
   name: 'maracatu de baque virado',
+  selector: 'maracatu', // the rhythm selector's chip
   feminineInstruments: FEMININE_INSTRUMENTS,
   scenes: {
     opening: { chip: 'Abertura', eyebrow: 'maracatu de baque virado', title: 'Baque virado' },

@@ -1,18 +1,19 @@
-// The engine takes a rhythm package, and `?ritmo=<id>` picks one (the 2/4 fixture is tests-only).
+// The engine takes a rhythm package; a path `/<id>` or `?ritmo=<id>` picks one (the 2/4 fixture is tests-only).
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { meterOf } from '../src/music.js';
-import { RHYTHM, RHYTHMS, rhythmChoices, rhythmFor } from '../src/rhythms/index.js';
+import { FORRO_PE_DE_SERRA } from '../src/rhythms/forro.js';
+import { preparingIds, RHYTHM, RHYTHMS, ROUTES, redirectFor, rhythmChoices, rhythmFor } from '../src/rhythms/index.js';
 import { MARACATU } from '../src/rhythms/maracatu.js';
 import { createShow } from '../src/show.js';
 import { TWO_FOUR } from './support/rhythm-two-four.js';
 
 const BOTH = [MARACATU, TWO_FOUR];
 
-test('the site ships one rhythm, maracatu, and shows it by default', () => {
+test('the site ships maracatu, the coco, forró and brega funk, and shows maracatu by default', () => {
   assert.deepEqual(
     RHYTHMS.map(rhythm => rhythm.id),
-    ['maracatu'],
+    ['maracatu', 'coco', 'forro', 'brega-funk'],
   );
   assert.equal(RHYTHM, MARACATU);
 });
@@ -22,14 +23,47 @@ test('?ritmo=<id> picks a rhythm; an unknown or missing id falls back to maracat
   assert.equal(rhythmFor('?ritmo=frevo', BOTH), MARACATU);
   assert.equal(rhythmFor('', BOTH), MARACATU);
   assert.equal(rhythmFor('?ritmo=dois-por-quatro'), MARACATU); // not shipped
+  assert.equal(rhythmFor('?ritmo=forro'), FORRO_PE_DE_SERRA);
 });
 
-test('the selector has no entry with one rhythm, and one link per rhythm with two', () => {
-  assert.deepEqual(rhythmChoices(MARACATU), []);
-  assert.deepEqual(rhythmChoices(TWO_FOUR, BOTH), [
-    { id: 'maracatu', label: 'maracatu de baque virado', href: '?ritmo=maracatu', current: false },
-    { id: 'dois-por-quatro', label: 'dois por quatro', href: '?ritmo=dois-por-quatro', current: true },
+test('a path /<id> picks a rhythm, and wins over ?ritmo=', () => {
+  assert.equal(rhythmFor('', RHYTHMS, '/forro'), FORRO_PE_DE_SERRA);
+  assert.equal(rhythmFor('?ritmo=maracatu', RHYTHMS, '/forro'), FORRO_PE_DE_SERRA);
+  assert.equal(rhythmFor('', RHYTHMS, '/forro.html'), FORRO_PE_DE_SERRA);
+  assert.equal(rhythmFor('', RHYTHMS, '/frevo'), MARACATU); // being prepared: its page has no show
+  assert.equal(rhythmFor('', RHYTHMS, '/'), MARACATU);
+});
+
+test('seven paths, in the order the owner set; the ones with no package yet are being prepared', () => {
+  assert.deepEqual(ROUTES, ['maracatu', 'coco', 'frevo', 'forro', 'manguebeat', 'brega-romantico', 'brega-funk']);
+  assert.deepEqual(preparingIds(), ['frevo', 'manguebeat', 'brega-romantico']);
+});
+
+test('?ritmo=<id> of a route redirects to its path and keeps the rest of the query', () => {
+  assert.equal(redirectFor('?ritmo=coco'), '/coco');
+  assert.equal(redirectFor('?ritmo=frevo&x=1'), '/frevo?x=1');
+  assert.equal(redirectFor('?ritmo=desconhecido'), null);
+  assert.equal(redirectFor(''), null);
+});
+
+test('the selector has no entry with one route, and one link per route with two or more', () => {
+  assert.deepEqual(rhythmChoices('maracatu', [MARACATU], ['maracatu']), []);
+  assert.deepEqual(rhythmChoices('dois-por-quatro', BOTH, ['maracatu', 'dois-por-quatro']), [
+    { id: 'maracatu', label: 'maracatu', href: '/maracatu', current: false },
+    { id: 'dois-por-quatro', label: 'dois por quatro', href: '/dois-por-quatro', current: true },
   ]);
+  assert.deepEqual(
+    rhythmChoices('frevo').map(choice => [choice.label, choice.href, choice.current]),
+    [
+      ['maracatu', '/maracatu', false],
+      ['coco', '/coco', false],
+      ['frevo', '/frevo', true],
+      ['forró', '/forro', false],
+      ['manguebeat', '/manguebeat', false],
+      ['brega romântico', '/brega-romantico', false],
+      ['brega funk', '/brega-funk', false],
+    ],
+  );
 });
 
 test('a 2/4 rhythm runs on an 8-step bar, one bar per turn, with its own tempo and swing', () => {
