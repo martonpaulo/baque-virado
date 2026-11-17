@@ -44,17 +44,19 @@ rehearsal or from videos of whole bands, where the parts cannot be told apart.
 - On desktop, lists the scenes as one timeline to jump through and lets the viewer swap each
   instrument's sound; a phone shows the reel alone, which plays and pauses on a tap and shows the time played and the total while paused,
   with the default sounds. The page never scrolls; on a narrow desktop the reel narrows instead.
+- On desktop, exports the show as a 9:16 video with its sound, made in the browser (an MP4 where the
+  browser encodes H.264 and AAC, else a WebM), named after the rhythm; phones have no export
+  ([#19](https://github.com/martonpaulo/baque-virado/issues/19)).
 
 ## What it will never do
 
-| Non-goal                                            | Reason                                                                            | Reopens when                                  |
-| :-------------------------------------------------- | :-------------------------------------------------------------------------------- | :-------------------------------------------- |
-| Present one nação's baques as the canonical version | Each nação plays its own; the patterns come from one published hand table         | A mestre or nação provides patterns to credit |
-| Be an editor or sequencer                           | The job is to understand a performance, not to compose one                        | Never, by the owner's choice                  |
-| Generate video in the page                          | The page stays light on phones; video is made offline by `tools/export-video.mjs` | Never, by the owner's choice                  |
-| Offer sound choices on phones                       | Phones download only the default samples, so the page loads on mobile data        | Never, by the owner's choice                  |
-| Show anything outside the reel on phones            | The owner wants the phone page to be the reel alone, tap to play (2026-11-16)     | The owner asks for controls on phones         |
-| Translate the interface                             | The audience is Brazilian; the copy is pt-BR only                                 | Readers outside Brazil ask for it             |
+| Non-goal                                            | Reason                                                                        | Reopens when                                  |
+| :-------------------------------------------------- | :---------------------------------------------------------------------------- | :-------------------------------------------- |
+| Present one nação's baques as the canonical version | Each nação plays its own; the patterns come from one published hand table     | A mestre or nação provides patterns to credit |
+| Be an editor or sequencer                           | The job is to understand a performance, not to compose one                    | Never, by the owner's choice                  |
+| Offer sound choices on phones                       | Phones download only the default samples, so the page loads on mobile data    | Never, by the owner's choice                  |
+| Show anything outside the reel on phones            | The owner wants the phone page to be the reel alone, tap to play (2026-11-16) | The owner asks for controls on phones         |
+| Translate the interface                             | The audience is Brazilian; the copy is pt-BR only                             | Readers outside Brazil ask for it             |
 
 ## How you know it worked
 
@@ -68,7 +70,8 @@ and the page plays smoothly to the end on a recent iPhone and an Android phone.
 - Every sample is public domain (CC0); credits in [`CREDITS.md`](../CREDITS.md).
 - The sound, the notes, the score, the wheel and the lanes are a function of the show position, so
   the video export matches playback. The background is the exception: its feedback trail depends on
-  the frames before it, so `tools/export-video.mjs` warms up for 4 s before the first frame
+  the frames before it, so both exports (`src/export.js` and `tools/export-video.mjs`) warm up for
+  4 s before a late first frame
   ([#7](https://github.com/martonpaulo/baque-virado/issues/7)).
 
 ## Rhythm shows
@@ -95,8 +98,8 @@ The rules every rhythm package in `src/rhythms/` follows.
 - **Coco.** The pandeiro and the palmas are viewer options, like the maracatu caixa options, with
   `couro` and `roda` as defaults. The atabaques are a trio: rum, rumpi and lê. Rufadas open the
   show.
-- **Video export.** Parked ([#19](https://github.com/martonpaulo/baque-virado/issues/19),
-  [#20](https://github.com/martonpaulo/baque-virado/issues/20)).
+- **Video export.** Every rhythm exports from the page on desktop, as «What it does» says
+  ([#19](https://github.com/martonpaulo/baque-virado/issues/19)).
 
 ## Limits the owner set
 

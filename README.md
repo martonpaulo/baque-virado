@@ -49,7 +49,8 @@ sounds a desktop viewer can pick are fetched when chosen.
 - `tools/make-coco-sounds.mjs` - synthesizes the coco's pandeiro and palmas WAV masters (`node tools/make-coco-sounds.mjs`).
 - `tests/` - unit tests of the DOM-free modules, and browser tests of the page in headless Chromium (`tests/page.test.js`, `tests/sounds-decode.test.js`).
 - `tools/static-server.mjs` - the local static server (`pnpm serve`).
-- `tools/export-video.mjs` - the vertical video exporter.
+- `src/export.js`, `src/stage-capture.js` - the video export in the page.
+- `tools/export-video.mjs` - the vertical video exporter on the command line.
 - [docs/research/expansion-decisions.md](docs/research/expansion-decisions.md) - the decisions for growing from one rhythm show to seven.
 - [docs/research/frevo-manguebeat-coco.md](docs/research/frevo-manguebeat-coco.md) - research on frevo, manguebeat and coco da Xambá.
 - [docs/research/brega-forro.md](docs/research/brega-forro.md) - research on brega romântico, brega funk and forró pé-de-serra.
@@ -76,9 +77,20 @@ if set, else the pinned Chrome headless shell that `node tools/install-browser.m
 
 ## Video export
 
-Renders the page to a 1080x1920, 30 fps H.264 MP4 with the offline-rendered audio (AAC 320k).
+On desktop, «Exportar vídeo» in the left column, between the Roteiro and the rhythm selector,
+exports the rhythm on show in the browser, with no server: `src/export.js` loads the page as the
+9:16 reel in a hidden frame, renders the sound offline, draws each frame with `window.baque.frame`
+(`src/stage-capture.js` copies the stage into a canvas), and encodes them with WebCodecs and the
+vendored [Mediabunny](https://mediabunny.dev) (`vendor/`, MPL-2.0). The file is `<rhythm id>.mp4`
+(H.264 and AAC) where the browser encodes both, as Chrome on macOS and Windows does, else
+`<rhythm id>.webm` (VP9 or VP8 and Opus); the status line names the format. The page the viewer
+watches does not change.
+
+The command line drives the same `window.baque.frame` with headless Chrome and `ffmpeg`.
+It renders the page to a 1080x1920, 30 fps H.264 MP4 with the offline-rendered audio (AAC 320k).
 It needs Google Chrome for Testing and `ffmpeg`; set `CHROME_PATH` and `FFMPEG_PATH` when they are
-not at the macOS defaults.
+not at the macOS defaults. Run as root (a cloud session), it starts Chrome without its sandbox
+([#20](https://github.com/martonpaulo/baque-virado/issues/20)).
 
 ```sh
 pnpm export index.html out/baque-virado.mp4

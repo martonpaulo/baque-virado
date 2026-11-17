@@ -33,4 +33,17 @@ export const COPY = {
     soundGroup: label => `Som ${of(label)} ${label}`,
     soundFailed: label => `som ${of(label)} ${label}: não carregou, tente de novo`,
   },
+  // the video export, desktop only (#19)
+  exportVideo: {
+    region: 'Vídeo',
+    start: 'Exportar vídeo',
+    cancel: 'Cancelar',
+    progress: 'Progresso do vídeo',
+    audio: 'Preparando o som…',
+    video: format => `Gravando o vídeo em ${format}…`,
+    done: (name, format) => `Pronto: ${name} baixado (${format})`,
+    cancelled: 'Exportação cancelada',
+    failed: 'Não deu para exportar o vídeo. Tente de novo.',
+    unsupported: 'Este navegador não grava vídeo. Use o Chrome, o Edge ou o Safari mais recentes.',
+  },
 };

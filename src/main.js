@@ -3,8 +3,9 @@
 
 import { createPlayer, createSampleBank, filesFor, isHeard, renderShowWav } from './audio.js';
 import { backgroundAt, createBackground, SCENE_LOOKS } from './background.js';
-import { bindKeyboard, createSceneList, createSoundPickers, initialChoices, initialVolumes, rhythmSelector } from './controls.js';
+import { bindKeyboard, createSceneList, createSoundPickers, exportControl, initialChoices, initialVolumes, rhythmSelector } from './controls.js';
 import { COPY } from './copy.js';
+import { canExportVideo, download, exportVideo } from './export.js';
 import { createKey, createLanes } from './lanes.js';
 import { BAR_SECONDS, BPM, STEPS_PER_BAR } from './music.js';
 import { createReadout } from './readout.js';
@@ -39,6 +40,8 @@ const EXPORT_SHADER_SCALE = 1,
   PHONE_SHADER_SCALE = 0.35;
 
 const stage = $('stage');
+// The video exports (tools/export-video.mjs, src/export.js) set .video-export: the 9:16 reel alone.
+const isVideoExport = () => document.documentElement.classList.contains('video-export');
 const volume = initialVolumes(DESKTOP); // each instrument's level: the player, the wheel and the lanes read it
 const scope = createScope($('scope'), volume);
 const readout = createReadout($('read'), volume);
@@ -219,6 +222,21 @@ if (rhythms.length) {
   $('scenes').parentElement.after(rhythmSelector(rhythms, 'block rhythms-side'));
   tapButton.after(rhythmSelector(rhythms, 'rhythms-stage'));
 }
+// Desktop: «Exportar vídeo» in the middle of the left column, between the Roteiro and the selector
+// (owner, 2026-11-17, #19). The export runs in a hidden copy of this page (src/export.js).
+if (DESKTOP && !isVideoExport()) {
+  $('scenes').parentElement.after(
+    exportControl({
+      supported: canExportVideo(),
+      run: async ({ onProgress, signal }) => {
+        const { blob, format } = await exportVideo({ onProgress, signal });
+        const name = `${RHYTHM.id}.${format.id}`;
+        download(blob, name);
+        return { name, format: format.label };
+      },
+    }),
+  );
+}
 bindKeyboard({ toggle, previousScene: () => stepScene(-1), nextScene: () => stepScene(1) });
 if (DESKTOP) {
   createSoundPickers(
@@ -269,6 +287,20 @@ function loop() {
 }
 
 // ---------- video exporter API ----------
+// The exports drive CSS animations and transitions from the show clock instead of wall time.
+const animationBirth = new WeakMap();
+function stepAnimations(seconds) {
+  for (const animation of document.getAnimations()) {
+    if (!animationBirth.has(animation)) animationBirth.set(animation, seconds);
+    const elapsed = (seconds - animationBirth.get(animation)) * MS_PER_SECOND;
+    const end = animation.effect ? animation.effect.getComputedTiming().endTime : 0;
+    if (elapsed >= end) animation.finish();
+    else {
+      animation.pause();
+      animation.currentTime = elapsed;
+    }
+  }
+}
 window.baque = {
   render(at) {
     if (!clock.exporting) {
@@ -285,6 +317,11 @@ window.baque = {
     position = at;
     renderedAt = null;
     render(at);
+  },
+  /** One video frame at `seconds`: the show, and the CSS animations on the same virtual clock. */
+  frame(seconds) {
+    this.render(seconds / BAR_SECONDS);
+    stepAnimations(seconds);
   },
   renderAudio: () => renderShowWav(bank, choice, AUDIO_LEAD_IN),
   TOTAL: TOTAL_BARS,
@@ -303,7 +340,6 @@ const PHONE_STAGE_WIDTH = 393;
 const DESKTOP_LAYOUT = window.matchMedia(DESKTOP_QUERY);
 // The video export (tools/export-video.mjs sets .video-export) draws the 9:16 reel at its own size:
 // no zoom there.
-const isVideoExport = () => document.documentElement.classList.contains('video-export');
 const fitStage = () => {
   stage.style.zoom = DESKTOP_LAYOUT.matches && !isVideoExport() ? String(stage.parentElement.clientWidth / PHONE_STAGE_WIDTH) : '';
 };
