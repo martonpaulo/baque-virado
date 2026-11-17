@@ -14,7 +14,7 @@ import { PREPARING, preparingLine } from '../src/rhythms/preparing.js';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const SITE_NAME = 'O Baque Virado';
-const COPIED = ['index.html', '404.html', 'styles.css', 'src', 'social.png', 'apple-touch-icon.png', 'CNAME', '.nojekyll'];
+const COPIED = ['index.html', '404.html', 'styles.css', 'src', 'vendor', 'social.png', 'apple-touch-icon.png', 'CNAME', '.nojekyll'];
 
 const escapeHtml = text => text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 const capitalized = text => text.charAt(0).toUpperCase() + text.slice(1);

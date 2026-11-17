@@ -513,6 +513,16 @@ a:focus-visible {
   border-color: var(--dim);
   color: var(--fg);
 }
+.chip:disabled {
+  cursor: default;
+  opacity: 0.5;
+  border-color: var(--line);
+  color: var(--dim);
+}
+.export-video progress {
+  width: 100%;
+  accent-color: var(--accent);
+}
 /* the stage itself is the Play and Pause button, on every screen (mobile first, 2026-11-16) */
 .tap {
   touch-action: manipulation; /* no double-tap zoom */
@@ -852,6 +862,17 @@ a:focus-visible {
   }
   .rhythms-side {
     margin-top: auto; /* the Roteiro opens the column, the selector closes it */
+  }
+  /* «Exportar vídeo» sits in the middle of the room between the Roteiro and the selector (#19) */
+  .export-video {
+    margin-block: auto;
+    padding-top: 0;
+    border-top: 0;
+    align-items: flex-start;
+    gap: var(--space-4);
+  }
+  .export-video + .rhythms-side {
+    margin-top: 0;
   }
   .side.right,
   .side .block {
