@@ -1,11 +1,11 @@
 // The deployed site has one page per rhythm path (tools/build-site.mjs), and the local server answers
 // `/<id>` with `<id>.html` as GitHub Pages does.
 import assert from 'node:assert/strict';
-import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
+import { existsSync, mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { test } from 'node:test';
-import { MOVED, ROUTES } from '../src/rhythms/index.js';
+import { MOVED, RHYTHMS, ROUTES } from '../src/rhythms/index.js';
 import { buildSite } from '../tools/build-site.mjs';
 import { startStaticServer } from '../tools/static-server.mjs';
 
@@ -26,6 +26,7 @@ test('every rhythm path answers 200 from the built site; a shipped one is the sh
       html
         .replace(/<title>.*<\/title>/, '')
         .replace(/<meta property="og:title"[^>]*>/, '')
+        .replace(/<meta property="og:image" [^>]*>/, '')
         .replace(/<meta (?:name|property)="(?:og:)?description"[^>]*>/g, '')
         .replace(/<script type="application\/ld\+json">.*<\/script>/, '')
         .replace(/https:\/\/batuque\.martonpaulo\.com\/[a-z-]*/g, '');
@@ -108,6 +109,12 @@ test('each rhythm path has its own description and structured data, and the site
       if (data) assert.equal(JSON.parse(data[1]).url, `https://batuque.martonpaulo.com/${id}`, id);
     }
     assert.equal(descriptions.size, ROUTES.length, 'no two paths share a description');
+    // a shipped rhythm's preview is its own card (tools/make-images.mjs), served by the site
+    for (const rhythm of RHYTHMS) {
+      const html = readFileSync(path.join(out, `${rhythm.id}.html`), 'utf8');
+      assert.match(html, new RegExp(`<meta property="og:image" content="https://batuque\\.martonpaulo\\.com/social/${rhythm.id}\\.png">`));
+      assert.ok(existsSync(path.join(out, 'social', `${rhythm.id}.png`)), rhythm.id);
+    }
     const sitemap = readFileSync(path.join(out, 'sitemap.xml'), 'utf8');
     assert.deepEqual(
       [...sitemap.matchAll(/<loc>([^<]+)<\/loc>/g)].map(match => match[1]),

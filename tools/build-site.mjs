@@ -17,14 +17,27 @@ import { PREPARING, preparingLine } from '../src/rhythms/preparing.js';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const SITE_NAME = 'Batuque';
-const COPIED = ['index.html', '404.html', 'styles.css', 'src', 'vendor', 'social.png', 'apple-touch-icon.png', 'icon.svg', 'icons', 'CNAME', '.nojekyll'];
+const COPIED = [
+  'index.html',
+  '404.html',
+  'styles.css',
+  'src',
+  'vendor',
+  'social.png',
+  'social',
+  'apple-touch-icon.png',
+  'icon.svg',
+  'icons',
+  'CNAME',
+  '.nojekyll',
+];
 
 const escapeHtml = text => text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 const LD_JSON = /<script type="application\/ld\+json">(.*)<\/script>/;
 const capitalized = text => text.charAt(0).toUpperCase() + text.slice(1);
 
 /** index.html with the title, description, address, preview and structured data of one route (#31). */
-function withRoute(html, { id, title, description, origin }) {
+function withRoute(html, { id, title, description, origin, image }) {
   const fullTitle = escapeHtml(`${title} · ${SITE_NAME}`);
   const url = `${origin}/${id}`;
   const text = escapeHtml(description);
@@ -47,6 +60,7 @@ function withRoute(html, { id, title, description, origin }) {
     .replace(/(<meta property="og:description" content=")[^"]*"/, `$1${text}"`)
     .replace(/(<link rel="canonical" href=")[^"]*"/, `$1${url}"`)
     .replace(/(<meta property="og:url" content=")[^"]*"/, `$1${url}"`)
+    .replace(/(<meta property="og:image" content=")[^"]*"/, (all, start) => (image ? `${start}${origin}/${image}"` : all))
     .replace(LD_JSON, () => `<script type="application/ld+json">${JSON.stringify(data).replace(/</g, '\\u003c')}</script>`);
 }
 
@@ -151,7 +165,10 @@ export function buildSite(out, root = ROOT, version = '') {
     const rhythm = RHYTHMS.find(candidate => candidate.id === id);
     if (rhythm) {
       const title = capitalized(rhythm.copy.selector || rhythm.copy.name);
-      writeFileSync(path.join(out, `${id}.html`), finish(withRoute(html, { id, title, description: rhythm.copy.description, origin })));
+      writeFileSync(
+        path.join(out, `${id}.html`),
+        finish(withRoute(html, { id, title, description: rhythm.copy.description, origin, image: `social/${id}.png` })),
+      );
     } else if (PREPARING[id]) {
       writeFileSync(
         path.join(out, `${id}.html`),
