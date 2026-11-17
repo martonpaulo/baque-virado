@@ -54,10 +54,26 @@ What the recordings show, and the show follows. Where they disagree with
   [`expansion-decisions.md`](../research/expansion-decisions.md) sets it.
 - **Tempo.** 4/4 at 136 BPM for the whole show, a 16-step wheel, one bar (1.76 s) per turn. Two
   bumbos and a caixa in each bar give the slow two-step a dancer feels.
-- **Form.** 59 bars, 1:44. Eleven scenes: Introdução (4), Base (4), Baixo (4), Teclado (8),
-  Guitarra (8), Virada (1), Refrão (8), Breque (2), Vinheta (8), Refrão final (8), Final (4). The
-  parts enter one by one: the trompete's theme alone, then bumbo, caixa and chimbal, the bass, the
-  strings and the keyboard's chords, the guitar.
+- **Form.** 55 bars, 1:37. The band plays from the first bar, as a track of the genre does (the
+  owner's direction, 2026-11-17: no show but the maracatu builds up one instrument at a time).
+  Each scene shows one thing about the rhythm by arrangement: the other parts rest or drop back,
+  the part shown is louder, then the band returns whole. Only two single bars leave one or two
+  voices alone: the Virada and the Breque's heartbeat.
+
+  | Scene (bars)     | Shows                                    | How                                             |
+  | :--------------- | :--------------------------------------- | :---------------------------------------------- |
+  | Introdução (4)   | the whole band and the head of the theme | everyone plays                                  |
+  | Base (4)         | the xacumbum, 3 + 3 + 2                  | melody and chords rest, kit louder, bass softer |
+  | Baixo (4)        | the bass walking from bumbo to bumbo     | strings rest, bass louder, chords softer        |
+  | Teclado (4)      | strings and short chords                 | both louder, the band whole                     |
+  | Guitarra (8)     | the guitar in thirds, relative major     | guitar louder over the band                     |
+  | Virada (1)       | the tom fill into a section              | toms and bumbo alone for one bar                |
+  | Refrão (8)       | the theme, the guitar answering          | everyone plays                                  |
+  | Breque (2)       | the break                                | a hit, silence, the bumbo's heartbeat           |
+  | Vinheta (8)      | guitar calls, horns answer               | the theme rests                                 |
+  | Refrão final (8) | the key change                           | everyone plays, a whole tone up                 |
+  | Final (4)        | the ending                               | theme, fill, one held chord                     |
+
 - **Base (xacumbum).** Bumbo on 1 and 7, caixa on 13, the chimbal on every eighth. Every fourth
   bar leads out with a third bumbo on 11, a ghost caixa on 16 and an open chimbal on 15. No swing.
 - **Bass.** The root with the first bumbo, the fifth with the second, then eighths through the
@@ -139,18 +155,23 @@ the probe is nothing.
 | Bass notes per beat                    | 1.1              | 2.4              | 1.8 and 2.4                            |
 | Bass, median pitch (MIDI)              | 38               | 42               | 43                                     |
 | Notes per beat of the rest of the band | 5.5              | 6.1              | 5.7 and 7.9                            |
-| Similarity, whole show                 | 0.67             | 0.66             | 0.92 and 0.94                          |
-| Similarity, chorus                     | 0.63             | 0.73             |                                        |
+| Similarity, whole show                 | 0.67             | 0.67             | 0.92 and 0.94                          |
+| Similarity, chorus                     | 0.63             | 0.71 to 0.73     |                                        |
+| Similarity, first eight bars           |                  | 0.74             |                                        |
 | «Live band, not MIDI», whole show      | 0.02             | 0.01             | 1.00                                   |
-| «Live band, not MIDI», chorus          | 0.00             | 0.60             |                                        |
-| Side against mid (dB), whole show      | −19.5            | −13.8            | −9.0 and −39.7                         |
+| «Live band, not MIDI», chorus          | 0.00             | 0.13 to 0.60     |                                        |
+| Side against mid (dB), whole show      | −19.5            | −13.0            | −9.0 and −39.7                         |
 | Drums, bass, rest (dB of the sum)      | −2.6, −7.0, −6.0 | −2.7, −5.2, −7.9 | −3.5, −6.9, −4.6 and −1.6, −10.0, −6.9 |
 
 The reference column holds «Uma Mulher É Igual uma Flor» and the live «Ainda Bem», the two
-recordings the lab's reference set held when the show was measured. The groove, the bass and the
-balance now sit on the references. The models still hear a show far from them: the similarity of
-the whole show did not move, and only the chorus, where the trompete plays the theme, is judged a
-live band. The drum sounds and the keyboard are the likely cause (see
+recordings the lab's reference set held when the show was measured. The note counts and the
+balance were measured on the 59-bar script, before the band played from the first bar; the notes
+did not change. The two chorus values of the probe are two renders of the same bars with other
+takes: the probe sits on its edge and is no proof.
+
+The groove, the bass and the balance now sit on the references. The models still hear a show far
+from them: the similarity of the whole show did not move, and only the scenes where the trompete
+plays the theme come nearer. The drum sounds and the keyboard are the likely cause (see
 [Open points](#open-points)).
 
 Tried and measured on the chorus, not kept:

@@ -25,7 +25,7 @@ const stepsOf = (voice, bar) =>
     .filter(h => h.voice === voice)
     .map(h => h.hit.step);
 
-test('brega is 4/4 at 136 BPM on a 16-step wheel, eleven scenes as the script lists them, about 1:44', () => {
+test('brega is 4/4 at 136 BPM on a 16-step wheel, eleven scenes, about 1:37', () => {
   assert.equal(BREGA.id, 'brega');
   assert.equal(BREGA.copy.name, 'brega');
   assert.equal(BREGA.bpm, 136, 'the tempo measured on the owner’s references');
@@ -36,7 +36,7 @@ test('brega is 4/4 at 136 BPM on a 16-step wheel, eleven scenes as the script li
       ['introducao', 4],
       ['base', 4],
       ['baixo', 4],
-      ['teclado', 8],
+      ['teclado', 4],
       ['guitarra', 8],
       ['virada', 1],
       ['refrao', 8],
@@ -54,17 +54,19 @@ test('brega is 4/4 at 136 BPM on a 16-step wheel, eleven scenes as the script li
     }
 });
 
-test('the parts enter one by one: the theme alone, the base, the bass, the keyboard, then the guitar', () => {
-  const firstBar = voice => {
-    for (let bar = 0; bar < show.TOTAL_BARS; bar++) if (show.hitsInBar(bar).some(h => h.voice === voice)) return bar;
-    return null;
-  };
-  const order = ['tema', 'bumbo', 'baixo', 'cordas', 'guitarra', 'tom', 'metais'].map(firstBar);
-  assert.deepEqual(
-    [...order].sort((a, b) => a - b),
-    order,
-  );
-  assert.deepEqual(show.barTimeline(0).playing, ['tema']);
+test('the band plays from the first bar; a scene thins the band to show one thing, never one voice alone for long', () => {
+  assert.deepEqual(show.barTimeline(0).playing, ['bumbo', 'caixa', 'chimbal', 'baixo', 'cordas', 'teclado', 'tema']);
+  const SOLO_BARS = new Set([show.sceneById('virada').start, show.sceneById('breque').start + 1]); // the fill and the heartbeat, one bar each
+  for (let bar = 0; bar < show.TOTAL_BARS; bar++) {
+    const voices = new Set(show.hitsInBar(bar).map(h => h.voice));
+    if (!SOLO_BARS.has(bar)) assert.ok(voices.size >= 5, `bar ${bar} has ${[...voices]} only`);
+  }
+  // what a scene shows is louder there, what stays under it is softer
+  const gain = id => show.sceneById(id).gain;
+  assert.ok(gain('base').bumbo > 1 && gain('base').baixo < 1);
+  assert.ok(gain('baixo').baixo > 1 && gain('baixo').teclado < 1);
+  assert.ok(gain('teclado').teclado > 1);
+  assert.ok(gain('guitarra').guitarra > 1);
 });
 
 test('the xacumbum base splits the bar 3 + 3 + 2: two bumbos, then the caixa, over a chimbal in eighths', () => {

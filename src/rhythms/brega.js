@@ -171,18 +171,38 @@ const FINAL_NOTE = '0:A4/16';
 const DOUBLED_FROM = 2; // in the last chorus the guitar doubles the theme's notes of an eighth or more
 
 // ---------- the show script ----------
+// The band plays from the first bar, as a track of the genre does; each scene then shows one thing
+// about the rhythm by arrangement: the other parts rest or drop back (`gain`: a voice's level in the
+// scene) and the band returns whole.
 // Each scene: id, bars, the voices per bar, the lanes (rows under the wheel), the chords per bar and
 // each melodic line (bars as parseBar reads them). `transpose`: semitones up. `fill`: the bar (from
 // the scene's end) that ends in a tom fill. `cut`: the bar where everyone hits 1, then silence.
 const DRUMS = ['bumbo', 'caixa', 'chimbal'];
 const BAND = [...DRUMS, 'baixo', 'cordas', 'teclado'];
 const always = value => () => value;
-const repeat = (list, bars) => [...Array(bars).keys()].map(bar => list[bar % list.length]);
 const SCENE_LIST = [
-  { id: 'introducao', bars: 4, voices: always(['tema']), lanes: ['tema'], chords: INTRO_CHORDS, lines: { tema: INTRO } },
-  { id: 'base', bars: 4, voices: always(DRUMS), lanes: DRUMS },
-  { id: 'baixo', bars: 4, voices: always([...DRUMS, 'baixo']), lanes: ['bumbo', 'baixo'], chords: BASE_CHORDS },
-  { id: 'teclado', bars: 8, voices: always(BAND), lanes: ['cordas', 'teclado', 'baixo'], chords: repeat(BASE_CHORDS, 8) },
+  // the whole band from the first bar, with the head of the theme
+  { id: 'introducao', bars: 4, voices: always([...BAND, 'tema']), lanes: ['tema', 'teclado', 'bumbo'], chords: INTRO_CHORDS, lines: { tema: INTRO } },
+  // the base: the melody rests, the keyboard's chords stop, the kit comes forward
+  {
+    id: 'base',
+    bars: 4,
+    voices: always([...DRUMS, 'baixo', 'cordas']),
+    lanes: DRUMS,
+    chords: BASE_CHORDS,
+    gain: { bumbo: 1.15, caixa: 1.15, chimbal: 1.1, baixo: 0.7, cordas: 0.7 },
+  },
+  // the bass: the strings stop, the bass comes forward over the kit and soft chords
+  {
+    id: 'baixo',
+    bars: 4,
+    voices: always([...DRUMS, 'baixo', 'teclado']),
+    lanes: ['bumbo', 'baixo'],
+    chords: BASE_CHORDS,
+    gain: { baixo: 1.3, teclado: 0.65, chimbal: 0.8 },
+  },
+  // the keyboard: its chords and the strings forward, the band whole again
+  { id: 'teclado', bars: 4, voices: always(BAND), lanes: ['cordas', 'teclado', 'baixo'], chords: BASE_CHORDS, gain: { teclado: 1.35, cordas: 1.3 } },
   {
     id: 'guitarra',
     bars: 8,
@@ -190,6 +210,7 @@ const SCENE_LIST = [
     lanes: ['guitarra', 'teclado', 'bumbo'],
     chords: VERSE_CHORDS,
     lines: { guitarra: VERSE },
+    gain: { guitarra: 1.2 },
   },
   { id: 'virada', bars: 1, voices: always(['bumbo', 'tom']), lanes: ['tom', 'bumbo'], fill: 'whole' },
   {
@@ -399,7 +420,7 @@ const hornsPunch = (chord, barInScene) => (ANSWERS[barInScene] ? HORN_PUNCHES.ma
 export function barHits(scene, barInScene) {
   const hits = allHits(scene, barInScene),
     playing = new Set(scene.voices(barInScene));
-  // a voice that has not entered yet is not on the wheel: each entry stands out on its own
+  // a voice that rests in a scene is not on the wheel: what the scene shows stands out
   return Object.fromEntries(VOICE_ORDER.map(voice => [voice, playing.has(voice) ? hits[voice] : []]));
 }
 function allHits(scene, barInScene) {
@@ -737,9 +758,9 @@ const COPY = {
   description: 'Brega do Recife: o xacumbum da bateria, baixo, teclado, cordas, guitarra em terças e metais, um de cada vez e depois juntos, em lá menor.', // the page's search and preview description
   feminineInstruments: ['caixa', 'guitarra'], // "som da caixa", "som do bumbo"
   scenes: {
-    introducao: { chip: 'Introdução', eyebrow: 'o tema no trompete', title: 'Brega' },
+    introducao: { chip: 'Introdução', eyebrow: 'a banda inteira, o tema no trompete', title: 'Brega' },
     base: { chip: 'Base', eyebrow: 'xacumbum: bumbo, bumbo, caixa', title: 'Base' },
-    baixo: { chip: 'Baixo', eyebrow: 'baixo que anda com o bumbo', title: 'Baixo' },
+    baixo: { chip: 'Baixo', eyebrow: 'o baixo anda com o bumbo', title: 'Baixo' },
     teclado: { chip: 'Teclado', eyebrow: 'cordas e acordes curtos', title: 'Teclado' },
     guitarra: { chip: 'Guitarra', eyebrow: 'solinho em terças', title: 'Guitarra' },
     virada: { chip: 'Virada', eyebrow: 'virada de tons', title: 'Virada' },
