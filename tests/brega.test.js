@@ -1,0 +1,290 @@
+// The brega package: its show script, its harmony and melodies, its recorded sounds and the rules its
+// colours and background keep (docs/rhythms/brega.md).
+import assert from 'node:assert/strict';
+import { existsSync, statSync } from 'node:fs';
+import { test } from 'node:test';
+import { fileURLToPath } from 'node:url';
+import { meterOf } from '../src/music.js';
+import { ACCENT_BARS, BEAT, BREGA, BREGA_LINES, HEARTBEAT, parseBar, THEME, thirdBelow } from '../src/rhythms/brega.js';
+import { BREGA_PALETTE, createBregaPainter } from '../src/rhythms/brega-background.js';
+import { midiOf } from '../src/rhythms/studio-kit.js';
+import { createShow } from '../src/show.js';
+import { planStudio } from '../src/studio.js';
+import { COLORS } from '../src/theme.js';
+
+const show = createShow(BREGA);
+const meter = meterOf(BREGA);
+const DEFAULTS = Object.fromEntries(BREGA.sounds.choices.map(choice => [choice.id, choice.defaultOption]));
+const soundPath = (name, extension) => fileURLToPath(new URL(`../sounds/${name}${extension}`, import.meta.url));
+const allFiles = choices => [...new Set([...BREGA.sounds.choices.flatMap(c => c.files(choices[c.id])), ...BREGA.sounds.fixedFiles])];
+const PHONE_BYTES = 900_000; // every default sample of the band, before Play (docs/rhythms/brega.md)
+const MAX_RETUNE = 5; // semitones a take may be retuned
+const stepsOf = (voice, bar) =>
+  show
+    .hitsInBar(bar)
+    .filter(h => h.voice === voice)
+    .map(h => h.hit.step);
+
+test('brega is 4/4 at 140 BPM on a 16-step wheel, eleven scenes as the script lists them, about 1:41', () => {
+  assert.equal(BREGA.id, 'brega');
+  assert.equal(BREGA.copy.name, 'brega');
+  assert.equal(BREGA.bpm, 140);
+  assert.equal(meter.stepsPerBar, 16);
+  assert.deepEqual(
+    show.SCENES.map(scene => [scene.id, scene.bars]),
+    [
+      ['introducao', 4],
+      ['base', 4],
+      ['baixo', 4],
+      ['teclado', 8],
+      ['guitarra', 8],
+      ['virada', 1],
+      ['refrao', 8],
+      ['breque', 2],
+      ['vinheta', 8],
+      ['refrao-final', 8],
+      ['final', 4],
+    ],
+  );
+  assert.ok(show.TOTAL_SECONDS > 90 && show.TOTAL_SECONDS < 120, `${show.TOTAL_SECONDS} s`);
+  for (let bar = 0; bar < show.TOTAL_BARS; bar++)
+    for (const h of show.hitsInBar(bar)) {
+      assert.ok(h.grid >= bar && h.grid < bar + 1, `${h.voice} at ${h.grid} is outside bar ${bar}`);
+      assert.equal(h.swing, 0, 'brega is programmed straight');
+    }
+});
+
+test('the parts enter one by one: the theme alone, the base, the bass, the keyboard, then the guitar', () => {
+  const firstBar = voice => {
+    for (let bar = 0; bar < show.TOTAL_BARS; bar++) if (show.hitsInBar(bar).some(h => h.voice === voice)) return bar;
+    return null;
+  };
+  const order = ['tema', 'bumbo', 'baixo', 'cordas', 'guitarra', 'tom', 'metais'].map(firstBar);
+  assert.deepEqual(
+    [...order].sort((a, b) => a - b),
+    order,
+  );
+  assert.deepEqual(show.barTimeline(0).playing, ['tema']);
+});
+
+test('the xacumbum base: bumbo on 1 and 3 with a pick-up, caixa on 2 and 4, the chimbal loud on the off-beat', () => {
+  const bar = show.sceneById('base').start;
+  assert.deepEqual(stepsOf('bumbo', bar), [0, 8, 15]);
+  assert.deepEqual(stepsOf('caixa', bar), [4, 12]);
+  assert.deepEqual(stepsOf('chimbal', bar), [0, 2, 4, 6, 8, 10, 12, 14]);
+  const loud = BEAT.chimbal.filter(h => h.velocity > 0.7).map(h => h.step);
+  assert.deepEqual(loud, [2, 6, 10, 14]);
+});
+
+test('the bass plays with the bumbo and pushes the next root on the last sixteenth', () => {
+  const bar = show.sceneById('baixo').start;
+  assert.deepEqual(stepsOf('baixo', bar), stepsOf('bumbo', bar));
+  const last = show.hitsInBar(bar).find(h => h.voice === 'baixo' && h.hit.step === 15);
+  assert.equal(Number(last.hit.tone.split(':')[0]), midiOf('F1'), 'the anticipation is the next chord’s root');
+});
+
+test('the keyboard chords sit on the off-beats; the strings hold one chord per bar', () => {
+  const bar = show.sceneById('teclado').start;
+  assert.deepEqual(stepsOf('teclado', bar), [2, 6, 10, 14]);
+  assert.deepEqual(stepsOf('cordas', bar), [0]);
+});
+
+test('the guitar plays in thirds: each hit is two notes a diatonic third apart', () => {
+  const scene = show.sceneById('guitarra');
+  let hits = 0;
+  for (let bar = scene.start; bar < scene.start + scene.bars; bar++)
+    for (const h of show.hitsInBar(bar).filter(candidate => candidate.voice === 'guitarra')) {
+      const [upper, lower] = h.hit.tone.split(':')[0].split(',').map(Number);
+      assert.ok([3, 4].includes(upper - lower), `${upper} over ${lower}`);
+      hits++;
+    }
+  assert.ok(hits > 20);
+  assert.equal(thirdBelow(midiOf('B4'), 'E7'), midiOf('G#4'));
+  assert.equal(thirdBelow(midiOf('C5'), 'Am'), midiOf('A4'));
+});
+
+test('a tom fill comes before each chorus, and the breque leaves a bar of silence but the heartbeat', () => {
+  const before = id => show.sceneById(id).start - 1;
+  for (const id of ['refrao', 'refrao-final']) assert.ok(stepsOf('tom', before(id)).length >= 8, `no fill before ${id}`);
+  const breque = show.sceneById('breque');
+  assert.equal(breque.mode(0), 'cut');
+  for (const h of show.hitsInBar(breque.start)) assert.equal(h.hit.step, 0, `${h.voice} sounds after the breque’s hit`);
+  assert.deepEqual(
+    stepsOf('bumbo', breque.start + 1),
+    HEARTBEAT.map(h => h.step),
+  );
+  assert.deepEqual(show.barTimeline(breque.start + 1).playing, ['bumbo']);
+});
+
+test('the horns answer the guitar in the vinheta, bar after bar', () => {
+  const scene = show.sceneById('vinheta');
+  for (let i = 0; i < scene.bars; i++) {
+    const bar = scene.start + i;
+    if (i % 2 === 0) {
+      assert.ok(stepsOf('guitarra', bar).length > 0, `the guitar is silent in bar ${i + 1}`);
+      assert.equal(stepsOf('metais', bar).length, 0);
+    } else {
+      assert.ok(stepsOf('metais', bar).length > 0, `no answer in bar ${i + 1}`);
+      assert.equal(stepsOf('guitarra', bar).length, 0);
+    }
+  }
+});
+
+test('the theme opens the show, returns in both choruses, and the last chorus is a whole tone higher', () => {
+  const tema = bar => (BREGA_LINES.tema.get(bar) || []).map(note => note.midi);
+  const intro = show.sceneById('introducao').start,
+    chorus = show.sceneById('refrao').start,
+    last = show.sceneById('refrao-final').start;
+  for (let i = 0; i < THEME.length; i++) {
+    assert.deepEqual(tema(chorus + i), tema(intro + i));
+    assert.deepEqual(
+      tema(last + i),
+      tema(intro + i).map(midi => midi + 2),
+    );
+  }
+  // a minor key: the theme rests on A and its long notes are chord tones
+  assert.equal(parseBar(THEME.at(-1)).at(-1).midi % 12, midiOf('A4') % 12);
+  assert.ok(
+    THEME.flatMap(parseBar).some(note => note.length >= 8),
+    'the theme has long notes',
+  );
+});
+
+test('the show ends on one held chord in the new key', () => {
+  const end = show.TOTAL_BARS - 1;
+  assert.equal(show.sceneAt(end).mode(end - show.sceneAt(end).start), 'cut');
+  const tema = show.hitsInBar(end).find(h => h.voice === 'tema');
+  assert.equal(Number(tema.hit.tone.split(':')[0]), midiOf('B4'));
+});
+
+test('every note plays a recorded take within five semitones, never the same take twice in a row', () => {
+  const plan = planStudio(BREGA, show, DEFAULTS),
+    last = {};
+  for (const step of [...plan.keys()].sort((a, b) => a - b))
+    for (const event of plan.get(step)) {
+      for (const source of event.sources) {
+        assert.ok(existsSync(soundPath(source.file, '.m4a')), `${source.file} is missing`);
+        assert.ok(Math.abs(Math.log2(source.rate) * 12) <= MAX_RETUNE + 0.01, `${event.voice} ${source.file} retunes too far`);
+      }
+      const [first] = event.sources;
+      const pool = BREGA.sounds.studio.voices[event.voice].strokes({})[event.stroke];
+      if (pool.length > 1 && !first.only) assert.ok(!last[event.voice]?.includes(first.file), `${event.voice} repeats ${first.file} at step ${step}`);
+      last[event.voice] = event.sources.map(source => source.file);
+    }
+});
+
+test('the drums stay on the grid and the players drift; the same plan every time', () => {
+  const plan = planStudio(BREGA, show, DEFAULTS);
+  const offsets = {};
+  for (const events of plan.values())
+    for (const event of events) {
+      offsets[event.voice] ??= [];
+      offsets[event.voice].push(event.offset);
+    }
+  for (const voice of ['bumbo', 'caixa', 'chimbal', 'tom'])
+    assert.ok(
+      offsets[voice].every(offset => offset === 0),
+      voice,
+    );
+  for (const voice of ['baixo', 'teclado', 'guitarra'])
+    assert.ok(
+      offsets[voice].some(offset => offset !== 0),
+      voice,
+    );
+  assert.deepEqual(JSON.stringify([...planStudio(BREGA, show, DEFAULTS)]), JSON.stringify([...plan]));
+});
+
+test('every sound has its WAV master; the phone set stays under 900 KB', () => {
+  for (const name of allFiles(DEFAULTS)) {
+    assert.ok(existsSync(soundPath(name, '.m4a')), `${name}.m4a`);
+    assert.ok(existsSync(soundPath(name, '.wav')), `${name}.wav`);
+  }
+  const bytes = allFiles(DEFAULTS).reduce((sum, name) => sum + statSync(soundPath(name, '.m4a')).size, 0);
+  assert.ok(bytes < PHONE_BYTES, `the default samples weigh ${bytes} bytes`);
+});
+
+/** WCAG relative luminance and contrast. */
+const rgb = hex => [1, 3, 5].map(i => parseInt(hex.slice(i, i + 2), 16));
+const channel = c => {
+  const v = c / 255;
+  return v <= 0.04045 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4;
+};
+const luminance = ([r, g, b]) => 0.2126 * channel(r) + 0.7152 * channel(g) + 0.0722 * channel(b);
+const contrast = (a, b) => (Math.max(luminance(a), luminance(b)) + 0.05) / (Math.min(luminance(a), luminance(b)) + 0.05);
+
+test('each voice reads at 3:1 on the wheel and on the ground, and no red passes R/(R+G+B) 0.8', () => {
+  for (const [voice, { color }] of Object.entries(BREGA.voices)) {
+    assert.ok(contrast(rgb(color), rgb(COLORS.void)) >= 3, `${voice} ${color} on the wheel`);
+    assert.ok(contrast(rgb(color), rgb(BREGA_PALETTE.ground)) >= 3, `${voice} ${color} on the ground`);
+  }
+  for (const hex of [...Object.values(BREGA_PALETTE), ...Object.values(BREGA.voices).map(v => v.color)]) {
+    const [r, g, b] = rgb(hex);
+    assert.ok(r / (r + g + b) < 0.8, hex);
+  }
+});
+
+// The background drawn over the whole show at 30 frames a second, on a canvas that records it.
+function paintShow(record = {}) {
+  const FPS = 30,
+    RADIUS = 120;
+  const layer = BREGA.background.create({ stepsPerBar: meter.stepsPerBar, angleOf: step => (step / meter.stepsPerBar) * Math.PI * 2 });
+  const noop = () => {};
+  const ctx = new Proxy({}, { get: (_target, key) => record[key] || (key.startsWith('create') ? () => ({ addColorStop: noop }) : noop), set: () => true });
+  const geometry = { width: 400, height: 800, centreX: 200, centreY: 330, scopeRadius: RADIUS, dpr: 1 };
+  const LOOK = BREGA.looks.introducao;
+  for (let frame = 0; frame < show.TOTAL_SECONDS * FPS; frame++) {
+    const position = frame / FPS / meter.barSeconds,
+      look = BREGA.looks[show.sceneAt(Math.floor(position)).id] || LOOK;
+    layer.draw(ctx, { ...geometry, position, params: { from: look, to: look, mix: 0 }, recent: [], time: frame / FPS, step: 1 / FPS, fresh: frame === 0 });
+  }
+  return { layer, geometry, RADIUS };
+}
+
+test('the background blooms at most 3 times in any second (WCAG 2.3.1), on phrase accents only', () => {
+  const { layer } = paintShow();
+  const flashes = layer.flashTimes();
+  assert.ok(flashes.length > 0);
+  assert.deepEqual(
+    flashes,
+    ACCENT_BARS.map(bar => bar * meter.barSeconds),
+  );
+  for (const start of flashes) assert.ok(flashes.filter(t => t >= start && t < start + 1).length <= 3, `flashes from ${start.toFixed(2)} s`);
+  // and none closer than a bar: well under the limit
+  for (let i = 1; i < flashes.length; i++) assert.ok(flashes[i] - flashes[i - 1] >= meter.barSeconds - 1e-9);
+});
+
+test('under the wheel the background keeps the ground: every wheel colour stays at 3:1 or more', () => {
+  const ground = rgb(BREGA_PALETTE.ground);
+  let darkest = Infinity,
+    innermost = Infinity;
+  const record = {
+    createRadialGradient: (_x0, _y0, r0, _x1, _y1, r1) => ({
+      addColorStop: (offset, colour) => {
+        if (r0 + offset * (r1 - r0) > 120) return;
+        const [r, g, b, a] = colour.match(/[\d.]+/g).map(Number);
+        const under = [r, g, b].map((c, i) => c * a + ground[i] * (1 - a));
+        for (const { color } of Object.values(BREGA.voices)) darkest = Math.min(darkest, contrast(rgb(color), under));
+      },
+    }),
+    arc: (x, y, radius) => {
+      innermost = Math.min(innermost, radius - Math.hypot(x - 200, y - 330));
+    },
+    ellipse: (x, y, radius) => {
+      innermost = Math.min(innermost, Math.hypot(x - 200, y - 330) - radius);
+    },
+  };
+  const { RADIUS } = paintShow(record);
+  assert.ok(darkest >= 3, `a wheel colour at ${darkest.toFixed(2)}:1`);
+  assert.ok(innermost > RADIUS, 'rings, petals and blooms stay outside the wheel');
+});
+
+test('with reduced motion the background has no bloom and nothing travels', () => {
+  const previous = globalThis.matchMedia;
+  globalThis.matchMedia = () => ({ matches: true });
+  try {
+    const painter = createBregaPainter({ beatsPerBar: 4, barSeconds: meter.barSeconds, petalBars: () => 3, accentBars: [0, 4] });
+    assert.deepEqual(painter.flashTimes(), []);
+  } finally {
+    globalThis.matchMedia = previous;
+  }
+});
