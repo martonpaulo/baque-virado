@@ -5,7 +5,7 @@ import { existsSync, statSync } from 'node:fs';
 import { test } from 'node:test';
 import { fileURLToPath } from 'node:url';
 import { meterOf } from '../src/music.js';
-import { CAIXA_CELL, FREVO, FREVO_LINES, MAX_RETUNE, midiOf, nearestSample } from '../src/rhythms/frevo.js';
+import { CAIXA_CELL, FREVO, FREVO_LINES, MAX_RETUNE, midiOf, nearestSample, PANDEIRO_BAR } from '../src/rhythms/frevo.js';
 import { FREVO_PALETTE } from '../src/rhythms/frevo-background.js';
 import { createShow } from '../src/show.js';
 import { COLORS } from '../src/theme.js';
@@ -60,6 +60,20 @@ test('the caixa cell is twelve sixteenths, then the rufo, over two bars', () => 
   const tokens = CAIXA_CELL.join(' ').split(' ');
   assert.equal(tokens.filter(token => token === 'X' || token === 'x').length, 12);
   assert.equal(tokens.indexOf('r'), 12);
+});
+
+test('the pandeiro plays a sixteenth-note ostinato: every step of the bar, grave on each beat', () => {
+  const bar = show.sceneById('pandeiro').start;
+  const steps = show
+    .hitsInBar(bar)
+    .filter(h => h.voice === 'pandeiro')
+    .map(h => h.hit.step)
+    .sort((a, b) => a - b);
+  assert.deepEqual(steps, [...Array(meterOf(FREVO).stepsPerBar).keys()]);
+  assert.deepEqual(
+    PANDEIRO_BAR.split(' ').flatMap((token, step) => (token === 'X' ? [step] : [])),
+    [0, FREVO.stepsPerBeat],
+  );
 });
 
 test('every note plays a sample within two semitones of it, and every sample exists', () => {

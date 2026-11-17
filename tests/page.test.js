@@ -476,6 +476,7 @@ test('?ritmo=frevo plays the frevo show on an 8-step wheel, every bar drawn with
   for (const { page, errors } of pages) {
     assert.equal(await page.evaluate(() => window.baque.TOTAL), 104);
     assert.equal(await page.$$eval('#scope text[fill-opacity]', texts => texts.filter(t => /^\d+$/.test(t.textContent)).length), 8);
+    assert.equal(await page.$eval('#scope', svg => svg.getAttribute('aria-label')), 'Roda de 8 semicolcheias com um anel por instrumento');
     for (let at = 0; at < 104; at += 0.37) await page.evaluate(position => window.baque.render(position), at);
     assert.deepEqual(errors, [], 'no console error on either viewport');
     await page.close();

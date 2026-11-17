@@ -44,6 +44,7 @@ const stage = $('stage');
 const isVideoExport = () => document.documentElement.classList.contains('video-export');
 const volume = initialVolumes(DESKTOP); // each instrument's level: the player, the wheel and the lanes read it
 const scope = createScope($('scope'), volume);
+$('scope').setAttribute('aria-label', COPY.wheel); // the rhythm's own number of steps
 const readout = createReadout($('read'), volume);
 const title = createTitle($('head'));
 const background = createBackground($('fx'), $('bg'));

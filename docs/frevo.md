@@ -22,8 +22,8 @@ The frevo de rua show: what it plays, what it shows and why. The package is
   caixa, pandeiro, tuba, then the metais, then the palhetas.
 - Percussion: the cell of two bars that the sources give for every Pernambuco frevo, twelve
   sixteenths and then the caixa's rufo. The accents follow the 3+3+2 grouping (an inference, as
-  in the research). The surdo is muted on beat 1 and open on beat 2; the pandeiro plays grave on
-  the beats and platinela between.
+  in the research). The surdo is muted on beat 1 and open on beat 2; the pandeiro plays every
+  sixteenth, the sources' ostinato: grave on the beats and platinela between.
 - No swing. The sources say the push comes from anticipations, not swing, and no measured frevo
   swing exists, so none is invented.
 - Key B♭ major: euphoria is fast, major, high and bright, and B♭ keeps every line inside the
@@ -60,7 +60,9 @@ edits are in [`CREDITS.md`](../CREDITS.md).
 - Each pitched sample was measured, retuned to the exact note and trimmed so the note starts at
   0. A note plays the nearest sample, retuned by its playback rate, never more than two semitones
   (`tests/frevo.test.js` checks every note of the show).
-- Levels were set by measuring an offline render, not yet by ear.
+- Levels were set by measuring an offline render, not yet by ear. In the 80 ms after each of its
+  hits, the caixa, pandeiro, trombones, trompetes and saxofone are each at least 3 dB louder above
+  1 kHz than the surdo and the tuba together, so the low end masks none of them.
 - A phone downloads every default sample, 43 files, about 380 KB. The maracatu limit of 100 KB
   cannot hold a melodic show; the frevo limit is 400 KB (`docs/product.md`, Limits).
 

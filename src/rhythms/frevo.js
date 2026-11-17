@@ -328,7 +328,7 @@ const melodic = (bar, voice) => (LINES[voice].get(bar) || []).map(note => hit(no
 // (docs/research/pernambuco-rhythms-feeling.md, § Frevo). Accent places follow the 3+3+2 grouping.
 export const CAIXA_CELL = ['X x x X x x X x', 'x X x X r . . .'];
 export const SURDO_CELL = ['o . . . X . . o', 'o . . . X . . .']; // o: abafado (hand on the skin), X: aberto
-export const PANDEIRO_BAR = 'X x . x X x . x'; // X: grave (thumb), x: platinela
+export const PANDEIRO_BAR = 'X x x x X x x x'; // the sixteenth ostinato: X grave (thumb) on the beat, x platinela
 const cellSteps = (text, mark) => text.split(' ').flatMap((token, step) => (token === mark ? [step] : []));
 function caixaBar(cellBar) {
   const text = CAIXA_CELL[cellBar];
@@ -517,8 +517,9 @@ const SOUND_CHOICES = [
 ];
 
 // voice → [sample, gain, playback rate] for one hit, or null for a mark that stays silent
-// Levels set by measuring an offline render (the brass above the rhythm section), not yet by ear.
-const GAIN = { surdo: 1, ghost: 0.7, tarol: 0.55, pandeiro: 0.65, tuba: 0.9, trombone: 0.6, trompete: 0.85, sax: 0.75 };
+// Levels set by measuring an offline render, not yet by ear: in the 80 ms after each of its hits, each
+// voice above the low end is at least 3 dB louder above 1 kHz than the surdo and tuba together.
+const GAIN = { surdo: 1, ghost: 0.7, tarol: 0.8, pandeiro: 0.65, tuba: 0.75, trombone: 0.85, trompete: 0.85, sax: 0.75 };
 const SAMPLE_FOR = {
   surdo: (choice, velocity, tone) =>
     choice.surdo === 'aberto'
