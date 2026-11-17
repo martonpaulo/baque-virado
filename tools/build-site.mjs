@@ -4,6 +4,9 @@
 // GitHub Pages serves at `/<id>` with status 200: a shipped rhythm's page is index.html with its own
 // title and address (the page reads the rhythm from its path); a rhythm being prepared gets a page
 // with the selector and one line, and no show. Assets stay at the root, so the relative links work.
+//   node tools/build-site.mjs <out> <commit>  → also versions every module, the stylesheet and the
+// sounds with `?v=<commit>` and writes build.txt, so a page never runs assets cached from another
+// build (#35). The repository's own pages stay unversioned for the dev server.
 
 import { cpSync, existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
@@ -56,8 +59,26 @@ export function preparingPage(html, id) {
   return head + body;
 }
 
-/** Write the whole site into `out`. */
-export function buildSite(out, root = ROOT) {
+const listModules = (dir, prefix) =>
+  readdirSync(dir, { withFileTypes: true }).flatMap(entry =>
+    entry.isDirectory() ? listModules(path.join(dir, entry.name), `${prefix}${entry.name}/`) : entry.name.endsWith('.js') ? [`${prefix}${entry.name}`] : [],
+  );
+
+/** The page with every module and the stylesheet at `?v=<version>`, and an import map that sends each
+ * module of `src/` to the same versioned URL, so the imports inside `src/` stay in this build too.
+ * `src/audio.js` reads the version from its own URL for the sounds. */
+export function versioned(html, version, modules) {
+  if (!/^[0-9a-f]{7,40}$/.test(version)) throw new Error(`the build version must be a commit, not ${version}`);
+  const query = `?v=${version}`;
+  const imports = Object.fromEntries(modules.map(module => [`/${module}`, `/${module}${query}`]));
+  const importMap = `<script type="importmap">${JSON.stringify({ imports })}</script>\n`;
+  const page = html.replace(/((?:src|href)=")((?:src\/[^"?]+\.js)|styles\.css)"/g, `$1$2${query}"`);
+  const firstModule = page.search(/<script type="module"|<link rel="modulepreload"/);
+  return firstModule < 0 ? page : page.slice(0, firstModule) + importMap + page.slice(firstModule);
+}
+
+/** Write the whole site into `out`; with a `version`, every page loads only that build's assets. */
+export function buildSite(out, root = ROOT, version = '') {
   if (existsSync(out)) throw new Error(`${out} already exists`);
   mkdirSync(out, { recursive: true });
   for (const entry of COPIED) cpSync(path.join(root, entry), path.join(out, entry), { recursive: true });
@@ -69,14 +90,20 @@ export function buildSite(out, root = ROOT) {
   for (const file of readdirSync(path.join(root, 'fonts')).filter(name => name.endsWith('.woff2') || /^OFL-.*\.txt$/.test(name)))
     cpSync(path.join(root, 'fonts', file), path.join(out, 'fonts', file));
 
+  const modules = listModules(path.join(root, 'src'), 'src/');
+  const finish = page => (version ? versioned(page, version, modules) : page);
   const html = readFileSync(path.join(root, 'index.html'), 'utf8');
+  if (version) {
+    writeFileSync(path.join(out, 'index.html'), finish(html));
+    writeFileSync(path.join(out, 'build.txt'), `${version}\n`);
+  }
   const origin = new URL(html.match(/<link rel="canonical" href="([^"]+)"/)[1]).origin; // the live address, which index.html owns
   for (const id of ROUTES) {
     const rhythm = RHYTHMS.find(candidate => candidate.id === id);
     if (rhythm) {
-      writeFileSync(path.join(out, `${id}.html`), withRoute(html, { id, title: capitalized(rhythm.copy.selector || rhythm.copy.name), origin }));
+      writeFileSync(path.join(out, `${id}.html`), finish(withRoute(html, { id, title: capitalized(rhythm.copy.selector || rhythm.copy.name), origin })));
     } else if (PREPARING[id]) {
-      writeFileSync(path.join(out, `${id}.html`), withRoute(preparingPage(html, id), { id, title: PREPARING[id].name, origin }));
+      writeFileSync(path.join(out, `${id}.html`), finish(withRoute(preparingPage(html, id), { id, title: PREPARING[id].name, origin })));
     } else {
       throw new Error(`route ${id} has neither a rhythm package nor an entry in src/rhythms/preparing.js`);
     }
@@ -85,7 +112,7 @@ export function buildSite(out, root = ROOT) {
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
   const out = process.argv[2];
-  if (!out) throw new Error('usage: node tools/build-site.mjs <out>');
-  buildSite(path.resolve(out));
+  if (!out) throw new Error('usage: node tools/build-site.mjs <out> [<commit>]');
+  buildSite(path.resolve(out), ROOT, process.argv[3] || '');
   console.log(`built the site in ${out}`);
 }
