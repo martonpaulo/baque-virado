@@ -89,8 +89,8 @@ From Freesound:
 ## Manguebeat
 
 The manguebeat show (`sounds/manguebeat-*`, [`docs/rhythms/manguebeat.md`](docs/rhythms/manguebeat.md))
-reuses the alfaia recordings above, two alfaia hits of the zabumba group, and the studio's caixa and
-baixo groups. Its own files were trimmed to start on the stroke, faded, normalised to −1 dBFS and,
+reuses the alfaia recordings above, two alfaia hits of the zabumba group, the studio's caixa and
+baixo groups, and, for its second guitar, the brega's clean Stratocaster notes. Its own files were trimmed to start on the stroke, faded, normalised to −1 dBFS and,
 for the guitar, retuned to equal temperament after measuring each chord's spectrum. All are CC0.
 
 - Distorted guitar power chords, from Freesound: SpeedY (E5, E5 up-strum, E5 two strings, D5 and
@@ -98,9 +98,10 @@ for the guitar, retuned to equal temperament after measuring each chord's spectr
   held, the D♯5 retuned up to E5; freesound.org/s/49280, 49277).
 - Ganzá: the small shaker of [VCSL](https://github.com/sgossner/VCSL) (CC0, Sam Gossner), faster
   strokes forward and back, two takes each.
-- Echo returns: the VCSL rope-tension snare (low, snares on, loudest layer, two takes) band-passed
-  from 500 Hz to 2.6 kHz; the repository's deep alfaia main and answer strokes band-passed from
-  90 Hz to 700 Hz.
+- Echo returns (`manguebeat-alfaia-eco-*`, `manguebeat-caixa-eco-*`): the VCSL rope-tension snare
+  (low, snares on, loudest layer, two takes) band-passed from 500 Hz to 2.6 kHz; the repository's
+  deep alfaia main and answer strokes band-passed from 90 Hz to 700 Hz. The show no longer plays
+  them: its echo is now a delay in the studio.
 - Sampler: a worn record's crackle, hiss and rumble, synthesized for this project from a seeded noise
   source (original, 2026-11).
 

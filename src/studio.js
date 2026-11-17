@@ -187,6 +187,7 @@ export function planStudio(rhythm, show, choice) {
               pool = byZone(takes, note, spec.maxZone ?? MAX_ZONE),
               take = pickTake(pool, spec.seed + SALT.ghost + i, ordinal * 8 + i, avoid);
             avoid.add(take.file);
+            played.push(take.file); // the next hit repeats neither side
             const rate = (take.rate ?? 1) * (note === null ? 1 : 2 ** ((note - take.root) / SEMITONES)) * 2 ** ((spec.double.cents ?? 0) / CENTS_PER_OCTAVE);
             return {
               file: take.file,
@@ -213,6 +214,8 @@ export function planStudio(rhythm, show, choice) {
         glide: shaped.glide ? { ratio: 2 ** (shaped.glide.semitones / SEMITONES), at: shaped.glide.at, over: shaped.glide.over } : null,
         vibrato:
           shaped.length && spec.vibrato ? { ...spec.vibrato, hz: spec.vibrato.hz * (1 + VIBRATO_SPREAD * noise(ordinal, spec.seed + STREAM.vibrato)) } : null,
+        // a dub throw: this one hit also goes into the echo bus, at this level
+        ...(shaped.throw ? { throw: shaped.throw } : {}),
       });
     }
   }
@@ -375,6 +378,11 @@ export function createStudioMix(context, destination, buffers, studio) {
           .connect(tone)
           .connect(envelope)
           .connect((source.twin && channels[event.voice].twin) || channels[event.voice].main);
+        if (echo && event.throw) {
+          const toEcho = context.createGain();
+          toEcho.gain.value = event.throw;
+          envelope.connect(toEcho).connect(echo);
+        }
         node.start(at);
         if (event.length) {
           const end = at + event.length;
