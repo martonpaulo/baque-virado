@@ -1247,4 +1247,88 @@ export const TAKES = {
       file: 'brega-queda-2',
     },
   ],
+  'flauta-stac': [
+    {
+      file: 'flauta-stac-1',
+      root: 69,
+      layer: 0.6,
+    },
+    {
+      file: 'flauta-stac-2',
+      root: 69.02,
+      layer: 0.9,
+    },
+    {
+      file: 'flauta-stac-3',
+      root: 69.08,
+      layer: 0.9,
+    },
+    {
+      file: 'flauta-stac-4',
+      root: 71.98,
+      layer: 0.6,
+    },
+    {
+      file: 'flauta-stac-5',
+      root: 72.06,
+      layer: 0.9,
+    },
+    {
+      file: 'flauta-stac-6',
+      root: 72.03,
+      layer: 0.9,
+    },
+    {
+      file: 'flauta-stac-7',
+      root: 76.01,
+      layer: 0.6,
+    },
+    {
+      file: 'flauta-stac-8',
+      root: 76.09,
+      layer: 0.9,
+    },
+    {
+      file: 'flauta-stac-9',
+      root: 76.04,
+      layer: 0.9,
+    },
+    {
+      file: 'flauta-stac-10',
+      root: 81,
+      layer: 0.6,
+    },
+    {
+      file: 'flauta-stac-11',
+      root: 81.05,
+      layer: 0.9,
+    },
+    {
+      file: 'flauta-stac-12',
+      root: 81.04,
+      layer: 0.9,
+    },
+  ],
+  'flauta-sus': [
+    {
+      file: 'flauta-sus-1',
+      root: 69,
+      layer: 0.8,
+    },
+    {
+      file: 'flauta-sus-2',
+      root: 72.02,
+      layer: 0.8,
+    },
+    {
+      file: 'flauta-sus-3',
+      root: 76.01,
+      layer: 0.8,
+    },
+    {
+      file: 'flauta-sus-4',
+      root: 80.99,
+      layer: 0.8,
+    },
+  ],
 };

@@ -117,6 +117,23 @@ trombone and small-room takes above. All CC0.
 - Guitar (clean Stratocaster notes): guitarmaster; two sustained notes: owstu (Freesound)
 - Horn falls (five-horn section, unison A and E major): flakdemier (Freesound)
 
+## Bregafunk
+
+The bregafunk show ([`docs/rhythms/bregafunk.md`](docs/rhythms/bregafunk.md)) synthesizes its drum
+machine and synthesizers in the page (`src/rhythms/bregafunk-synth.js`, original to this project,
+2026-11): the bumbo, the lata, the palma, the 808 grave, the keyboard stab and the riser. It reuses
+the hi-hat, trumpet, trombone, atabaque and living-room takes above. Its own recordings, cut by
+`tools/prepare-takes.mjs` (trimmed to the note, faded and normalised; each note measured):
+
+- Flute, the hook (`sounds/flauta-stac-*`, staccato, four notes, three takes each; and
+  `sounds/flauta-sus-*`, sustained with vibrato, four notes): the solo flute of
+  [VSCO 2 Community Edition](https://github.com/sgossner/VSCO-2-CE) by Versilian Studios, recorded
+  by Sam Gossner and Simon Dalzell. The repository's `LICENSE` file is CC0 1.0 Universal. Source
+  files: `Woodwinds/Flute/stac/LDFlute_stac_<note>_<v2_rr1, v3_rr1, v3_rr2>.wav` and
+  `Woodwinds/Flute/susvib/LDFlute_susvib_<note>_v1_1.wav`, for the notes named A3, C4, E4 and A4
+  (they sound an octave higher), under
+  <https://raw.githubusercontent.com/sgossner/VSCO-2-CE/master/>.
+
 ## Fonts
 
 Space Grotesk (Copyright 2020 The Space Grotesk Project Authors) and JetBrains Mono (Copyright 2020
