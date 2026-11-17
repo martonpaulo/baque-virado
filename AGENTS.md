@@ -183,3 +183,5 @@ Lead with the outcome, in the output shape, and include:
   frames before it (`docs/product.md`, Constraints).
 - Each rhythm is one package in `src/rhythms/` (the engine reads it; nothing else names its voices, patterns or scenes); each has its path `/<id>` (`ROUTES` in `src/rhythms/index.js`; `tools/build-site.mjs` writes one page per path at deploy time, and a rhythm with no package yet gets a page saying its show is being prepared), `?ritmo=<id>` redirects to it, and the selector, at the bottom of the left column under the Roteiro, shows only with two or more ([#18](https://github.com/martonpaulo/baque-virado/issues/18), D13 in `docs/decisions.md`).
 - Dynamic copy lives in `src/copy.js` and the rhythm packages, colours in `src/theme.js` mirrored by `styles.css`.
+- The cloud cannot download from Freesound: CC0 recordings are fetched on the owner's Mac and pushed on a branch. `.gitignore` ignores a WAV outside the top of `sounds/`, so add it with `git add -f`.
+- Parallel cloud runs on one branch run `git pull --no-rebase` before each push, merge commits only, and never force-push.
