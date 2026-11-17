@@ -48,7 +48,7 @@ and the page plays smoothly to the end on a recent iPhone and an Android phone.
 
 ## Constraints
 
-- Static files only, served by GitHub Pages at https://baquevirado.martonpaulo.com; no backend.
+- Static files only, served by GitHub Pages at https://batuque.martonpaulo.com; no backend.
 - Chromium and WebKit are the acceptance engines (Android, desktop, iPhone).
 - Every sample is public domain (CC0); credits in [`CREDITS.md`](../CREDITS.md).
 - The sound, the notes, the score, the wheel and the lanes are a function of the show position, so
