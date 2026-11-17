@@ -37,7 +37,7 @@ A voice names its strokes; each stroke is a list of recorded takes. A take has a
 - **Shapes.** A held note has a length and a release; an accordion note opens with the bellows
   (45 ms) or a finger (6 ms); a held melodic note can carry a vibrato; an 808 note can glide.
 - **Ornaments.** A voice may add quiet ghost strokes with a probability per bar: the forró
-  zabumba a pressed ghost on the last sixteenth in half the bars, the coco's second head a soft
+  zabumba a pressed ghost before its pick-up in half the bars, the coco's second head a soft
   pick-up in 60 % of them. The identifying cell is the rhythm's own script and always plays.
 
 ## Feel
@@ -78,10 +78,12 @@ saturation and a compressor). In bregafunk the kick ducks the grave and the melo
 
 ## What still sounds artificial
 
-- The cavaquinho has one strum per chord, and the agogô one bell retuned for its high note: they
-  repeat the same recording.
-- The sanfona has one take per note; round robin borrows the neighbouring notes, retuned.
-- The zabumba's open head is a concert bass drum and alfaia hits, not a zabumba.
+- The agogô has one bell retuned for its high note: it repeats the same recording.
+- The forró cavaquinho is the bandolim's single notes strummed, not a cavaquinho.
+- The sanfona's right hand has one take per note; round robin borrows the neighbouring notes,
+  retuned by at most two semitones. Its bass buttons are three recordings.
+- The zabumba's open head is a concert bass drum and alfaia hits, played faster to reach a
+  zabumba's pitch, not a zabumba.
 - The rabeca is a violin; the bandolim's notes are cut from longer phrases.
 - The arrangement changes (a new pattern every few bars, fills) are the rhythm scripts' own; the
   studio adds only ghost strokes.

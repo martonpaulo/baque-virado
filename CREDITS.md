@@ -76,13 +76,18 @@ triângulo (Triangle 3 and 6, open and muted), the zabumba's open head (concert 
 quinto), rabeca (solo violin, arco with vibrato and spiccato), keys (Upright Nr1 piano), lead
 trumpet (sustained with vibrato and staccato) and the horns (trumpet and tenor trombone staccato).
 
+From FreePats (<https://freepats.zenvoid.org/Organ/accordion.html>, «Button Accordion HN», version
+2024-03-29, CC0 1.0): the forró sanfona's right hand and chord buttons, seventeen notes of a Hohner
+button accordion recorded by Jeff Stauffer and prepared by michael02022. The bank names its notes an
+octave above where they sound; the takes carry the pitch measured.
+
 From Freesound:
 
-- Sanfona notes and bass buttons: Miles_Thompson
+- Sanfona bass buttons (and the earlier sanfona notes, no longer played): Miles_Thompson
 - Zabumba: Sassaby (alfaia hits), sgossner (muted bass drum), gilblack1234 (short surdo)
 - Bacalhau: Sassaby, sgossner, DanVGC++, KEVOY
 - Bandolim: lucasgonze, gollybob
-- Cavaquinho chords: Sadiquecat (ukulele)
+- Cavaquinho chords (ukulele, no longer played: the forró strums the bandolim's single notes): Sadiquecat
 - Baixo: Ixwolf, mat_the_glad, SirBagel
 - Pandeiro: katusm, Ilson_Junior, menegass, MeanRaccoon
 - Palmas: steeltowngaming, semccab, launchsite, junioraragaki, pomeroyjoshua

@@ -6,33 +6,59 @@ spec is [`expansion-decisions.md`](../research/expansion-decisions.md), the forr
 [`backgrounds.html`](../sketches/backgrounds.html). This page records each choice the build made and
 why ([#21](https://github.com/martonpaulo/baque-virado/issues/21)).
 
+## Contents
+
+- [Music](#music)
+- [Sounds](#sounds)
+- [Visuals](#visuals)
+
 ## Music
 
-- **Tempo and metre.** 120 BPM for the whole show, as the script says, counted on the quarter note:
-  the felt pulse, one dance step per beat. 2/4 on an 8-step wheel, one bar per turn: 1 s per turn.
-  98 bars, 1:38. 120 sits inside the baião range of the web sources in
-  [`brega-forro.md`](../research/brega-forro.md) (110 to 135; xote 85 to 110, arrasta-pé 130 to
-  160), above the inferred 85 to 110 of
-  [`pernambuco-rhythms-feeling.md`](../research/pernambuco-rhythms-feeling.md). It is not a
-  half-time count: the triângulo plays 8 sixteenths a second.
-- **Swing.** None. The maracatu swing was measured on a recording; no forró measurement exists here,
-  so the grid stays straight rather than carry invented numbers.
-- **Mode and harmony.** G mixolydian (F natural, the flat seventh). Three chords: G (I), F (♭VII)
-  and C (IV), the drone-like I and ♭VII of the research.
-- **Tune.** Original. The hook A is two bars: a pick-up shape that lands the flat seventh on beat 2
-  and holds it. A phrase is A, A, A2 (A moved up to IV), A: the hook three times, varied once, back
-  unchanged at the end. The answer phrase is B, B, A2, A. The bandolim doubles the tune a diatonic
-  third below; the rabeca doubles it in unison.
-- **Zabumba.** The maceta plays the baião cell (dotted eighth, sixteenth, eighth: steps 1, 4, 5, the
-  last one pressed, abafada); the bacalhau plays the off-beats (3 and 7). The cell changes, as the
+The owner's reference is «Forró no Malagueta» (Forróçacana), studio and live
+([`references.md`](../research/references.md)). The show takes its tempo, groove, density, register
+and balance from it, measured on the recordings; the tune is original. Where the recording and an
+earlier study disagree, the recording decides and the line below says so.
+
+- **Tempo and metre.** 100 BPM for the whole show, counted on the quarter note: the felt pulse, one
+  dance step per beat. A beat tracker gives 97 BPM for the studio recording and 103 for the live
+  one, and 100 sits inside the researched baião range of 85 to 110
+  ([`pernambuco-rhythms-feeling.md`](../research/pernambuco-rhythms-feeling.md)). The show ran at
+  120 before, the top of another source's range. 2/4 on an 8-step wheel, one bar per turn: 1.2 s
+  per turn. 86 bars, 1:43.
+- **Swing.** None on the grid. No forró timing study exists here, so the wheel stays straight; the
+  triângulo's off-beat sixteenths sit about 10 % late in the sound only.
+- **Mode and harmony.** A dorian: a minor mode with a major sixth (F sharp). The reference is in a
+  minor key, and the research names dorian beside mixolydian for the baião. The second part moves
+  to D mixolydian, the same seven notes heard from D, whose flat seventh is C natural: the «major
+  with a flat seventh» of the research, now as a contrast inside the tune. Five chords: Am (i),
+  D (IV), G (♭VII), C (♭III) and E7 (V7), which borrows G sharp for the cadence.
+- **Tune.** Original, in two parts of eight bars, each ending on a cadence. Part A (Am, Am, D, D, Am,
+  G, E7, Am): a run of sixteenths up to a held top note that arrives a sixteenth early, with a
+  slide into it; the same shape over IV; the bellows rebounding on thirds; V7 to i. Part B (D, C,
+  D, C, G, D, E7, E7): the flat seventh held on the first beat, chords in 3 + 3 + 2, and two bars
+  of V7 that lead back. No bar of a part repeats another. The show plays A, B, then A and B with
+  everyone, the jogo de fole, A and B over the baião cell, the breque, and A to the end.
+- **Density and register.** Measured on the reference with a transcription model: about 10 to 12
+  note onsets per beat in the melodic instruments, their median pitch between F sharp 4 and B 4;
+  the bass 2.5 to 3.2 notes per beat around E2. The show's tutti measures 11 notes per beat at a
+  median of A4, and its bass 2.9 notes per beat at a median of D2.
+- **Zabumba.** The maceta plays the baião cell (dotted eighth, sixteenth, eighth: steps 1, 4 and 5,
+  the last one pressed, abafada) and a pick-up on the last sixteenth (step 8), as the reference's
+  low drum does on every bar. The bacalhau plays the off-beats (3 and 7). The cell changes, as the
   research asks: 3 + 3 + 2 in the Baião scene, a fill at the end of each 8-bar phrase.
 - **Triângulo.** Every sixteenth, closed by the hand, open on the off-beat eighths.
 - **Sanfona.** Two voices of one instrument: the right hand (the tune) and the left hand, «fole»
-  (bass button on the beat, chord button on the off-beat; in Jogo de fole, chord accents in
-  3 + 3 + 2).
-- **Breque.** Everyone on 1, then silence; the sanfona alone plays the pick-up back into the hook.
-  The end is everyone on 1, on G, the tune held on the tonic. The Final scene's last A keeps its
-  first bar, which lands the flat seventh, and the cadence takes its second: F resolves up to G.
+  (bass button on the beat, chord button on the off-beat, with a second, lighter chord as the
+  bellows come back). In the Jogo de fole the bellows shake on every sixteenth (the resfolego),
+  with the accents in 3 + 3 + 2.
+- **Bass.** It plays with the maceta (steps 1, 4, 5 and 8), leaves the root for the fifth, the
+  third and the octave, and leans into the next chord a sixteenth early, often by a semitone.
+- **Cavaquinho.** Down on the off-beat, up on the sixteenth after it, in two bars that alternate.
+- **Rabeca and bandolim.** In part A the rabeca holds long notes under the tune and answers in its
+  gaps; in part B it doubles the first four bars in unison. The bandolim plays the tune's eighth
+  notes a diatonic third below.
+- **Breque.** One more bar of V7, then everyone on 1 and silence; the sanfona alone plays the
+  pick-up back into the tune. The end is everyone on 1, on the A minor chord, held.
 
 ## Sounds
 
@@ -40,16 +66,43 @@ Every instrument is recorded and played through the studio ([`studio.md`](studio
 in [`CREDITS.md`](../../CREDITS.md).
 
 - **Zabumba**: open head from a concert bass drum (three dynamics, two round robins) and two alfaia
-  hits; the pressed note from muted bass drums, a stick hit, a short surdo and the dry alfaia.
+  hits. The bass drum takes sound near 62 Hz; the reference's zabumba sounds near 95 Hz and falls
+  20 dB in about 50 ms, so the takes play 1.45 times faster, which brings both to it. The pressed
+  note comes from muted bass drums, a stick hit, a short surdo and the dry alfaia.
 - **Bacalhau**: five stick and rim clicks and the maracatu's stick.
 - **Triângulo**: two triangles, open and muted, two dynamics and two round robins each.
-- **Sanfona**: nine recorded notes (C3 to E5), bass buttons C, F and G; chord buttons are three
-  recorded notes together. A held note or a motif's first note opens with the bellows (45 ms), the
-  others with a finger (6 ms).
-- **Rabeca**: a solo violin, spiccato for short notes and arco with vibrato for held ones.
+- **Sanfona**: a Hohner button accordion, seventeen recorded notes from B2 to G5, each with its two
+  reeds beating. A note plays a take recorded at most two semitones away. A held note opens with
+  the bellows (50 ms), the others with a finger (6 ms); a grace note slides up a semitone into its
+  note; the chord buttons are three recorded notes together; the bass buttons are the three
+  recorded bass notes. The recording is strong from 500 to 1000 Hz and dull above, so its channel
+  cuts 10 dB there and opens the top.
+- **Rabeca**: a solo violin, spiccato for a sixteenth and arco with vibrato for longer notes.
 - **Bandolim**: twelve single mandolin notes cut from longer recordings.
-- **Cavaquinho**: one strummed ukulele chord each for C, F and G.
+- **Cavaquinho**: no cavaquinho recording under CC0 was found. It strums the bandolim's single
+  notes: four strings down, three coming back, spread over a few milliseconds, each string its own
+  take. A ukulele strummed the same way measured closer to a toy keyboard and was dropped.
 - **Baixo**: ten electric bass notes, picked and fingered.
+
+### Mix
+
+The balance follows the reference, measured with a source-separation model and an audio-text model
+(CLAP) on a tutti scene. The numbers are the measures of 2026-11-17.
+
+| Measure                                       | Before           | Now              | Reference        |
+| :-------------------------------------------- | :--------------- | :--------------- | :--------------- |
+| Similarity to the reference (CLAP, 0 to 1)    | 0.83             | 0.90             | 0.97 (to itself) |
+| «A forró band», not «a toy keyboard» (0 to 1) | 0.74             | 0.99             | 0.99 to 1.00     |
+| Drums, bass, other (dB of the total)          | −5.8, −8.4, −2.3 | −3.6, −7.7, −4.1 | −3.5, −7.1, −4.9 |
+
+- Offline mixes of each instrument alone showed what moved the similarity: the triângulo 6 dB down
+  and the bass 3 dB down, the cavaquinho 5 dB and the rabeca 4 dB up. The reference's melodic stem
+  is itself heard by the model as plucked strings as much as accordion.
+- A tone on the whole band brings each of nine bands, 20 Hz to 16 kHz, within about 2 dB of the
+  reference's long-term spectrum; before, the band from 500 to 1000 Hz was 6 dB over and the lows
+  3 to 5 dB short.
+- The drums-bass-other row of «Now» was measured before the last balance change; the final values
+  are in the change's report.
 
 The zabumba leads the timing; the triângulo's off-beat sixteenths sit about 10 % of a sixteenth late.
 
