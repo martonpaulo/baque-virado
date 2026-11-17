@@ -195,7 +195,10 @@ function hitEnergy(recent) {
 }
 
 export function createBackground(fxCanvas, feedbackCanvas) {
-  const kaleidoscope = createKaleidoscope(fxCanvas);
+  // A rhythm with a background of its own draws it on the 2D canvas, over the frame before, in
+  // place of the kaleidoscope and the feedback tunnel (src/rhythms/, `background`).
+  const layer = RHYTHM.background?.create() ?? null;
+  const kaleidoscope = layer ? null : createKaleidoscope(fxCanvas);
   const ctx = feedbackCanvas.getContext('2d');
   const previous = document.createElement('canvas'),
     previousCtx = previous.getContext('2d');
@@ -341,8 +344,14 @@ export function createBackground(fxCanvas, feedbackCanvas) {
     const { width, height, centreX, centreY } = geometry;
     if (kaleidoscope) kaleidoscope.draw({ centreX: centreX * fxRatio(), centreY: centreY * fxRatio(), time: clock.time, params, ...hitEnergy(recent) });
     ctx.clearRect(0, 0, width, height);
-    if (clock.step > 0 && clock.step < FEEDBACK_MAX_STEP && hasFrame) drawFeedback(params, clock.step);
-    drawEmissions(recent, shapes, clock.time);
+    if (layer) {
+      const fresh = !hasFrame || clock.step >= FEEDBACK_MAX_STEP;
+      if (!fresh) ctx.drawImage(previous, 0, 0);
+      layer.draw(ctx, { ...geometry, position, params, recent, shapes, time: clock.time, step: clock.step, fresh });
+    } else {
+      if (clock.step > 0 && clock.step < FEEDBACK_MAX_STEP && hasFrame) drawFeedback(params, clock.step);
+      drawEmissions(recent, shapes, clock.time);
+    }
     if (SCENE_LOOKS[params.sceneId].moire) drawMoire(position, clock.time);
     if (params.strobe)
       for (const h of recent)
