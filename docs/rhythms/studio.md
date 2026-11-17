@@ -12,7 +12,7 @@
 ## What it is
 
 `src/studio.js` plays a rhythm that opts in with `sounds.studio` in its package. The forró, the
-coco and the brega funk use it. The maracatu does not: its sound path in `src/audio.js` is
+coco, the brega funk and the frevo use it. The maracatu does not: its sound path in `src/audio.js` is
 unchanged, and `tests/maracatu-sound.test.js` pins every sample, time, rate and level of its
 render.
 

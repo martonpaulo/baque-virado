@@ -156,6 +156,7 @@ export function planStudio(rhythm, show, choice) {
       if (voice === studio.lead) velocity *= 1 + BAR_ACCENT * noise(bar * SALT.bar + hit.step, spec.seed + STREAM.accent);
       velocity = clamp(velocity, MIN_VELOCITY, MAX_VELOCITY);
       const shaped = spec.shape ? spec.shape(hit.tone, choice, { bar, step: hit.step, velocity }) : {};
+      if (shaped === null) continue; // a mark that stays silent
       const strokeName = shaped.stroke ?? hit.tone ?? 'hit';
       const takes = spec.strokes(choice)[strokeName];
       if (!takes) throw new Error(`studio: ${voice} has no stroke ${strokeName}`);
@@ -174,7 +175,8 @@ export function planStudio(rhythm, show, choice) {
         avoid.add(take.file);
         played.push(take.file);
         const rate = (take.rate ?? 1) * (note === null ? 1 : 2 ** ((note - take.root) / SEMITONES));
-        return { file: take.file, rate, gain: take.gain ?? 1, delay: i * (shaped.strum ?? 0) };
+        // `only`: no other take was near enough, so this one may repeat
+        return { file: take.file, rate, gain: take.gain ?? 1, delay: i * (shaped.strum ?? 0), only: candidates.length === 1 };
       });
       if (shaped.echo) sources.push(...sources.map(source => ({ ...source, delay: source.delay + shaped.echo.delay, gain: source.gain * shaped.echo.gain })));
       last[voice] = played;

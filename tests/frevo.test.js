@@ -8,6 +8,7 @@ import { meterOf } from '../src/music.js';
 import { CAIXA_CELL, FREVO, FREVO_LINES, MAX_RETUNE, midiOf, nearestSample } from '../src/rhythms/frevo.js';
 import { FREVO_PALETTE } from '../src/rhythms/frevo-background.js';
 import { createShow } from '../src/show.js';
+import { planStudio } from '../src/studio.js';
 import { COLORS } from '../src/theme.js';
 
 const show = createShow(FREVO);
@@ -62,14 +63,14 @@ test('the caixa cell is twelve sixteenths, then the rufo, over two bars', () => 
   assert.equal(tokens.indexOf('r'), 12);
 });
 
-test('every note plays a sample within two semitones of it, and every sample exists', () => {
-  for (let bar = 0; bar < show.TOTAL_BARS; bar++)
-    for (const { voice, hit } of show.hitsInBar(bar)) {
-      const sample = FREVO.sounds.sampleFor[voice](DEFAULTS, hit.velocity, hit.tone, 0);
-      if (!sample) continue;
-      assert.ok(existsSync(soundPath(sample[0], '.m4a')), `${sample[0]} is missing`);
-      assert.ok(Math.abs(Math.log2(sample[2]) * 12) <= MAX_RETUNE + 1e-9, `${voice} ${hit.tone} retunes too far`);
-    }
+test('every note plays a take within two semitones of it, and every take exists', () => {
+  const plan = planStudio(FREVO, show, DEFAULTS);
+  for (const events of plan.values())
+    for (const event of events)
+      for (const source of event.sources) {
+        assert.ok(existsSync(soundPath(source.file, '.m4a')), `${source.file} is missing`);
+        assert.ok(Math.abs(Math.log2(source.rate) * 12) <= MAX_RETUNE + 1e-9, `${event.voice} ${source.file} retunes too far`);
+      }
   assert.deepEqual(nearestSample('trompete', 'bb5').slice(2), [1]);
   assert.equal(midiOf('bb4'), 70);
 });

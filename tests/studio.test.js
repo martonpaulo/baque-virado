@@ -42,13 +42,13 @@ test('every planned take exists, is retuned sanely and sits near its place', () 
   }
 });
 
-test('a voice never plays the same take of a stroke twice in a row when the stroke has another', () => {
+test('a voice never plays the same take twice in a row when another take is near enough', () => {
   for (const rhythm of STUDIO_RHYTHMS) {
     const last = {};
     for (const event of events(planOf(rhythm))) {
       const pool = new Set(rhythm.sounds.studio.voices[event.voice].strokes({})[event.stroke].map(take => take.file));
       const [first] = event.sources;
-      if (pool.size > 1 && last[event.voice])
+      if (pool.size > 1 && !first.only && last[event.voice])
         assert.ok(!last[event.voice].includes(first.file), `${rhythm.id} ${event.voice} repeats ${first.file} at step ${event.step}`);
       last[event.voice] = event.sources.map(source => source.file);
     }
