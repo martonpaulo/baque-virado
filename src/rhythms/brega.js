@@ -1,9 +1,10 @@
 // Brega: Recife's romantic brega, everything the engine plays and shows that belongs to this rhythm.
-// Instrumental: bumbo, caixa and chimbal on the off-beat (the xacumbum base), the bass with the bumbo,
-// a string pad and keyboard chords on the off-beat, the keyboard's theme, a guitar melody in thirds,
-// a tom fill (virada) before each chorus, a one-bar break (breque) and the horns' answer (vinheta).
-// 4/4 at one tempo, a 16-step wheel, one bar per turn. A minor (heartbreak), the last chorus a whole
-// tone higher. The melodies are original to this project; choices and sources: docs/rhythms/brega.md.
+// Instrumental, a keyboard-led dance band: bumbo, caixa and chimbal (the xacumbum base, 3 + 3 + 2), a
+// walking bass, the keyboard's string pad and short chords, its lead with the theme, a guitar in
+// thirds that answers it, a tom fill (virada) before each chorus, a one-bar break (breque) and the
+// horns' answer (vinheta). 4/4 at one tempo, a 16-step wheel, one bar per turn. A minor (heartbreak),
+// the last chorus a whole tone higher. The melodies are original to this project; choices, sources
+// and the measurements on the owner's reference: docs/rhythms/brega.md.
 import { label, row, stat, stats } from '../readout-markup.js';
 import { rollReadout } from '../roll.js';
 import { fgAlpha } from '../theme.js';
@@ -11,10 +12,10 @@ import { BREGA_PALETTE, createBregaPainter } from './brega-background.js';
 import { sceneStarts, straightMeter } from './meter.js';
 import { midiOf, recordedChoices, studioSounds, takes } from './studio-kit.js';
 
-// docs/research/brega-forro.md, § 1c: «Expect about 130 to 150 BPM on a quarter-note pulse», and the
-// show outline there and the script sketch both run at 140. The bumbo on 1 and 3 gives the slow
-// two-step the dancers feel (70 half notes a minute, the «70 to 100» of pernambuco-rhythms-feeling.md).
-const BPM = 140;
+// The owner's reference («Uma Mulher É Igual uma Flor», Banda Musa do Calipso, and two other bands'
+// versions) measures 135 to 136 BPM; docs/research/brega-forro.md, § 1c, gives 130 to 150. The two
+// bumbos and the caixa split the bar 3 + 3 + 2 in eighths, so a dancer feels a slow two-step.
+const BPM = 136;
 const BEATS_PER_BAR = 4;
 const STEPS_PER_BEAT = 4;
 const STEPS_PER_BAR = BEATS_PER_BAR * STEPS_PER_BEAT;
@@ -26,6 +27,7 @@ const KEY_CHANGE = 2; // semitones: the last chorus and the end, a whole tone up
 // Velocities.
 const ACCENT = 1;
 const PLAIN = 0.85;
+const MEDIUM = 0.72;
 const SOFT = 0.6;
 const GHOST = 0.45;
 
@@ -57,109 +59,127 @@ const VOICES = {
   cordas: { instrument: 'cordas', ring: 66, size: 3.6, swing: null, color: COLOR.cordas, pitched: true },
   teclado: { instrument: 'teclado', ring: 58, size: 3, swing: null, color: COLOR.teclado, pitched: true },
   guitarra: { instrument: 'guitarra', ring: 50, size: 3.4, swing: null, color: COLOR.guitarra, pitched: true },
-  tema: { instrument: 'teclado', ring: 42, size: 3.6, swing: null, color: COLOR.tema, pitched: true, spark: true },
+  tema: { instrument: 'metais', ring: 42, size: 3.6, swing: null, color: COLOR.tema, pitched: true, spark: true },
   metais: { instrument: 'metais', ring: 35, size: 3.6, swing: null, color: COLOR.metais, pitched: true },
 };
 // The order also seeds the per-hit variation of the sound: keep it stable.
 const VOICE_ORDER = Object.keys(VOICES);
 
 // ---------- harmony ----------
-// One chord per bar. The pad and the keyboard voice each chord close, the keyboard an octave above.
+// One chord per bar. `third`: semitones from the root to the chord's third (the bass walks through
+// it). The pad voices each chord close, with the smallest move from the chord before; the keyboard
+// plays the same voicing an octave above. `horns`: the stab, voiced for trompetes over a trombone.
+const MINOR_THIRD = 3;
+const MAJOR_THIRD = 4;
 const CHORDS = {
-  Am: { bass: 'A1', pad: ['A3', 'C4', 'E4'], symbol: 'Am', name: 'lá menor' },
-  F: { bass: 'F1', pad: ['A3', 'C4', 'F4'], symbol: 'F', name: 'fá maior' },
-  Dm: { bass: 'D2', pad: ['A3', 'D4', 'F4'], symbol: 'Dm', name: 'ré menor' },
-  E7: { bass: 'E1', pad: ['G#3', 'D4', 'E4'], symbol: 'E7', name: 'mi com sétima' },
-  G: { bass: 'G1', pad: ['G3', 'B3', 'D4'], symbol: 'G', name: 'sol maior' },
-  C: { bass: 'C2', pad: ['G3', 'C4', 'E4'], symbol: 'C', name: 'dó maior' },
+  Am: { bass: 'A1', third: MINOR_THIRD, pad: ['A3', 'C4', 'E4'], horns: ['E4', 'A4', 'C5'], symbol: 'Am', name: 'lá menor' },
+  Dm: { bass: 'D2', third: MINOR_THIRD, pad: ['A3', 'D4', 'F4'], horns: ['D4', 'F4', 'A4'], symbol: 'Dm', name: 'ré menor' },
+  G: { bass: 'G2', third: MAJOR_THIRD, pad: ['G3', 'B3', 'D4'], horns: ['D4', 'G4', 'B4'], symbol: 'G', name: 'sol maior' },
+  C: { bass: 'C2', third: MAJOR_THIRD, pad: ['G3', 'C4', 'E4'], horns: ['E4', 'G4', 'C5'], symbol: 'C', name: 'dó maior' },
+  F: { bass: 'F2', third: MAJOR_THIRD, pad: ['A3', 'C4', 'F4'], horns: ['C4', 'F4', 'A4'], symbol: 'F', name: 'fá maior' },
+  Em: { bass: 'E2', third: MINOR_THIRD, pad: ['G3', 'B3', 'E4'], horns: ['E4', 'G4', 'B4'], symbol: 'Em', name: 'mi menor' },
+  E7: { bass: 'E2', third: MAJOR_THIRD, pad: ['G#3', 'D4', 'E4'], horns: ['D4', 'G#4', 'E5'], symbol: 'E7', name: 'mi com sétima' },
 };
 const OCTAVE = 12;
 const FIFTH = 7;
-const BASS_TOP = midiOf('E2'); // the fifth goes below the root when it would pass the recorded bass
-const fifthOf = root => (root + FIFTH <= BASS_TOP ? root + FIFTH : root + FIFTH - OCTAVE);
-// The horns' stabs, voiced for trompetes over a trombone.
-const HORN_CHORDS = { Am: ['E4', 'A4', 'C5'], Dm: ['D4', 'F4', 'A4'], E7: ['D4', 'G#4', 'E5'] };
 // A minor, natural; over E7 the seventh degree is raised (G♯), the harmonic minor of the cadence.
 const SCALE = [9, 11, 0, 2, 4, 5, 7];
 const RAISED = { E7: [9, 11, 0, 2, 4, 5, 8] };
-/** The diatonic third below a note, in the scale of its chord: the guitar's second line. */
-export function thirdBelow(midi, symbol) {
+const THIRD = 2; // scale steps down to the third below
+const SIXTH = 5; // and to the sixth below
+/** The note `degrees` scale steps below `midi`, in the scale of its chord. */
+function below(midi, symbol, degrees) {
   const scale = RAISED[symbol] || SCALE;
-  let below = midi,
+  let note = midi,
     found = 0;
-  while (found < 2) {
-    below--;
-    if (scale.includes(((below % OCTAVE) + OCTAVE) % OCTAVE)) found++;
+  while (found < degrees) {
+    note--;
+    if (scale.includes(((note % OCTAVE) + OCTAVE) % OCTAVE)) found++;
   }
-  return below;
+  return note;
 }
+/** The diatonic third below a note, in the scale of its chord: the guitar's second line. */
+export const thirdBelow = (midi, symbol) => below(midi, symbol, THIRD);
 
 // ---------- lines ----------
+const NOTE = /^(\d+):([~=]*)([A-G][#b]?\d)\/(\d+)$/;
 /**
- * One bar of a line, as written: sixteen tokens, one per sixteenth. '.' rests or holds; 'A4-6' plays
- * A4 for six sixteenths.
+ * One bar of a line, as written: `step:note/length` for each note, steps and lengths in sixteenths
+ * (`4:E5/3` plays E5 on the second beat for three sixteenths). `~` before the note: the player bends
+ * up into it. `=`: the guitar's second voice goes a sixth below, not a third.
  */
 export function parseBar(text) {
-  const tokens = text.trim().split(/\s+/);
-  if (tokens.length !== STEPS_PER_BAR) throw new Error(`a bar has ${STEPS_PER_BAR} tokens: ${text}`);
-  return tokens.flatMap((token, step) => {
-    if (token === '.') return [];
-    const [note, length] = token.split('-');
-    return [{ step, midi: midiOf(note), length: Number(length) }];
-  });
+  return text
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean)
+    .map(token => {
+      const match = NOTE.exec(token);
+      if (!match || Number(match[1]) >= STEPS_PER_BAR) throw new Error(`not a note of a bar: ${token}`);
+      const [, step, flags, note, length] = match;
+      return { step: Number(step), midi: midiOf(note), length: Number(length), bend: flags.includes('~'), sixth: flags.includes('=') };
+    });
 }
 
-// The theme: a wide, singable line with long notes, four bars that rise to F and sigh down to A. The
-// chorus is the theme and its answer (bars 5 to 8), which climbs back and lands on the tonic.
+// The theme, eight bars on the keyboard's lead: it starts after the beat, climbs the chord, pushes
+// the next bar's note a sixteenth or an eighth early, and rests in bars 4 and 8, where the guitar
+// answers. Bars 5 and 6 answer bars 1 and 2 from the top note. One chord per bar: the minor key's
+// circle (i, iv, VII, III, VI, iv, V7, i).
 export const THEME = [
-  'A4-2 . C5-2 . F5-8 . . . . . . . E5-2 . D5-2 .',
-  'D5-6 . . . . . B4-2 . G4-4 . . . B4-2 . D5-2 .',
-  'E5-12 . . . . . . . . . . . D5-2 . C5-2 .',
-  'C5-4 . . . B4-4 . . . A4-8 . . . . . . .',
+  '2:A4/1 3:C5/1 4:~E5/4 8:D5/1 9:E5/1 10:C5/2 12:A4/2 14:C5/2',
+  '0:D5/3 3:F5/3 6:~A5/4 10:G5/1 11:F5/1 12:E5/2 14:F5/2',
+  '0:~D5/6 6:B4/2 8:D5/2 10:G5/3 13:F5/1 14:D5/2',
+  '0:~E5/7 12:E5/1 13:F5/1 14:G5/1 15:G#5/1',
+  '0:~A5/5 5:G5/1 6:F5/2 8:E5/1 9:F5/1 10:C5/2 12:A4/2 14:C5/2',
+  '0:D5/3 3:F5/3 6:E5/2 8:D5/2 10:A4/2 12:D5/1 13:E5/1 14:F5/2',
+  '0:~E5/4 4:D5/2 6:B4/2 8:~G#5/4 12:F5/1 13:E5/1 14:D5/1 15:B4/1',
+  '0:~A4/8',
 ];
-const THEME_ANSWER = [
-  'A4-2 . D5-2 . F5-8 . . . . . . . E5-2 . D5-2 .',
-  'D5-4 . . . C5-2 . B4-2 . G#4-8 . . . . . . .',
-  'A4-2 . B4-2 . C5-4 . . . E5-4 . . . D5-2 . C5-2 .',
-  'A4-16 . . . . . . . . . . . . . . .',
-];
-const CHORUS = [...THEME, ...THEME_ANSWER];
-const CHORUS_CHORDS = ['F', 'G', 'Am', 'Am', 'Dm', 'E7', 'Am', 'Am'];
-// The guitar's verse: a two-bar motif in sequence (A minor, D minor, G, then C to the dominant), the
-// upper line written, the lower a third below.
+const THEME_CHORDS = ['Am', 'Dm', 'G', 'C', 'F', 'Dm', 'E7', 'Am'];
+// The guitar answers in the theme's two rests.
+const ANSWERS = ['', '', '', '6:G4/1 7:A4/1 8:C5/2 10:B4/1 11:A4/1 12:=G4/3', '', '', '', '6:E4/1 7:A4/1 8:C5/2 10:B4/1 11:C5/1 12:=A4/4'];
+// The introduction: the theme's first two bars, then its cadence, on the lead alone.
+const INTRO = [THEME[0], THEME[1], THEME[6], THEME[7]];
+const INTRO_CHORDS = ['Am', 'Dm', 'E7', 'Am'];
+// The guitar's part («solinho»): eight bars in the relative major, in thirds, that fall back to the
+// dominant: the contrast to the theme.
 const VERSE = [
-  'E4-2 . A4-2 . C5-6 . . . . . B4-2 . A4-4 . . .',
-  'B4-4 . . . A4-2 . E4-2 . C5-8 . . . . . . .',
-  'D4-2 . F4-2 . A4-6 . . . . . G4-2 . F4-4 . . .',
-  'E4-4 . . . D4-2 . F4-2 . A4-8 . . . . . . .',
-  'D4-2 . G4-2 . B4-6 . . . . . A4-2 . G4-4 . . .',
-  'A4-4 . . . G4-2 . D4-2 . B4-8 . . . . . . .',
-  'E4-2 . G4-2 . C5-6 . . . . . B4-2 . A4-4 . . .',
-  'G#4-4 . . . B4-4 . . . D5-4 . . . B4-4 . . .',
+  '0:E4/2 2:G4/2 4:C5/3 7:B4/1 8:C5/2 10:B4/2 12:A4/2 14:G4/2',
+  '0:G4/3 3:A4/1 4:B4/2 6:=B4/4 10:A4/2 12:G4/2 14:B4/2',
+  '0:C5/3 3:B4/3 6:A4/2 8:E4/2 10:A4/2 12:C5/2 14:B4/2',
+  '0:=B4/6 6:G4/2 8:E4/2 10:G4/1 11:A4/1 12:=B4/4',
+  '0:F4/2 2:A4/2 4:C5/3 7:B4/1 8:A4/2 10:C5/2 12:A4/2 14:F4/2',
+  '0:G4/4 4:E4/2 6:G4/2 8:=C5/4 12:B4/1 13:C5/1 14:B4/2',
+  '0:A4/3 3:G4/1 4:F4/2 6:D4/2 8:F4/2 10:A4/2 12:G4/1 13:F4/1 14:D4/2',
+  '0:E4/2 2:G#4/2 4:B4/3 7:G#4/1 8:=B4/2 10:G#4/2 12:E4/2 14:G#4/2',
 ];
-const VERSE_CHORDS = ['Am', 'Am', 'Dm', 'Dm', 'G', 'G', 'C', 'E7'];
-// The vinheta's call: one bar of guitar, then one bar of the horns' answer.
+const VERSE_CHORDS = ['C', 'G', 'Am', 'Em', 'F', 'C', 'Dm', 'E7'];
+// The vinheta: one bar of the guitar's call, then one bar of the horns' answer on the same chord.
 const CALL = {
-  Am: 'E4-2 . A4-2 . C5-2 . B4-2 . A4-8 . . . . . . .',
-  Dm: 'F4-2 . A4-2 . D5-2 . C5-2 . A4-8 . . . . . . .',
+  Am: '0:E4/1 1:A4/1 2:C5/2 4:B4/1 5:A4/1 6:B4/2 8:C5/2 10:A4/2 12:=C5/4',
+  Dm: '0:D4/1 1:F4/1 2:A4/2 4:G4/1 5:A4/1 6:C5/2 8:A4/2 10:F4/2 12:=A4/4',
+  F: '0:F4/1 1:A4/1 2:C5/2 4:A4/2 6:F4/2 8:A4/2 10:C5/2 12:=C5/4',
+  E7: '0:G#4/1 1:B4/1 2:G#4/2 4:E4/2 6:G#4/2 8:B4/3 11:G#4/1 12:=B4/4',
 };
-const EMPTY = '. . . . . . . . . . . . . . . .';
-const VINHETA_CHORDS = ['Am', 'Am', 'Dm', 'E7', 'Am', 'Am', 'Dm', 'E7'];
-const BASE_CHORDS = ['Am', 'F', 'Dm', 'E7'];
-const HORN_STABS = [4, 6]; // the answer: two stabs, then the section falls off the note
-const HORN_FALL = 8;
-const FINAL_NOTE = 'A4-16 . . . . . . . . . . . . . . .';
+const VINHETA_CHORDS = ['Am', 'Am', 'Dm', 'Dm', 'F', 'F', 'E7', 'E7'];
+const BASE_CHORDS = ['Am', 'G', 'F', 'E7']; // the loop the band enters on: down the minor key to its dominant
+const HORN_STABS = [2, 6, 8]; // the answer: three stabs around the second bumbo, then the section falls off the note
+const HORN_FALL = 10;
+const HORN_PUNCHES = [8, 11, 14]; // the last chorus: three stabs in the theme's rests
+const FALLS = { E7: 'queda-e' }; // the recorded fall from E; every other chord here holds an A
+const FINAL_NOTE = '0:A4/16';
+const DOUBLED_FROM = 2; // in the last chorus the guitar doubles the theme's notes of an eighth or more
 
-// ---------- the show script (docs/sketches/scripts.html, the `brega` entry) ----------
+// ---------- the show script ----------
 // Each scene: id, bars, the voices per bar, the lanes (rows under the wheel), the chords per bar and
-// each melodic line (bars of sixteen tokens). `transpose`: semitones up. `fill`: the bar (from the
-// scene's end) that ends in a tom fill. `cut`: the bar where everyone hits 1, then silence.
+// each melodic line (bars as parseBar reads them). `transpose`: semitones up. `fill`: the bar (from
+// the scene's end) that ends in a tom fill. `cut`: the bar where everyone hits 1, then silence.
 const DRUMS = ['bumbo', 'caixa', 'chimbal'];
 const BAND = [...DRUMS, 'baixo', 'cordas', 'teclado'];
 const always = value => () => value;
 const repeat = (list, bars) => [...Array(bars).keys()].map(bar => list[bar % list.length]);
 const SCENE_LIST = [
-  { id: 'introducao', bars: 4, voices: always(['tema']), lanes: ['tema'], chords: ['F', 'G', 'Am', 'Am'], lines: { tema: THEME } },
+  { id: 'introducao', bars: 4, voices: always(['tema']), lanes: ['tema'], chords: INTRO_CHORDS, lines: { tema: INTRO } },
   { id: 'base', bars: 4, voices: always(DRUMS), lanes: DRUMS },
   { id: 'baixo', bars: 4, voices: always([...DRUMS, 'baixo']), lanes: ['bumbo', 'baixo'], chords: BASE_CHORDS },
   { id: 'teclado', bars: 8, voices: always(BAND), lanes: ['cordas', 'teclado', 'baixo'], chords: repeat(BASE_CHORDS, 8) },
@@ -175,10 +195,10 @@ const SCENE_LIST = [
   {
     id: 'refrao',
     bars: 8,
-    voices: always([...BAND, 'tema']),
-    lanes: ['tema', 'cordas', 'baixo'],
-    chords: CHORUS_CHORDS,
-    lines: { tema: CHORUS },
+    voices: always([...BAND, 'tema', 'guitarra']),
+    lanes: ['tema', 'guitarra', 'baixo'],
+    chords: THEME_CHORDS,
+    lines: { tema: THEME, guitarra: ANSWERS },
     accents: [0, 4],
   },
   {
@@ -194,21 +214,22 @@ const SCENE_LIST = [
   {
     id: 'vinheta',
     bars: 8,
-    voices: always([...DRUMS, 'tom', 'baixo', 'teclado', 'guitarra', 'metais']),
+    voices: always([...DRUMS, 'tom', 'baixo', 'cordas', 'teclado', 'guitarra', 'metais']),
     lanes: ['guitarra', 'metais', 'tom'],
     chords: VINHETA_CHORDS,
-    lines: { guitarra: VINHETA_CHORDS.map((chord, bar) => (bar % 2 ? EMPTY : CALL[chord])) },
-    horns: true,
+    lines: { guitarra: VINHETA_CHORDS.map((chord, bar) => (bar % 2 ? '' : CALL[chord])) },
+    horns: 'answer',
     fill: 'end',
   },
   {
     id: 'refrao-final',
     bars: 8,
-    voices: always([...BAND, 'tema', 'guitarra']),
+    voices: always([...BAND, 'tema', 'guitarra', 'metais']),
     lanes: ['tema', 'guitarra', 'cordas'],
-    chords: CHORUS_CHORDS,
-    lines: { tema: CHORUS },
+    chords: THEME_CHORDS,
+    lines: { tema: THEME },
     guitarUnderTheme: true,
+    horns: 'punch',
     transpose: KEY_CHANGE,
     accents: [0, 4],
   },
@@ -218,8 +239,8 @@ const SCENE_LIST = [
     voices: always([...BAND, 'tema', 'tom']),
     mode: bar => (bar === 3 ? 'cut' : 'normal'),
     lanes: ['tema', 'tom', 'bumbo'],
-    chords: ['F', 'G', 'E7', 'Am'],
-    lines: { tema: [THEME[0], THEME[1], THEME_ANSWER[1], FINAL_NOTE] },
+    chords: ['F', 'Dm', 'E7', 'Am'],
+    lines: { tema: [THEME[4], THEME[5], THEME[6], FINAL_NOTE] },
     transpose: KEY_CHANGE,
     fill: 'end-1',
     isEnd: true,
@@ -237,7 +258,8 @@ function chordAt(bar) {
   return symbol ? { ...CHORDS[symbol], transpose: SCENE_LIST[i].transpose || 0 } : null;
 }
 
-// Every written note of every melodic voice, by absolute bar, transposed: { step, midi, length, lower? }.
+// Every written note of every melodic voice, by absolute bar, transposed:
+// { step, midi, length, bend, lower } (`lower`: the guitar's second voice).
 const LINES = { tema: new Map(), guitarra: new Map() };
 SCENE_LIST.forEach((scene, i) => {
   const up = scene.transpose || 0;
@@ -245,16 +267,19 @@ SCENE_LIST.forEach((scene, i) => {
     bars.forEach((text, barInScene) => {
       const bar = SCENE_STARTS[i] + barInScene,
         symbol = scene.chords?.[barInScene];
-      const notes = parseBar(text).map(note => ({ ...note, midi: note.midi + up, lower: thirdBelow(note.midi, symbol) + up }));
+      const notes = parseBar(text).map(note => ({ ...note, midi: note.midi + up, lower: below(note.midi, symbol, note.sixth ? SIXTH : THIRD) + up }));
       if (notes.length) LINES[voice].set(bar, notes);
     });
-  // the last chorus: the guitar doubles the theme in thirds, an octave down
+  // the last chorus: the guitar doubles the theme's longer notes in thirds, an octave down
   if (scene.guitarUnderTheme)
     for (let barInScene = 0; barInScene < scene.bars; barInScene++) {
       const bar = SCENE_STARTS[i] + barInScene;
       LINES.guitarra.set(
         bar,
-        LINES.tema.get(bar).map(note => ({ ...note, midi: note.midi - OCTAVE, lower: note.lower - OCTAVE })),
+        LINES.tema
+          .get(bar)
+          .filter(note => note.length >= DOUBLED_FROM)
+          .map(note => ({ ...note, bend: false, midi: note.midi - OCTAVE, lower: note.lower - OCTAVE })),
       );
     }
 });
@@ -265,25 +290,34 @@ const hit = (step, velocity, tone) => (tone === undefined ? { step, velocity } :
 const silentBar = () => Object.fromEntries(VOICE_ORDER.map(voice => [voice, []]));
 const chordTone = (chord, length) => `${chord.symbol}:${chord.transpose}:${length}`;
 
-// The xacumbum base: the bumbo on 1 and 3 with a pick-up on the last sixteenth; the caixa on 2 and 4;
-// the chimbal on the eighths, the off-beat ones loud (docs/research/brega-forro.md, § 1).
+// The xacumbum base, as the reference's three versions play it: the bumbo on 1 and on the fourth
+// eighth (step 7 of 16), the caixa on the fourth beat, so the bar splits 3 + 3 + 2; the chimbal on
+// the eighths. TURN: every fourth bar a third bumbo, a ghost caixa and an open chimbal lead out.
+const CLOSED = [ACCENT, SOFT, PLAIN, PLAIN, PLAIN, SOFT, PLAIN, MEDIUM]; // one level per eighth
+const EIGHTHS = SIXTEENTHS.filter(step => step % 2 === 0);
+const OPEN_AT = 14;
 export const BEAT = {
-  bumbo: [hit(0, ACCENT), hit(8, PLAIN), hit(15, GHOST)],
-  caixa: [hit(4, PLAIN), hit(12, ACCENT)],
-  chimbal: SIXTEENTHS.filter(step => step % 2 === 0).map(step => hit(step, step % STEPS_PER_BEAT ? PLAIN : GHOST, 'fechado')),
+  bumbo: [hit(0, ACCENT), hit(6, PLAIN)],
+  caixa: [hit(12, ACCENT)],
+  chimbal: EIGHTHS.map((step, i) => hit(step, CLOSED[i], 'fechado')),
 };
-const OFFBEATS = SIXTEENTHS.filter(step => step % STEPS_PER_BEAT === 2); // 3, 7, 11 and 15, counted from 1
-const LAST_STEP = STEPS_PER_BAR - 1; // the bass pushes the next root here
-const THIRD_BEAT = STEPS_PER_BAR / 2;
-const KEY_LENGTH = 1.5; // sixteenths: the keyboard's stabs are short
+const TURN = {
+  bumbo: [...BEAT.bumbo, hit(10, SOFT)],
+  caixa: [...BEAT.caixa, hit(15, GHOST)],
+  chimbal: BEAT.chimbal.map(h => (h.step === OPEN_AT ? hit(h.step, PLAIN, 'aberto') : h)),
+};
+const TURN_EVERY = 4;
+const beatOf = barInScene => (barInScene % TURN_EVERY === TURN_EVERY - 1 ? TURN : BEAT);
+// The keyboard's chords: short stabs between the bumbos and with the second one, two shapes in turn.
+export const COMP = [
+  [hit(2, PLAIN), hit(6, ACCENT), hit(8, SOFT), hit(10, PLAIN), hit(14, MEDIUM)],
+  [hit(2, PLAIN), hit(6, ACCENT), hit(10, PLAIN), hit(12, SOFT), hit(14, MEDIUM)],
+];
+const KEY_LENGTH = 1.3; // sixteenths: the keyboard's stabs are short
 // The heartbeat of the breque's second bar: the bumbo alone, lub-dub, twice.
 export const HEARTBEAT = [hit(0, ACCENT), hit(3, SOFT), hit(8, PLAIN), hit(11, SOFT)];
-// The virada: eighths on the high tom, then sixteenths down the middle and the low one, louder each beat.
-const FILL_WHOLE = [
-  ...[0, 2, 4, 6].map(step => [step, 'agudo']),
-  ...[8, 9, 10, 11].map(step => [step, 'medio']),
-  ...[12, 13, 14, 15].map(step => [step, 'grave']),
-];
+// The virada: the three toms answer the base's 3 + 3 + 2, high to low, louder to the end.
+const FILL_WHOLE = [...[0, 2, 3].map(step => [step, 'agudo']), ...[6, 8, 9].map(step => [step, 'medio']), ...[12, 13, 14, 15].map(step => [step, 'grave'])];
 const FILL_HALF = [
   [8, 'agudo'],
   [9, 'agudo'],
@@ -296,27 +330,70 @@ const FILL_HALF = [
 ];
 const fillHits = fill => fill.map(([step, tone], i) => hit(step, SOFT + (ACCENT - SOFT) * (i / (fill.length - 1)), tone));
 
-/** The bass with the bumbo: the root on 1, the fifth on 3, and on the last sixteenth the next root. */
-function bassBar(bar, chord) {
+// The bass: the root with the first bumbo, the fifth with the second, then eighths that climb or
+// fall through the chord and step into the next root from a semitone below (the walk measured on
+// the reference: about two notes a beat, leaps of fifths and octaves). Three shapes take turns.
+// Each note: [step, degree, length in sixteenths, velocity]; degrees: root, third, fifth, octave, approach.
+const BASS_TOP = midiOf('A2'); // the highest note the recorded bass reaches
+const BASS_SHAPES = [
+  [
+    [0, 'root', 5, ACCENT],
+    [6, 'fifth', 2, PLAIN],
+    [8, 'octave', 2, MEDIUM],
+    [10, 'fifth', 2, MEDIUM],
+    [12, 'octave', 2, PLAIN],
+    [14, 'approach', 2, PLAIN],
+  ],
+  [
+    [0, 'root', 3, ACCENT],
+    [3, 'root', 2, GHOST],
+    [6, 'fifth', 3, PLAIN],
+    [10, 'octave', 2, PLAIN],
+    [12, 'fifth', 2, MEDIUM],
+    [14, 'approach', 2, PLAIN],
+  ],
+  [
+    [0, 'root', 5, ACCENT],
+    [6, 'root', 2, PLAIN],
+    [8, 'third', 2, MEDIUM],
+    [10, 'fifth', 2, PLAIN],
+    [12, 'octave', 1, PLAIN],
+    [13, 'fifth', 1, SOFT],
+    [14, 'approach', 2, PLAIN],
+  ],
+];
+const BASS_ORDER = [0, 1, 0, 2]; // the shape of each bar of a four-bar phrase
+const inBassRange = note => (note > BASS_TOP ? note - OCTAVE : note);
+function bassBar(bar, barInScene, chord) {
   const root = midiOf(chord.bass) + chord.transpose,
     next = chordAt(bar + 1);
-  const out = [hit(0, ACCENT, `${root}:6`), hit(8, PLAIN, `${fifthOf(root)}:6`)];
-  if (next) out.push(hit(LAST_STEP, SOFT, `${midiOf(next.bass) + next.transpose}:1`));
-  return out;
+  const degrees = {
+    root,
+    third: root + chord.third,
+    fifth: inBassRange(root + FIFTH),
+    octave: inBassRange(root + OCTAVE),
+    approach: next ? midiOf(next.bass) + next.transpose - 1 : inBassRange(root + FIFTH),
+  };
+  return BASS_SHAPES[BASS_ORDER[barInScene % BASS_ORDER.length]].map(([step, degree, length, velocity]) => hit(step, velocity, `${degrees[degree]}:${length}`));
 }
-const melodic = (bar, voice, velocity) =>
+
+// A melody's levels: long notes sing, a note pushed ahead of the beat leans, passing sixteenths are light.
+const LONG = 4; // sixteenths
+const isPushed = note => note.step % STEPS_PER_BEAT !== 0 && note.length > 2;
+const levelOf = note => (note.length >= LONG || isPushed(note) ? ACCENT : note.length === 1 ? SOFT : PLAIN);
+const BEND = '~';
+const melodic = (bar, voice) =>
   (LINES[voice].get(bar) || []).map(note =>
-    hit(
-      note.step,
-      note.length >= STEPS_PER_BEAT ? ACCENT : velocity,
-      voice === 'guitarra' ? `${note.midi},${note.lower}:${note.length}` : `${note.midi}:${note.length}`,
-    ),
+    hit(note.step, levelOf(note), voice === 'guitarra' ? `${note.midi},${note.lower}:${note.length}` : `${note.bend ? BEND : ''}${note.midi}:${note.length}`),
   );
-/** The horns answer the guitar: two stabs on the chord, then the section falls off the note. */
-const hornsBar = chord => [
-  ...HORN_STABS.map(step => hit(step, PLAIN, `stab:${chord.symbol}`)),
-  hit(HORN_FALL, ACCENT, chord.symbol === 'E7' ? 'queda-e' : 'queda-a'),
+const stab = (chord, step, velocity) => hit(step, velocity, `stab:${chord.symbol}:${chord.transpose}`);
+/** The horns answer the guitar: stabs on the chord, then the section falls off the note. */
+const hornsAnswer = chord => [
+  ...HORN_STABS.map((step, i) => stab(chord, step, i === 1 ? ACCENT : PLAIN)),
+  hit(HORN_FALL, ACCENT, FALLS[chord.symbol] || 'queda-a'),
 ];
+/** In the last chorus the horns punch the theme's two rests. */
+const hornsPunch = (chord, barInScene) => (ANSWERS[barInScene] ? HORN_PUNCHES.map(step => stab(chord, step, PLAIN)) : []);
 
 // Bar modes: normal, and cut (everyone on 1, then silence: the breque's first bar and the end).
 export function barHits(scene, barInScene) {
@@ -337,7 +414,7 @@ function allHits(scene, barInScene) {
     hits.baixo = [hit(0, ACCENT, `${midiOf(chord.bass) + chord.transpose}:${length}`)];
     hits.cordas = [hit(0, PLAIN, chordTone(chord, length))];
     hits.teclado = [hit(0, PLAIN, chordTone(chord, length))];
-    hits.tema = melodic(bar, 'tema', PLAIN);
+    hits.tema = melodic(bar, 'tema');
     return hits;
   }
   if (scene.heartbeat) {
@@ -346,22 +423,24 @@ function allHits(scene, barInScene) {
   }
   const fillBar = { whole: true, end: barInScene === scene.bars - 1, 'end-1': barInScene === scene.bars - 2 }[scene.fill],
     fill = fillBar ? (scene.fill === 'whole' ? FILL_WHOLE : FILL_HALF) : null;
-  const fillFrom = fill ? fill[0][0] : STEPS_PER_BAR;
+  const fillFrom = fill ? fill[0][0] : STEPS_PER_BAR,
+    beat = beatOf(barInScene);
   hits.bumbo =
     fill === FILL_WHOLE
-      ? [hit(0, ACCENT), hit(fill.find(([, tone]) => tone === 'grave')[0], PLAIN)]
-      : BEAT.bumbo.filter(h => h.step < fillFrom || h.step === THIRD_BEAT);
-  hits.caixa = BEAT.caixa.filter(h => h.step < fillFrom);
-  hits.chimbal = BEAT.chimbal.filter(h => h.step < fillFrom);
+      ? [hit(0, ACCENT), hit(fill.find(([, tone]) => tone === 'medio')[0], PLAIN), hit(fill.find(([, tone]) => tone === 'grave')[0], PLAIN)]
+      : beat.bumbo.filter(h => h.step < fillFrom);
+  hits.caixa = beat.caixa.filter(h => h.step < fillFrom);
+  hits.chimbal = beat.chimbal.filter(h => h.step < fillFrom);
   hits.tom = fill ? fillHits(fill) : [];
   if (chord) {
-    hits.baixo = bassBar(bar, chord);
+    hits.baixo = bassBar(bar, barInScene, chord);
     hits.cordas = [hit(0, SOFT, chordTone(chord, STEPS_PER_BAR))];
-    hits.teclado = OFFBEATS.map(step => hit(step, step === OFFBEATS[0] ? PLAIN : SOFT, chordTone(chord, KEY_LENGTH)));
-    if (scene.horns && barInScene % 2 === 1) hits.metais = hornsBar(chord);
+    hits.teclado = COMP[barInScene % COMP.length].map(h => hit(h.step, h.velocity, chordTone(chord, KEY_LENGTH)));
+    if (scene.horns === 'answer' && barInScene % 2 === 1) hits.metais = hornsAnswer(chord);
+    if (scene.horns === 'punch') hits.metais = hornsPunch(chord, barInScene);
   }
-  hits.tema = melodic(bar, 'tema', PLAIN);
-  hits.guitarra = melodic(bar, 'guitarra', PLAIN);
+  hits.tema = melodic(bar, 'tema');
+  hits.guitarra = melodic(bar, 'guitarra');
   return hits;
 }
 
@@ -393,10 +472,10 @@ const petalBars = bar => {
 export const ACCENT_BARS = SCENE_LIST.flatMap((scene, i) => (scene.accents || []).map(bar => SCENE_STARTS[i] + bar));
 
 // ---------- sound: the studio (src/studio.js) ----------
-// Recorded takes (tools/prepare-takes.mjs, CREDITS.md). The drums are programmed, as brega's
-// electronic kits are: they stay on the grid (human-feel.md, rule 12) and vary by take, layer and
-// level. The players (bass, strings, keyboard, guitar, horns) drift with a correlated feel around
-// the keyboard, the genre's lead instrument.
+// A dance band played live: every instrument is a recorded take (tools/prepare-takes.mjs,
+// CREDITS.md); the band's reverb is a generated plate. The drums keep the grid, as
+// the genre's kits and click tracks do (human-feel.md, rule 12), and vary by take, layer and level.
+// The players drift with a correlated feel around the keyboard.
 const TONE = /^(.+):(-?\d+(?:\.\d+)?)$/; // a pitched hit's tone: what it plays, then its length in sixteenths
 const lengthOf = tone => Number(TONE.exec(tone)[2]) * STEP_SECONDS;
 /** The notes of a chord's tone (`Am:2:16`), close voiced; the keyboard plays them an octave up. */
@@ -404,41 +483,85 @@ const chordNotes = (tone, octaves = 0) => {
   const [symbol, transpose] = tone.split(':');
   return CHORDS[symbol].pad.map(note => midiOf(note) + Number(transpose) + octaves * OCTAVE);
 };
-const ECHO = { delay: 3 * STEP_SECONDS, gain: 0.3 }; // a dotted-eighth echo, as on a brega guitar
+const hornNotes = tone => {
+  const [, symbol, transpose] = tone.split(':');
+  return CHORDS[symbol].horns.map(note => midiOf(note) + Number(transpose));
+};
 const MEDIO = 1.12; // the middle tom: the high one tuned down and the low one tuned up, to meet
-// the stabs' range (D4 to E5): the loud trompete takes below A5, the trombone's two top notes
+// the stabs' range (C4 to F♯5): the loud trompete takes below A5, the trombone's two top notes
 const HIGHEST_TRUMPET = midiOf('A5');
 const LOWEST_TROMBONE = midiOf('B3');
 const STAB_LAYER = 0.8;
+const STAB_LENGTH = 1.5; // sixteenths
+
+const PLATE = 'brega-plate'; // the band's reverb: a bright digital plate (tools/make-brega-plate.mjs)
+// The lead's bend: the trompete starts the note a whole tone low and lips up into it.
+const BEND_FROM = 2; // semitones below
+const BEND_SECONDS = 0.07;
+const GUITAR_HOLD = 0.9; // of the written length: the guitar lifts between notes
+const BASS_HOLD = 0.85;
+const DOTTED_EIGHTH = 3 * STEP_SECONDS;
+const KICK_SECONDS = 0.13;
 const STUDIO = {
-  room: 'sala-pequena',
-  roomLevel: 1,
+  room: PLATE,
+  roomLevel: 0.8,
+  output: 0.5, // room for the drums' peaks: the band is not pressed against the master compressor
   lead: 'teclado',
+  // one tape echo for the guitar and the lead, a dotted eighth long, to one side
+  echo: { time: DOTTED_EIGHTH, feedback: 0.38, lowpass: 3600, highpass: 350, level: 0.55, pan: -0.45, room: 0.4 },
+  // the bus: less under 50 Hz and more chest, as the references measure
+  tone: [
+    { type: 'highpass', frequency: 50, Q: 0.8 },
+    { type: 'peaking', frequency: 110, gain: 2, Q: 0.8 },
+    { type: 'peaking', frequency: 1500, gain: -2, Q: 0.8 },
+    { type: 'highshelf', frequency: 5500, gain: 3 },
+  ],
   voices: {
-    bumbo: { seed: 51, role: 'grid', gain: 0.95, send: 0.04, bright: [5000, 16000], strokes: () => ({ hit: takes('bumbo') }) },
+    bumbo: {
+      seed: 51,
+      role: 'grid',
+      gain: 0.9,
+      send: 0.03,
+      release: 0.07,
+      bright: [5000, 16000],
+      eq: [
+        { type: 'highpass', frequency: 55, Q: 0.9 },
+        { type: 'peaking', frequency: 95, gain: 4, Q: 1.1 },
+        { type: 'peaking', frequency: 3200, gain: 4, Q: 0.9 },
+      ],
+      strokes: () => ({ hit: takes('bumbo') }),
+      shape: () => ({ stroke: 'hit', length: KICK_SECONDS }), // a kit's bumbo is short: the 808's long tail is cut
+    },
     caixa: {
       seed: 52,
       role: 'grid',
-      gain: 0.75,
-      pan: 0.08,
-      send: 0.22,
+      gain: 0.8,
+      pan: 0.06,
+      send: 0.34, // the caixa's long plate is the sound of the genre's records
+      eq: [{ type: 'peaking', frequency: 210, gain: 3, Q: 1 }],
       strokes: () => ({ hit: takes('caixa').filter(take => take.layer >= 0.4) }),
     },
     chimbal: {
       seed: 53,
       role: 'grid',
-      gain: 0.75,
-      pan: 0.3,
-      send: 0.1,
-      bright: [5000, 18000],
+      gain: 0.85,
+      pan: 0.42,
+      send: 0.12,
+      bright: [7000, 18000],
+      // a soft sixteenth between the eighths, now and then
+      ghosts: [
+        { step: 3, probability: 0.35, velocity: 0.3, tone: 'fechado' },
+        { step: 11, probability: 0.45, velocity: 0.3, tone: 'fechado' },
+        { step: 15, probability: 0.3, velocity: 0.35, tone: 'fechado' },
+      ],
       strokes: () => ({ fechado: takes('chimbal-fechado'), aberto: takes('chimbal-aberto') }),
     },
     tom: {
       seed: 54,
       role: 'grid',
       gain: 0.85,
-      pan: -0.15,
-      send: 0.2,
+      pan: -0.25,
+      send: 0.3,
       strokes: () => ({
         agudo: takes('brega-tom-agudo'),
         medio: takes(['brega-tom-agudo', { rate: 1 / MEDIO }], ['brega-tom-grave', { rate: MEDIO }]),
@@ -448,23 +571,34 @@ const STUDIO = {
     baixo: {
       seed: 55,
       role: 'follower',
-      gain: 0.85,
-      send: 0.05,
-      bright: [700, 4000],
-      strokes: () => ({ nota: takes('baixo').filter(take => !take.file.endsWith('-11') && !take.file.endsWith('-12')) }),
-      shape: tone => ({ stroke: 'nota', notes: [Number(TONE.exec(tone)[1])], length: lengthOf(tone) }),
+      gain: 0.8,
+      send: 0.03,
+      release: 0.05,
+      bright: [900, 4500],
+      eq: [
+        { type: 'highpass', frequency: 55, Q: 0.7 },
+        { type: 'peaking', frequency: 130, gain: 4, Q: 0.9 },
+        { type: 'peaking', frequency: 800, gain: 2, Q: 1 },
+      ],
+      zone: 5,
+      maxZone: 5,
+      // the picked notes, and the fingered G2 for the top of the walk (not the fingered D1, below the line)
+      strokes: () => ({ nota: takes('baixo').filter(take => !take.file.endsWith('-11')) }),
+      shape: tone => ({ stroke: 'nota', notes: [Number(TONE.exec(tone)[1])], length: lengthOf(tone) * BASS_HOLD }),
     },
     cordas: {
       seed: 56,
       role: 'follower',
-      gain: 0.32,
-      pan: -0.35,
-      send: 0.4,
-      attack: 0.18, // the bows swell in
-      release: 0.5,
+      gain: 0.2,
+      pan: -0.1,
+      send: 0.45,
+      attack: 0.14, // the pad swells in
+      release: 0.45,
       zone: 4,
       maxZone: 5,
-      bright: [2500, 9000],
+      bright: [3500, 9000],
+      eq: [{ type: 'highpass', frequency: 180, Q: 0.7 }],
+      chorus: { rate: 0.45, depth: 0.004, mix: 0.6 },
       strokes: () => ({ acorde: takes('brega-cordas') }),
       shape: tone => ({ stroke: 'acorde', notes: chordNotes(tone), length: lengthOf(tone) }),
     },
@@ -472,41 +606,66 @@ const STUDIO = {
       seed: 57,
       role: 'lead',
       gain: 0.3,
-      pan: 0.28,
-      send: 0.25,
+      pan: 0.38,
+      send: 0.22,
+      release: 0.06,
+      eq: [{ type: 'highpass', frequency: 220, Q: 0.7 }],
+      zone: 4,
+      maxZone: 5,
+      chorus: { rate: 0.8, depth: 0.003, mix: 0.5 },
       strokes: () => ({ acorde: takes('brega-teclado') }),
       shape: tone => ({ stroke: 'acorde', notes: chordNotes(tone, 1), length: lengthOf(tone), strum: 0.006 }),
     },
     tema: {
       seed: 58,
       role: 'follower',
-      gain: 0.55,
-      send: 0.3,
-      release: 0.25,
-      strokes: () => ({ nota: takes('brega-teclado') }),
-      shape: tone => ({ stroke: 'nota', notes: [Number(TONE.exec(tone)[1])], length: lengthOf(tone) }),
+      gain: 0.42,
+      pan: 0.05,
+      send: 0.35,
+      echo: 0.18,
+      release: 0.1,
+      zone: 4,
+      maxZone: 5,
+      bright: [5000, 14000],
+      // sustained takes with the player's own vibrato; a sixteenth is a tongued, staccato take
+      strokes: () => ({ nota: takes('trompete-sus'), curta: takes('trompete-stac').filter(take => take.root < HIGHEST_TRUMPET) }),
+      shape: tone => {
+        const [, note, length] = TONE.exec(tone),
+          bend = note.startsWith(BEND),
+          midi = Number(bend ? note.slice(BEND.length) : note);
+        if (Number(length) === 1) return { stroke: 'curta', notes: [midi] };
+        return bend
+          ? { stroke: 'nota', notes: [midi - BEND_FROM], length: lengthOf(tone), glide: { semitones: BEND_FROM, at: 0, over: BEND_SECONDS } }
+          : { stroke: 'nota', notes: [midi], length: lengthOf(tone) };
+      },
     },
     guitarra: {
       seed: 59,
       role: 'follower',
-      gain: 0.6,
-      pan: -0.2,
+      gain: 0.5,
+      pan: -0.3,
       send: 0.3,
+      echo: 0.45,
       release: 0.15,
       zone: 5,
       maxZone: 5,
+      eq: [
+        { type: 'highpass', frequency: 160, Q: 0.7 },
+        { type: 'peaking', frequency: 2800, gain: 3, Q: 0.9 },
+      ],
+      chorus: { rate: 1.1, depth: 0.003, mix: 0.55 },
       strokes: () => ({ nota: takes('brega-guitarra') }),
       shape: tone => {
         const [notes] = tone.split(':');
-        return { stroke: 'nota', notes: notes.split(',').map(Number), length: lengthOf(tone), strum: 0.012, echo: ECHO };
+        return { stroke: 'nota', notes: notes.split(',').map(Number), length: lengthOf(tone) * GUITAR_HOLD, strum: 0.012 };
       },
     },
     metais: {
       seed: 60,
       role: 'follower',
-      gain: 0.5,
-      pan: 0.2,
-      send: 0.28,
+      gain: 0.45,
+      pan: 0.25,
+      send: 0.32,
       strokes: () => ({
         stab: [
           ...takes('trompete-stac').filter(take => take.layer > STAB_LAYER && take.root < HIGHEST_TRUMPET),
@@ -515,14 +674,11 @@ const STUDIO = {
         'queda-a': takes('brega-queda').slice(0, 1),
         'queda-e': takes('brega-queda').slice(1),
       }),
-      shape: tone =>
-        tone.startsWith('stab:')
-          ? { stroke: 'stab', notes: HORN_CHORDS[tone.slice('stab:'.length)].map(midiOf), length: STEP_SECONDS * 1.5 }
-          : { stroke: tone },
+      shape: tone => (tone.startsWith('stab:') ? { stroke: 'stab', notes: hornNotes(tone), length: STEP_SECONDS * STAB_LENGTH } : { stroke: tone }),
     },
   },
 };
-// One recorded option per instrument, so the desktop gives each its volume.
+// One option per instrument, so the desktop gives each its volume.
 const SOUND_CHOICES = recordedChoices(STUDIO, [
   ['bumbo', 'bumbo', ['bumbo'], 'bumbo eletrônico'],
   ['caixa', 'caixa', ['caixa'], 'caixa gravada'],
@@ -530,9 +686,9 @@ const SOUND_CHOICES = recordedChoices(STUDIO, [
   ['tom', 'tom', ['tom'], 'tons gravados'],
   ['baixo', 'baixo', ['baixo'], 'baixo elétrico'],
   ['cordas', 'naipe de cordas', ['cordas'], 'violas'],
-  ['teclado', 'teclado', ['teclado', 'tema'], 'piano FM'],
+  ['teclado', 'teclado', ['teclado'], 'piano FM'],
   ['guitarra', 'guitarra', ['guitarra'], 'guitarra limpa'],
-  ['metais', 'naipe de metais', ['metais'], 'trompetes e trombones'],
+  ['metais', 'naipe de metais', ['metais', 'tema'], 'trompetes e trombones'],
 ]);
 
 // ---------- copy ----------
@@ -549,12 +705,12 @@ const READ = {
   keyValue: 'lá menor',
   theme: 'tema',
   themeValue: `${THEME.length} compassos`,
-  strong: 'forte',
-  soft: 'fraco',
+  groove: 'xacumbum',
+  grooveValue: '3 + 3 + 2: bumbo, bumbo, caixa',
   withBumbo: 'com o bumbo',
-  bassValue: 'fundamental no 1, quinta no 3, antecipação no 16',
+  bassValue: 'fundamental e quinta nos bumbos, depois anda até o próximo acorde',
   progression: 'harmonia',
-  offbeat: 'acordes no contratempo',
+  stabs: 'acordes curtos',
   pad: 'cordas',
   padValue: 'um acorde por compasso',
   thirds: 'terças',
@@ -563,7 +719,7 @@ const READ = {
   middle: 'médio',
   low: 'grave',
   chorus: 'refrão',
-  chorusValue: `${CHORUS.length} compassos: tema e resposta`,
+  chorusValue: `${THEME.length} compassos; a guitarra responde nas pausas`,
   pause: 'compasso de pausa',
   heartbeat: 'bumbo sozinho',
   question: 'pergunta',
@@ -578,16 +734,16 @@ const READ = {
 };
 const COPY = {
   name: 'brega',
-  description: 'Brega do Recife: bateria, baixo, teclado, cordas, guitarra em terças e metais, um de cada vez e depois juntos, em lá menor.', // the page's search and preview description
+  description: 'Brega do Recife: o xacumbum da bateria, baixo, teclado, cordas, guitarra em terças e metais, um de cada vez e depois juntos, em lá menor.', // the page's search and preview description
   feminineInstruments: ['caixa', 'guitarra'], // "som da caixa", "som do bumbo"
   scenes: {
-    introducao: { chip: 'Introdução', eyebrow: 'teclado com o tema', title: 'Brega' },
-    base: { chip: 'Base', eyebrow: 'chimbal no contratempo', title: 'Base' },
-    baixo: { chip: 'Baixo', eyebrow: 'baixo com o bumbo', title: 'Baixo' },
-    teclado: { chip: 'Teclado', eyebrow: 'cordas e acordes no contratempo', title: 'Teclado' },
-    guitarra: { chip: 'Guitarra', eyebrow: 'melodia em terças', title: 'Guitarra' },
+    introducao: { chip: 'Introdução', eyebrow: 'o tema no trompete', title: 'Brega' },
+    base: { chip: 'Base', eyebrow: 'xacumbum: bumbo, bumbo, caixa', title: 'Base' },
+    baixo: { chip: 'Baixo', eyebrow: 'baixo que anda com o bumbo', title: 'Baixo' },
+    teclado: { chip: 'Teclado', eyebrow: 'cordas e acordes curtos', title: 'Teclado' },
+    guitarra: { chip: 'Guitarra', eyebrow: 'solinho em terças', title: 'Guitarra' },
     virada: { chip: 'Virada', eyebrow: 'virada de tons', title: 'Virada' },
-    refrao: { chip: 'Refrão', eyebrow: 'teclado com o tema', title: 'Refrão' },
+    refrao: { chip: 'Refrão', eyebrow: 'o tema no trompete, a guitarra responde', title: 'Refrão' },
     breque: { chip: 'Breque', eyebrow: 'pausa de um compasso', title: 'Breque' },
     vinheta: { chip: 'Vinheta', eyebrow: 'metais respondem à guitarra', title: 'Vinheta' },
     'refrao-final': { chip: 'Refrão final', eyebrow: 'um tom acima', title: 'Refrão final' },
@@ -639,12 +795,12 @@ function sceneRoll(scene, voices, band) {
       return voice === 'guitarra' ? [upper, { id: voice, color: VOICES[voice].color, notes: notesOf(note => note.lower) }] : [upper];
     });
   const horns =
-    voices.includes('metais') && scene.horns
+    voices.includes('metais') && scene.horns === 'answer'
       ? [...Array(scene.bars).keys()]
           .filter(bar => bar % 2 === 1)
           .map(bar => ({
             slot: bar * STEPS_PER_BAR + HORN_STABS[0],
-            midi: midiOf(HORN_CHORDS[scene.chords[bar]].at(-1)),
+            midi: midiOf(CHORDS[scene.chords[bar]].horns.at(-1)),
             length: HORN_FALL - HORN_STABS[0] + STEPS_PER_BEAT,
           }))
       : [];
@@ -660,27 +816,21 @@ const LAYOUTS = {
     row(label(T.meter), T.meterValue) +
     row(label(T.bar), T.barValue) +
     row(label(T.key), T.keyValue) +
-    row(label(T.theme, COLOR.tema), T.themeValue, 'teclado'),
+    row(label(T.theme, COLOR.tema), T.themeValue, 'metais'),
   base: () =>
     notation(
       seqRow('bumbo', COPY.voices.bumbo, BEAT.bumbo),
       seqRow('caixa', COPY.voices.caixa, BEAT.caixa),
       seqRow('chimbal', COPY.voices.chimbal, BEAT.chimbal),
-    ) + row(label(`● ${T.strong} · ○ ${T.soft}`), countFromOne(BEAT.chimbal.filter(h => h.velocity > SOFT).map(h => h.step)), 'chimbal'),
+    ) + row(label(T.groove), T.grooveValue),
   baixo: () => {
-    const bass = bassBar(sceneOf('baixo').start, chordAt(sceneOf('baixo').start));
+    const bass = bassBar(sceneOf('baixo').start, 0, chordAt(sceneOf('baixo').start));
     return notation(seqRow('bumbo', COPY.voices.bumbo, BEAT.bumbo), seqRow('baixo', COPY.voices.baixo, bass)) + row(label(T.withBumbo), T.bassValue, 'baixo');
   },
   teclado: () =>
     row(label(T.progression), progression(BASE_CHORDS)) +
-    notation(
-      seqRow(
-        'teclado',
-        COPY.voices.teclado,
-        OFFBEATS.map(step => hit(step, PLAIN)),
-      ),
-    ) +
-    row(label(T.offbeat, COLOR.teclado), countFromOne(OFFBEATS), 'teclado') +
+    notation(seqRow('teclado', COPY.voices.teclado, COMP[0])) +
+    row(label(T.stabs, COLOR.teclado), countFromOne(COMP[0].map(h => h.step)), 'teclado') +
     row(label(T.pad, COLOR.cordas), T.padValue, 'cordas'),
   virada: () =>
     notation(
@@ -697,7 +847,7 @@ const LAYOUTS = {
 };
 const ROLLS = {
   guitarra: scene => ({ ...sceneRoll(scene, ['guitarra']), rows: row(label(T.thirds, COLOR.guitarra), T.thirdsValue, 'guitarra') }),
-  refrao: scene => ({ ...sceneRoll(scene, ['tema']), rows: row(label(T.chorus, COLOR.tema), T.chorusValue, 'teclado') }),
+  refrao: scene => ({ ...sceneRoll(scene, ['tema', 'guitarra']), rows: row(label(T.chorus, COLOR.tema), T.chorusValue, 'metais') }),
   vinheta: scene => ({
     ...sceneRoll(scene, ['guitarra', 'metais']),
     rows: row(label(T.question, COLOR.guitarra), COPY.voices.guitarra, 'guitarra') + row(label(T.answer, COLOR.metais), COPY.voices.metais, 'metais'),
@@ -740,6 +890,6 @@ export const BREGA = {
   },
   readout,
   waves: null,
-  sounds: studioSounds(STUDIO, SOUND_CHOICES, 'refrao-final'), // every instrument but the horns and the tom plays its part there
+  sounds: studioSounds(STUDIO, SOUND_CHOICES, 'refrao-final'), // every instrument but the tom plays its part there
   copy: COPY,
 };
