@@ -8,8 +8,8 @@
 - Identifier name: `baqueVirado`
 - Benefit-first description: See and hear what each maracatu instrument plays, where the swing sits and how seven baques differ, in a two-minute animated show.
 - Repository: `martonpaulo/baque-virado` (public)
-- Public identifiers: the domain `baquevirado.martonpaulo.com`, the repository name and the localStorage prefix `baque-virado:`
-- Landing page: the site itself is the product, served by GitHub Pages at https://baquevirado.martonpaulo.com
+- Public identifiers: the domain `batuque.martonpaulo.com` (moved from `baquevirado.martonpaulo.com`, which 301-redirects to it with the same path and query, [#28](https://github.com/martonpaulo/baque-virado/issues/28)), the repository name and the localStorage prefix `baque-virado:`, kept unchanged so viewers keep their settings
+- Landing page: the site itself is the product, served by GitHub Pages at https://batuque.martonpaulo.com
 - License: `MIT`
 - Copyright: 2026 Marton Paulo
 - Development language: English.
@@ -181,5 +181,5 @@ Lead with the outcome, in the output shape, and include:
 - Phones (`max-width: 899px`) show the reel alone, a tap plays or pauses, and fetch only the default samples.
 - Sound, notes, score, wheel and lanes depend only on the show position; the background also on the
   frames before it (`docs/product.md`, Constraints).
-- Each rhythm is one package in `src/rhythms/` (the engine reads it; nothing else names its voices, patterns or scenes); `?ritmo=<id>` picks one, and the selector shows only with two or more ([#18](https://github.com/martonpaulo/baque-virado/issues/18)).
+- Each rhythm is one package in `src/rhythms/` (the engine reads it; nothing else names its voices, patterns or scenes); each has its path `/<id>` (`ROUTES` in `src/rhythms/index.js`; `tools/build-site.mjs` writes one page per path at deploy time, and a rhythm with no package yet gets a page saying its show is being prepared), `?ritmo=<id>` redirects to it, and the selector, at the bottom of the left column under the Roteiro, shows only with two or more ([#18](https://github.com/martonpaulo/baque-virado/issues/18), D13 in `docs/decisions.md`).
 - Dynamic copy lives in `src/copy.js` and the rhythm packages, colours in `src/theme.js` mirrored by `styles.css`.

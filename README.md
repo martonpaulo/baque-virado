@@ -5,7 +5,7 @@ with real one-shot drum samples. It walks through the instruments, the measured 
 offbeat and the seven baques, then ends on the unison virada. The interface is in Brazilian
 Portuguese.
 
-Live: <https://baquevirado.martonpaulo.com>
+Live: <https://batuque.martonpaulo.com>
 
 ## Run locally
 
@@ -25,8 +25,10 @@ sounds a desktop viewer can pick are fetched when chosen.
 
 - `index.html`, `styles.css` - the page and its layout.
 - `src/rhythms/maracatu.js` - the maracatu package: tempo, voices, swing, patterns (`barHits`), the show script, readout layouts, background looks, sounds and its copy.
-- `src/rhythms/coco-xamba.js` - the Coco da Xambá package, in 2/4 (open it with `?ritmo=coco-xamba`).
-- `src/rhythms/index.js` - the rhythms the site ships and the one `?ritmo=<id>` picks.
+- `src/rhythms/coco-xamba.js` - the Coco da Xambá package, in 2/4 (open it at `/coco`).
+- `src/rhythms/index.js` - the rhythms the site ships, their paths (`/<id>`) and the one a page shows.
+- `src/rhythms/preparing.js` - the rhythms that have a path but no show yet.
+- `tools/build-site.mjs` - builds the deployed site, with one page per rhythm path.
 - `src/music.js` - the meter, voices and swing of the rhythm on show, as the engine reads them.
 - `src/show.js` - a rhythm's scenes, its timeline and what sounds at any moment.
 - `src/audio.js` - sound choices, the lazy sample bank, the live player and the offline WAV render.
