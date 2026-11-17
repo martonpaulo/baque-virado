@@ -54,11 +54,34 @@ A voice names its strokes; each stroke is a list of recorded takes. A take has a
 
 ## Mix
 
-Each voice has its channel: a pan and a send to one shared room, a convolution reverb with a
-recorded impulse response (a small room for forró and coco, a living room for bregafunk). The
-voices meet in a glue compressor (2:1 from −18 dB), then the site's master chain (gentle
-saturation and a compressor). In bregafunk the kick ducks the grave and the melodic voices
+Each voice has its channel: a pan and a send to one shared room, a convolution reverb with an
+impulse response (a small room for forró and coco, a living room for bregafunk, a generated plate
+for brega). The voices meet in a glue compressor (2:1 from −18 dB), then the site's master chain
+(gentle saturation and a compressor). In bregafunk the kick ducks the grave and the melodic voices
 ([`bregafunk.md`](bregafunk.md), Mix).
+
+A voice may also name, in its entry of `STUDIO.voices`:
+
+| Key      | Value                                        | What it does                                                                                                       |
+| :------- | :------------------------------------------- | :----------------------------------------------------------------------------------------------------------------- |
+| `eq`     | `[{ type, frequency, gain, Q }]`             | Biquad filters in series on the channel                                                                            |
+| `drive`  | a number, about 1.5 (warm) to 6 (fuzz)       | Soft clipping, oversampled twice                                                                                   |
+| `chorus` | `{ rate, depth, mix }` (Hz, seconds, 0 to 1) | Two slowly modulated copies, left and right                                                                        |
+| `echo`   | a send level                                 | Feeds the mix's echo bus all the time                                                                              |
+| `double` | `{ spread, delay, gain, cents }`             | Double-tracking: a second, different take on the other side, 12 ms later; the next hit repeats neither side's take |
+
+A voice's `shape()` may return `throw: <level>`: that one hit also feeds the echo bus (a dub throw).
+
+The mix itself (`STUDIO`) may name:
+
+| Key    | Value                                                     | What it does                                                        |
+| :----- | :-------------------------------------------------------- | :------------------------------------------------------------------ |
+| `echo` | `{ time, feedback, lowpass, highpass, level, pan, room }` | One tempo delay whose feedback passes a band-pass, as a tape echo   |
+| `tone` | `[{ type, frequency, gain, Q }]`                          | Filters on the whole bus, to tilt the balance toward the references |
+
+The offline render takes a bar range and the instrument volumes
+(`window.baque.renderAudio({ fromBar, toBar, volume })`), so the sound lab ([`lab/`](../../lab/README.md))
+renders one scene or one instrument in seconds.
 
 ## Parameters and their sources
 

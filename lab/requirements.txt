@@ -1,0 +1,18 @@
+# CPU builds are enough. Install torch and torchaudio first from https://download.pytorch.org/whl/cpu
+torch==2.15.0
+torchaudio==2.11.1
+demucs==4.1.0
+transformers==5.23.0
+librosa==1.0.1
+soundfile==0.14.0
+pyloudnorm==0.2.0
+scipy==1.18.1
+audiobox_aesthetics==0.0.4
+beat-this==1.1.0
+onnxruntime==1.32.0
+pretty_midi==0.2.11.post0
+resampy==0.4.3
+mir_eval==0.8.2
+# basic-pitch 0.4.0 does not build its TensorFlow dependency on Python 3.13: install it last with
+#   pip install --no-deps basic-pitch==0.4.0
+# and use its ONNX model, as style.py does.

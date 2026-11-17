@@ -37,6 +37,7 @@ Before editing under a path, read the file its row names. A module with rules of
 | `src/`    | `docs/product.md` |
 | `sounds/` | `CREDITS.md`      |
 | `tools/`  | `README.md`       |
+| `lab/`    | `lab/README.md`   |
 
 ## Instruction hierarchy and sources of truth
 
@@ -185,3 +186,4 @@ Lead with the outcome, in the output shape, and include:
 - Dynamic copy lives in `src/copy.js` and the rhythm packages, colours in `src/theme.js` mirrored by `styles.css`.
 - The cloud cannot download from Freesound: CC0 recordings are fetched on the owner's Mac and pushed on a branch. `.gitignore` ignores a WAV outside the top of `sounds/`, so add it with `git add -f`.
 - Parallel cloud runs on one branch run `git pull --no-rebase` before each push, merge commits only, and never force-push.
+- A show's sound is measured before the owner listens, with the sound lab (`lab/`, method and learnings in `docs/research/sound-lab.md`): render through the page, compare with the owner's references in `docs/research/references.md`, and send the owner the rendered audio. Only the owner names a reference or a similar song. At most two rhythm agents measure at once.

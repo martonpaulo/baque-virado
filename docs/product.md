@@ -73,6 +73,13 @@ and the page plays smoothly to the end on a recent iPhone and an Android phone.
   the frames before it, so both exports (`src/export.js` and `tools/export-video.mjs`) warm up for
   4 s before a late first frame
   ([#7](https://github.com/martonpaulo/baque-virado/issues/7)).
+- On an iPhone or iPad the page asks for the «playback» audio session when the viewer taps Play
+  (`useMediaPlayback` in `src/audio.js`): Web Audio alone plays in the «ambient» session, which the
+  ringer switch mutes in every browser there, and the show stayed silent until another site had
+  played a video.
+- The background takes its centre from the wheel's place in the stage, and measures again when the
+  wheel moves without a stage resize (`sizeKey` in `src/main.js`): on a phone the column's padding
+  follows the safe-area inset, which changes when the browser's bars hide.
 
 ## Rhythm shows
 
