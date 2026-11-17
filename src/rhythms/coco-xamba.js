@@ -342,7 +342,7 @@ const ALFAIA_FOCUS = new Set(['alfaia', 'heads', 'phrases', 'toque', 'rufo']);
 const readout = (scene, show) => ({ markup: LAYOUTS[scene.id](show), score: null, focus: ALFAIA_FOCUS.has(scene.id) ? 'alfaia' : '' });
 
 export const COCO_XAMBA = {
-  id: 'coco-xamba',
+  id: 'coco',
   bpm: BPM,
   beatsPerBar: BEATS_PER_BAR,
   stepsPerBeat: STEPS_PER_BEAT,

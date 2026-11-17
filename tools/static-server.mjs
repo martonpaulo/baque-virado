@@ -1,10 +1,14 @@
 // Minimal static file server for local preview, tests and the video exporter (no dependencies).
 //   node tools/static-server.mjs [port]   → serves the repository root
+// As GitHub Pages does, `/<name>` serves `<name>.html` when there is no `<name>` file. On the
+// repository root, which has no per-rhythm pages (tools/build-site.mjs writes them at deploy time),
+// a rhythm's path (`ROUTES`) serves index.html, which reads the rhythm from the path.
 
 import { readFile, stat } from 'node:fs/promises';
 import { createServer } from 'node:http';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { ROUTES } from '../src/rhythms/index.js';
 
 const REPO_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const OK = 200,
@@ -31,12 +35,25 @@ const isInside = (base, file) => {
 /** A dot segment (`.git`, `.scratch`) is local state, never part of the site. */
 const hasHiddenSegment = urlPath => urlPath.split('/').some(segment => segment.startsWith('.'));
 
+const exists = file =>
+  stat(file).then(
+    () => true,
+    () => false,
+  );
+/** The file a request path names: a folder's index.html, `<name>.html`, or index.html for a route. */
+async function resolveFile(base, file, routes) {
+  if (await exists(file)) return (await stat(file)).isDirectory() ? path.join(file, 'index.html') : file;
+  if (path.extname(file) === '' && (await exists(`${file}.html`))) return `${file}.html`;
+  if (path.dirname(file) === base && routes.includes(path.basename(file))) return path.join(base, 'index.html');
+  return file; // missing: the read fails and the request gets 404
+}
+
 /**
  * Serve `root` on 127.0.0.1. Resolves to { url, close() } once listening. Only requests addressed to
  * this server by name (127.0.0.1 or localhost) are answered, so a page that rebinds its own domain
- * to 127.0.0.1 cannot read the working tree.
+ * to 127.0.0.1 cannot read the working tree. A missing `/<id>` for an id in `routes` serves index.html.
  */
-export function startStaticServer(root = REPO_ROOT, port = 0) {
+export function startStaticServer(root = REPO_ROOT, port = 0, { routes = [] } = {}) {
   const base = path.resolve(root);
   const server = createServer(async (request, response) => {
     try {
@@ -51,7 +68,7 @@ export function startStaticServer(root = REPO_ROOT, port = 0) {
         response.writeHead(FORBIDDEN).end();
         return;
       }
-      if ((await stat(file)).isDirectory()) file = path.join(file, 'index.html');
+      file = await resolveFile(base, file, routes);
       const body = await readFile(file);
       response.writeHead(OK, { 'Content-Type': CONTENT_TYPES[path.extname(file)] || 'application/octet-stream', 'Cache-Control': 'no-store' });
       response.end(request.method === 'HEAD' ? undefined : body);
@@ -71,6 +88,6 @@ export function startStaticServer(root = REPO_ROOT, port = 0) {
 }
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
-  const { url } = await startStaticServer(REPO_ROOT, Number(process.argv[2]) || 8000);
+  const { url } = await startStaticServer(REPO_ROOT, Number(process.argv[2]) || 8000, { routes: ROUTES });
   console.log(`serving ${REPO_ROOT} at ${url}`);
 }

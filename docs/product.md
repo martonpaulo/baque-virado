@@ -95,9 +95,6 @@ The rules every rhythm package in `src/rhythms/` follows.
 - **Coco.** The pandeiro and the palmas are viewer options, like the maracatu caixa options, with
   `couro` and `roda` as defaults. The atabaques are a trio: rum, rumpi and lê. Rufadas open the
   show.
-- **Page.** Every rhythm is public, finished or not. The desktop left column shows the Roteiro on
-  top and the rhythm selector at the bottom. Each rhythm has its own path: `/maracatu`, `/coco`,
-  `/frevo`, `/forro`, `/manguebeat`, `/brega`, `/bregafunk`.
 - **Video export.** Parked ([#19](https://github.com/martonpaulo/baque-virado/issues/19),
   [#20](https://github.com/martonpaulo/baque-virado/issues/20)).
 
