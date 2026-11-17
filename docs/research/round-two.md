@@ -14,6 +14,7 @@ here is built yet: the owner asked to record, research and understand first, and
 - [AI music software: what exists](#ai-music-software-what-exists)
 - [Order of work](#order-of-work)
 - [Open questions for the owner](#open-questions-for-the-owner)
+- [Unfinished work kept](#unfinished-work-kept)
 
 ## What the owner asked
 
@@ -163,5 +164,13 @@ audio model may serve as a sketch pad to compare ideas, if the owner wants to tr
 
 - The brega has five songs named and the owner counts four: which four?
 - In the background, should a show keep playing or pause?
-- May the unfinished work of the stopped frevo, forró and bregafunk agents be pushed as `wip/`
-  branches, so a recycled session does not lose it?
+
+## Unfinished work kept
+
+The rewrites of the frevo, forró and bregafunk scripts that the owner stopped on 2026-11-17 are on
+GitHub as the branches `wip/frevo`, `wip/forro` and `wip/bregafunk` (pushed with the owner's
+permission). Each is one commit ahead of `main`, does not pass its test, and is a starting point
+for round two, not something to merge as it is.
+
+The owner's view of the first round: every show but the maracatu still has a lot to improve, the
+delivered ones included.
