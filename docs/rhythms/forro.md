@@ -8,9 +8,13 @@ why ([#21](https://github.com/martonpaulo/baque-virado/issues/21)).
 
 ## Music
 
-- **Tempo and metre.** 120 BPM for the whole show, as the script says. 2/4 on an 8-step wheel, one
-  bar per turn. 98 bars, 1:38. The research estimates baião at 85 to 110 BPM; the script's 120 sits
-  between baião and arrasta-pé and keeps the dance feel.
+- **Tempo and metre.** 120 BPM for the whole show, as the script says, counted on the quarter note:
+  the felt pulse, one dance step per beat. 2/4 on an 8-step wheel, one bar per turn: 1 s per turn.
+  98 bars, 1:38. 120 sits inside the baião range of the web sources in
+  [`brega-forro.md`](../research/brega-forro.md) (110 to 135; xote 85 to 110, arrasta-pé 130 to
+  160), above the inferred 85 to 110 of
+  [`pernambuco-rhythms-feeling.md`](../research/pernambuco-rhythms-feeling.md). It is not a
+  half-time count: the triângulo plays 8 sixteenths a second.
 - **Swing.** None. The maracatu swing was measured on a recording; no forró measurement exists here,
   so the grid stays straight rather than carry invented numbers.
 - **Mode and harmony.** G mixolydian (F natural, the flat seventh). Three chords: G (I), F (♭VII)
@@ -27,7 +31,8 @@ why ([#21](https://github.com/martonpaulo/baque-virado/issues/21)).
   (bass button on the beat, chord button on the off-beat; in Jogo de fole, chord accents in
   3 + 3 + 2).
 - **Breque.** Everyone on 1, then silence; the sanfona alone plays the pick-up back into the hook.
-  The end is everyone on 1, on G, the tune held on the tonic.
+  The end is everyone on 1, on G, the tune held on the tonic. The Final scene's last A keeps its
+  first bar, which lands the flat seventh, and the cadence takes its second: F resolves up to G.
 
 ## Sounds
 
@@ -61,11 +66,18 @@ The zabumba leads the timing; the triângulo's off-beat sixteenths sit about 10 
   and coming out of the wheel: a dusk sky from bonfire orange to night indigo, whose warm light
   shrinks toward the wheel over the show (saudade is light leaving); a sanfona bellows that opens
   and closes once per bar around the wheel; bandeirinhas thrown outward by the zabumba's low head.
-  The wheel's face stays dark, so it reads over the sky.
+  The sky stays night inside the wheel's edge, where its step numbers sit, and the light starts just
+  outside; the bellows and the flags turn outside the numbers. Measured on screenshots at 393 x 852
+  and 1440 x 900, the faintest wheel mark (an off-beat number) keeps 3.97:1 against what is behind
+  it, and the sanfona's red dots 4.08:1 against the face; with the light at the rim, they fell to
+  1.4:1 and 2.6:1.
 - **Flash safety (WCAG 2.3.1).** Nothing changes brightness on the beat. The pulse is motion: the
   wheel's hand, the bellows and the flags. Measured in headless Chromium, 30 frames per second over
   two bars of the Rabeca e bandolim scene: the largest change of mean relative luminance in any
   eighth of the screen's width and height is 0.004 per frame, far below the 0.10 of a flash.
+- **Only what sounds.** The wheel draws only the voices the scene plays, with no ghost of the ones
+  to come (the maracatu draws them faint): the parts enter one by one on the wheel too, and the key
+  over the lanes, one line, names at most six voices; nine names did not fit a phone's width.
 - **Widgets.** The wheel, the lanes and the readout stay; the maracatu score, swing table and
   waves do not, as forró has no measured swing and no notated baques here. The readout shows what
   each scene teaches: the triângulo's closed and open strokes, the zabumba cell, the bacalhau on

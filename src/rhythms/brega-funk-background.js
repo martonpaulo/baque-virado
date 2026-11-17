@@ -1,6 +1,6 @@
 // The brega funk background: a night party around the wheel. Everything comes out of the wheel and
 // stays circular: a dark purple bloom on the bumbo (the sub-bass felt, not flashed), lime rays thrown
-// from the lata like the LEDs of a paredão, rings that sway like hips on each beat, and gold only on
+// from the lata like the LEDs of a paredão, rings that sway like hips on alternate beats, and gold only on
 // the drop's horns. Bright emissions are limited to 3 per second (WCAG 2.3.1).
 // Palette and reasons: docs/rhythms/brega-funk.md.
 
@@ -17,13 +17,16 @@ export const PALETTE = {
 };
 
 const BEATS_PER_BAR = 4;
+export const BEATS_PER_LEAN = 2; // the hips lean on alternate beats at 170, the wheel and the rings alike
 const TAU = Math.PI * 2;
 const MIN_FLASH_GAP = 0.34; // seconds between bright emissions: under 3 per second
 const TRAIL_SECONDS = 0.14; // how fast the frame before fades into the night
-const BLOOM = { decay: 0.4, reach: 3.4, alpha: 0.5, inner: '#4a0a5c' }; // reach in wheel radii
+// reach in wheel radii; under the wheel the bloom keeps only `under` of its strength, so the bumbo's
+// purple keeps 3:1 against it (WCAG 1.4.11)
+const BLOOM = { decay: 0.4, reach: 3.4, alpha: 0.5, under: 0.3, inner: '#4a0a5c' };
 const RAYS = { count: 4, life: 0.45, from: 1.15, length: 0.9, travel: 2.6, width: 3 }; // in wheel radii and CSS px
 const RINGS = { radii: [1.3, 1.65, 2.05], sway: 0.12, width: 1.2, alpha: 0.28 };
-const GOLD_RING = { life: 0.6, travel: 2.2, width: 3 };
+const GOLD_RING = { life: 0.6, from: RAYS.from, travel: 2.2, width: 3 }; // born just outside the wheel, like the rays
 const SPARK = { life: 0.3, radius: 1.25, size: 2 };
 const MOTION_SCALE_REDUCED = 0.5;
 const REDUCED_MOTION = globalThis.matchMedia?.('(prefers-reduced-motion: reduce)');
@@ -79,15 +82,17 @@ export function createBregaFunkBackground() {
 
     // the bumbo and the grave: a large dark bloom, felt rather than flashed
     if (bloom > 0) {
-      const glow = ctx.createRadialGradient(cx, cy, r, cx, cy, r * BLOOM.reach);
-      glow.addColorStop(0, alphaOf(BLOOM.inner, BLOOM.alpha * bloom));
+      const glow = ctx.createRadialGradient(cx, cy, 0, cx, cy, r * BLOOM.reach);
+      glow.addColorStop(0, alphaOf(BLOOM.inner, BLOOM.alpha * BLOOM.under * bloom));
+      glow.addColorStop(1 / BLOOM.reach, alphaOf(BLOOM.inner, BLOOM.alpha * BLOOM.under * bloom));
+      glow.addColorStop(RAYS.from / BLOOM.reach, alphaOf(BLOOM.inner, BLOOM.alpha * bloom));
       glow.addColorStop(1, alphaOf(PALETTE.ground, 0));
       ctx.fillStyle = glow;
       ctx.fillRect(0, 0, width, height);
     }
 
-    // the hips: rings that lean wide on one beat and tall on the next
-    const lean = Math.sin(Math.PI * position * BEATS_PER_BAR) * RINGS.sway * calm,
+    // the hips: rings that lean wide over beats 1 and 2 and tall over 3 and 4
+    const lean = Math.sin((Math.PI * position * BEATS_PER_BAR) / BEATS_PER_LEAN) * RINGS.sway * calm,
       drop = params.sceneId === 'drop';
     ctx.lineWidth = RINGS.width * dpr;
     RINGS.radii.forEach((radius, i) => {
@@ -120,7 +125,7 @@ export function createBregaFunkBackground() {
         ctx.strokeStyle = alphaOf(e.kind === 'gold' ? PALETTE.gold : PALETTE.leather, life);
         ctx.lineWidth = GOLD_RING.width * dpr;
         ctx.beginPath();
-        ctx.arc(cx, cy, r * (1 + (1 - life) * GOLD_RING.travel * calm), 0, TAU);
+        ctx.arc(cx, cy, r * (GOLD_RING.from + (1 - life) * GOLD_RING.travel * calm), 0, TAU);
         ctx.stroke();
       } else {
         const life = 1 - age / SPARK.life;

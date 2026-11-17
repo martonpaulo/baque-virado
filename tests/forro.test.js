@@ -69,3 +69,27 @@ test('the breque cuts on 1 and the sanfona alone leads back; the show ends on th
   assert.ok(last.every(h => h.hit.step === 0));
   assert.equal(last.find(h => h.voice === 'sanfona').hit.tone, 'G5:L');
 });
+
+// docs/research/brega-forro.md, «What makes it special»: bacalhau at 50 to 70 % of the low head,
+// triângulo closed at about 60 % under the open accent. Too quiet and the signature is lost.
+// The levels between voices are the studio's (src/studio.js, docs/rhythms/studio.md); inside the
+// triângulo, the closed strokes stay soft under the open accent (brega-forro.md: about 60 %).
+test('the closed triângulo strokes sit under the open accent', () => {
+  const bar = show.barTimeline(show.sceneById('bacalhau').start).voices;
+  const triangle = bar.triangulo.map(h => [h.hit.tone, h.hit.velocity]),
+    open = Math.min(...triangle.filter(([tone]) => tone === 'aberto').map(([, v]) => v));
+  assert.ok(triangle.some(([tone]) => tone === 'fechado'));
+  for (const [tone, v] of triangle) if (tone === 'fechado') assert.ok(v / open <= 0.7, `closed stroke at ${v / open} of the open one`);
+});
+
+// The key over the lanes names, on one line, each wheel voice the lanes do not show (src/lanes.js
+// keyVoices); at 393 px six names fit. A voice the scene does not play draws nothing.
+test('only the voices a scene plays reach the wheel, so the key fits one line', () => {
+  const MAX_KEY_NAMES = 6;
+  for (let bar = 0; bar < show.TOTAL_BARS; bar++) {
+    const { scene, playing, voices } = show.barTimeline(bar);
+    for (const voice of Object.keys(voices)) if (!playing.includes(voice)) assert.deepEqual(voices[voice], [], `${voice} in bar ${bar}`);
+    const named = Object.keys(voices).filter(voice => voices[voice].length && !scene.lanes.includes(voice));
+    assert.ok(named.length <= MAX_KEY_NAMES, `bar ${bar}: ${named}`);
+  }
+});

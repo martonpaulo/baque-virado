@@ -329,7 +329,7 @@ const melodic = (bar, voice) => (LINES[voice].get(bar) || []).map(note => hit(no
 // (docs/research/pernambuco-rhythms-feeling.md, § Frevo). Accent places follow the 3+3+2 grouping.
 export const CAIXA_CELL = ['X x x X x x X x', 'x X x X r . . .'];
 export const SURDO_CELL = ['o . . . X . . o', 'o . . . X . . .']; // o: abafado (hand on the skin), X: aberto
-export const PANDEIRO_BAR = 'X x . x X x . x'; // X: grave (thumb), x: platinela
+export const PANDEIRO_BAR = 'X x x x X x x x'; // the sixteenth ostinato: X grave (thumb) on the beat, x platinela
 const cellSteps = (text, mark) => text.split(' ').flatMap((token, step) => (token === mark ? [step] : []));
 function caixaBar(cellBar) {
   const text = CAIXA_CELL[cellBar];
@@ -488,7 +488,7 @@ const STUDIO = {
     tarol: {
       seed: 42,
       role: 'follower',
-      gain: 0.55,
+      gain: 0.8, // the review (#25): the caixa over the surdo
       pan: 0.2,
       send: 0.16,
       strokes: () => ({
@@ -512,8 +512,8 @@ const STUDIO = {
       }),
       shape: tone => ({ stroke: tone === 'grave' ? 'grave' : 'platinela' }),
     },
-    tuba: { seed: 44, role: 'follower', gain: 0.9, send: 0.1, bright: [800, 6000], ...brass('tuba') },
-    trombone: { seed: 45, role: 'follower', gain: 0.6, pan: -0.25, send: 0.2, ...brass('trombone') },
+    tuba: { seed: 44, role: 'follower', gain: 0.75, send: 0.1, bright: [800, 6000], ...brass('tuba') },
+    trombone: { seed: 45, role: 'follower', gain: 0.85, pan: -0.25, send: 0.2, ...brass('trombone') },
     trompete: { seed: 46, role: 'follower', gain: 0.85, pan: 0.25, send: 0.22, ...brass('trompete') },
     sax: { seed: 47, role: 'follower', gain: 0.75, pan: 0.45, send: 0.22, ...brass('sax') },
   },

@@ -9,6 +9,7 @@ const of = instrument => (FEMININE_INSTRUMENTS.has(instrument) ? 'da' : 'do'); /
 
 export const COPY = {
   ...RHYTHM.copy,
+  wheel: `Roda de ${STEPS_PER_BAR} semicolcheias com um anel por instrumento`, // the wheel's label: index.html holds the maracatu's
   hud: {
     bar: (n, total) => `comp ${n}/${total}`,
     step: n => `semicolcheia ${n}/${STEPS_PER_BAR}`,

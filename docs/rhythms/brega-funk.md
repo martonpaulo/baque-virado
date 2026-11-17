@@ -24,22 +24,24 @@ and can be changed.
 
 - Feeling: sensuality and provocation. The music cues follow music-cognition rule 15: minor mode, a
   deep bass groove, a dark timbre on the low end, and a short bright hook on top.
-- One tempo for the whole show: 170 BPM, the tempo producers name, counted in half time. The engine
-  runs at 85 BPM with one 16-sixteenth bar per turn of the wheel (2.82 s). The HUD shows ♩ = 85; the
-  first readout says «170 BPM, em meio tempo». The «old and new» tempo scene of the research outline
-  is left out, as the one-tempo decision requires.
+- One tempo for the whole show: 170 BPM, felt at 170, the top of today's 160 to 170 range
+  (`docs/research/brega-forro.md`, Tempo; D26 in `docs/decisions.md`). The engine runs at 170 BPM
+  with one 16-sixteenth bar per turn of the wheel (1.41 s): the chimbal runs in sixteenths of 170,
+  the bumbo falls on beats 1 and 3, and the lata makes the 3 + 3 + 2 inside each half bar. The HUD
+  shows ♩ = 170 and the first readout says «170 BPM». The «old and new» tempo scene of the research
+  outline is left out, as the one-tempo decision requires.
 - No swing: the beat is hard-quantized, as it is programmed in FL Studio.
 
 ## The beat
 
-| Voice     | Sixteenths (from 1)             | Why                                                                                     |
-| :-------- | :------------------------------ | :-------------------------------------------------------------------------------------- |
-| bumbo     | 1, 9; ghost notes on 7 and 15   | The half-time pulse on the grid, low and clear (rules 6 and 7)                          |
-| lata      | 4, 7, 12, 15                    | With the bumbo heads it groups each half bar as 3 + 3 + 2, the dembow-like bounce       |
-| chimbal   | all 16, the off-beat «e» louder | Chimbais dobrados; 32nd-note rolls (fusas) before the grave and in the quebra           |
-| grave     | 1 (held), 7, 9 (gliding)        | The sliding 808: the note on 9 glides into the next bar's root                          |
-| teclado   | 5, 13, and a light 15           | Off-beat chords, the reggae-like keyboard the sources describe                          |
-| tamborzão | 1, 4, 7, 11, 14 (3 3 4 3 3)     | The Rio atabaque line, played alone for two bars to show why brega funk is not Rio funk |
+| Voice     | Sixteenths (from 1)             | Why                                                                                   |
+| :-------- | :------------------------------ | :------------------------------------------------------------------------------------ |
+| bumbo     | 1, 9; ghost notes on 7 and 15   | Beats 1 and 3 of 170, low and clear (rules 6 and 7)                                   |
+| lata      | 4, 7, 12, 15                    | With the bumbo heads it groups each half bar as 3 + 3 + 2, the dembow-like bounce     |
+| chimbal   | all 16, the off-beat «e» louder | Chimbais dobrados; 32nd-note rolls (fusas) before the grave and in the quebra         |
+| grave     | 1 (held), 7, 9 (gliding)        | The sliding 808: the note on 9 glides into the next bar's root                        |
+| teclado   | 5, 13, and a light 15           | Chords on beats 2 and 4, the reggae-like keyboard the sources describe                |
+| tamborzão | 1, 4, 7, 11, 14 (3 3 4 3 3)     | The Rio atabaque line, played alone for 4 bars to show why brega funk is not Rio funk |
 
 The passinho scene doubles the bumbo (1, 3, 7, 9, 11, 15) and moves the lata (4, 7, 11, 12, 15).
 
@@ -48,17 +50,20 @@ The passinho scene doubles the bumbo (1, 3, 7, 9, 11, 15) and moves the lata (4,
 - A minor. Four bars of harmony under a two-bar hook: lá menor, lá menor, fá, sol. The hook meets two
   harmonies, so its repeats do not sound like a loop.
 - The hook is original: a wave contour in the first bar and one leap to E6 in the second (rule 12).
-  It is stated first, alone, repeated through the show, varied once on the drop (the second bar
-  climbs back to E6 and holds it) and comes back unchanged in the final (rule 13).
+  It is stated first, alone, twice, repeated through the show, varied once on the drop (only its
+  second statement there: the second bar climbs back to E6 and holds it; the drop's other
+  statements are unchanged) and comes back unchanged in the final (rule 13). A test pins it.
 - The horns answer the hook on the drop (rule 14): a stab on its first bar, two pick-ups at the end
   of its second, the frevo nod the sources describe.
 
 ## Script
 
-The 11 scenes of `docs/sketches/scripts.html`, 34 bars, 1:36. Parts enter one at a time (rule 8),
+The 11 scenes of `docs/sketches/scripts.html`, each with twice the sketch's bars because a bar at 170
+lasts 1.41 s: 68 bars, 1:36. Parts enter one at a time (rule 8),
 and the density goes build, full, drop out, return (rule 9): Tema (hook alone), Bumbo, Lata,
 Chimbais, Grave, Batida completa, Tamborzão (the Rio contrast), Quebra (hook and chimbais, then one
-silent beat), Drop (everything, horns, the hook's variation), Passinho, Final (hook, then a cut on 1).
+silent beat on the scene's last bar), Drop (everything, horns, the hook's variation), Passinho,
+Final (hook, then a cut on 1 of the last bar).
 
 A voice is drawn on the wheel only in the scenes where it plays, so each entry stands out.
 
@@ -104,12 +109,18 @@ pink `#ff2e88` of that note was dropped: the expansion decision says pink repeat
 - `src/rhythms/brega-funk-background.js` replaces the kaleidoscope for this rhythm. Everything comes
   out of the wheel and stays circular: a large dark purple bloom on the bumbo and the grave (the
   sub-bass felt, not flashed), lime rays thrown from where the lata sits on the wheel, three rings
-  that lean wide and tall on alternate beats, gold rings on the drop's horns, leather rings for the
-  tamborzão and small sparks for the chimbais of the quebra.
+  that lean wide over beats 1 and 2 and tall over 3 and 4, gold rings on the drop's horns, leather
+  rings for the tamborzão and small sparks for the chimbais of the quebra.
+- The wheel stays readable over it: under the wheel the bloom keeps 30 % of its strength, and the
+  rays and the gold and leather rings are born just outside the wheel. Measured on rendered frames,
+  the darkest wheel colour, the bumbo's purple, keeps at least 3.5:1 against the brightest pixel
+  behind the wheel (WCAG 1.4.11); a test guards the 3:1.
 - WCAG 2.3.1: bright emissions keep at least 0.34 s apart, so never more than 3 per second; a test
-  runs the whole show to prove it. No full-screen flash.
-- The pulse is carried by the wheel itself: it leans 2.5° to one side on one beat and to the other on
-  the next, like hips in the passinho, and swells 3 % on each bumbo. It depends on the position only.
+  runs the whole show to prove it. At 170 the lata's second hit of each 3 + 3 + 2 comes 0.26 s after
+  the first, so it draws no rays. No full-screen flash.
+- The pulse is carried by the wheel itself: it leans 2.5° to one side over beats 1 and 2 and to the
+  other over 3 and 4, like hips in the passinho (a lean on every beat would last only 0.35 s at 170),
+  and swells 3 % on each bumbo. It depends on the position only.
 - Reduced motion: the wheel stays still, and the rays and rings travel half as far.
 
 ## Widgets
@@ -125,7 +136,7 @@ pink `#ff2e88` of that note was dropped: the expansion decision says pink repeat
 ## Copy
 
 Brazilian Portuguese, with the producers' and the sources' terms: bumbo, lata, chimbais dobrados,
-grave, glissando, meio tempo, tamborzão, quebra, drop, passinho, fusas, naipe de metais. No song
+grave, glissando, tamborzão, quebra, drop, passinho, fusas, naipe de metais. No song
 title, recording or performer is named.
 
 ## Engine hooks this rhythm added

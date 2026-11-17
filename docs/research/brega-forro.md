@@ -145,21 +145,23 @@ About 2:00 at about 140 BPM. One bar is about 1.7 s. 64 to 72 bars.
 From VICE (Duca do Baixo, MC Tocha, Dany Bala):
 
 - Funk was at 130 BPM.
-- «Posição da Rã» by Dany Bala was at 150 BPM.
+- A track of that time by one of these producers was at 150 BPM.
 - Brega funk climbed to 190 to 195 BPM around 2011 to 2014.
-- Duca slowed it to about 170. Then «Subidinha» set **about 160, up to 170, still common today**.
+- Duca slowed it to about 170. Then a later hit set **about 160, up to 170, still common today**.
 - Commercial sample packs notate it in half time (87 BPM).
 - The «160 to 180 BPM, half-time feel» on Wikipedia is consistent with this.
 
-**Recommendation:** run the show at **about 170 BPM**. One turn of the 16-step wheel is one
-half-time bar (about 85 BPM, about 2.8 s).
+**Recommendation:** run the show at **about 170 BPM, felt at 170**. One turn of the 16-step wheel
+is one bar at 170 (about 1.41 s): the chimbal in sixteenths of 170, the bumbo on beats 1 and 3, the
+lata in 3+3+2 per half bar. The half-time count of the sample packs is only how they write it; the
+show is built at the felt tempo (D10 in `docs/decisions.md`).
 
 There are no canonical named patterns. There are trend names and the dance, the «passinho dos
 malokas».
 
 ### What makes it special
 
-How a producer would program it [inferred], on a 16-step half-time bar:
+How a producer would program it [inferred], on a 16-step bar at 170:
 
 1. **A dembow-like kick and lata:**
    - Kick on 1 and 9, plus a ghost note on 7 or 15.
@@ -180,12 +182,13 @@ How a producer would program it [inferred], on a 16-step half-time bar:
 
 ### d. Show outline
 
-About 2:00 at 170 BPM. One half-time bar is about 2.8 s. About 42 bars.
+About 2:00 at 170 BPM. This first plan counted half-time bars of about 2.8 s, about 42 bars; at
+the felt 170 a bar is about 1.41 s, so the show doubles each scene's bars (D10).
 
 | #   | Scene              | Bars | What enters or changes                        | What it teaches         |
 | --- | ------------------ | ---- | --------------------------------------------- | ----------------------- |
 | 1   | Hook alone         | 2    | Lead hook, no beat                            | The hook                |
-| 2   | Bumbo              | 2    | Kick on 1 and 9                               | The half-time pulse     |
+| 2   | Bumbo              | 2    | Kick on 1 and 9                               | The pulse on 1 and 3    |
 | 3   | The lata           | 4    | Metallic snare, 3+3+2                         | The signature sound     |
 | 4   | Chimbais dobrados  | 2    | Sixteenth hats, then rolls                    | Motion                  |
 | 5   | Graves             | 4    | Sliding 808                                   | The bass                |
