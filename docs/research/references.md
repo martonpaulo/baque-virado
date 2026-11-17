@@ -21,8 +21,10 @@ Reference: the show predates this list; it follows the nações' baque, as
 
 ## Coco da Xambá (`/coco`)
 
-Reference: Bongar, «Mulungu»; and Bongar live at «Observa e Toca»
+Reference and similar songs: all four are in Bongar live at «Observa e Toca»
 (https://www.youtube.com/watch?v=W8ThpRHsuTI), the whole video, especially from 18:00.
+
+Reference: Bongar, «Mulungu».
 
 Similar, all by Bongar:
 
@@ -47,19 +49,25 @@ Similar, all by Nação Zumbi:
 ## Forró (`/forro`)
 
 Reference: «Forró no Malagueta», Forróçacana (a Rio de Janeiro group, forró universitário).
-Similar: none named yet.
+
+Similar:
+
+- «Forrobodó», Fulô de Mandacaru.
+- «Meu Cenário», Petrúcio Amorim.
+
+A third similar song: none named yet.
 
 ## Brega (`/brega`)
 
-Reference: «Uma Mulher É Igual uma Flor», Banda Musa do Calipso.
+Reference: «Uma Mulher É Igual uma Flor», Banda Musa do Calipso; other bands' versions of the song
+count too.
 
-Similar, both by Banda Lapada as played on the television show SuperStar (Globo; the video is on
-YouTube):
+Similar:
 
-- «Diz na Minha Cara».
-- «Ainda Bem».
-
-A third similar song: none named yet.
+- «Diz na Minha Cara», as Banda Lapada played it on the television show SuperStar (Globo; the video
+  is on YouTube); other versions of the song count too.
+- «Ainda Bem», Banda Lapada, from the same show.
+- «Novo Namorado», Priscila Senna.
 
 ## Bregafunk (`/bregafunk`)
 
