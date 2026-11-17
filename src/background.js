@@ -16,6 +16,9 @@ const FEEDBACK_KEYS = ['zoom', 'rot', 'hue', 'keep', 'speed'];
 
 // How the background behaves in each scene: the rhythm's looks (src/rhythms/), one per scene id.
 export const SCENE_LOOKS = RHYTHM.looks;
+// A rhythm may paint its own background (`background.create`); the kaleidoscope and the feedback
+// tunnel then stay off, and the painter gets the frame's position, look, hits and bar mode.
+const PAINTER = RHYTHM.background || null;
 
 // Hit energy fed to the shader (ages in seconds).
 const BOOM_ATTACK = 0.035; // alfaia/stick boom rise time constant
@@ -195,7 +198,8 @@ function hitEnergy(recent) {
 }
 
 export function createBackground(fxCanvas, feedbackCanvas) {
-  const kaleidoscope = createKaleidoscope(fxCanvas);
+  const kaleidoscope = PAINTER ? null : createKaleidoscope(fxCanvas);
+  const painter = PAINTER?.create({ stepsPerBar: STEPS_PER_BAR, angleOf });
   const ctx = feedbackCanvas.getContext('2d');
   const previous = document.createElement('canvas'),
     previousCtx = previous.getContext('2d');
@@ -338,6 +342,12 @@ export function createBackground(fxCanvas, feedbackCanvas) {
   /** One frame. `clock` = { time, step } (seconds); `shapes` are the wheel's partly drawn shapes. */
   function draw(position, params, recent, clock, shapes) {
     if (!geometry?.width || !geometry.height) return; // not laid out, or hidden: a 0-px canvas cannot be drawn
+    if (painter) {
+      const bar = Math.floor(position),
+        scene = sceneAt(bar);
+      painter.draw(ctx, geometry, { position, params, recent, clock, mode: scene.mode(bar - scene.start), barStart: bar });
+      return;
+    }
     const { width, height, centreX, centreY } = geometry;
     if (kaleidoscope) kaleidoscope.draw({ centreX: centreX * fxRatio(), centreY: centreY * fxRatio(), time: clock.time, params, ...hitEnergy(recent) });
     ctx.clearRect(0, 0, width, height);
