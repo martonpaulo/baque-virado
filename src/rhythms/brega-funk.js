@@ -1,15 +1,16 @@
 // Brega funk: everything the engine plays and shows that belongs to this rhythm (Recife, since about
-// 2009). A half-time beat at 170 BPM, written as 85 BPM with one 16-sixteenth bar per turn of the
-// wheel: the bumbo on 1 and 9, the metallic «lata» in 3 + 3 + 2, doubled chimbais, the sliding
-// «grave», off-beat keys and a short minor hook. Hard-quantized, as it is programmed: no swing.
+// 2009). 170 BPM, felt at 170: one 16-sixteenth bar per turn of the wheel (1.41 s), the bumbo on 1
+// and 3, the metallic «lata» in 3 + 3 + 2 per half bar, chimbais in sixteenths, the sliding «grave»,
+// keys on 2 and 4 and a short minor hook. Hard-quantized, as it is programmed: no swing.
 // Research and choices: docs/research/brega-forro.md, docs/rhythms/brega-funk.md.
 import { label, row, stat, stats } from '../readout-markup.js';
-import { createBregaFunkBackground, PALETTE } from './brega-funk-background.js';
+import { BEATS_PER_LEAN, createBregaFunkBackground, PALETTE } from './brega-funk-background.js';
 import { atabaque, brass, grave, hat, keys, kick, lata, lead } from './brega-funk-sounds.js';
 import { straightMeter } from './meter.js';
 
-const BPM = 85;
-const SHOWN_BPM = BPM * 2; // the tempo producers name; the wheel turns once per half-time bar
+// The top of today's 160 to 170 (docs/research/brega-forro.md, Tempo; D25 in docs/decisions.md):
+// the wheel is one bar at that tempo, so the bumbo, lata and chimbal are felt at 170 (#23).
+const BPM = 170;
 const BEATS_PER_BAR = 4;
 const STEPS_PER_BEAT = 4;
 const STEPS_PER_BAR = BEATS_PER_BAR * STEPS_PER_BEAT;
@@ -124,8 +125,9 @@ const nextChordOf = barInScene => PROGRESSION[(barInScene + 1) % PROGRESSION.len
 const TONE = /^(.+):(\d+)$/; // a pitched hit's tone: what it plays, then its length in sixteenths
 const silentBar = () => Object.fromEntries(VOICE_ORDER.map(voice => [voice, []]));
 
+const VARIED_STATEMENT = 1; // the drop varies its second statement of the hook only, then goes back
 function hookBar(scene, barInScene) {
-  const bars = scene.hookVaried && barInScene >= 2 ? HOOK_VARIED : HOOK;
+  const bars = scene.hookVaried && Math.floor(barInScene / HOOK.length) === VARIED_STATEMENT ? HOOK_VARIED : HOOK;
   return bars[barInScene % 2].map(([step, note, length]) => hit(step, HOOK_VELOCITY, `${note}:${length}`));
 }
 function graveBar(barInScene) {
@@ -198,25 +200,27 @@ function allHits(scene, barInScene) {
 }
 
 // ---------- the show script (docs/sketches/scripts.html), one tempo throughout ----------
+// Each scene of the sketch has twice its bars: a bar lasts half as long at 170, and the show stays
+// between 1:30 and 2:00. A scene's mode reads its last bar from its own length.
 const always = value => () => value;
 const BEAT_VOICES = ['bumbo', 'lata', 'chimbal', 'grave'];
 const FULL = [...BEAT_VOICES, 'teclado', 'lead'];
 const SCENE_LIST = [
-  { id: 'tema', bars: 2, voices: always(['lead']), lanes: ['lead'] },
-  { id: 'bumbo', bars: 2, voices: always(['bumbo']), lanes: ['bumbo'] },
-  { id: 'lata', bars: 4, voices: always(['bumbo', 'lata']), lanes: ['bumbo', 'lata'] },
-  { id: 'chimbais', bars: 2, voices: always(['bumbo', 'lata', 'chimbal']), lanes: ['bumbo', 'lata', 'chimbal'] },
-  { id: 'grave', bars: 4, voices: always(BEAT_VOICES), lanes: ['bumbo', 'grave', 'lata', 'chimbal'] },
-  { id: 'batida', bars: 4, voices: always(FULL), lanes: ['bumbo', 'grave', 'lata', 'teclado', 'lead'] },
-  { id: 'tamborzao', bars: 2, pattern: 'tamborzao', voices: always(['bumbo', 'tamborzao']), lanes: ['bumbo', 'tamborzao', 'lata'] },
-  { id: 'quebra', bars: 2, voices: always(['chimbal', 'lead']), mode: bar => (bar === 1 ? 'break' : 'normal'), lanes: ['lead', 'chimbal'] },
-  { id: 'drop', bars: 4, voices: always([...FULL, 'metais']), openHat: true, hookVaried: true, lanes: ['bumbo', 'lata', 'lead', 'metais'] },
-  { id: 'passinho', bars: 4, pattern: 'passinho', voices: always([...BEAT_VOICES, 'lead']), lanes: ['bumbo', 'lata', 'grave', 'lead'] },
+  { id: 'tema', bars: 4, voices: always(['lead']), lanes: ['lead'] },
+  { id: 'bumbo', bars: 4, voices: always(['bumbo']), lanes: ['bumbo'] },
+  { id: 'lata', bars: 8, voices: always(['bumbo', 'lata']), lanes: ['bumbo', 'lata'] },
+  { id: 'chimbais', bars: 4, voices: always(['bumbo', 'lata', 'chimbal']), lanes: ['bumbo', 'lata', 'chimbal'] },
+  { id: 'grave', bars: 8, voices: always(BEAT_VOICES), lanes: ['bumbo', 'grave', 'lata', 'chimbal'] },
+  { id: 'batida', bars: 8, voices: always(FULL), lanes: ['bumbo', 'grave', 'lata', 'teclado', 'lead'] },
+  { id: 'tamborzao', bars: 4, pattern: 'tamborzao', voices: always(['bumbo', 'tamborzao']), lanes: ['bumbo', 'tamborzao', 'lata'] },
+  { id: 'quebra', bars: 4, voices: always(['chimbal', 'lead']), mode: bar => (bar === 3 ? 'break' : 'normal'), lanes: ['lead', 'chimbal'] },
+  { id: 'drop', bars: 8, voices: always([...FULL, 'metais']), openHat: true, hookVaried: true, lanes: ['bumbo', 'lata', 'lead', 'metais'] },
+  { id: 'passinho', bars: 8, pattern: 'passinho', voices: always([...BEAT_VOICES, 'lead']), lanes: ['bumbo', 'lata', 'grave', 'lead'] },
   {
     id: 'final',
-    bars: 4,
+    bars: 8,
     voices: always([...BEAT_VOICES, 'lead']),
-    mode: bar => (bar === 3 ? 'cut' : 'normal'),
+    mode: bar => (bar === 7 ? 'cut' : 'normal'),
     lanes: ['bumbo', 'lata', 'grave', 'lead'],
     isEnd: true,
   },
@@ -257,8 +261,10 @@ const SYNTH_VOICES = {
   },
   tamborzao: { name: tone => `${NAME}tamborzao-${tone}`, render: tone => sampleRate => atabaque(sampleRate, tone) },
 };
-// Levels chosen by ear against the bumbo; the lead's echo and the horns' chords sum louder.
-const LEVEL = { bumbo: 0.85, grave: 0.62, lata: 0.6, chimbal: 0.28, teclado: 0.3, lead: 0.36, metais: 0.42, tamborzao: 0.7, tarol: 0.55 };
+// Levels chosen by ear against the bumbo; the lead's echo and the horns' chords sum louder. Measured
+// offline, the mix peaks before the master bus where maracatu does (about +3 dBFS), so the bus
+// saturates no harder than for maracatu: about −6.5 dBFS RMS in the full scenes (#23).
+const LEVEL = { bumbo: 0.54, grave: 0.39, lata: 0.38, chimbal: 0.18, teclado: 0.19, lead: 0.23, metais: 0.26, tamborzao: 0.44, tarol: 0.35 };
 const SAMPLED_LATA = 'caixa-aro'; // the tarol rim, a CC0 recording, as the other lata
 
 /** Every tone each voice plays in the show, from the script itself: the sounds to synthesize. */
@@ -314,13 +320,15 @@ const SAMPLE_FOR = {
 };
 
 // ---------- the wheel's motion: the hips of the passinho ----------
-const SWAY_DEGREES = 2.5; // the wheel leans left on one beat and right on the next
+// At 170 a lean on every beat would be 0.35 s: the hips lean one way over beats 1 and 2 and the
+// other over 3 and 4 (BEATS_PER_LEAN), as the passinho dances it.
+const SWAY_DEGREES = 2.5;
 const KICK_SWELL = 0.03; // and swells a little on each bumbo
 const KICK_SWELL_SECONDS = 0.14;
 /** The wheel at `position` (bars), from its beat and the hits just heard. */
 function wheelMotion(position, recent = []) {
   const beats = position * BEATS_PER_BAR,
-    lean = Math.sin(Math.PI * beats);
+    lean = Math.sin((Math.PI * beats) / BEATS_PER_LEAN);
   let swell = 0;
   for (const h of recent) if (h.voice === 'bumbo') swell = Math.max(swell, h.hit.velocity * Math.exp(-h.age / KICK_SWELL_SECONDS));
   return { rotate: SWAY_DEGREES * lean * Math.abs(lean), scale: 1 + KICK_SWELL * swell };
@@ -337,7 +345,7 @@ const RIO_GROUPING = intervals(TAMBORZAO.drum.steps);
 const DRUMMING = new Set(SCENE_LIST.flatMap(scene => scene.voices()));
 const READ = {
   tempo: 'andamento',
-  tempoValue: `${SHOWN_BPM} BPM, em meio tempo`,
+  tempoValue: `${BPM} BPM`,
   cycle: '1 ciclo',
   cycleValue: seconds => `${STEPS_PER_BAR} semicolcheias = ${seconds} s`,
   key: 'tom',
@@ -361,7 +369,7 @@ const READ = {
   low: 'grave',
   mid: 'médio',
   high: 'agudo',
-  offbeatKeys: 'teclado no contratempo',
+  backbeatKeys: 'teclado nos tempos 2 e 4',
   rio: 'Rio',
   recife: 'Recife',
   rioNoLata: 'sem lata',
@@ -376,7 +384,7 @@ const READ = {
 };
 const SCENE_COPY = {
   tema: { chip: 'Tema', eyebrow: 'brega funk', title: 'Tema' },
-  bumbo: { chip: 'Bumbo', eyebrow: 'meio tempo', title: 'Bumbo' },
+  bumbo: { chip: 'Bumbo', eyebrow: 'no 1 e no 3', title: 'Bumbo' },
   lata: { chip: 'Lata', eyebrow: READ.groupingValue, title: 'Lata' },
   chimbais: { chip: 'Chimbais', eyebrow: 'chimbais dobrados', title: 'Chimbais' },
   grave: { chip: 'Grave', eyebrow: 'grave 808', title: 'Grave' },
@@ -439,7 +447,7 @@ const LAYOUTS = {
     registerRow('low', T.low) +
     registerRow('mid', T.mid) +
     registerRow('high', T.high) +
-    row(label(T.offbeatKeys), countFromOne(KEYS_AT.filter(h => h.velocity > HAT_VELOCITY[2]).map(h => h.step)), 'teclado'),
+    row(label(T.backbeatKeys), countFromOne(KEYS_AT.filter(h => h.velocity > HAT_VELOCITY[2]).map(h => h.step)), 'teclado'),
   tamborzao: () =>
     notation(
       notationRow(T.rio, TAMBORZAO.drum.steps, 'tamborzao'),
@@ -453,7 +461,7 @@ const LAYOUTS = {
     row(label(T.recife), GROUPING.join(' ')),
   quebra: () => stats('two', stat(1, T.silentBeat, PALETTE.gold), stat(SCENE_LIST.find(scene => scene.id === 'quebra').voices().length, T.voices, PALETTE.tin)),
   drop: () =>
-    stats('two', stat(SCENE_LIST.find(scene => scene.id === 'drop').voices().length, T.voices, PALETTE.gold), stat(SHOWN_BPM, 'BPM', PALETTE.lime)) +
+    stats('two', stat(SCENE_LIST.find(scene => scene.id === 'drop').voices().length, T.voices, PALETTE.gold), stat(BPM, 'BPM', PALETTE.lime)) +
     row(label(T.horns, PALETTE.gold), T.hornsValue, 'metais') +
     row(label(T.hookChange), T.hookChangeValue, 'lead'),
   passinho: () =>
@@ -462,7 +470,7 @@ const LAYOUTS = {
       notationRow(T.doubled, PASSINHO.bumbo.steps, 'bumbo'),
       notationRow(COPY.voices.lata, PASSINHO.lata.steps, 'lata'),
     ),
-  final: show => stats('', stat(DRUMMING.size, T.voices, PALETTE.lime), stat(show.totalBars, T.bars, PALETTE.ivory), stat(SHOWN_BPM, 'BPM', PALETTE.gold)),
+  final: show => stats('', stat(DRUMMING.size, T.voices, PALETTE.lime), stat(show.totalBars, T.bars, PALETTE.ivory), stat(BPM, 'BPM', PALETTE.gold)),
 };
 const FOCUS = { bumbo: 'bumbo', lata: 'lata', chimbais: 'chimbal', grave: 'grave' };
 const readout = (scene, show) => ({ markup: (LAYOUTS[scene.id] || (() => ''))(show), score: null, focus: FOCUS[scene.id] || '' });

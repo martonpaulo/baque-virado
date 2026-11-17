@@ -286,7 +286,8 @@ synth in the instrumental form.
   Marcelo André calls it «a three-second loop… without a fill». The earlier Volt Mix had sixteenth
   hats, snare on the second halves of beats, and a kick «syncopating three of the sixteen
   divisions» [S, 25].
-- Tempo: 160 to 180 BPM with a half-time feel [S, 26; secondary]. [I] It is felt as 80 to 90 BPM.
+- Tempo: 160 to 180 BPM with a half-time feel [S, 26; secondary]. The show is built felt at 170:
+  one 16-step bar at 170, the bumbo on beats 1 and 3 (D25 in `docs/decisions.md`).
 
 **Social context and feeling.**
 
@@ -297,8 +298,8 @@ synth in the instrumental form.
 - [I] **The feeling is swagger and play**: a bodily challenge in the passinho, with romantic brega
   melody under the provocation.
 
-**2-second signature.** A half-time bounce of dry kick and click, a clinking off-beat like a
-triangle, sliding bass, and a cheap bright synth hook.
+**2-second signature.** A bounce of dry kick (on 1 and 3 at 170) and click, a clinking off-beat
+like a triangle, sliding bass, and a cheap bright synth hook.
 
 ---
 
