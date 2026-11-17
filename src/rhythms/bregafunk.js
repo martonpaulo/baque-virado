@@ -590,8 +590,6 @@ const READ = {
   withKick: 'com o bumbo',
   few: 'chimbais',
   fewValue: `${HATS.plain.length} por compasso, secos`,
-  roll: 'rufo',
-  rollValue: 'no fim da frase',
   notes: 'notas',
   notesValue: [...new Set(PROGRESSION)].map(chord => noteName(ROOTS[chord])).join(' · '),
   glide: 'glissando',
@@ -676,11 +674,7 @@ const LAYOUTS = {
   lata: () =>
     notation(notationRow(COPY.voices.bumbo, BEAT.bumbo.steps, 'bumbo'), notationRow(COPY.voices.lata, BEAT.lata.steps, 'lata')) +
     row(label(T.grouping), `${T.groupingValue} ${T.groupingUnit}`),
-  palmas: () =>
-    entry +
-    row(label(T.withKick), countFromOne(BEAT.palma.steps), 'palma') +
-    row(label(T.few), T.fewValue, 'chimbal') +
-    row(label(T.roll), T.rollValue, 'chimbal'),
+  palmas: () => entry + row(label(T.withKick), countFromOne(BEAT.palma.steps), 'palma') + row(label(T.few), T.fewValue, 'chimbal'),
   grave: () => entry + row(label(T.notes), T.notesValue, 'grave') + row(label(T.glide), T.glideValue, 'grave'),
   teclado: () => entry + row(label(T.withLata), countFromOne(STAB_AT.map(([step]) => step)), 'teclado') + row(label(T.stabNotes), T.stabNotesValue, 'teclado'),
   batida: () => registerRow('low', T.low) + registerRow('mid', T.mid) + registerRow('high', T.high),
