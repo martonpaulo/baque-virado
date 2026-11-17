@@ -61,12 +61,13 @@ function masterChain(context) {
   return input;
 }
 
-function playSample(context, buffers, name, time, gain, rate, destination, variation) {
+// A melodic voice (VOICES[voice].pitched) keeps its tuning; every other hit drifts a little in pitch.
+function playSample(context, buffers, name, time, gain, rate, destination, variation, pitched = false) {
   const buffer = buffers[name];
   if (!buffer) return;
   const source = context.createBufferSource();
   source.buffer = buffer;
-  source.playbackRate.value = rate * (1 + (variation - 0.5) * 0.02);
+  source.playbackRate.value = pitched ? rate : rate * (1 + (variation - 0.5) * 0.02);
   const level = context.createGain();
   level.gain.value = gain * (0.92 + variation * 0.16);
   source.connect(level).connect(destination);
@@ -83,7 +84,18 @@ function scheduleStep(context, buffers, destination, step, time, choice, volume 
     const variation = hash(step * 8 + VOICE_SEED[voice]);
     const level = volumeOf(volume, voice);
     const sample = level > 0 && SAMPLE_FOR[voice](choice, hit.velocity * (scene.gain[voice] || 1) * level, hit.tone, variation);
-    if (sample) playSample(context, buffers, sample[0], time + (swing / STEPS_PER_BEAT) * BEAT_SECONDS, sample[1], sample[2], destination, variation);
+    if (sample)
+      playSample(
+        context,
+        buffers,
+        sample[0],
+        time + (swing / STEPS_PER_BEAT) * BEAT_SECONDS,
+        sample[1],
+        sample[2],
+        destination,
+        variation,
+        VOICES[voice].pitched,
+      );
   }
 }
 
@@ -262,7 +274,7 @@ export function createPlayer(bank, choice, volume = {}) {
           const variation = hash((cycle * STEPS_PER_BAR + hit.step) * 8 + VOICE_SEED[voice]);
           const sample = SAMPLE_FOR[voice](next, hit.velocity * level, hit.tone, variation);
           const at = start + (cycle + (hit.step + swing) / STEPS_PER_BAR) * BAR_SECONDS;
-          if (sample) playSample(context, buffers, sample[0], at, sample[1], sample[2], bus, variation);
+          if (sample) playSample(context, buffers, sample[0], at, sample[1], sample[2], bus, variation, VOICES[voice].pitched);
         }
       const ringMs = (START_DELAY + PREVIEW_BARS * BAR_SECONDS) * MS_PER_SECOND + PREVIEW_RING_MS;
       awakeUntil = Math.max(awakeUntil, performance.now() + ringMs);

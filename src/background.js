@@ -7,7 +7,7 @@ import { SCOPE_GEOMETRY } from './scope.js';
 
 const { angleOf, radius: SCOPE_RADIUS } = SCOPE_GEOMETRY;
 
-import { blendAt, sceneAt } from './show.js';
+import { blendAt, sceneAt, TOTAL_BARS } from './show.js';
 import { boneAlpha, COLORS, fgAlpha, TINTS, voidAlpha } from './theme.js';
 
 const CROSSFADE_BARS = 1.5; // ≈3 s, centred on each scene boundary
@@ -16,6 +16,8 @@ const FEEDBACK_KEYS = ['zoom', 'rot', 'hue', 'keep', 'speed'];
 
 // How the background behaves in each scene: the rhythm's looks (src/rhythms/), one per scene id.
 export const SCENE_LOOKS = RHYTHM.looks;
+// A rhythm may draw its own background instead of the kaleidoscope and the feedback tunnel.
+const BACKDROP = RHYTHM.backdrop;
 
 // Hit energy fed to the shader (ages in seconds).
 const BOOM_ATTACK = 0.035; // alfaia/stick boom rise time constant
@@ -339,6 +341,11 @@ export function createBackground(fxCanvas, feedbackCanvas) {
   function draw(position, params, recent, clock, shapes) {
     if (!geometry?.width || !geometry.height) return; // not laid out, or hidden: a 0-px canvas cannot be drawn
     const { width, height, centreX, centreY } = geometry;
+    if (BACKDROP) {
+      BACKDROP(ctx, geometry, { position, totalBars: TOTAL_BARS, recent });
+      drawVignette();
+      return;
+    }
     if (kaleidoscope) kaleidoscope.draw({ centreX: centreX * fxRatio(), centreY: centreY * fxRatio(), time: clock.time, params, ...hitEnergy(recent) });
     ctx.clearRect(0, 0, width, height);
     if (clock.step > 0 && clock.step < FEEDBACK_MAX_STEP && hasFrame) drawFeedback(params, clock.step);
@@ -353,11 +360,17 @@ export function createBackground(fxCanvas, feedbackCanvas) {
     // keep this frame for the feedback, then darken top and bottom for the viewer only
     previousCtx.globalCompositeOperation = 'copy';
     previousCtx.drawImage(feedbackCanvas, 0, 0);
+    drawVignette();
+    hasFrame = true;
+  }
+
+  /** Darken top and bottom for the viewer, so the title and the lanes stay readable. */
+  function drawVignette() {
+    const { width, height } = geometry;
     const vignette = ctx.createLinearGradient(0, 0, 0, height);
     for (const [stop, alpha] of VIGNETTE_STOPS) vignette.addColorStop(stop, voidAlpha(alpha));
     ctx.fillStyle = vignette;
     ctx.fillRect(0, 0, width, height);
-    hasFrame = true;
   }
 
   return {
