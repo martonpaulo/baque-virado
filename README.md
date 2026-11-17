@@ -36,8 +36,7 @@ um servidor. O arquivo sai em MP4 quando o navegador consegue, ou em WebM.
 ## De onde vêm os sons
 
 Os sons são gravações de instrumentos de verdade, em domínio público (CC0). Quem gravou cada som
-está em [CREDITS.md](CREDITS.md). Alguns sons do bregafunk são feitos no próprio navegador, como
-os produtores do gênero fazem no computador.
+está em [CREDITS.md](CREDITS.md).
 
 ## Pesquisa
 

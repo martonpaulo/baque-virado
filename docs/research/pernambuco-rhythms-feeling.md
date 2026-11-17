@@ -287,7 +287,7 @@ synth in the instrumental form.
   hats, snare on the second halves of beats, and a kick «syncopating three of the sixteen
   divisions» [S, 25].
 - Tempo: 160 to 180 BPM with a half-time feel [S, 26; secondary]. The show is built felt at 170:
-  one 16-step bar at 170, the bumbo on beats 1 and 3 (D25 in `docs/decisions.md`).
+  one 16-step bar at 170, the bumbo on beats 1 and 3 (D26 in `docs/decisions.md`).
 
 **Social context and feeling.**
 

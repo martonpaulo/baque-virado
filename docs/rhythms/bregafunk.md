@@ -69,9 +69,8 @@ A voice is drawn on the wheel only in the scenes where it plays, so each entry s
 
 ## Sounds
 
-Freesound refuses this environment, so every voice is synthesized in the page
-(`src/rhythms/bregafunk-sounds.js`): nothing is downloaded, and a phone fetches no sound file. Brega
-funk itself is made of drum-machine and MIDI sounds, so most of these are the real thing in kind.
+Every voice is a recorded instrument played through the studio
+([`studio.md`](studio.md)); sources are in [`CREDITS.md`](../../CREDITS.md).
 
 | Voice                | Recording                                              | Takes |
 | :------------------- | :----------------------------------------------------- | :---- |

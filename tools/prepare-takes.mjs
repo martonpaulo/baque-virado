@@ -211,7 +211,7 @@ export const GROUPS = {
       lib('snare-clap/clap-anu-08.mp3'),
     ],
   },
-  // ---- brega funk ----
+  // ---- bregafunk ----
   bumbo: { length: 0.8, takes: [lib('808/808-kick-short.mp3'), lib('808/808-kick-smooth.mp3'), lib('808/808-kick-tr808.mp3')] },
   grave808: {
     pitched: true,

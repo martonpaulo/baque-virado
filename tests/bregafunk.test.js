@@ -1,15 +1,12 @@
-// The bregafunk package: one tempo, its beat, the hook's form, sounds for every hit and the flash limit.
+// The bregafunk package: one tempo, its beat, the hook's form, its background and the flash limit.
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { meterOf } from '../src/music.js';
 import { BEAT, BREGAFUNK, HOOK, HOOK_VARIED, TAMBORZAO } from '../src/rhythms/bregafunk.js';
 import { createBregafunkBackground, PALETTE } from '../src/rhythms/bregafunk-background.js';
-import { noteFrequency } from '../src/rhythms/bregafunk-sounds.js';
 import { createShow } from '../src/show.js';
 
 const show = createShow(BREGAFUNK);
-const SAMPLE_RATE = 44100;
-const DEFAULTS = Object.fromEntries(BREGAFUNK.sounds.choices.map(choice => [choice.id, choice.defaultOption]));
 const leadBars = () =>
   [...Array(show.TOTAL_BARS).keys()].map(bar => ({
     bar,
@@ -91,37 +88,6 @@ test('the quebra leaves its last beat silent before the drop', () => {
   for (const h of last) assert.ok(h.hit.step < 12, `${h.voice} on ${h.hit.step + 1}`);
   // and no note rings into it
   for (const h of last.filter(h => h.voice === 'lead')) assert.ok(h.hit.step + Number(h.hit.tone.split(':')[1]) <= 12);
-});
-
-test('every hit has a sound: synthesized, or the CC0 tarol for the lata', () => {
-  const { synth, sampleFor } = BREGAFUNK.sounds;
-  for (let bar = 0; bar < show.TOTAL_BARS; bar++)
-    for (const h of show.hitsInBar(bar)) {
-      const [name, gain] = sampleFor[h.voice](DEFAULTS, h.hit.velocity, h.hit.tone, 0.5);
-      assert.ok(Object.hasOwn(synth, name), `${h.voice} ${h.hit.tone}: ${name}`);
-      assert.ok(gain > 0 && gain <= 1);
-    }
-  const [tarol] = sampleFor.lata({ ...DEFAULTS, lata: 'tarol' }, 1);
-  assert.ok(existsSync(new URL(`../sounds/${tarol}.m4a`, import.meta.url)));
-  // the default choices name only synthesized sounds: a phone downloads nothing
-  for (const choice of BREGAFUNK.sounds.choices) for (const name of choice.files(choice.defaultOption)) assert.ok(Object.hasOwn(synth, name), name);
-});
-
-test('the synthesized sounds render finite, audible and the same every time', () => {
-  for (const [name, render] of Object.entries(BREGAFUNK.sounds.synth)) {
-    const samples = render(SAMPLE_RATE);
-    let peak = 0;
-    for (const value of samples) {
-      assert.ok(Number.isFinite(value), name);
-      peak = Math.max(peak, Math.abs(value));
-    }
-    assert.ok(peak > 0.5 && peak <= 1, `${name} peaks at ${peak}`);
-    assert.equal(Math.abs(samples.at(-1)) < 1e-3, true, `${name} ends without a click`);
-  }
-  const name = Object.keys(BREGAFUNK.sounds.synth).find(key => key.includes('lata'));
-  assert.deepEqual(BREGAFUNK.sounds.synth[name](SAMPLE_RATE), BREGAFUNK.sounds.synth[name](SAMPLE_RATE));
-  assert.equal(noteFrequency('A4'), 440);
-  assert.equal(Math.round(noteFrequency('A1')), 55);
 });
 
 test('the background flashes at most 3 times in any second (WCAG 2.3.1)', () => {

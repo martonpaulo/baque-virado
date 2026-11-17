@@ -12,7 +12,7 @@
 ## What it is
 
 `src/studio.js` plays a rhythm that opts in with `sounds.studio` in its package. The forró, the
-coco, the brega funk and the frevo use it. The maracatu does not: its sound path in `src/audio.js` is
+coco, the bregafunk and the frevo use it. The maracatu does not: its sound path in `src/audio.js` is
 unchanged, and `tests/maracatu-sound.test.js` pins every sample, time, rate and level of its
 render.
 
@@ -47,7 +47,7 @@ A voice names its strokes; each stroke is a list of recorded takes. A take has a
 - **Correlated drift.** The lead voice drifts with 1/f (pink) noise; followers close a share of
   the gap to it every beat and add a smaller drift of their own. Each stroke adds a 1.5 ms pink
   wobble. There is no white noise anywhere.
-- **Grid.** The brega funk is programmed: every voice stays on the grid; variation comes from
+- **Grid.** The bregafunk is programmed: every voice stays on the grid; variation comes from
   takes, velocity and brightness.
 - **Dynamics.** A phrase swells from −7 % to +7 % over its bars; each voice's level drifts 6 %
   with 1/f noise; the lead varies its accents by up to 8 % every bar.
@@ -55,9 +55,9 @@ A voice names its strokes; each stroke is a list of recorded takes. A take has a
 ## Mix
 
 Each voice has its channel: a pan and a send to one shared room, a convolution reverb with a
-recorded impulse response (a small room for forró and coco, a living room for brega funk). The
+recorded impulse response (a small room for forró and coco, a living room for bregafunk). The
 voices meet in a glue compressor (2:1 from −18 dB), then the site's master chain (gentle
-saturation and a compressor). In brega funk the kick ducks the grave, keys, hook and horns by
+saturation and a compressor). In bregafunk the kick ducks the grave, keys, hook and horns by
 45 % for 70 ms.
 
 ## Parameters and their sources
@@ -71,10 +71,10 @@ saturation and a compressor). In brega funk the kick ducks the grave, keys, hook
 | Lead correction             | 0.1                                | the same                                                                         |
 | Forró triângulo lilt        | 10 % of a sixteenth                | `docs/research/brega-forro.md` (8 to 12 % swing)                                 |
 | Coco ganzá lilt             | 12 % (56 % swing)                  | `docs/research/frevo-manguebeat-coco.md` (55 to 58 %)                            |
-| Brega funk timing           | hard grid                          | `docs/research/brega-forro.md` (hard-quantized)                                  |
+| Bregafunk timing            | hard grid                          | `docs/research/brega-forro.md` (hard-quantized)                                  |
 | Phrase swell, accents       | ±7 % over the phrase, ±8 % per bar | the owner's brief: accents per bar, swells over 4 to 8 bars                      |
 | Vibrato                     | 5 to 7 Hz                          | the owner's brief; the violin and trumpet takes carry their own                  |
-| Ducking                     | brega funk only                    | the owner's brief                                                                |
+| Ducking                     | bregafunk only                     | the owner's brief                                                                |
 
 ## What still sounds artificial
 

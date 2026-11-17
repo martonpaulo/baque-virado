@@ -5,7 +5,6 @@
 // Research and choices: docs/research/brega-forro.md, docs/rhythms/bregafunk.md.
 import { label, row, stat, stats } from '../readout-markup.js';
 import { BEATS_PER_LEAN, createBregafunkBackground, PALETTE } from './bregafunk-background.js';
-import { atabaque, brass, grave, hat, keys, kick, lata, lead } from './bregafunk-sounds.js';
 import { straightMeter } from './meter.js';
 import { midiOf, recordedChoices, studioSounds, takes } from './studio-kit.js';
 
@@ -231,8 +230,11 @@ const SCENE_LIST = [
 const LOOK = { zoom: 0, rot: 0, hue: 0, keep: 0, seg: 0, warp: 0, pal: 0, speed: 1 };
 const SCENE_LOOKS = Object.fromEntries(SCENE_LIST.map(scene => [scene.id, LOOK]));
 
-// ---------- sound: synthesized in the page (bregafunk-sounds.js) ----------
-const NAME = `${ID}-`;
+// ---------- sound: recorded instruments in the studio (src/studio.js) ----------
+// Recorded takes (CC0) for every voice: 808 kicks and subs, cans for the lata, hi-hats, an upright
+// piano for the keys, a trumpet for the hook, trumpet and trombone for the horns, congas for the
+// tamborzão. Programmed, as producers do: every voice on the hard grid, the kick ducks the rest.
+// Sources: CREDITS.md; choices: docs/rhythms/studio.md.
 const lengthOf = tone => Number(TONE.exec(tone)[2]) * STEP_SECONDS;
 const noteOf = tone => TONE.exec(tone)[1];
 const ECHO = { delay: 3 * STEP_SECONDS, gain: 0.32 }; // the lead's echo, a dotted eighth behind

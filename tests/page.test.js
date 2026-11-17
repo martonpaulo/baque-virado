@@ -577,7 +577,7 @@ test('?ritmo=coco moves to /coco and shows the coco on an 8-step wheel, its 12 s
   await page.close();
 });
 
-test('?ritmo=brega-funk moves to /bregafunk and plays its synthesized sounds without fetching a sound file', async () => {
+test('?ritmo=brega-funk moves to /bregafunk and plays its recorded sounds through the studio, with no error', async () => {
   const { page, errors } = await openPage(DESKTOP, { query: '?ritmo=brega-funk' });
   assert.equal(await page.evaluate(() => location.pathname), '/bregafunk');
   await page.click('#tap');
