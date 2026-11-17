@@ -81,6 +81,11 @@ The rules every rhythm package in `src/rhythms/` follows.
 - **Feeling.** Each rhythm has its own feeling, from
   [`pernambuco-rhythms-feeling.md`](research/pernambuco-rhythms-feeling.md); no show copies
   another's mood.
+- **Script.** Only the maracatu brings its instruments in one at a time. Every other show starts
+  with the band already playing, as a track of the genre does, and each scene gives a highlight to
+  one characteristic of the rhythm (an accent, a cell, a call and response, a break), not
+  necessarily to an instrument: the other parts drop back for a few bars, then the band returns. A
+  show never leaves one instrument alone for long: some rhythms sound empty that way.
 - **Music.** Instrumental only. Every melody is original. Each show follows the owner's
   reference in [`references.md`](research/references.md), which also lists similar songs. One tempo for the whole show. A 2/4
   rhythm draws its bar on an 8-step wheel.
@@ -115,7 +120,8 @@ The rules every rhythm package in `src/rhythms/` follows.
 | Flashes                          | WCAG 2.3.1, three flashes or below threshold                                                                       | `docs/product.md` Rhythm shows | owner, 2026-11-17                                                               | current                                                                           |
 | Felt tempo                       | inside the genre's researched range, checked before the owner listens                                              | `docs/product.md` Rhythm shows | owner, 2026-11-17                                                               | current                                                                           |
 | Sound                            | real CC0 recordings first; a synthesized voice sounds like the instrument; no identical repeats                    | `docs/product.md` Rhythm shows | owner, 2026-11-17                                                               | current                                                                           |
-| Samples a phone downloads, frevo | the 43 default files, under 400 KB ([#25](https://github.com/martonpaulo/baque-virado/issues/25))                  | `tests/frevo.test.js`          | agent, 2026-11-17, to confirm with the owner                                    | current                                                                           |
+| Samples a phone downloads, frevo | the 43 default files, under 400 KB ([#25](https://github.com/martonpaulo/baque-virado/issues/25))                  | `tests/frevo.test.js`          | agent, 2026-11-17, to confirm with the owner                                    | replaced, 2026-11-17: sustained takes, so the horns hold their notes              |
+| Samples a phone downloads, frevo | the 78 default files, under 880 KB                                                                                 | `tests/frevo.test.js`          | agent, 2026-11-17, to confirm with the owner                                    | current                                                                           |
 | Maracatu sound                   | identical to before the studio: same samples, times, rates and levels                                              | `tests/maracatu-sound.test.js` | owner, 2026-11-17, [#36](https://github.com/martonpaulo/baque-virado/issues/36) | current                                                                           |
 
 ## Alternatives considered

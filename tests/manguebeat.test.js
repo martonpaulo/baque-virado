@@ -5,7 +5,24 @@ import { existsSync, statSync } from 'node:fs';
 import { test } from 'node:test';
 import { fileURLToPath } from 'node:url';
 import { meterOf } from '../src/music.js';
-import { ANSWER, GANZA, isEcho, MAIN, MANGUEBEAT, MAX_RETUNE, RIFF } from '../src/rhythms/manguebeat.js';
+import {
+  ANSWER,
+  BASS_A,
+  BASS_B,
+  CAIXA,
+  GANZA,
+  isEcho,
+  isThrown,
+  LICK,
+  LICK_B,
+  MAIN,
+  MANGUEBEAT,
+  MAX_DOUBLE_RETUNE,
+  MAX_RETUNE,
+  parseTone,
+  RIFF_A,
+  RIFF_B,
+} from '../src/rhythms/manguebeat.js';
 import { MANGUE_PALETTE } from '../src/rhythms/manguebeat-background.js';
 import { midiOf } from '../src/rhythms/studio-kit.js';
 import { createShow } from '../src/show.js';
@@ -16,108 +33,166 @@ const show = createShow(MANGUEBEAT);
 const meter = meterOf(MANGUEBEAT);
 const DEFAULTS = Object.fromEntries(MANGUEBEAT.sounds.choices.map(choice => [choice.id, choice.defaultOption]));
 const soundPath = (name, extension) => fileURLToPath(new URL(`../sounds/${name}${extension}`, import.meta.url));
-const PHONE_BYTES = 420_000; // every default take and the room, before Play (docs/rhythms/manguebeat.md)
+const PHONE_BYTES = 520_000; // every default take and the room, before Play (docs/rhythms/manguebeat.md)
 const FELT_RANGE = [90, 105]; // docs/research/pernambuco-rhythms-feeling.md, § 4
-const stepsOf = (bar, voice, keep = () => true) =>
-  show
-    .hitsInBar(bar)
-    .filter(h => h.voice === voice && keep(h))
-    .map(h => h.hit.step);
+const SHOW_SECONDS = [80, 130]; // about 1:20 to 2:10
+const ECHO_STEPS = 3; // a dotted eighth, in sixteenths
+const OCTAVE = 12;
+const CELL = [0, 3, 6, 8, 11, 14]; // 3 + 3 + 2 sixteenths, twice a bar
+const PICK_UPS = [7, 15]; // the answer hand, before beats 3 and 1
+const LOUDEST_CAIXA = [6, 14]; // the «2» of each cell
+const INTRO_BARS = 2;
+const FULL_TEXTURE = 6; // voices sounding in a bar of the band: the drums, the bass and a guitar at least
+const MOSTLY = 0.7; // the share of the show's bars with the full texture
+const MIN_SCENE_GAIN = 0.6; // a part pulled back stays in the mix
+const MAX_SCENE_GAIN = 1.3;
+const MOST_OF_A_BAR = 0.75; // a riff sounds on at most this share of the bar's sixteenths
+const MIN_LICK_RESTS = 6; // sixteenths of silence in each bar of the second guitar
+const marked = (text, mark = 'X') => text.split(' ').flatMap((token, step) => (token === mark ? [step] : []));
+const hitsOf = (bar, voice, keep = () => true) => show.hitsInBar(bar).filter(h => h.voice === voice && keep(h));
+const stepsOf = (bar, voice, keep) => hitsOf(bar, voice, keep).map(h => h.hit.step);
 const written = h => !isEcho(h.hit.tone);
 const bars = id => {
   const scene = show.sceneById(id);
   return [...Array(scene.bars).keys()].map(bar => scene.start + bar);
 };
 
-test('manguebeat is 4/4 at a felt 100 BPM on a 16-step wheel, twelve scenes, 48 bars, under two minutes', () => {
+test('manguebeat is 4/4 at one felt tempo, the top of its range, on a 16-step wheel: thirteen scenes, 52 bars', () => {
   assert.equal(MANGUEBEAT.id, 'manguebeat');
   assert.equal(MANGUEBEAT.copy.name, 'manguebeat');
   assert.ok(MANGUEBEAT.bpm >= FELT_RANGE[0] && MANGUEBEAT.bpm <= FELT_RANGE[1], `${MANGUEBEAT.bpm} BPM`);
+  assert.equal(MANGUEBEAT.bpm, FELT_RANGE[1], 'the edge of the range nearest the reference recording');
   assert.equal(meter.stepsPerBar, 16);
-  assert.equal(meter.barSeconds, 2.4);
   assert.deepEqual(
     show.SCENES.map(scene => [scene.id, scene.bars]),
     [
       ['introducao', 2],
-      ['alfaias', 4],
+      ['celula', 4],
       ['maos', 4],
       ['caixa', 4],
       ['baixo', 4],
       ['guitarra', 4],
-      ['coco', 4],
       ['dub', 4],
       ['retorno', 4],
+      ['conversa', 4],
       ['corte', 2],
+      ['segunda', 4],
       ['banda', 8],
       ['final', 4],
     ],
   );
-  assert.equal(show.TOTAL_BARS, 48);
-  assert.ok(show.TOTAL_SECONDS > 110 && show.TOTAL_SECONDS < 120, `${show.TOTAL_SECONDS} s`);
+  assert.equal(show.TOTAL_BARS, 52);
+  assert.ok(show.TOTAL_SECONDS > SHOW_SECONDS[0] && show.TOTAL_SECONDS < SHOW_SECONDS[1], `${show.TOTAL_SECONDS} s`);
   for (let bar = 0; bar < show.TOTAL_BARS; bar++)
     for (const h of show.hitsInBar(bar)) assert.ok(h.grid >= bar && h.grid < bar + 1, `${h.voice} at ${h.grid} is outside bar ${bar}`);
+  for (const scene of show.SCENES) assert.ok(MANGUEBEAT.readout(scene).markup.length > 0, scene.id);
 });
 
-test('the parts enter one by one after the introduction: alfaias, caixa, bass, guitar, ganzá', () => {
-  const firstBar = voice => {
-    for (let bar = show.sceneById('alfaias').start; bar < show.TOTAL_BARS; bar++) if (show.hitsInBar(bar).some(h => h.voice === voice)) return bar;
-    return null;
-  };
-  const order = ['main', 'caixa', 'baixo', 'guitarra', 'ganza'].map(firstBar);
-  assert.deepEqual(
-    [...order].sort((a, b) => a - b),
-    order,
-  );
-  assert.equal(new Set(order).size, order.length);
-});
-
-test('the alfaias play in unison first, then the answer hand moves to beats 2 and 4', () => {
-  for (const bar of bars('alfaias')) assert.deepEqual(stepsOf(bar, 'answer'), stepsOf(bar, 'main'));
-  const main = MAIN.split(' ').flatMap((token, step) => (token === 'X' ? [step] : []));
-  for (const bar of bars('maos')) {
-    assert.deepEqual(stepsOf(bar, 'main'), main);
-    assert.deepEqual(
-      stepsOf(bar, 'answer').filter(step => step % meter.stepsPerBar < 13),
-      [4, 12],
-    );
-  }
-  assert.equal(ANSWER.length, 2);
-});
-
-test('the bass doubles the main hand, an octave under the guitar, and the riff sits on its strokes', () => {
-  for (const id of ['baixo', 'guitarra', 'banda'])
-    for (const bar of bars(id)) {
-      const main = stepsOf(bar, 'main', written);
-      assert.deepEqual(stepsOf(bar, 'baixo', written), main, `${id} bar ${bar}`);
-      if (id === 'baixo') continue;
-      const guitar = show.hitsInBar(bar).filter(h => h.voice === 'guitarra' && written(h));
-      for (const g of guitar.filter(h => h.hit.velocity === 1)) assert.ok(main.includes(g.hit.step), `a guitar accent off the main hand at ${g.hit.step}`);
-      for (const b of show.hitsInBar(bar).filter(h => h.voice === 'baixo')) {
-        const g = guitar.find(h => h.hit.step === b.hit.step);
-        assert.equal(midiOf(g.hit.tone) - midiOf(b.hit.tone), 12, `bar ${bar} step ${b.hit.step}`);
-      }
+test('the band plays from the third bar: no part waits for its turn, and only the dub and the stops thin it out', () => {
+  const playing = bar => new Set(show.hitsInBar(bar).map(h => h.voice));
+  const [first] = bars('celula');
+  assert.equal(first, INTRO_BARS);
+  for (const voice of ['main', 'answer', 'caixa', 'ganza', 'baixo', 'guitarra'])
+    assert.ok(playing(first).has(voice), `${voice} is not in from bar ${first + 1}`);
+  const THIN = ['introducao', 'dub', 'retorno', 'corte', 'final']; // an intro, the drop and its way back, the stops
+  let full = 0;
+  for (const scene of show.SCENES)
+    for (const bar of bars(scene.id)) {
+      const voices = playing(bar);
+      if (voices.size >= FULL_TEXTURE) full++;
+      if (!THIN.includes(scene.id)) assert.ok(voices.size >= FULL_TEXTURE, `bar ${bar + 1} of ${scene.id} has only ${voices.size} voices`);
+      // never one instrument alone for a whole bar, outside the two-bar introduction and the last echo
+      const instruments = new Set([...voices].map(voice => MANGUEBEAT.voices[voice].instrument));
+      if (!['introducao', 'final'].includes(scene.id)) assert.ok(instruments.size >= 3, `bar ${bar + 1} of ${scene.id}: ${[...instruments]}`);
+    }
+  assert.ok(full / show.TOTAL_BARS > MOSTLY, `${full} of ${show.TOTAL_BARS} bars have the full texture`);
+  // a scene that brings a part forward names voices of the package, and never mutes one
+  for (const scene of show.SCENES)
+    for (const [voice, gain] of Object.entries(scene.gain || {})) {
+      assert.ok(MANGUEBEAT.voices[voice], `${scene.id}: ${voice}`);
+      assert.ok(gain >= MIN_SCENE_GAIN && gain <= MAX_SCENE_GAIN, `${scene.id} ${voice} ${gain}`);
     }
 });
 
-test('the riff is in E minor: every chord root is a degree of E natural or harmonic minor', () => {
-  const E_MINOR = new Set(['E', 'F#', 'G', 'A', 'B', 'C', 'D', 'D#']);
-  const roots = RIFF.flatMap(bar => bar.split(' ').filter(token => token !== '.')).map(token => token.replace(/[!~]/g, ''));
-  assert.ok(roots.length > 0);
-  for (const root of roots) assert.ok(E_MINOR.has(root), root);
-  assert.equal(roots[0], 'E', 'the riff starts on the tonic');
+test('the alfaias play the coco cell, 3 + 3 + 2 twice a bar, in unison first; then the answer hand plays the pick-ups', () => {
+  assert.deepEqual(marked(MAIN), CELL);
+  const last = bars('celula').at(-1);
+  for (const bar of bars('celula')) {
+    assert.deepEqual(stepsOf(bar, 'main'), CELL);
+    if (bar !== last) assert.deepEqual(stepsOf(bar, 'answer'), CELL);
+  }
+  assert.equal(ANSWER.length, 2);
+  for (const bar of bars('maos')) {
+    assert.deepEqual(stepsOf(bar, 'main'), CELL);
+    const answer = hitsOf(bar, 'answer');
+    for (const pickUp of PICK_UPS)
+      assert.ok(
+        answer.some(h => h.hit.step === pickUp && h.hit.velocity > 0.5),
+        `no pick-up at ${pickUp} in bar ${bar}`,
+      );
+    if (bar !== bars('maos').at(-1)) assert.ok(!answer.some(h => CELL.includes(h.hit.step)), `the answer hand doubles the main hand in bar ${bar}`);
+  }
 });
 
-test('the ganzá plays the coco levada: every sixteenth, the accent on the third of each beat', () => {
-  const tokens = GANZA.split(' ');
-  assert.equal(tokens.length, meter.stepsPerBar);
+test('the caixa accents the cell with the alfaias, ghost notes between; the ganzá plays every sixteenth with the same accents', () => {
+  for (const text of CAIXA) {
+    assert.deepEqual(marked(text), CELL);
+    assert.ok(marked(text, 'x').length >= 4, 'ghost notes');
+  }
+  assert.deepEqual(marked(GANZA), CELL);
+  assert.equal(GANZA.split(' ').length, meter.stepsPerBar);
+  for (const bar of bars('caixa')) assert.equal(stepsOf(bar, 'ganza').length, meter.stepsPerBar);
+  // the loudest caixa strokes are the syncopated ones, never the first beat
+  const [bar] = bars('caixa');
+  const loudest = Math.max(...hitsOf(bar, 'caixa').map(h => h.hit.velocity));
   assert.deepEqual(
-    tokens.flatMap((token, step) => (token === 'X' ? [step % MANGUEBEAT.stepsPerBeat] : [])),
-    [2, 2, 2, 2],
+    stepsOf(bar, 'caixa', h => h.hit.velocity === loudest),
+    LOUDEST_CAIXA,
   );
-  for (const bar of bars('coco')) assert.equal(stepsOf(bar, 'ganza').length, meter.stepsPerBar);
 });
 
-test('the dub echo repeats each accent a dotted eighth later, softer each time, and the show ends in silence', () => {
+test('the riffs lock on the cell and leave space: guitar accents on the alfaia strokes, the bass an octave under each bar’s first chord', () => {
+  const sounding = hits => new Set(hits.flatMap(h => [...Array(parseTone(h.hit.tone).steps).keys()].map(i => h.hit.step + i)));
+  for (const id of ['guitarra', 'conversa', 'segunda', 'banda'])
+    for (const bar of bars(id)) {
+      const guitar = hitsOf(bar, 'guitarra', written),
+        bass = hitsOf(bar, 'baixo', written);
+      for (const g of guitar.filter(h => h.hit.velocity === 1))
+        assert.ok(CELL.includes(g.hit.step), `a guitar accent off the cell at ${g.hit.step}, bar ${bar}`);
+      assert.equal(guitar[0].hit.step, 0);
+      assert.equal(bass[0].hit.step, 0);
+      assert.equal(midiOf(parseTone(guitar[0].hit.tone).note) - midiOf(parseTone(bass[0].hit.tone).note), OCTAVE, `bar ${bar}`);
+      assert.ok(sounding(bass).size <= meter.stepsPerBar * MOST_OF_A_BAR, `the bass leaves no space in bar ${bar}`);
+      assert.ok(sounding(guitar).size <= meter.stepsPerBar * MOST_OF_A_BAR, `the guitar leaves no space in bar ${bar}`);
+    }
+  // a phrase is four bars and at least three of them differ: never one bar in a loop
+  for (const phrase of [BASS_A, BASS_B, RIFF_A, RIFF_B]) {
+    assert.equal(phrase.length, 4);
+    assert.ok(new Set(phrase).size >= 3);
+  }
+  // the second guitar answers after the riff's first stabs, and rests for a third of each bar or more
+  for (const bar of [...LICK, ...LICK_B])
+    assert.ok(
+      marked(bar, '.').length >= MIN_LICK_RESTS &&
+        bar
+          .split(' ')
+          .slice(0, 4)
+          .every(token => token === '.'),
+    );
+});
+
+test('every line is in E minor, natural or harmonic, and the riffs start on the tonic', () => {
+  const E_MINOR = new Set(['E', 'F#', 'G', 'A', 'B', 'C', 'D', 'D#']);
+  const notes = [BASS_A, BASS_B, RIFF_A, RIFF_B, LICK, LICK_B].flatMap(phrase =>
+    phrase.flatMap(bar => bar.split(' ').filter(token => token !== '.' && token !== '-')).map(token => token.replace(/[!*\d]/g, '')),
+  );
+  assert.ok(notes.length > 100);
+  for (const note of notes) assert.ok(E_MINOR.has(note), note);
+  assert.ok(RIFF_A[0].startsWith('E2'), 'the riff starts on the tonic');
+  assert.ok(BASS_A[0].startsWith('E1'));
+});
+
+test('the dub echo: each mark a dotted eighth after a louder stroke, silent in the plan, its stroke thrown into the studio’s delay', () => {
   const echoes = [];
   for (const bar of bars('dub')) for (const h of show.hitsInBar(bar)) if (isEcho(h.hit.tone)) echoes.push(h);
   assert.ok(echoes.length > 10, `${echoes.length} echoes in the dub`);
@@ -125,16 +200,43 @@ test('the dub echo repeats each accent a dotted eighth later, softer each time, 
   for (const echo of echoes) {
     const bar = Math.floor(echo.grid);
     const source = [...show.hitsInBar(bar - 1), ...show.hitsInBar(bar)].find(
-      h => h.voice === echo.voice && sixteenths(echo, h) > 0 && sixteenths(echo, h) % 3 === 0 && h.hit.velocity > echo.hit.velocity,
+      h => h.voice === echo.voice && sixteenths(echo, h) > 0 && sixteenths(echo, h) % ECHO_STEPS === 0 && h.hit.velocity > echo.hit.velocity,
     );
     assert.ok(source, `${echo.voice} echo at ${echo.grid} has no louder stroke a dotted eighth or more before it`);
   }
-  // the final: one stroke for all, then only its echo, fading, then nothing
+  // the dub drops the band: no ganzá, no distorted guitar
+  for (const bar of bars('dub')) assert.deepEqual([...hitsOf(bar, 'ganza'), ...hitsOf(bar, 'guitarra')], []);
+  // the studio's delay is that dotted eighth, and it sounds the marks: the plan holds no event for them
+  const { echo } = MANGUEBEAT.sounds.studio;
+  assert.ok(Math.abs(echo.time - (ECHO_STEPS * meter.beatSeconds) / MANGUEBEAT.stepsPerBeat) < 1e-9);
+  const plan = planStudio(MANGUEBEAT, show, DEFAULTS);
+  let thrown = 0,
+    marks = 0;
+  for (let bar = 0; bar < show.TOTAL_BARS; bar++)
+    for (const h of show.hitsInBar(bar)) {
+      const events = (plan.get(bar * meter.stepsPerBar + h.hit.step) || []).filter(event => event.voice === h.voice);
+      if (isEcho(h.hit.tone)) {
+        assert.deepEqual(events, [], `an echo mark of ${h.voice} sounds at bar ${bar} step ${h.hit.step}`);
+        marks++;
+      } else if (isThrown(h.voice, bar, h.hit.step)) {
+        assert.ok(
+          events.some(event => event.throw > 0),
+          `${h.voice} at bar ${bar} step ${h.hit.step} is not thrown`,
+        );
+        thrown++;
+      }
+    }
+  assert.ok(marks > thrown);
+  assert.ok(thrown >= 10 && thrown <= 40, `${thrown} throws: an effect, not a wash`);
+  assert.equal([...plan.values()].flat().filter(event => event.throw).length, thrown);
+});
+
+test('the show ends on one stroke for all, its echo fading, then silence', () => {
   const [, stroke, tail, last] = bars('final');
-  assert.ok(show.hitsInBar(stroke).some(h => h.voice === 'guitarra' && h.hit.tone.endsWith('~')));
-  const tailHits = show.hitsInBar(tail).filter(h => h.voice === 'main');
+  assert.ok(show.hitsInBar(stroke).some(h => h.voice === 'guitarra' && parseTone(h.hit.tone).steps === meter.stepsPerBar));
+  const tailHits = hitsOf(tail, 'main');
   assert.ok(tailHits.length > 0 && tailHits.every(h => isEcho(h.hit.tone)));
-  const levels = [stroke, tail].flatMap(bar => show.hitsInBar(bar).filter(h => h.voice === 'main' && isEcho(h.hit.tone))).map(h => h.hit.velocity);
+  const levels = [stroke, tail].flatMap(bar => hitsOf(bar, 'main', h => isEcho(h.hit.tone))).map(h => h.hit.velocity);
   assert.deepEqual(
     levels,
     [...levels].sort((a, b) => b - a),
@@ -142,20 +244,32 @@ test('the dub echo repeats each accent a dotted eighth later, softer each time, 
   assert.deepEqual(show.hitsInBar(last), []);
 });
 
-test('every planned take exists, a chord retunes at most two semitones, the same render every time', () => {
+test('every planned take exists, a note retunes at most two semitones (a chord’s double three), the same render every time', () => {
   const plan = planStudio(MANGUEBEAT, show, DEFAULTS);
   const again = planStudio(MANGUEBEAT, show, DEFAULTS);
   assert.deepEqual([...plan.entries()], [...again.entries()]);
+  const LIMIT = { baixo: MAX_RETUNE, guitarra: MAX_DOUBLE_RETUNE };
+  const TUNING_SLACK = 0.2; // semitones: the recorded notes' own tuning and the double's few cents
+  let doubled = 0,
+    chords = 0;
   for (const events of plan.values())
-    for (const event of events)
+    for (const event of events) {
+      if (event.voice === 'guitarra') {
+        const [first, twin] = event.sources;
+        assert.ok(twin?.twin, 'the guitar is double-tracked');
+        chords++;
+        if (twin.file !== first.file) doubled++;
+      }
       for (const source of event.sources) {
         assert.ok(existsSync(soundPath(source.file, '.m4a')) && existsSync(soundPath(source.file, '.wav')), source.file);
-        if (event.voice === 'guitarra' || event.voice === 'baixo')
-          assert.ok(Math.abs(Math.log2(source.rate) * 12) <= MAX_RETUNE + 1e-9, `${event.voice} ${source.file} retunes too far`);
+        if (LIMIT[event.voice])
+          assert.ok(Math.abs(Math.log2(source.rate) * OCTAVE) <= LIMIT[event.voice] + TUNING_SLACK, `${event.voice} ${source.file} retunes too far`);
       }
+    }
+  assert.ok(doubled > chords / 2, `${doubled} of ${chords} chords doubled by a different take`);
 });
 
-test('every default take sits beside its WAV master; the phone set stays under 420 KB', () => {
+test('every default take sits beside its WAV master; the phone set stays under 520 KB', () => {
   const names = [...new Set([...MANGUEBEAT.sounds.choices.flatMap(choice => choice.files(choice.defaultOption)), ...MANGUEBEAT.sounds.fixedFiles])];
   for (const name of names) assert.ok(existsSync(soundPath(name, '.m4a')) && existsSync(soundPath(name, '.wav')), name);
   const bytes = names.reduce((sum, name) => sum + statSync(soundPath(name, '.m4a')).size, 0);

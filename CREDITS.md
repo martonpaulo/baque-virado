@@ -23,6 +23,12 @@ level-matched; the frevo show also uses the dry surdo and two caixas above:
 - Tenor saxophone, rope-tension snare (tarol), bass drum (surdo), small frame drum and tambourine
   (pandeiro): [VCSL](https://github.com/sgossner/VCSL) (CC0). The caixa's rufo is built from the
   same snare's strokes.
+- Sustained tenor saxophone (`frevo-sax-longo-*`, the loud layer):
+  [FreePats Tenor Saxophone](https://freepats.zenvoid.org/Reed/saxophone.html), version 2020-07-17,
+  assembled by Roberto from the VCSL samples (CC0). Each note cut to 1.55 s with a fade.
+- Clarinet (`frevo-clarinete-*`): [FreePats Clarinet](https://freepats.zenvoid.org/Reed/clarinet.html),
+  version 2019-08-18, played by Kaili Dence and recorded by Tyler Dence (CC0). Each note retuned,
+  cut to 1.55 s with a fade.
 
 Alfaia patterns: the table at lansdownsoftware.com. Swing measured on a Batuk Nagô workshop recording.
 
@@ -70,13 +76,18 @@ triângulo (Triangle 3 and 6, open and muted), the zabumba's open head (concert 
 quinto), rabeca (solo violin, arco with vibrato and spiccato), keys (Upright Nr1 piano), lead
 trumpet (sustained with vibrato and staccato) and the horns (trumpet and tenor trombone staccato).
 
+From FreePats (<https://freepats.zenvoid.org/Organ/accordion.html>, «Button Accordion HN», version
+2024-03-29, CC0 1.0): the forró sanfona's right hand and chord buttons, seventeen notes of a Hohner
+button accordion recorded by Jeff Stauffer and prepared by michael02022. The bank names its notes an
+octave above where they sound; the takes carry the pitch measured.
+
 From Freesound:
 
-- Sanfona notes and bass buttons: Miles_Thompson
+- Sanfona bass buttons (and the earlier sanfona notes, no longer played): Miles_Thompson
 - Zabumba: Sassaby (alfaia hits), sgossner (muted bass drum), gilblack1234 (short surdo)
 - Bacalhau: Sassaby, sgossner, DanVGC++, KEVOY
 - Bandolim: lucasgonze, gollybob
-- Cavaquinho chords: Sadiquecat (ukulele)
+- Cavaquinho chords (ukulele, no longer played: the forró strums the bandolim's single notes): Sadiquecat
 - Baixo: Ixwolf, mat_the_glad, SirBagel
 - Pandeiro: katusm, Ilson_Junior, menegass, MeanRaccoon
 - Palmas: steeltowngaming, semccab, launchsite, junioraragaki, pomeroyjoshua
@@ -89,8 +100,8 @@ From Freesound:
 ## Manguebeat
 
 The manguebeat show (`sounds/manguebeat-*`, [`docs/rhythms/manguebeat.md`](docs/rhythms/manguebeat.md))
-reuses the alfaia recordings above, two alfaia hits of the zabumba group, and the studio's caixa and
-baixo groups. Its own files were trimmed to start on the stroke, faded, normalised to −1 dBFS and,
+reuses the alfaia recordings above, two alfaia hits of the zabumba group, the studio's caixa and
+baixo groups, and, for its second guitar, the brega's clean Stratocaster notes. Its own files were trimmed to start on the stroke, faded, normalised to −1 dBFS and,
 for the guitar, retuned to equal temperament after measuring each chord's spectrum. All are CC0.
 
 - Distorted guitar power chords, from Freesound: SpeedY (E5, E5 up-strum, E5 two strings, D5 and
@@ -98,17 +109,18 @@ for the guitar, retuned to equal temperament after measuring each chord's spectr
   held, the D♯5 retuned up to E5; freesound.org/s/49280, 49277).
 - Ganzá: the small shaker of [VCSL](https://github.com/sgossner/VCSL) (CC0, Sam Gossner), faster
   strokes forward and back, two takes each.
-- Echo returns: the VCSL rope-tension snare (low, snares on, loudest layer, two takes) band-passed
-  from 500 Hz to 2.6 kHz; the repository's deep alfaia main and answer strokes band-passed from
-  90 Hz to 700 Hz.
+- Echo returns (`manguebeat-alfaia-eco-*`, `manguebeat-caixa-eco-*`): the VCSL rope-tension snare
+  (low, snares on, loudest layer, two takes) band-passed from 500 Hz to 2.6 kHz; the repository's
+  deep alfaia main and answer strokes band-passed from 90 Hz to 700 Hz. The show no longer plays
+  them: its echo is now a delay in the studio.
 - Sampler: a worn record's crackle, hiss and rumble, synthesized for this project from a seeded noise
   source (original, 2026-11).
 
 ## Brega
 
 The brega show (`sounds/brega-*`, cut by `tools/prepare-takes.mjs`: trimmed to the hit, faded and
-normalised; each pitched note measured) also reuses the bumbo, caixa, chimbal, baixo, trompete,
-trombone and small-room takes above. All CC0.
+normalised; each pitched note measured) also reuses the bumbo, caixa, chimbal, baixo, trompete
+(sustained and staccato) and trombone takes above. All CC0.
 
 - Toms (high and low, stick, two dynamics) and the keyboard (Yamaha TX81Z «FM Piano», five notes, two
   dynamics each): [VCSL](https://github.com/sgossner/VCSL) by Versilian Studios
@@ -116,6 +128,25 @@ trombone and small-room takes above. All CC0.
   [VSCO 2 Community Edition](https://github.com/sgossner/VSCO-2-CE) by Versilian Studios
 - Guitar (clean Stratocaster notes): guitarmaster; two sustained notes: owstu (Freesound)
 - Horn falls (five-horn section, unison A and E major): flakdemier (Freesound)
+- Reverb (`sounds/brega-plate`): not a recording; the impulse response of a plate reverb, generated
+  for this project by `tools/make-brega-plate.mjs` (decaying noise from the site's own hash). CC0.
+
+## Bregafunk
+
+The bregafunk show ([`docs/rhythms/bregafunk.md`](docs/rhythms/bregafunk.md)) synthesizes its drum
+machine and synthesizers in the page (`src/rhythms/bregafunk-synth.js`, original to this project,
+2026-11): the bumbo, the lata, the palma, the 808 grave, the keyboard stab and the riser. It reuses
+the hi-hat, trumpet, trombone, atabaque and living-room takes above. Its own recordings, cut by
+`tools/prepare-takes.mjs` (trimmed to the note, faded and normalised; each note measured):
+
+- Flute, the hook (`sounds/flauta-stac-*`, staccato, four notes, three takes each; and
+  `sounds/flauta-sus-*`, sustained with vibrato, four notes): the solo flute of
+  [VSCO 2 Community Edition](https://github.com/sgossner/VSCO-2-CE) by Versilian Studios, recorded
+  by Sam Gossner and Simon Dalzell. The repository's `LICENSE` file is CC0 1.0 Universal. Source
+  files: `Woodwinds/Flute/stac/LDFlute_stac_<note>_<v2_rr1, v3_rr1, v3_rr2>.wav` and
+  `Woodwinds/Flute/susvib/LDFlute_susvib_<note>_v1_1.wav`, for the notes named A3, C4, E4 and A4
+  (they sound an octave higher), under
+  <https://raw.githubusercontent.com/sgossner/VSCO-2-CE/master/>.
 
 ## Fonts
 

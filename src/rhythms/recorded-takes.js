@@ -183,6 +183,76 @@ export const TAKES = {
       root: 76.03,
     },
   ],
+  'sanfona-hohner': [
+    {
+      file: 'sanfona-hohner-1',
+      root: 47.1,
+    },
+    {
+      file: 'sanfona-hohner-2',
+      root: 50.18,
+    },
+    {
+      file: 'sanfona-hohner-3',
+      root: 53.98,
+    },
+    {
+      file: 'sanfona-hohner-4',
+      root: 55,
+    },
+    {
+      file: 'sanfona-hohner-5',
+      root: 57.22,
+    },
+    {
+      file: 'sanfona-hohner-6',
+      root: 59,
+    },
+    {
+      file: 'sanfona-hohner-7',
+      root: 60.05,
+    },
+    {
+      file: 'sanfona-hohner-8',
+      root: 62,
+    },
+    {
+      file: 'sanfona-hohner-9',
+      root: 64.21,
+    },
+    {
+      file: 'sanfona-hohner-10',
+      root: 66.17,
+    },
+    {
+      file: 'sanfona-hohner-11',
+      root: 67.14,
+    },
+    {
+      file: 'sanfona-hohner-12',
+      root: 69.19,
+    },
+    {
+      file: 'sanfona-hohner-13',
+      root: 71.12,
+    },
+    {
+      file: 'sanfona-hohner-14',
+      root: 72.11,
+    },
+    {
+      file: 'sanfona-hohner-15',
+      root: 74.11,
+    },
+    {
+      file: 'sanfona-hohner-16',
+      root: 76.19,
+    },
+    {
+      file: 'sanfona-hohner-17',
+      root: 79.06,
+    },
+  ],
   'sanfona-baixo': [
     {
       file: 'sanfona-baixo-1',
@@ -1245,6 +1315,90 @@ export const TAKES = {
     },
     {
       file: 'brega-queda-2',
+    },
+  ],
+  'flauta-stac': [
+    {
+      file: 'flauta-stac-1',
+      root: 69,
+      layer: 0.6,
+    },
+    {
+      file: 'flauta-stac-2',
+      root: 69.02,
+      layer: 0.9,
+    },
+    {
+      file: 'flauta-stac-3',
+      root: 69.08,
+      layer: 0.9,
+    },
+    {
+      file: 'flauta-stac-4',
+      root: 71.98,
+      layer: 0.6,
+    },
+    {
+      file: 'flauta-stac-5',
+      root: 72.06,
+      layer: 0.9,
+    },
+    {
+      file: 'flauta-stac-6',
+      root: 72.03,
+      layer: 0.9,
+    },
+    {
+      file: 'flauta-stac-7',
+      root: 76.01,
+      layer: 0.6,
+    },
+    {
+      file: 'flauta-stac-8',
+      root: 76.09,
+      layer: 0.9,
+    },
+    {
+      file: 'flauta-stac-9',
+      root: 76.04,
+      layer: 0.9,
+    },
+    {
+      file: 'flauta-stac-10',
+      root: 81,
+      layer: 0.6,
+    },
+    {
+      file: 'flauta-stac-11',
+      root: 81.05,
+      layer: 0.9,
+    },
+    {
+      file: 'flauta-stac-12',
+      root: 81.04,
+      layer: 0.9,
+    },
+  ],
+  'flauta-sus': [
+    {
+      file: 'flauta-sus-1',
+      root: 69,
+      layer: 0.8,
+    },
+    {
+      file: 'flauta-sus-2',
+      root: 72.02,
+      layer: 0.8,
+    },
+    {
+      file: 'flauta-sus-3',
+      root: 76.01,
+      layer: 0.8,
+    },
+    {
+      file: 'flauta-sus-4',
+      root: 80.99,
+      layer: 0.8,
     },
   ],
 };

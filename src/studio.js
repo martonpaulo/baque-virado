@@ -54,6 +54,7 @@ const DEFAULT_BRIGHT = [2500, 16000]; // low-pass at velocity 0 and 1, in Hz
 const MIN_VELOCITY = 0.05;
 const MAX_VELOCITY = 1.25;
 const SEMITONES = 12;
+const DOUBLE_DELAY = 0.012; // a doubled part's second take lands this much later
 
 /** The velocity layer group of takes nearest to `velocity`, widened by LAYER_WINDOW. */
 function byLayer(takes, velocity) {
@@ -178,6 +179,25 @@ export function planStudio(rhythm, show, choice) {
         // `only`: no other take was near enough, so this one may repeat
         return { file: take.file, rate, gain: take.gain ?? 1, delay: i * (shaped.strum ?? 0), only: candidates.length === 1 };
       });
+      // double-tracking: a second, different take a few ms later, on the other side of the stereo field
+      if (spec.double)
+        sources.push(
+          ...sources.map((source, i) => {
+            const note = notes[i],
+              pool = byZone(takes, note, spec.maxZone ?? MAX_ZONE),
+              take = pickTake(pool, spec.seed + SALT.ghost + i, ordinal * 8 + i, avoid);
+            avoid.add(take.file);
+            played.push(take.file); // the next hit repeats neither side
+            const rate = (take.rate ?? 1) * (note === null ? 1 : 2 ** ((note - take.root) / SEMITONES)) * 2 ** ((spec.double.cents ?? 0) / CENTS_PER_OCTAVE);
+            return {
+              file: take.file,
+              rate,
+              gain: (take.gain ?? 1) * (spec.double.gain ?? 1),
+              delay: source.delay + (spec.double.delay ?? DOUBLE_DELAY),
+              twin: true,
+            };
+          }),
+        );
       if (shaped.echo) sources.push(...sources.map(source => ({ ...source, delay: source.delay + shaped.echo.delay, gain: source.gain * shaped.echo.gain })));
       last[voice] = played;
       const [low, high] = spec.bright || DEFAULT_BRIGHT;
@@ -194,6 +214,8 @@ export function planStudio(rhythm, show, choice) {
         glide: shaped.glide ? { ratio: 2 ** (shaped.glide.semitones / SEMITONES), at: shaped.glide.at, over: shaped.glide.over } : null,
         vibrato:
           shaped.length && spec.vibrato ? { ...spec.vibrato, hz: spec.vibrato.hz * (1 + VIBRATO_SPREAD * noise(ordinal, spec.seed + STREAM.vibrato)) } : null,
+        // a dub throw: this one hit also goes into the echo bus, at this level
+        ...(shaped.throw ? { throw: shaped.throw } : {}),
       });
     }
   }
@@ -204,6 +226,76 @@ const GLUE = { threshold: -18, ratio: 2, attack: 0.01, release: 0.15 };
 const DUCK_ATTACK = 0.004;
 const DEFAULT_OUTPUT = 0.7; // into the master chain: peaks near −1 dBFS, not into its saturation
 
+/** A biquad filter from `{ type, frequency, gain, Q }`. */
+function filterOf(context, band) {
+  const filter = context.createBiquadFilter();
+  filter.type = band.type;
+  filter.frequency.value = band.frequency;
+  if (band.gain !== undefined && filter.gain) filter.gain.value = band.gain;
+  if (band.Q !== undefined) filter.Q.value = band.Q;
+  return filter;
+}
+
+const DRIVE_CURVE_POINTS = 2048;
+/** A soft-clipping stage: `amount` is the gain into a tanh curve; the output is levelled back. */
+function driveOf(context, amount) {
+  const shaper = context.createWaveShaper(),
+    curve = new Float32Array(DRIVE_CURVE_POINTS);
+  for (let i = 0; i < DRIVE_CURVE_POINTS; i++) curve[i] = Math.tanh(amount * ((2 * i) / (DRIVE_CURVE_POINTS - 1) - 1)) / Math.tanh(amount);
+  shaper.curve = curve;
+  shaper.oversample = '2x';
+  return shaper;
+}
+
+const CHORUS_SIDES = [-0.75, 0.75]; // the two modulated copies sit left and right
+const CHORUS_BASE = 0.017; // seconds: the centre of the modulated delay
+const CHORUS_SIDE_OFFSET = 0.004; // seconds between the two copies' centres
+const CHORUS_MAX_DELAY = 0.1;
+const CHORUS_MIX = 0.5;
+const CHORUS_RATE_SPREAD = 1.13; // the right copy's LFO is a little faster, so the sides never move together
+/** A stereo chorus beside the dry signal: two copies through slowly modulated delays, left and right. */
+function addChorus(context, chorus, tail, bus, send) {
+  CHORUS_SIDES.forEach((side, i) => {
+    const delay = context.createDelay(CHORUS_MAX_DELAY),
+      lfo = context.createOscillator(),
+      depth = context.createGain(),
+      level = context.createGain(),
+      pan = context.createStereoPanner();
+    delay.delayTime.value = CHORUS_BASE + i * CHORUS_SIDE_OFFSET;
+    lfo.frequency.value = chorus.rate * (i ? CHORUS_RATE_SPREAD : 1);
+    depth.gain.value = chorus.depth;
+    lfo.connect(depth).connect(delay.delayTime);
+    lfo.start(0);
+    level.gain.value = chorus.mix ?? CHORUS_MIX;
+    pan.pan.value = side;
+    tail.connect(delay).connect(level).connect(pan).connect(bus);
+    pan.connect(send);
+  });
+}
+
+// The echo's defaults: a tape echo's band (each repeat loses lows and highs), feedback, level and room share.
+const ECHO = { lowpass: 3200, highpass: 300, feedback: 0.4, level: 0.5, room: 0.3, maxDelay: 2 };
+/** The echo bus: a delay whose feedback passes a band-pass, so each repeat is darker and thinner. */
+function createEcho(context, echo, bus, room) {
+  const input = context.createGain(),
+    delay = context.createDelay(ECHO.maxDelay),
+    low = filterOf(context, { type: 'lowpass', frequency: echo.lowpass ?? ECHO.lowpass }),
+    high = filterOf(context, { type: 'highpass', frequency: echo.highpass ?? ECHO.highpass }),
+    feedback = context.createGain(),
+    level = context.createGain(),
+    pan = context.createStereoPanner(),
+    toRoom = context.createGain();
+  delay.delayTime.value = echo.time;
+  feedback.gain.value = echo.feedback ?? ECHO.feedback;
+  level.gain.value = echo.level ?? ECHO.level;
+  pan.pan.value = echo.pan ?? 0;
+  toRoom.gain.value = echo.room ?? ECHO.room;
+  input.connect(delay).connect(high).connect(low).connect(feedback).connect(delay);
+  low.connect(level).connect(pan).connect(bus);
+  pan.connect(toRoom).connect(room);
+  return input;
+}
+
 /** The mix bus feeding `destination`: one channel per voice (pan, send), the room, glue compression. */
 export function createStudioMix(context, destination, buffers, studio) {
   const glue = context.createDynamicsCompressor();
@@ -213,7 +305,7 @@ export function createStudioMix(context, destination, buffers, studio) {
   glue.release.value = GLUE.release;
   const output = context.createGain();
   output.gain.value = studio.output ?? DEFAULT_OUTPUT;
-  glue.connect(output).connect(destination);
+  output.connect(destination);
   const room = context.createConvolver();
   room.buffer = buffers[studio.room] || null;
   const roomLevel = context.createGain();
@@ -221,16 +313,38 @@ export function createStudioMix(context, destination, buffers, studio) {
   room.connect(roomLevel).connect(glue);
   const duck = context.createGain(); // the voices that make room for the kick
   duck.connect(glue);
+  // the bus tone: a few filters after the glue, for the show's overall balance
+  let busOut = glue;
+  for (const band of studio.tone || []) busOut = busOut.connect(filterOf(context, band));
+  busOut.connect(output);
+  // the echo: one tempo delay with a filtered feedback, for the voices that send to it
+  const echo = studio.echo ? createEcho(context, studio.echo, glue, room) : null;
   const channels = {};
-  for (const [voice, spec] of Object.entries(studio.voices)) {
-    const input = context.createGain(),
-      pan = context.createStereoPanner(),
-      send = context.createGain();
-    pan.pan.value = spec.pan ?? 0;
+  /** One channel strip: drive, filters, chorus, pan, and the sends to the room and the echo. */
+  const strip = (spec, panValue) => {
+    const input = context.createGain();
+    let tail = input;
+    if (spec.drive) tail = tail.connect(driveOf(context, spec.drive));
+    for (const band of spec.eq || []) tail = tail.connect(filterOf(context, band));
+    const pan = context.createStereoPanner(),
+      send = context.createGain(),
+      bus = studio.duck && spec.ducked ? duck : glue;
+    pan.pan.value = panValue;
     send.gain.value = spec.send ?? DEFAULT_SEND;
-    input.connect(pan).connect(studio.duck && spec.ducked ? duck : glue);
+    tail.connect(pan).connect(bus);
     pan.connect(send).connect(room);
-    channels[voice] = input;
+    if (spec.chorus) addChorus(context, spec.chorus, tail, bus, send);
+    if (echo && spec.echo) {
+      const toEcho = context.createGain();
+      toEcho.gain.value = spec.echo;
+      pan.connect(toEcho).connect(echo);
+    }
+    return input;
+  };
+  for (const [voice, spec] of Object.entries(studio.voices)) {
+    const pan = spec.pan ?? 0,
+      spread = spec.double?.spread ?? 0;
+    channels[voice] = { main: strip(spec, clamp(pan - spread, -1, 1)), twin: spec.double ? strip(spec, clamp(pan + spread, -1, 1)) : null };
   }
   return {
     /** Play one planned event at `time` at the level `level`. */
@@ -260,7 +374,15 @@ export function createStudioMix(context, destination, buffers, studio) {
           envelope.gain.setValueAtTime(0, at);
           envelope.gain.linearRampToValueAtTime(peak, at + event.attack);
         } else envelope.gain.value = peak;
-        node.connect(tone).connect(envelope).connect(channels[event.voice]);
+        node
+          .connect(tone)
+          .connect(envelope)
+          .connect((source.twin && channels[event.voice].twin) || channels[event.voice].main);
+        if (echo && event.throw) {
+          const toEcho = context.createGain();
+          toEcho.gain.value = event.throw;
+          envelope.connect(toEcho).connect(echo);
+        }
         node.start(at);
         if (event.length) {
           const end = at + event.length;

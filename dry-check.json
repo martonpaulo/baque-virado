@@ -4,7 +4,7 @@
     "exclude": ["src/score.js"],
     "counts": {
       "src/audio.js": {
-        "number": 42
+        "number": 41
       },
       "src/background.js": {
         "number": 12

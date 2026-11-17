@@ -54,8 +54,11 @@ const lanes = createLanes($('lanes'), volume);
 const key = createKey($('key'), volume);
 
 // ---------- sizes ----------
-let measuredSize = ''; // the stage size the canvases were last sized for
-const sizeKey = (width, height) => `${width.toFixed(2)}x${height.toFixed(2)}`;
+let measuredSize = ''; // the stage size and the wheel's place the canvases were last sized for
+// The wheel's place is part of the key: on a phone the column's padding follows the safe-area inset,
+// which changes when the browser's bars hide, and that moves the wheel without resizing the stage.
+const sizeKey = (box, wheel) =>
+  [box.width, box.height, wheel.left - box.left + wheel.width / 2, wheel.top - box.top + wheel.height / 2].map(value => value.toFixed(2)).join('x');
 function measure() {
   const device = window.devicePixelRatio || 1,
     dpr = Math.min(MAX_DPR, device);
@@ -64,7 +67,7 @@ function measure() {
   const feedback = clock.exporting ? dpr : device * FEEDBACK_DEVICE_SCALE;
   const box = stage.getBoundingClientRect(),
     wheel = $('scopeBox').getBoundingClientRect();
-  measuredSize = sizeKey(box.width, box.height);
+  measuredSize = sizeKey(box, wheel);
   background.resize({
     width: Math.round(box.width * feedback),
     height: Math.round(box.height * feedback),
@@ -326,7 +329,7 @@ window.baque = {
     this.render(seconds / BAR_SECONDS);
     stepAnimations(seconds);
   },
-  renderAudio: () => renderShowWav(bank, choice, AUDIO_LEAD_IN),
+  renderAudio: options => renderShowWav(bank, choice, AUDIO_LEAD_IN, options),
   TOTAL: TOTAL_BARS,
   BAR: BAR_SECONDS,
   audioOffset: AUDIO_LEAD_IN,
@@ -347,14 +350,17 @@ const fitStage = () => {
   stage.style.zoom = DESKTOP_LAYOUT.matches && !isVideoExport() ? String(stage.parentElement.clientWidth / PHONE_STAGE_WIDTH) : '';
 };
 fitStage();
-new ResizeObserver(() => {
+const stageColumn = stage.querySelector('.inner');
+const stageObserver = new ResizeObserver(() => {
   fitStage();
-  const { width, height } = stage.getBoundingClientRect();
-  if (!width || !height || sizeKey(width, height) === measuredSize) return;
+  const box = stage.getBoundingClientRect();
+  if (!box.width || !box.height || sizeKey(box, $('scopeBox').getBoundingClientRect()) === measuredSize) return;
   measure();
   title.fit();
   render(position, true);
-}).observe(stage.parentElement);
+});
+stageObserver.observe(stage.parentElement);
+stageObserver.observe(stageColumn); // its content box changes with its padding
 document.fonts?.ready.then(() => title.fit());
 measure();
 render(0, true);

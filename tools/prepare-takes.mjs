@@ -9,6 +9,7 @@
 //   --vsco:    a checkout of github.com/sgossner/VSCO-2-CE
 //   --vcsl:    a checkout of github.com/sgossner/VCSL (the brega groups)
 //   --coco:    the sounds/incoming-coco folder of the old coco-sounds branch
+//   --hohner:  the unpacked FreePats «Button Accordion HN» sound bank (the forró sanfona's right hand)
 // Sources and authors: CREDITS.md. Without group names every group is rebuilt.
 import { spawnSync } from 'node:child_process';
 import { existsSync, writeFileSync } from 'node:fs';
@@ -26,12 +27,14 @@ const SILENCE = 10 ** (-60 / 20);
 
 // group → its takes. `from`: source root and path; `hit`: which hit of a recording with several
 // (0 = the first); `length`: the longest the take may last, in seconds; `layer`: velocity layer
-// (0 soft … 1 loud); `existing`: a master already in sounds/, listed as it is.
+// (0 soft … 1 loud); `existing`: a master already in sounds/, listed as it is; `onset`: see cut().
 const v = (file, layer, extra = {}) => ({ from: `vsco:${file}`, layer, ...extra });
 const lib = (file, extra = {}) => ({ from: `library:${file}`, ...extra });
 const files = (folder, names) => names.map(name => lib(`${folder}/${name}.mp3`));
 const coco = (file, extra = {}) => ({ from: `coco:${file}`, ...extra });
 const vcsl = (file, layer, extra = {}) => ({ from: `vcsl:${file}`, layer, ...extra });
+// The bank names its notes an octave above where they sound: the label is the pitch measured.
+const hohner = note => ({ from: `hohner:Button Accordion HN ${note}.flac`, label: note.slice(0, -1) + (Number(note.slice(-1)) - 1) });
 const rr = (make, ids, layers) => ids.flatMap(id => layers.map(([tag, layer]) => make(id, tag, layer)));
 const series = (file, count, extra = {}) => [...Array(count).keys()].map(hit => lib(file, { hit, ...extra }));
 // VSCO names some notes an octave below where they sound: `octave` moves the label to the real pitch.
@@ -102,6 +105,13 @@ export const GROUPS = {
     pitched: true,
     length: 1.2,
     takes: ['C3', 'E3', 'G3', 'A3', 'C4', 'E4', 'G4', 'C5', 'E5'].map(note => lib(`accordion/accordion-${note}.mp3`, { label: note })),
+  },
+  // the right hand of the forró: a Hohner button accordion, its seventeen recorded notes, sounding B2 to G5
+  'sanfona-hohner': {
+    pitched: true,
+    length: 1.3,
+    onset: 0.25,
+    takes: ['B3', 'D4', 'F#4', 'G4', 'A4', 'B4', 'C5', 'D5', 'E5', 'F#5', 'G5', 'A5', 'B5', 'C6', 'D6', 'E6', 'G6'].map(hohner),
   },
   'sanfona-baixo': {
     pitched: true,
@@ -290,6 +300,26 @@ export const GROUPS = {
       1,
     ),
   },
+  // the bregafunk hook: a concert flute, tongued short (two dynamics, two round robins) and held with
+  // vibrato. VSCO names these an octave below where they sound; `hit: 0` trims the breath before the note.
+  'flauta-stac': {
+    pitched: true,
+    length: 0.45,
+    takes: ['A3', 'C4', 'E4', 'A4'].flatMap(note =>
+      [
+        ['v2_rr1', 0.6],
+        ['v3_rr1', 0.9],
+        ['v3_rr2', 0.9],
+      ].map(([tag, layer]) => v(`Woodwinds/Flute/stac/LDFlute_stac_${note}_${tag}.wav`, layer, { label: note[0] + (Number(note[1]) + 1), hit: 0 })),
+    ),
+  },
+  'flauta-sus': {
+    pitched: true,
+    length: 0.9,
+    takes: ['A3', 'C4', 'E4', 'A4'].map(note =>
+      v(`Woodwinds/Flute/susvib/LDFlute_susvib_${note}_v1_1.wav`, 0.8, { label: note[0] + (Number(note[1]) + 1), hit: 0 }),
+    ),
+  },
   'atabaque-grave': {
     length: 0.7,
     takes: [
@@ -384,7 +414,12 @@ function cut(samples, spec, group) {
   const starts = spec.hit === undefined ? [0] : onsets(samples, spec.ratio ? { ratio: spec.ratio } : undefined);
   if (spec.hit !== undefined && spec.hit >= starts.length) throw new Error(`only ${starts.length} hits in ${spec.from}`);
   const startHit = spec.hit === undefined ? 0 : starts[spec.hit];
-  const from = Math.max(0, group.room ? 0 : startHit - Math.round(PRE_ROLL * RATE));
+  let from = Math.max(0, group.room ? 0 : startHit - Math.round(PRE_ROLL * RATE));
+  // `onset`: a reed speaks slowly; start the take where it first reaches this share of its peak
+  if (group.onset) {
+    const loudest = samples.reduce((most, value) => Math.max(most, Math.abs(value)), 0);
+    from = Math.max(0, samples.findIndex(value => Math.abs(value) >= loudest * group.onset) - Math.round(PRE_ROLL * RATE));
+  }
   const nextHit = spec.hit === undefined ? Number.POSITIVE_INFINITY : (starts[spec.hit + 1] ?? Number.POSITIVE_INFINITY);
   let to = Math.min(samples.length, from + Math.round(group.length * RATE), nextHit - Math.round(PRE_ROLL * RATE));
   let peak = 0;
