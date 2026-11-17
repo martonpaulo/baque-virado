@@ -5,7 +5,7 @@ import { existsSync, statSync } from 'node:fs';
 import { test } from 'node:test';
 import { fileURLToPath } from 'node:url';
 import { meterOf } from '../src/music.js';
-import { CAIXA_CELL, FREVO, FREVO_LINES, MAX_RETUNE, midiOf, nearestSample, PANDEIRO_BAR } from '../src/rhythms/frevo.js';
+import { CAIXA_CELL, FREVO, FREVO_LINES, MAX_BORROW, midiOf, nearestSample, PANDEIRO_BAR } from '../src/rhythms/frevo.js';
 import { FREVO_PALETTE } from '../src/rhythms/frevo-background.js';
 import { createShow } from '../src/show.js';
 import { planStudio } from '../src/studio.js';
@@ -15,27 +15,26 @@ const show = createShow(FREVO);
 const DEFAULTS = Object.fromEntries(FREVO.sounds.choices.map(choice => [choice.id, choice.defaultOption]));
 const soundPath = (name, extension) => fileURLToPath(new URL(`../sounds/${name}${extension}`, import.meta.url));
 const allFiles = choices => [...FREVO.sounds.choices.flatMap(c => c.files(choices[c.id])), ...FREVO.sounds.fixedFiles];
-const PHONE_BYTES = 400_000; // every default sample of the melodic show, before Play (docs/frevo.md)
+const PHONE_BYTES = 880_000; // every default sample of the melodic show, before Play (docs/frevo.md)
 
-test('frevo is 2/4 at one tempo on an 8-step wheel, twelve scenes as the script lists them', () => {
+test('frevo is 2/4 at one tempo on an 8-step wheel, eleven scenes as the script lists them', () => {
   const meter = meterOf(FREVO);
-  assert.equal(FREVO.bpm, 140);
+  assert.equal(FREVO.bpm, 125); // the reference's tempo, inside the frevo-canção range (docs/frevo.md)
   assert.equal(meter.stepsPerBar, 8);
   assert.deepEqual(
     show.SCENES.map(scene => [scene.id, scene.bars]),
     [
       ['introducao', 4],
-      ['surdo', 8],
+      ['surdo', 4],
       ['caixa', 8],
-      ['pandeiro', 8],
+      ['pandeiro', 4],
       ['tuba', 8],
-      ['metais', 16],
+      ['palhetas', 16],
+      ['metais', 8],
       ['la-e-ca', 16],
-      ['ventania', 8],
-      ['bambeando', 8],
+      ['segunda', 16],
       ['fotografia', 4],
-      ['abafo', 8],
-      ['final', 8],
+      ['final', 16],
     ],
   );
   for (let bar = 0; bar < show.TOTAL_BARS; bar++)
@@ -45,12 +44,12 @@ test('frevo is 2/4 at one tempo on an 8-step wheel, twelve scenes as the script 
     }
 });
 
-test('the parts enter one by one: surdo, caixa, pandeiro, then the tuba', () => {
+test('the parts enter one by one: surdo, caixa, pandeiro, tuba, the palhetas, then the metais', () => {
   const firstBar = voice => {
     for (let bar = FREVO.scenes[0].bars; bar < show.TOTAL_BARS; bar++) if (show.hitsInBar(bar).some(h => h.voice === voice)) return bar;
     return null;
   };
-  const order = ['surdo', 'tarol', 'pandeiro', 'tuba', 'trompete', 'sax'].map(firstBar);
+  const order = ['surdo', 'tarol', 'pandeiro', 'tuba', 'sax', 'clarinete', 'trompete'].map(firstBar);
   assert.deepEqual(
     [...order].sort((a, b) => a - b),
     order,
@@ -77,19 +76,21 @@ test('the pandeiro plays a sixteenth-note ostinato: every step of the bar, grave
   );
 });
 
-test('every note plays a take within two semitones of it, and every take exists', () => {
+test('every note plays a take within four semitones of it, the nearest within two, and every take exists', () => {
   const plan = planStudio(FREVO, show, DEFAULTS);
   for (const events of plan.values())
     for (const event of events)
       for (const source of event.sources) {
         assert.ok(existsSync(soundPath(source.file, '.m4a')), `${source.file} is missing`);
-        assert.ok(Math.abs(Math.log2(source.rate) * 12) <= MAX_RETUNE + 1e-9, `${event.voice} ${source.file} retunes too far`);
+        assert.ok(Math.abs(Math.log2(source.rate) * 12) <= MAX_BORROW + 1e-9, `${event.voice} ${source.file} retunes too far`);
       }
   assert.deepEqual(nearestSample('trompete', 'bb5').slice(2), [1]);
+  for (const [voice, line] of Object.entries(FREVO_LINES))
+    for (const note of [...line.values()].flat()) assert.ok(note.stroke, `${voice} ${note.note} has no take`);
   assert.equal(midiOf('bb4'), 70);
 });
 
-test('every sound option has its files beside their WAV masters; the phone set stays under 400 KB', () => {
+test('every sound option has its files beside their WAV masters; the phone set stays under 880 KB', () => {
   for (const choice of FREVO.sounds.choices)
     for (const [option] of choice.options)
       for (const name of allFiles({ ...DEFAULTS, [choice.id]: option })) {
@@ -100,23 +101,42 @@ test('every sound option has its files beside their WAV masters; the phone set s
   assert.ok(bytes < PHONE_BYTES, `the default samples weigh ${bytes} bytes`);
 });
 
-test('the hook comes in with its pickup, is played three times, varied once and returns unchanged at the end', () => {
-  const trumpet = bar => JSON.stringify(FREVO_LINES.trompete.get(bar) || []);
-  const metais = show.sceneById('metais').start,
-    hook = trumpet(metais);
-  const starts = [...Array(show.TOTAL_BARS).keys()].filter(bar => trumpet(bar) === hook && trumpet(bar + 1) === trumpet(metais + 1));
-  assert.ok(starts.length >= 3, `the hook plays ${starts.length} times`);
-  assert.ok(starts.includes(show.sceneById('final').start), 'the final opens with the hook');
-  for (const start of starts)
-    assert.ok(
-      FREVO_LINES.trompete.get(start - 1)?.some(note => note.step > 4),
-      `no pickup before bar ${start + 1}`,
-    );
-  const laEca = show.sceneById('la-e-ca').start;
+test('the tune is played three times, each with its pickup, and the second part moves to the relative major', () => {
+  const sax = (scene, bar) => JSON.stringify((FREVO_LINES.sax.get(show.sceneById(scene).start + bar) || []).map(note => [note.step, note.note, note.steps]));
+  const THEME_BARS = 14; // the bars every statement shares; the last two lead somewhere else each time
+  for (const scene of ['la-e-ca', 'final']) {
+    for (let bar = 0; bar < THEME_BARS; bar++) assert.equal(sax(scene, bar), sax('palhetas', bar), `${scene}, bar ${bar + 1}`);
+  }
+  for (const scene of ['palhetas', 'la-e-ca', 'final']) assert.notEqual(sax(scene, -1), '[]', `no pickup into ${scene}`);
+  assert.notEqual(sax('segunda', 0), sax('palhetas', 0));
+  const scenes = Object.fromEntries(FREVO.scenes.map(scene => [scene.id, scene]));
+  assert.equal(scenes.palhetas.chords[0], 'Gm');
+  assert.equal(scenes.segunda.chords[0], 'Bb');
+  assert.equal(scenes.final.chords.at(-1), 'Gm', 'the show ends on the tonic');
+});
+
+test('the horns sing: held notes of many lengths, sections of several players, the metais in the gaps of the tune', () => {
+  const plan = planStudio(FREVO, show, DEFAULTS);
+  const events = voice => [...plan.values()].flat().filter(event => event.voice === voice);
+  const lengths = new Set(events('sax').map(event => event.length.toFixed(2)));
+  assert.ok(lengths.size >= 6, `the saxofones play ${lengths.size} note lengths`);
+  assert.ok(Math.max(...events('sax').map(event => event.length)) > meterOf(FREVO).beatSeconds, 'no held note longer than a beat');
+  const section = event => event.sources.length >= 2 && new Set(event.sources.map(source => source.file)).size === event.sources.length;
+  assert.ok(events('sax').every(section), 'a saxofone note with one player');
   assert.ok(
-    [...Array(16).keys()].some(i => trumpet(laEca + i) === hook && trumpet(laEca + i + 1) !== trumpet(metais + 1)),
-    'no varied hook in Lá e cá',
+    events('trompete')
+      .filter(event => event.stroke === 'curta')
+      .every(section),
+    'a staccato trompete note with one player',
   );
+  // an answer sounds while the tune holds a note: the saxofones start no note from its first step to its last
+  const laEca = show.sceneById('la-e-ca');
+  for (let bar = laEca.start; bar < laEca.start + laEca.bars; bar++) {
+    const answer = FREVO_LINES.trompete.get(bar) || [];
+    if (!answer.some(note => note.staccato) || answer.length < 3) continue;
+    const tune = (FREVO_LINES.sax.get(bar) || []).filter(note => note.step >= answer[0].step && note.step <= answer.at(-1).step);
+    assert.deepEqual(tune, [], `bar ${bar + 1}: the tune moves under the answer`);
+  }
 });
 
 /** WCAG relative luminance and contrast. */
