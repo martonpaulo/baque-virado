@@ -6,7 +6,7 @@ removed on 2026-11-17.
 
 How to use this list:
 
-- A rhythm has four references (the brega has five) and they weigh the same: none is «the main one» and none is only a
+- A rhythm has four references and they weigh the same: none is «the main one» and none is only a
   «similar song». What the four share is the rhythm; what only one has is that song.
 - Listen to, or measure, the whole of each recording, every section of it (introduction, verse,
   chorus, breaks, solos, ending), not a thirty-second excerpt.
@@ -62,19 +62,14 @@ whole video, especially from 18:00.
 
 ## Brega (`/brega`)
 
-The brega has five references: the owner said every song named counts (2026-11-17).
-
 1. «Uma Mulher É Igual uma Flor», Banda Musa do Calipso; other bands' versions count too. [search](https://www.youtube.com/results?search_query=Banda+Musa+Uma+Mulher+%C3%89+Igual+uma+Flor)
 2. «Diz na Minha Cara», as Banda Lapada played it on the television show SuperStar (Globo); other versions count too. [search](https://www.youtube.com/results?search_query=Banda+Lapada+Diz+na+Minha+Cara+SuperStar)
-3. «Ainda Bem», Banda Lapada, from the same show. [search](https://www.youtube.com/results?search_query=Banda+Lapada+Ainda+Bem+SuperStar)
-4. «Novo Namorado», Priscila Senna. [search](https://www.youtube.com/results?search_query=Priscila+Senna+Novo+Namorado)
-5. «Milk Shake», Nega do Babado. [search](https://www.youtube.com/results?search_query=Nega+do+Babado+Milk+Shake)
+3. «Novo Namorado», Priscila Senna. [search](https://www.youtube.com/results?search_query=Priscila+Senna+Novo+Namorado)
+4. «Milk Shake», Nega do Babado. [search](https://www.youtube.com/results?search_query=Nega+do+Babado+Milk+Shake)
 
 ## Bregafunk (`/bregafunk`)
 
 1. «Viciou na Flauta», MC Reino, Barca na Batida, Chefe Coringa and MC Mari (https://www.youtube.com/watch?v=Zju5BjqEgTY).
 2. «Tuf Tuf Pof Pof», MC Reino. [search](https://www.youtube.com/results?search_query=MC+Reino+Tuf+Tuf+Pof+Pof)
 3. «Dally», Shevchenko e Elloco. [search](https://www.youtube.com/results?search_query=Shevchenko+e+Elloco+Dally)
-4. A song by MC Cego Abusado, not yet named: the owner wrote «MC Cego - Abusado», and the catalogue
-   lists «MC Cego Abusado» as the artist's name, so which song is an open question for the owner.
-   [search](https://www.youtube.com/results?search_query=MC+Cego+Abusado+brega+funk)
+4. «Cafajeste», MC Cego Abusado (https://youtu.be/19T2lMaq56A).

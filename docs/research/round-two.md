@@ -16,6 +16,7 @@ here is built yet: the owner asked to record, research and understand first, and
 - [What the owner answered](#what-the-owner-answered)
 - [What is still missing](#what-is-still-missing)
 - [Musical graphics per rhythm](#musical-graphics-per-rhythm)
+- [Which agent writes the music](#which-agent-writes-the-music)
 - [Unfinished work kept](#unfinished-work-kept)
 
 ## What the owner asked
@@ -175,15 +176,24 @@ two agents run at once, and the rendered audio goes to the owner before each dep
 
 ## What the owner answered
 
-- **Brega:** all five songs named count.
+- **Brega:** four references, after the owner took «Ainda Bem» out (2026-11-17).
+- **Bregafunk:** the fourth reference is «Cafajeste», MC Cego Abusado.
 - **In the background a show pauses, as a video does**, and resumes where it stopped when the viewer
   comes back ([#45](https://github.com/martonpaulo/baque-virado/issues/45), D35).
+- **The owner accepted every decision the agent proposed** (2026-11-17, D37): the reading under
+  «What is still missing» is the direction of round two (a hook; one instrument that takes the
+  singer's place and phrases as a voice; a form; phrases played by people; weight and loudness); the
+  bregafunk's five elements, its form and 171 BPM ([`../rhythms/bregafunk.md`](../rhythms/bregafunk.md));
+  the wheel stays in every show, smaller, as the site's mark, and each rhythm's own graphic takes
+  the main space ([#49](https://github.com/martonpaulo/baque-virado/issues/49)); the order of work below.
+- **Every usable idea, and code, from AI music software is to be used** (D38), within the site's
+  rules: the notes still drive the graphics, the recordings stay CC0 and the melodies original.
 
 ## What is still missing
 
 The agent's own reading on 2026-11-17, after the first round, asked by the owner in two roles. It
 is judgement from the measurements, the references' facts and knowledge of the genres; nobody has
-listened, so each point is a hypothesis for the owner to accept or throw out. The maracatu is not
+listened. The owner accepted it as the direction of round two (D37). The maracatu is not
 part of it.
 
 ### As a producer who only releases hits
@@ -273,8 +283,23 @@ Across rhythms: a string or a drum head vibrating at the note's pitch; two instr
 or spectra side by side; the same cell in two notations.
 
 Each graphic stays a function of the show position, so the video export matches playback, reads on
-a phone and respects reduced motion. Open for the owner: whether the wheel stays in every show as
-the site's common ground, or a rhythm may replace it.
+a phone and respects reduced motion. The wheel stays in every show, smaller, as the site's
+mark, and the rhythm's own graphic takes the main space (the owner, D37).
+
+## Which agent writes the music
+
+Asked by the owner on 2026-11-17; read from Anthropic's model reference of that date.
+
+| Role                                                    | Model                                                                             | Effort                                   | Why                                                                                                                                                                                                                                 |
+| :------------------------------------------------------ | :-------------------------------------------------------------------------------- | :--------------------------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Writes a rhythm: the hook, the form, the parts, the mix | Claude Fable 5.2 (`claude-fable-5-2`), the most capable model generally available | `high`                                   | Composition and arrangement are the hard, long-horizon judgement here. Anthropic's guidance for this model is to start at `high`: gains above it are uneven, `xhigh` only where a gain is measured, `max` only to measure a ceiling |
+| The same, on a smaller budget                           | Claude Opus 5.5 (`claude-opus-5-5`)                                               | `high` (its default is `medium`: set it) | Half the price per token; the strongest Opus                                                                                                                                                                                        |
+| Measures, renders, fetches, runs the gates              | Claude Sonnet 5.5 or Claude Haiku 5.5                                             | `medium` or `low`                        | Mechanical work; cheap and fast                                                                                                                                                                                                     |
+
+- No Claude model hears or generates audio. The agent writes notes, synthesis and mix settings as
+  code, and the lab measures the result; the owner's ear decides.
+- One writing agent per rhythm, at most two at once ([`sound-lab.md`](sound-lab.md), Limits).
+- A session's default model applies to an agent that names none; the owner sets it for the session.
 
 ## Unfinished work kept
 

@@ -106,7 +106,8 @@ The rules every rhythm package in `src/rhythms/` follows.
 - **Graphics.** A show's musical graphics belong to its own instruments: a score, tablature, the
   strings, keys, buttons or valves being played, the hands' position, a vibration, a comparison
   between instruments. The wheel, lanes and counts were made for the maracatu; no other show
-  repeats that set unchanged ([#49](https://github.com/martonpaulo/baque-virado/issues/49)).
+  repeats that set unchanged: the wheel stays in every show, smaller, as the site's mark, and the
+  rhythm's own graphic takes the main space ([#49](https://github.com/martonpaulo/baque-virado/issues/49)).
 - **Background.** Circular, coming out of the central wheel, in the rhythm's palette from section 5
   of [`colour-and-visuals.md`](research/colour-and-visuals.md): brega in desaturated blue
   and muted rose, bregafunk in purple, magenta and gold. The approved backgrounds are a sketch to
