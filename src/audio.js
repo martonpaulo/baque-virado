@@ -129,6 +129,9 @@ export const filesFor = choice => [...SOUND_CHOICES.flatMap(c => c.files(choice[
 
 // The page fetches AAC at 96 kbps (#3); `tools/encode-sounds.mjs` makes each one from its WAV master.
 export const SOUND_EXTENSION = '.m4a';
+// The deployed page loads this module at `?v=<commit>` (tools/build-site.mjs); the sounds take the same
+// query, so a page never plays samples cached from another build (#35). Empty on the dev server.
+const BUILD_QUERY = new URL(import.meta.url).search;
 
 /** Fetches samples on demand and decodes them once per audio context; a synthesized sound is rendered instead. */
 export function createSampleBank(baseUrl = 'sounds/', synth = SYNTH) {
@@ -138,7 +141,7 @@ export function createSampleBank(baseUrl = 'sounds/', synth = SYNTH) {
   const fetchSample = async name => {
     for (let attempt = 1; ; attempt++) {
       try {
-        const response = await fetch(`${baseUrl}${name}${SOUND_EXTENSION}`);
+        const response = await fetch(`${baseUrl}${name}${SOUND_EXTENSION}${BUILD_QUERY}`);
         if (!response.ok) throw new Error(`missing sound: ${name} (${response.status})`);
         return await response.arrayBuffer();
       } catch (error) {

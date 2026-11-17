@@ -6,6 +6,7 @@ import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { after, before, test } from 'node:test';
 import { COPY } from '../src/copy.js';
+import { redirectFor } from '../src/rhythms/index.js';
 import { SCENES } from '../src/show.js';
 import { openBrowser } from './support/browser.js';
 
@@ -13,12 +14,15 @@ import { openBrowser } from './support/browser.js';
 // tests-only 2/4 fixture, or maracatu alone.
 const SHIPPED_REGISTRY = readFileSync(new URL('../src/rhythms/index.js', import.meta.url), 'utf8');
 const SHIPPED_LIST = /export const RHYTHMS = \[.*\];/;
+const SHIPPED_ROUTES = /export const ROUTES = \[.*\];/;
+const TWO_FOUR_ROUTES = ['maracatu', 'dois-por-quatro']; // tests/support/browser.js serves both paths
+const REGISTRY_ROUTES = { twoFour: TWO_FOUR_ROUTES, maracatuOnly: ['maracatu'] };
 const REGISTRIES = {
   twoFour: SHIPPED_REGISTRY.replace(
     SHIPPED_LIST,
     "import { TWO_FOUR } from '../../tests/support/rhythm-two-four.js';\nexport const RHYTHMS = [MARACATU, TWO_FOUR];",
-  ),
-  maracatuOnly: SHIPPED_REGISTRY.replace(SHIPPED_LIST, 'export const RHYTHMS = [MARACATU];'),
+  ).replace(SHIPPED_ROUTES, `export const ROUTES = ${JSON.stringify(TWO_FOUR_ROUTES)};`),
+  maracatuOnly: SHIPPED_REGISTRY.replace(SHIPPED_LIST, 'export const RHYTHMS = [MARACATU];').replace(SHIPPED_ROUTES, "export const ROUTES = ['maracatu'];"),
 };
 
 const PHONES = [
@@ -68,7 +72,8 @@ async function openPage(viewport, { delaySounds = false, videoExport = false, qu
   await page.setRequestInterception(true);
   page.on('request', async request => {
     const url = request.url();
-    if (!url.startsWith(session.server.url)) {
+    // a data: URL never leaves the page (the video export draws each frame from one)
+    if (!url.startsWith(session.server.url) && !url.startsWith('data:')) {
       errors.push(`request off the site: ${url}`);
       await request.abort();
       return;
@@ -82,7 +87,9 @@ async function openPage(viewport, { delaySounds = false, videoExport = false, qu
   });
   await page.setViewport(viewport);
   await page.goto(session.server.url + query, { waitUntil: 'load' });
-  await page.waitForFunction(() => window.baque);
+  // `?ritmo=<id>` of a rhythm path reloads the page there: wait for the page at the final address
+  const path = redirectFor(query, REGISTRY_ROUTES[registry]) ?? '/';
+  await page.waitForFunction(at => location.pathname === at && window.baque && document.readyState === 'complete', {}, path);
   await page.evaluate(() => document.fonts.ready);
   return { page, errors, contexts: () => page.evaluate(() => window.__audioContexts) };
 }
@@ -429,7 +436,8 @@ test('on phones only the stage shows, and a tap on it plays and pauses', async (
   );
   assert.deepEqual(visible, []);
   assert.equal(await page.$eval('#tapLabel', element => element.textContent), COPY.controls.play);
-  await page.click('#stage');
+  // the rhythm links sit under Play on a stopped phone stage, so a viewer taps Play itself
+  await page.click('#tapLabel');
   await page.waitForFunction(() => document.getElementById('tap').dataset.state === 'pause');
   await page.click('#stage');
   // paused at the start the stage offers «Tocar», after the first frame «Continuar»: either is paused
@@ -463,15 +471,18 @@ test('the rhythm selector stays out of the page with one rhythm', async () => {
   }
 });
 
-test('an unknown ?ritmo= shows maracatu, marked in the selector of the shipped rhythms', async () => {
+test('an unknown ?ritmo= shows maracatu, marked in the selector of every rhythm path', async () => {
   for (const viewport of [PHONES[0], DESKTOP]) {
     const { page, errors } = await openPage(viewport, { query: '?ritmo=desconhecido' });
     assert.equal(await page.evaluate(() => window.baque.TOTAL), SCENES.at(-1).start + SCENES.at(-1).bars);
     assert.deepEqual(await page.$$eval('.rhythms-stage a', links => links.map(a => [a.getAttribute('href'), a.getAttribute('aria-current')])), [
-      ['?ritmo=maracatu', 'true'],
-      ['?ritmo=coco-xamba', null],
-      ['?ritmo=forro', null],
-      ['?ritmo=brega-funk', null],
+      ['/maracatu', 'true'],
+      ['/coco', null],
+      ['/frevo', null],
+      ['/forro', null],
+      ['/manguebeat', null],
+      ['/brega-romantico', null],
+      ['/brega-funk', null],
     ]);
     assert.deepEqual(errors, []);
     await page.close();
@@ -493,8 +504,9 @@ test('?ritmo=forro shows the forró on an 8-step wheel, over its own background,
   }
 });
 
-test('?ritmo=coco-xamba shows the coco on an 8-step wheel, its 12 scenes and the selector', async () => {
-  const { page, errors } = await openPage(DESKTOP, { query: '?ritmo=coco-xamba' });
+test('?ritmo=coco moves to /coco and shows the coco on an 8-step wheel, its 12 scenes and the selector', async () => {
+  const { page, errors } = await openPage(DESKTOP, { query: '?ritmo=coco' });
+  assert.equal(await page.evaluate(() => location.pathname + location.search), '/coco');
   const steps = await page.$$eval('#scope text[fill-opacity]', texts => texts.map(t => t.textContent).filter(t => /^\d+$/.test(t)));
   assert.equal(steps.length, 8);
   assert.equal(await page.evaluate(() => window.baque.TOTAL), 104);
@@ -502,7 +514,10 @@ test('?ritmo=coco-xamba shows the coco on an 8-step wheel, its 12 scenes and the
   assert.deepEqual(await page.$$eval('.rhythms-side a', links => links.map(a => [a.textContent, a.getAttribute('aria-current')])), [
     ['maracatu', null],
     ['coco', 'true'],
+    ['frevo', null],
     ['forró', null],
+    ['manguebeat', null],
+    ['brega romântico', null],
     ['brega funk', null],
   ]);
   assert.deepEqual(errors, []);
@@ -539,22 +554,134 @@ test('with a second rhythm, ?ritmo= plays it on its own wheel and the selector s
   // phones: under Play on the stopped stage, the current rhythm marked; hidden while playing
   assert.ok(await visible(page, '.rhythms-stage'));
   assert.deepEqual(await page.$$eval('.rhythms-stage a', links => links.map(a => [a.getAttribute('href'), a.getAttribute('aria-current')])), [
-    ['?ritmo=maracatu', null],
-    ['?ritmo=dois-por-quatro', 'true'],
+    ['/maracatu', null],
+    ['/dois-por-quatro', 'true'],
   ]);
-  await page.click('#tap');
+  await page.click('#tapLabel'); // the rhythm links fill the middle of the stopped stage
   await page.waitForFunction(() => document.getElementById('tap').dataset.state === 'pause');
   assert.equal(await visible(page, '.rhythms-stage'), false);
   await page.click('#tap');
   for (let at = 0; at < 5; at += 0.1) await page.evaluate(position => window.baque.render(position), at);
   assert.deepEqual(errors, []);
   await page.close();
-  // desktop: above the Roteiro in the left column; the stage copy stays hidden
+  // desktop: under the Roteiro, at the bottom of the left column; the stage copy stays hidden
   const desktop = await openPage(DESKTOP, { registry: 'twoFour', query: '?ritmo=dois-por-quatro' });
   assert.ok(await visible(desktop.page, '.rhythms-side'));
   assert.equal(await visible(desktop.page, '.rhythms-stage'), false);
-  assert.equal(await desktop.page.$eval('.rhythms-side', nav => nav.nextElementSibling.contains(document.getElementById('scenes'))), true);
+  // the export control sits between the Roteiro and the selector (#19)
+  assert.equal(
+    await desktop.page.$eval(
+      '.rhythms-side',
+      nav =>
+        nav.previousElementSibling.matches('.export-video') && nav.previousElementSibling.previousElementSibling.contains(document.getElementById('scenes')),
+    ),
+    true,
+  );
+  assert.equal(await desktop.page.$eval('.rhythms-side', nav => nav === nav.parentElement.lastElementChild), true);
   assert.equal(await desktop.page.$$eval('#scenes li', items => items.length), 2);
   assert.deepEqual(desktop.errors, []);
   await desktop.page.close();
+});
+
+// ---------- the video export in the page (#19) ----------
+
+test('desktop shows «Exportar vídeo» in the middle of the left column, between the Roteiro and the selector', async () => {
+  const { page, errors } = await openPage(DESKTOP);
+  const layout = await page.evaluate(() => {
+    const box = element => element.getBoundingClientRect();
+    const roteiro = document.getElementById('scenes').closest('.block'),
+      control = document.querySelector('.export-video'),
+      selector = document.querySelector('.rhythms-side');
+    const button = control.querySelector('button.export-start');
+    return {
+      order: [roteiro.nextElementSibling === control, control.nextElementSibling === selector, control.parentElement.matches('.side.left')],
+      above: box(control).top - box(roteiro).bottom,
+      below: box(selector).top - box(control).bottom,
+      button: { tag: button.localName, type: button.type, text: button.textContent, disabled: button.disabled, visible: button.checkVisibility() },
+      cancelHidden: [...control.querySelectorAll('button')].filter(b => b !== button).every(b => b.hidden),
+    };
+  });
+  assert.deepEqual(layout.order, [true, true, true]);
+  assert.ok(layout.above > 0 && layout.below > 0, `gaps ${layout.above} and ${layout.below}`);
+  assert.ok(Math.abs(layout.above - layout.below) <= 1, `centred: ${layout.above} px above, ${layout.below} px below`);
+  assert.deepEqual(layout.button, { tag: 'button', type: 'button', text: COPY.exportVideo.start, disabled: false, visible: true });
+  assert.ok(layout.cancelHidden);
+  // keyboard: Tab from the last Roteiro control reaches the button, then the selector
+  await page.evaluate(() => [...document.querySelectorAll('#scenes button, #scenes a')].at(-1).focus());
+  await page.keyboard.press('Tab');
+  assert.equal(await page.evaluate(() => document.activeElement.classList.contains('export-start')), true);
+  await page.keyboard.press('Tab');
+  assert.equal(await page.evaluate(() => document.activeElement.closest('.rhythms-side') !== null), true);
+  assert.deepEqual(errors, []);
+  await page.close();
+});
+
+test('phones have no video export', async () => {
+  for (const phone of PHONES) {
+    const { page, errors } = await openPage(phone);
+    assert.equal(await page.$('.export-video'), null);
+    assert.deepEqual(errors, []);
+    await page.close();
+  }
+});
+
+test('the export makes a short 9:16 video with sound, cancels on request, and leaves the live page as it was', async () => {
+  const { page, errors } = await openPage(DESKTOP);
+  const before = await page.evaluate(() => ({
+    html: document.documentElement.className,
+    zoom: document.getElementById('stage').style.zoom,
+    time: document.getElementById('hTime').textContent,
+  }));
+  const result = await page.evaluate(async () => {
+    const { exportVideo } = await import('/src/export.js');
+    const phases = [];
+    const { blob, format } = await exportVideo({ to: 0.2, onProgress: ({ phase, done, total }) => phases.push(`${phase} ${done}/${total}`) });
+    const head = [...new Uint8Array(await blob.slice(0, 12).arrayBuffer())];
+    return {
+      type: blob.type,
+      size: blob.size,
+      format: format.id,
+      phases: [phases[0], phases.at(-1)],
+      head,
+      frames: document.querySelectorAll('iframe').length,
+    };
+  });
+  assert.ok(['mp4', 'webm'].includes(result.format));
+  assert.equal(result.type, `video/${result.format}`);
+  assert.ok(result.size > 0);
+  // MP4 opens with an ftyp box; WebM with the EBML magic number
+  if (result.format === 'mp4') assert.equal(String.fromCharCode(...result.head.slice(4, 8)), 'ftyp');
+  else assert.deepEqual(result.head.slice(0, 4), [0x1a, 0x45, 0xdf, 0xa3]);
+  assert.deepEqual(result.phases, ['audio 0/6', 'video 6/6']); // 0.2 s at 30 frames per second
+  assert.equal(result.frames, 0, 'the hidden reel is removed');
+  assert.deepEqual(
+    await page.evaluate(() => ({
+      html: document.documentElement.className,
+      zoom: document.getElementById('stage').style.zoom,
+      time: document.getElementById('hTime').textContent,
+    })),
+    before,
+  );
+  // the control: disabled while it runs, Cancel stops it and says so
+  const control = await page.evaluate(async () => {
+    const start = document.querySelector('.export-start'),
+      cancel = start.parentElement.querySelectorAll('button')[1],
+      status = start.parentElement.querySelector('[role="status"]');
+    start.click();
+    const during = { disabled: start.disabled, cancelShown: !cancel.hidden };
+    cancel.click();
+    for (let i = 0; i < 600 && start.disabled; i++) await new Promise(resolve => setTimeout(resolve, 50));
+    return {
+      during,
+      after: { disabled: start.disabled, cancelShown: !cancel.hidden, status: status.textContent },
+      frames: document.querySelectorAll('iframe').length,
+    };
+  });
+  assert.deepEqual(control, {
+    during: { disabled: true, cancelShown: true },
+    after: { disabled: false, cancelShown: false, status: COPY.exportVideo.cancelled },
+    frames: 0,
+  });
+  assert.deepEqual(errors, []);
+  await page.close();
 });

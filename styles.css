@@ -513,6 +513,16 @@ a:focus-visible {
   border-color: var(--dim);
   color: var(--fg);
 }
+.chip:disabled {
+  cursor: default;
+  opacity: 0.5;
+  border-color: var(--line);
+  color: var(--dim);
+}
+.export-video progress {
+  width: 100%;
+  accent-color: var(--accent);
+}
 /* the stage itself is the Play and Pause button, on every screen (mobile first, 2026-11-16) */
 .tap {
   touch-action: manipulation; /* no double-tap zoom */
@@ -560,8 +570,8 @@ a:focus-visible {
   outline: var(--space-1) solid var(--fg);
   outline-offset: calc(-1 * var(--space-1));
 }
-/* the rhythm selector, built only with two or more rhythms (main.js): above the Roteiro on desktop,
-   under Play on the stopped stage on phones */
+/* the rhythm selector, built only with two or more rhythms (main.js): at the bottom of the left
+   column, under the Roteiro, on desktop; under Play on the stopped stage on phones */
 .rhythms {
   display: flex;
   flex-wrap: wrap;
@@ -575,13 +585,24 @@ a:focus-visible {
   overflow: hidden;
   text-overflow: ellipsis;
 }
+/* phones: Play and its time, then the rhythms one per line under them; the pair stays centred on
+   the stage (owner, 2026-11-17). --tap-lift moves Play up by half the selector's height. */
+.tap,
+.rhythms-stage {
+  --tap-lift: 32cqw;
+}
+.tap:where(:not([data-state="pause"])) {
+  padding-bottom: calc(2 * var(--tap-lift));
+}
 .rhythms-stage {
   position: absolute;
   left: 0;
   right: 0;
-  top: calc(50% + 18cqw);
+  top: calc(50% - var(--tap-lift) + 16cqw);
   z-index: 6;
-  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
 }
 .tap:where([data-state="pause"]) ~ .rhythms-stage {
   display: none;
@@ -850,6 +871,30 @@ a:focus-visible {
   .side.left {
     order: 1;
   }
+  .side.left {
+    padding-bottom: var(--space-11); /* the same room under the selector as above the Roteiro */
+  }
+  /* the selector closes the column and looks like the sound options: one option per line, each as
+     wide as its name, the same gap, and no rule above it (owner, 2026-11-17) */
+  .rhythms-side {
+    margin-top: auto; /* the Roteiro opens the column, the selector closes it */
+    padding-top: 0;
+    border-top: 0;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-3);
+  }
+  /* «Exportar vídeo» sits in the middle of the room between the Roteiro and the selector (#19) */
+  .export-video {
+    margin-block: auto;
+    padding-top: 0;
+    border-top: 0;
+    align-items: flex-start;
+    gap: var(--space-4);
+  }
+  .export-video + .rhythms-side {
+    margin-top: 0;
+  }
   .side.right,
   .side .block {
     display: flex;
@@ -1071,4 +1116,18 @@ html:not(.ready) .tap,
 html:not(.ready) .hud,
 html:not(.ready) .side {
   visibility: hidden;
+}
+
+/* a rhythm being prepared (tools/build-site.mjs writes its page): its name, one line and the selector */
+.preparing {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-6);
+  padding-top: var(--space-11);
+  text-align: center;
+  font-family: var(--f-mono);
+}
+.preparing > nav {
+  justify-content: center;
 }

@@ -5,18 +5,22 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>O Baque Virado</title>
 <meta name="description" content="Maracatu de baque virado: 7 baques, 5 instrumentos, partitura e microtempo medido, com som de instrumentos reais.">
-<link rel="canonical" href="https://baquevirado.martonpaulo.com/">
+<link rel="canonical" href="https://batuque.martonpaulo.com/">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="O Baque Virado">
-<meta property="og:url" content="https://baquevirado.martonpaulo.com/">
+<meta property="og:url" content="https://batuque.martonpaulo.com/">
 <meta property="og:title" content="O Baque Virado">
-<meta property="og:image" content="https://baquevirado.martonpaulo.com/social.png">
+<meta property="og:image" content="https://batuque.martonpaulo.com/social.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
 <meta property="og:description" content="Maracatu de baque virado: 7 baques, 5 instrumentos, partitura e microtempo medido, com som de instrumentos reais.">
 <meta name="theme-color" content="#07060b">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='14' fill='%2307060b' stroke='%23ffc53d' stroke-width='3'/%3E%3Ccircle cx='16' cy='5' r='3' fill='%23ffc53d'/%3E%3C/svg%3E">
+<link rel="icon" href="icons/icon-32.png" type="image/png" sizes="32x32">
+<link rel="icon" href="icons/icon-192.png" type="image/png" sizes="192x192">
+<link rel="icon" href="icons/icon-512.png" type="image/png" sizes="512x512">
+<!-- the SVG last: browsers that read it prefer it over the PNG fallbacks -->
+<link rel="icon" href="icon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="preload" href="fonts/space-grotesk-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="fonts/jetbrains-mono-latin.woff2" as="font" type="font/woff2" crossorigin>
@@ -26,6 +30,7 @@
 <link rel="modulepreload" href="src/audio.js">
 <link rel="modulepreload" href="src/background.js">
 <link rel="modulepreload" href="src/controls.js">
+<link rel="modulepreload" href="src/export.js">
 <link rel="modulepreload" href="src/copy.js">
 <link rel="modulepreload" href="src/lanes.js">
 <link rel="modulepreload" href="src/music.js">
@@ -36,6 +41,7 @@
 <link rel="modulepreload" href="src/rhythms/forro.js">
 <link rel="modulepreload" href="src/rhythms/index.js">
 <link rel="modulepreload" href="src/rhythms/maracatu.js">
+<link rel="modulepreload" href="src/rhythms/preparing.js">
 <link rel="modulepreload" href="src/rhythms/brega-funk.js">
 <link rel="modulepreload" href="src/rhythms/brega-funk-background.js">
 <link rel="modulepreload" href="src/rhythms/recorded-takes.js">
@@ -43,12 +49,13 @@
 <link rel="modulepreload" href="src/scope.js">
 <link rel="modulepreload" href="src/score.js">
 <link rel="modulepreload" href="src/show.js">
+<link rel="modulepreload" href="src/stage-capture.js">
 <link rel="modulepreload" href="src/studio.js">
 <link rel="modulepreload" href="src/theme.js">
 <link rel="modulepreload" href="src/title.js">
 <link rel="modulepreload" href="src/util.js">
 <link rel="modulepreload" href="src/waves.js">
-<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebSite", "name": "O Baque Virado", "url": "https://baquevirado.martonpaulo.com/", "inLanguage": "pt-BR"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebSite", "name": "O Baque Virado", "url": "https://batuque.martonpaulo.com/", "inLanguage": "pt-BR"}</script>
 </head>
 <body>
 <!-- Static text stays here (works without JS, crawlable); copy for dynamic text lives in src/copy.js. -->

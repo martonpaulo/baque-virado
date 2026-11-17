@@ -2,6 +2,7 @@
 import { existsSync } from 'node:fs';
 import { computeExecutablePath } from '@puppeteer/browsers';
 import puppeteer from 'puppeteer-core';
+import { ROUTES } from '../../src/rhythms/index.js';
 import { startStaticServer } from '../../tools/static-server.mjs';
 import { PINNED_BROWSER } from './pinned-browser.js';
 
@@ -26,7 +27,7 @@ export function chromePath() {
 
 /** Start the static server and a headless browser; `close()` stops both. */
 export async function openBrowser() {
-  const server = await startStaticServer();
+  const server = await startStaticServer(undefined, 0, { routes: [...ROUTES, 'dois-por-quatro'] }); // and the 2/4 fixture's path
   const browser = await puppeteer.launch({
     executablePath: chromePath(),
     headless: true,

@@ -2,7 +2,7 @@
 // Export the animated page (#stage + window.baque contract) to a vertical 1080x1920 MP4.
 // Usage: node tools/export-video.mjs <page.html> <out.mp4> [--from SECONDS] [--to SECONDS] [--loudnorm]
 //
-// The page must expose window.baque = { render(positionInBars), renderAudio() -> Promise<ArrayBuffer WAV>,
+// The page must expose window.baque = { frame(seconds), renderAudio() -> Promise<ArrayBuffer WAV>,
 // TOTAL (bars), BAR (seconds per bar), audioOffset (seconds of lead-in at the start of the WAV) }.
 import { spawn } from 'node:child_process';
 import { existsSync, mkdirSync, mkdtempSync, renameSync, rmSync, writeFileSync } from 'node:fs';
@@ -58,23 +58,6 @@ function parseArgs(argv) {
 function die(message) {
   console.error(`export-video: ${message}`);
   process.exit(2);
-}
-
-// Runs in the page: drive CSS animations and transitions from the virtual clock instead of wall time.
-function installVirtualClock() {
-  const born = new WeakMap();
-  window.__exportStep = seconds => {
-    for (const animation of document.getAnimations()) {
-      if (!born.has(animation)) born.set(animation, seconds);
-      const elapsed = (seconds - born.get(animation)) * 1000;
-      const end = animation.effect ? animation.effect.getComputedTiming().endTime : 0;
-      if (elapsed >= end) animation.finish();
-      else {
-        animation.pause();
-        animation.currentTime = elapsed;
-      }
-    }
-  };
 }
 
 /** Run ffmpeg to completion; resolves with its stderr. */
@@ -163,6 +146,8 @@ async function main() {
       defaultViewport: VIEWPORT,
       // WebGL for the background through a software GPU, so it works headless on any machine
       args: [
+        // Chrome refuses to start as root (a cloud session) inside its sandbox (#20)
+        ...(process.getuid?.() === 0 ? ['--no-sandbox'] : []),
         '--force-color-profile=srgb',
         '--hide-scrollbars',
         '--autoplay-policy=no-user-gesture-required',
@@ -177,13 +162,12 @@ async function main() {
     // the reel keeps its 9:16 layout; the browser view uses the taller phone-shaped stage
     await page.evaluateOnNewDocument(() => addEventListener('DOMContentLoaded', () => document.documentElement.classList.add('video-export')));
     await page.goto(server.url + encodeURIComponent(path.basename(args.page)), { waitUntil: 'networkidle0', timeout: 60000 });
-    await page.waitForFunction(() => window.baque && typeof window.baque.render === 'function', { timeout: 30000 });
+    await page.waitForFunction(() => window.baque && typeof window.baque.frame === 'function', { timeout: 30000 });
     await page.evaluate(() => document.fonts.ready);
     const fonts = await page.evaluate(() => [...document.fonts].map(font => `${font.family}:${font.status}`).filter((v, i, all) => all.indexOf(v) === i));
     if (!fonts.some(font => font.endsWith(':loaded'))) console.warn(`warning: no web font loaded (${fonts.join(', ') || 'none'})`);
     // Video frame: square corners (the page rounds the stage for the browser view only).
     await page.addStyleTag({ content: '#stage { border-radius: 0 !important; }' });
-    await page.evaluate(installVirtualClock);
     await page.evaluate(nextFrame);
 
     await fitViewport(page);
@@ -266,19 +250,16 @@ async function main() {
     encoderDone.catch(() => {}); // handled by the await below; this keeps an early exit from crashing Node
     encoder.stdin.on('error', () => {}); // surfaced through encoderDone
 
-    const renderAt = (seconds, bars) => {
-      window.baque.render(bars);
-      window.__exportStep(seconds);
-    };
+    const renderAt = seconds => window.baque.frame(seconds); // the same frame the in-page export draws (src/export.js)
     // Warm-up: play WARM_UP_SECONDS before --from without capturing, so fades and the background's
     // feedback trail (it keeps about half of itself per second) look as they do in a full export.
-    for (let i = Math.max(0, firstFrame - WARM_UP_SECONDS * FPS); i < firstFrame; i++) await page.evaluate(renderAt, i / FPS, i / FPS / BAR);
+    for (let i = Math.max(0, firstFrame - WARM_UP_SECONDS * FPS); i < firstFrame; i++) await page.evaluate(renderAt, i / FPS);
 
     const cdp = await page.createCDPSession();
     const captureStartedAt = Date.now();
     for (let i = firstFrame; i < endFrame; i++) {
       const seconds = i / FPS;
-      await page.evaluate(renderAt, seconds, seconds / BAR);
+      await page.evaluate(renderAt, seconds);
       const { data } = await cdp.send('Page.captureScreenshot', { format: 'png', clip, optimizeForSpeed: true, captureBeyondViewport: false });
       if (!encoder.stdin.write(Buffer.from(data, 'base64'))) await new Promise(resolve => encoder.stdin.once('drain', resolve));
       const done = i - firstFrame + 1;
