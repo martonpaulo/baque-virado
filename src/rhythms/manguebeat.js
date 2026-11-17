@@ -1,5 +1,7 @@
 // Manguebeat: everything the engine plays and shows that belongs to this rhythm. Instrumental: a dub
-// of a coco. Two alfaia voices (the main hand on the coco cell, 3 + 3 + 2 twice a bar, and the answer
+// of a coco, played as one track: the band plays from the third bar, and each scene brings one
+// characteristic forward (the cell, the hands, the caixa, the bass, the riff, the dub, the two
+// guitars' talk, the second part) the way a band does, by thinning the rest. Two alfaia voices (the main hand on the coco cell, 3 + 3 + 2 twice a bar, and the answer
 // hand's pick-ups), the caixa on the same cell with ghost notes, the ganzá, an electric bass riff, a
 // distorted guitar riff in power chords, a clean guitar drenched in echo and a sampler (a worn
 // record's noise). 4/4 at one tempo, a 16-step wheel, one bar per turn. The dub echo is a real delay
@@ -120,6 +122,9 @@ export const RIFF_B = [
   'E2! . E2* E2! . E2* G2! - . . . . . E2* D3! .',
   'G2! - - G2! . . A2! - . . . . A2 A2 A2! A2',
 ];
+// The band holds back for the alfaia's hands: one held chord a bar, then the riff's last bar.
+const HOLD_RIFF = ['E2! - - - - - . . . . . . . . . .', 'G2! - - - - - . . . . . . . . . .', 'E2! - - - - - . . . . . . . . . .', RIFF_A[3]];
+const HOLD_BASS = ['E1 - - - - - - - . . . . . . D2 .', 'G1 - - - - - - - . . . . . . D2 .', 'E1 - - - - - - - . . . . . . D2 .', BASS_A[3]];
 // The second guitar, clean and in the echo: it answers the riff in the space the riff leaves.
 export const LICK = [
   '. . . . . . . . . B4! . A4 G4 . . .',
@@ -180,10 +185,15 @@ const held = (note, steps = STEPS_PER_BAR, swell = false) => toneOf({ note, step
 
 const PHRASE_BARS = 4; // every riff's length; a fill closes each
 const lastOfPhrase = bar => bar % PHRASE_BARS === PHRASE_BARS - 1;
-/** The whole band, one bar into its riffs; `fill` closes a phrase, `lick` adds the second guitar. */
-const bandBar = (bar, { bass = BASS_A, riff = RIFF_A, lick = null, fill = lastOfPhrase(bar) } = {}) => ({
+/** The answer hand in unison with the main hand, picking the band up at the end of the phrase. */
+const unisonBar = bar => (lastOfPhrase(bar) ? [...mainBar().slice(0, -1), ...strokes(PICK_UP).slice(1)] : mainBar());
+/**
+ * The whole band, one bar into its riffs; `fill` closes a phrase, `lick` adds the second guitar,
+ * `unison` puts the answer hand on the main hand's strokes.
+ */
+const bandBar = (bar, { bass = BASS_A, riff = RIFF_A, lick = null, fill = lastOfPhrase(bar), unison = false } = {}) => ({
   main: mainBar(),
-  answer: strokes(fill ? ANSWER_FILL : ANSWER[bar % ANSWER.length]),
+  answer: unison ? unisonBar(bar) : strokes(fill ? ANSWER_FILL : ANSWER[bar % ANSWER.length]),
   caixa: caixaBar(fill ? CAIXA_FILL : CAIXA[bar % CAIXA.length]),
   ganza: ganzaBar(),
   baixo: pitched(bass[bar % PHRASE_BARS], STRONG),
@@ -219,14 +229,23 @@ const stopTime = () => {
 };
 
 // ---------- the show script ----------
+// The band plays from the third bar to the end; no part waits for its turn. Each scene brings one
+// characteristic of the rhythm forward as a band would: the others drop back, thin out or stop for a
+// few bars (`gain`, `voices`, the options of `bandBar`), then the full band returns.
 // Each scene: id, bars, voices, lanes (rows under the wheel), named (the centre names it), mode per
-// bar, `parts(bar)`: the hits of each voice in its bar, and `echo`: which voices throw their accents
-// into the echo, how many repeats the wheel marks, and on which bars (all when absent).
+// bar, `gain` per voice, `parts(bar)`: the hits of each voice in its bar, and `echo`: which voices
+// throw their accents into the echo, how many repeats the wheel marks, and on which bars (all when
+// absent).
 const always = value => () => value;
 const ALL = VOICE_ORDER;
 const SHORT_ECHO = 4; // repeats the wheel marks
 const LONG_ECHO = 7;
-const BAND_BARS = 12; // the full band: the riff, the second part, the riff with the second guitar
+const BAND_BARS = 8; // the full band at the end: the riff twice, the second guitar answering
+const BAND = ALL.filter(voice => voice !== 'eco'); // the band without the second guitar
+const RHYTHM_SECTION = [...DRUMS, 'baixo', 'sampler'];
+// How far a scene pulls its subject forward and the rest back.
+const FORWARD = 1.2;
+const BACK = 0.8;
 const SCENE_LIST = [
   {
     id: 'introducao',
@@ -241,45 +260,53 @@ const SCENE_LIST = [
         : { sampler: samplerAt(0, HALF_BAR), main: strokes(PICK_UP, STRONG, {}, SOFT) },
   },
   {
-    id: 'alfaias',
+    // the band comes in whole; the two hands of the alfaia hit the cell together, in front
+    id: 'celula',
     bars: 4,
-    voices: always(HANDS),
-    lanes: HANDS,
-    parts: bar => ({ main: mainBar(), answer: bar === PHRASE_BARS - 1 ? [...mainBar().slice(0, -1), ...strokes(PICK_UP).slice(1)] : mainBar() }),
+    voices: always(BAND),
+    lanes: [...HANDS, 'caixa', 'guitarra'],
+    named: true,
+    gain: { main: FORWARD, answer: FORWARD, guitarra: BACK, baixo: BACK },
+    parts: bar => bandBar(bar, { unison: true }),
   },
-  { id: 'maos', bars: 4, voices: always(HANDS), lanes: HANDS, parts: bar => ({ main: mainBar(), answer: bandBar(bar).answer }) },
   {
+    // the guitar and the bass hold one chord a bar, so the hands are heard: the cell and its pick-ups
+    id: 'maos',
+    bars: 4,
+    voices: always(BAND),
+    lanes: [...HANDS, 'guitarra', 'baixo'],
+    gain: { answer: FORWARD, caixa: BACK, ganza: BACK },
+    parts: bar => bandBar(bar, { bass: HOLD_BASS, riff: HOLD_RIFF }),
+  },
+  {
+    // the riff is back; the caixa in front, its last accents of the phrase thrown into the echo
     id: 'caixa',
     bars: 4,
-    voices: always([...HANDS, 'caixa']),
-    lanes: ['caixa', ...HANDS],
+    voices: always(BAND),
+    lanes: ['caixa', 'main', 'guitarra', 'baixo'],
     focus: 'caixa',
+    gain: { caixa: FORWARD, guitarra: BACK },
     echo: { voices: ['caixa'], repeats: SHORT_ECHO, bars: lastOfPhrase },
-    parts: bar => ({ main: mainBar(), answer: bandBar(bar).answer, caixa: bandBar(bar).caixa }),
-  },
-  {
-    id: 'coco',
-    bars: 4,
-    voices: always(DRUMS),
-    lanes: ['ganza', 'caixa', 'main'],
-    named: true,
-    focus: 'ganza',
     parts: bandBar,
   },
   {
+    // the guitars stop: the bass riff over the drums, starting each bar with the alfaia
     id: 'baixo',
     bars: 4,
-    voices: always([...DRUMS, 'baixo', 'sampler']),
+    voices: always(RHYTHM_SECTION),
     lanes: ['baixo', 'main', 'caixa'],
     focus: 'baixo',
+    gain: { baixo: FORWARD },
     parts: bandBar,
   },
   {
+    // the riff in front, the whole band under it
     id: 'guitarra',
     bars: 4,
-    voices: always([...DRUMS, 'baixo', 'guitarra', 'sampler']),
-    lanes: ['guitarra', 'baixo', 'main'],
+    voices: always(BAND),
+    lanes: ['guitarra', 'baixo', 'main', 'caixa'],
     focus: 'guitarra',
+    gain: { guitarra: FORWARD },
     parts: bandBar,
   },
   {
@@ -307,9 +334,18 @@ const SCENE_LIST = [
     parts: bandBar,
   },
   {
+    // call and response: the riff asks in the first half of the bar, the clean guitar answers in the echo
+    id: 'conversa',
+    bars: 4,
+    lanes: ['guitarra', 'eco', 'baixo', 'main'],
+    focus: 'guitarra',
+    gain: { eco: FORWARD },
+    parts: bar => bandBar(bar, { lick: LICK }),
+  },
+  {
     id: 'corte',
     bars: 2,
-    voices: always(ALL.filter(voice => voice !== 'sampler' && voice !== 'eco')),
+    voices: always(BAND.filter(voice => voice !== 'sampler')),
     lanes: ['guitarra', 'main', 'caixa'],
     // one bar on the first beat, thrown into the echo, and silence; then the band on the cell alone
     mode: bar => (bar === 0 ? 'cut' : 'normal'),
@@ -317,11 +353,18 @@ const SCENE_LIST = [
     parts: bar => (bar === 0 ? tutti() : stopTime()),
   },
   {
+    // the second part: the riffs move to the fourth and climb back
+    id: 'segunda',
+    bars: 4,
+    lanes: ['guitarra', 'baixo', 'eco', 'main'],
+    parts: bar => bandBar(bar, { bass: BASS_B, riff: RIFF_B, lick: LICK_B }),
+  },
+  {
     id: 'banda',
     bars: BAND_BARS,
     lanes: ['guitarra', 'baixo', 'main', 'caixa'],
     echo: { voices: ['caixa'], repeats: SHORT_ECHO, bars: lastOfPhrase },
-    parts: bar => (bar >= PHRASE_BARS && bar < 2 * PHRASE_BARS ? bandBar(bar, { bass: BASS_B, riff: RIFF_B, lick: LICK_B }) : bandBar(bar, { lick: LICK })),
+    parts: bar => bandBar(bar, { lick: LICK }),
   },
   {
     id: 'final',
@@ -406,15 +449,16 @@ function barHits(scene, barInScene) {
 const LOOK = { zoom: 0, rot: 0, hue: 0, keep: 0, speed: 1 };
 const SCENE_LOOKS = {
   introducao: { ...LOOK, mud: 0.3, grain: 0.5, cables: 0, fury: 0, flash: 0 },
-  alfaias: { ...LOOK, mud: 0.5, grain: 0.3, cables: 0, fury: 0, flash: 0 },
-  maos: { ...LOOK, mud: 0.6, grain: 0.35, cables: 1, fury: 0, flash: 0 },
-  caixa: { ...LOOK, mud: 0.6, grain: 0.4, cables: 2, fury: 0.2, flash: 0 },
-  coco: { ...LOOK, mud: 0.7, grain: 0.45, cables: 2, fury: 0.3, flash: 0 },
+  celula: { ...LOOK, mud: 0.8, grain: 0.5, cables: 3, fury: 0.5, flash: 1 },
+  maos: { ...LOOK, mud: 0.6, grain: 0.35, cables: 2, fury: 0.2, flash: 0 },
+  caixa: { ...LOOK, mud: 0.8, grain: 0.5, cables: 3, fury: 0.5, flash: 0 },
   baixo: { ...LOOK, mud: 0.8, grain: 0.45, cables: 3, fury: 0.3, flash: 0 },
   guitarra: { ...LOOK, mud: 1, grain: 0.6, cables: 5, fury: 0.8, flash: 1 },
   dub: { ...LOOK, mud: 0.5, grain: 0.25, cables: 3, fury: 0, flash: 0 },
   retorno: { ...LOOK, mud: 0.8, grain: 0.5, cables: 4, fury: 0.4, flash: 0 },
+  conversa: { ...LOOK, mud: 0.9, grain: 0.6, cables: 5, fury: 0.6, flash: 0 },
   corte: { ...LOOK, mud: 0.7, grain: 0.3, cables: 6, fury: 1, flash: 1 },
+  segunda: { ...LOOK, mud: 0.9, grain: 0.7, cables: 6, fury: 0.8, flash: 1 },
   banda: { ...LOOK, mud: 1, grain: 0.8, cables: 6, fury: 1, flash: 1 },
   final: { ...LOOK, mud: 0.6, grain: 0.4, cables: 6, fury: 0.3, flash: 1 },
 };
@@ -653,7 +697,6 @@ const countFromOne = steps => steps.map(step => step + 1).join(' ');
 const NOTE_WORDS = { E: 'mi', G: 'sol', A: 'lá', B: 'si', C: 'dó', D: 'ré' };
 const pitchClass = note => note.replace(/\d/, '');
 const rootsOf = lines => [...new Set(lines.flatMap(text => lineOf(text).map(n => pitchClass(n.note))))];
-const RIFF_ROOTS = rootsOf([...RIFF_A, ...RIFF_B]);
 const READ = {
   tempo: 'andamento',
   tempoValue: `${BPM} bpm, do início ao fim`,
@@ -667,7 +710,7 @@ const READ = {
   unison: 'uníssono',
   unisonValue: 'mão principal e resposta juntas',
   cell: 'célula',
-  cellValue: '3 + 3 + 2 semicolcheias, duas vezes por compasso',
+  cellValue: '3 + 3 + 2, duas vezes por compasso',
   strokes: 'batidas',
   mainHand: 'mão principal',
   answerHand: 'resposta',
@@ -684,14 +727,23 @@ const READ = {
   key: 'tom',
   keyValue: 'mi menor',
   chords: 'acordes',
-  chordsValue: RIFF_ROOTS.map(root => `${root}5`).join(' '),
-  riff: 'riff',
-  riffValue: `${PHRASE_BARS} compassos, com pausas`,
-  parts: 'partes',
-  partsValue: `A, B e A, ${PHRASE_BARS} compassos cada`,
-  coco: 'célula do coco',
-  ganza: 'ganzá',
-  ganzaValue: 'todas as semicolcheias',
+  chordsValue: rootsOf(RIFF_A)
+    .map(root => `${root}5`)
+    .join(' '),
+  held: 'guitarra e baixo',
+  heldValue: 'um acorde por compasso',
+  locks: 'baixo e alfaia',
+  locksValue: 'juntos no tempo 1; depois, pausas',
+  call: 'pergunta',
+  callValue: 'guitarra distorcida, 1ª metade',
+  response: 'resposta',
+  responseValue: 'guitarra com eco, 2ª metade',
+  secondChords: 'acordes',
+  secondChordsValue: rootsOf(RIFF_B)
+    .map(root => `${root}5`)
+    .join(' '),
+  band: 'riff',
+  bandValue: 'com a resposta da guitarra com eco',
   space: 'espaço',
   spaceValue: 'ficam o baixo e o eco',
   echoPlays: 'o eco toca',
@@ -709,19 +761,20 @@ const COPY = {
   feminineInstruments: ['alfaia', 'caixa', 'guitarra'],
   scenes: {
     introducao: { chip: 'Introdução', eyebrow: 'sampler e eco', title: 'Manguebeat' },
-    alfaias: { chip: 'Alfaias', eyebrow: 'alfaias em uníssono', title: 'Alfaias' },
+    celula: { chip: 'Célula', eyebrow: 'alfaias em uníssono: 3 + 3 + 2', title: 'Célula' },
     maos: { chip: 'Mãos', eyebrow: 'mão principal e resposta', title: 'Mãos' },
-    caixa: { chip: 'Caixa', eyebrow: 'caixa na célula da alfaia', title: 'Caixa' },
-    coco: { chip: 'Coco', eyebrow: 'ganzá e a célula do coco', title: 'Coco' },
-    baixo: { chip: 'Baixo', eyebrow: 'riff de baixo', title: 'Baixo' },
-    guitarra: { chip: 'Guitarra', eyebrow: 'riff de guitarra distorcida', title: 'Guitarra' },
-    dub: { chip: 'Dub', eyebrow: 'baixo, eco e guitarra limpa', title: 'Dub' },
-    retorno: { chip: 'Retorno', eyebrow: 'entrada das camadas', title: 'Retorno' },
+    caixa: { chip: 'Caixa', eyebrow: 'acentos fora do tempo, notas fracas', title: 'Caixa' },
+    baixo: { chip: 'Baixo', eyebrow: 'o baixo entra com a alfaia', title: 'Baixo' },
+    guitarra: { chip: 'Riff', eyebrow: 'guitarra nos acentos da célula', title: 'Riff' },
+    dub: { chip: 'Dub', eyebrow: 'a banda para: baixo e eco', title: 'Dub' },
+    retorno: { chip: 'Retorno', eyebrow: 'a banda volta por camadas', title: 'Retorno' },
+    conversa: { chip: 'Conversa', eyebrow: 'o riff pergunta, o eco responde', title: 'Conversa' },
     corte: { chip: 'Corte', eyebrow: 'parada da banda', title: 'Corte' },
+    segunda: { chip: 'Parte B', eyebrow: 'o riff sobe para o quarto grau', title: 'Parte B' },
     banda: { chip: 'Banda completa', eyebrow: 'todos os instrumentos', title: 'Banda' },
     final: { chip: 'Final', eyebrow: 'eco até o silêncio', title: 'Fim' },
   },
-  patterns: { coco: 'Coco', dub: 'Dub' },
+  patterns: { celula: 'Coco', dub: 'Dub' },
   voices: {
     main: 'mão principal',
     answer: 'resposta',
@@ -774,21 +827,18 @@ const LAYOUTS = {
     row(label(T.bar), T.barValue) +
     row(label(T.echo), T.echoValue) +
     row(label(T.instruments), INSTRUMENT_COUNT),
-  alfaias: () =>
+  celula: () =>
     notation([seqRow(T.unison, marks(MAIN, ['X']), COLOR.main, 'alfaia')]) +
     row(label(T.cell), T.cellValue, 'alfaia') +
     row(label(T.strokes), countFromOne(stepsOf(MAIN, ['X'])), 'alfaia'),
   maos: () =>
     notation([seqRow(T.mainHand, marks(MAIN, ['X']), COLOR.main, 'alfaia'), seqRow(T.answerHand, marks(ANSWER[0], ['X'], ['x']), COLOR.answer, 'alfaia')]) +
-    row(label(T.answerHand, COLOR.answer), T.pickUp, 'alfaia'),
+    row(label(T.answerHand, COLOR.answer), T.pickUp, 'alfaia') +
+    row(label(T.held), T.heldValue),
   caixa: () =>
     notation([seqRow(T.mainHand, marks(MAIN, ['X']), COLOR.main, 'alfaia'), seqRow('caixa', marks(CAIXA[0], ['X'], ['x']), COLOR.caixa, 'caixa')]) +
     row(label(`● ${T.accent} · ○ ${T.ghost}`), '', 'caixa') +
     row(label(T.withAlfaia), T.withAlfaiaValue, 'caixa'),
-  coco: () =>
-    notation([seqRow('', marks(GANZA, ['X'], ['x']), COLOR.ganza, 'ganza')]) +
-    row(label(T.coco), T.cellValue, 'ganza') +
-    row(label(T.ganza, COLOR.ganza), T.ganzaValue, 'ganza'),
   dub: () =>
     notation([seqRow(T.mainHand, marks(DUB_MAIN, ['X'], [], dubEchoSteps()), COLOR.main, 'alfaia')]) +
     row(label(`◌ ${T.repeat}`), T.echoValue) +
@@ -803,13 +853,18 @@ const LAYOUTS = {
 const ROLLS = {
   baixo: scene => ({
     ...riffRoll(scene, ['baixo']),
-    rows: row(label(T.riff, COLOR.baixo), T.riffValue, 'baixo') + row(label(T.notes), T.bassNotesValue, 'baixo'),
+    rows: row(label(T.locks, COLOR.baixo), T.locksValue, 'baixo') + row(label(T.notes), T.bassNotesValue, 'baixo'),
   }),
   guitarra: scene => ({
     ...riffRoll(scene, ['guitarra', 'baixo']),
     rows: row(label(T.key), T.keyValue, 'guitarra') + row(label(T.chords), T.chordsValue, 'guitarra'),
   }),
-  banda: scene => ({ ...riffRoll(scene, ['guitarra', 'baixo']), rows: row(label(T.parts, COLOR.guitarra), T.partsValue) }),
+  conversa: scene => ({
+    ...riffRoll(scene, ['guitarra', 'eco']),
+    rows: row(label(T.call, COLOR.guitarra), T.callValue, 'guitarra') + row(label(T.response, COLOR.eco), T.responseValue, 'guitarra'),
+  }),
+  segunda: scene => ({ ...riffRoll(scene, ['guitarra', 'baixo']), rows: row(label(T.secondChords, COLOR.guitarra), T.secondChordsValue, 'guitarra') }),
+  banda: scene => ({ ...riffRoll(scene, ['guitarra', 'baixo']), rows: row(label(T.band, COLOR.guitarra), T.bandValue) }),
 };
 
 /**
@@ -817,7 +872,7 @@ const ROLLS = {
  * instrument the whole readout is about (`focus`, '' for none), so a muted one shows disabled.
  */
 function readout(scene) {
-  const focus = scene.focus || (['alfaias', 'maos'].includes(scene.id) ? 'alfaia' : '');
+  const focus = scene.focus || (['celula', 'maos'].includes(scene.id) ? 'alfaia' : '');
   if (ROLLS[scene.id]) {
     const { markup, score, rows } = ROLLS[scene.id](scene);
     return { markup: rows + markup, score, focus };

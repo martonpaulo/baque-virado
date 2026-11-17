@@ -41,6 +41,11 @@ const OCTAVE = 12;
 const CELL = [0, 3, 6, 8, 11, 14]; // 3 + 3 + 2 sixteenths, twice a bar
 const PICK_UPS = [7, 15]; // the answer hand, before beats 3 and 1
 const LOUDEST_CAIXA = [6, 14]; // the «2» of each cell
+const INTRO_BARS = 2;
+const FULL_TEXTURE = 6; // voices sounding in a bar of the band: the drums, the bass and a guitar at least
+const MOSTLY = 0.7; // the share of the show's bars with the full texture
+const MIN_SCENE_GAIN = 0.6; // a part pulled back stays in the mix
+const MAX_SCENE_GAIN = 1.3;
 const MOST_OF_A_BAR = 0.75; // a riff sounds on at most this share of the bar's sixteenths
 const MIN_LICK_RESTS = 6; // sixteenths of silence in each bar of the second guitar
 const marked = (text, mark = 'X') => text.split(' ').flatMap((token, step) => (token === mark ? [step] : []));
@@ -52,7 +57,7 @@ const bars = id => {
   return [...Array(scene.bars).keys()].map(bar => scene.start + bar);
 };
 
-test('manguebeat is 4/4 at one felt tempo, the top of its range, on a 16-step wheel: twelve scenes, 52 bars', () => {
+test('manguebeat is 4/4 at one felt tempo, the top of its range, on a 16-step wheel: thirteen scenes, 52 bars', () => {
   assert.equal(MANGUEBEAT.id, 'manguebeat');
   assert.equal(MANGUEBEAT.copy.name, 'manguebeat');
   assert.ok(MANGUEBEAT.bpm >= FELT_RANGE[0] && MANGUEBEAT.bpm <= FELT_RANGE[1], `${MANGUEBEAT.bpm} BPM`);
@@ -62,16 +67,17 @@ test('manguebeat is 4/4 at one felt tempo, the top of its range, on a 16-step wh
     show.SCENES.map(scene => [scene.id, scene.bars]),
     [
       ['introducao', 2],
-      ['alfaias', 4],
+      ['celula', 4],
       ['maos', 4],
       ['caixa', 4],
-      ['coco', 4],
       ['baixo', 4],
       ['guitarra', 4],
       ['dub', 4],
       ['retorno', 4],
+      ['conversa', 4],
       ['corte', 2],
-      ['banda', 12],
+      ['segunda', 4],
+      ['banda', 8],
       ['final', 4],
     ],
   );
@@ -82,23 +88,36 @@ test('manguebeat is 4/4 at one felt tempo, the top of its range, on a 16-step wh
   for (const scene of show.SCENES) assert.ok(MANGUEBEAT.readout(scene).markup.length > 0, scene.id);
 });
 
-test('the parts enter one by one after the introduction: alfaias, caixa, ganzá, bass, guitar, the guitar in the echo', () => {
-  const firstBar = voice => {
-    for (let bar = show.sceneById('alfaias').start; bar < show.TOTAL_BARS; bar++) if (show.hitsInBar(bar).some(h => h.voice === voice)) return bar;
-    return null;
-  };
-  const order = ['main', 'caixa', 'ganza', 'baixo', 'guitarra', 'eco'].map(firstBar);
-  assert.deepEqual(
-    [...order].sort((a, b) => a - b),
-    order,
-  );
-  assert.equal(new Set(order).size, order.length);
+test('the band plays from the third bar: no part waits for its turn, and only the dub and the stops thin it out', () => {
+  const playing = bar => new Set(show.hitsInBar(bar).map(h => h.voice));
+  const [first] = bars('celula');
+  assert.equal(first, INTRO_BARS);
+  for (const voice of ['main', 'answer', 'caixa', 'ganza', 'baixo', 'guitarra'])
+    assert.ok(playing(first).has(voice), `${voice} is not in from bar ${first + 1}`);
+  const THIN = ['introducao', 'dub', 'retorno', 'corte', 'final']; // an intro, the drop and its way back, the stops
+  let full = 0;
+  for (const scene of show.SCENES)
+    for (const bar of bars(scene.id)) {
+      const voices = playing(bar);
+      if (voices.size >= FULL_TEXTURE) full++;
+      if (!THIN.includes(scene.id)) assert.ok(voices.size >= FULL_TEXTURE, `bar ${bar + 1} of ${scene.id} has only ${voices.size} voices`);
+      // never one instrument alone for a whole bar, outside the two-bar introduction and the last echo
+      const instruments = new Set([...voices].map(voice => MANGUEBEAT.voices[voice].instrument));
+      if (!['introducao', 'final'].includes(scene.id)) assert.ok(instruments.size >= 3, `bar ${bar + 1} of ${scene.id}: ${[...instruments]}`);
+    }
+  assert.ok(full / show.TOTAL_BARS > MOSTLY, `${full} of ${show.TOTAL_BARS} bars have the full texture`);
+  // a scene that brings a part forward names voices of the package, and never mutes one
+  for (const scene of show.SCENES)
+    for (const [voice, gain] of Object.entries(scene.gain || {})) {
+      assert.ok(MANGUEBEAT.voices[voice], `${scene.id}: ${voice}`);
+      assert.ok(gain >= MIN_SCENE_GAIN && gain <= MAX_SCENE_GAIN, `${scene.id} ${voice} ${gain}`);
+    }
 });
 
 test('the alfaias play the coco cell, 3 + 3 + 2 twice a bar, in unison first; then the answer hand plays the pick-ups', () => {
   assert.deepEqual(marked(MAIN), CELL);
-  const last = bars('alfaias').at(-1);
-  for (const bar of bars('alfaias')) {
+  const last = bars('celula').at(-1);
+  for (const bar of bars('celula')) {
     assert.deepEqual(stepsOf(bar, 'main'), CELL);
     if (bar !== last) assert.deepEqual(stepsOf(bar, 'answer'), CELL);
   }
@@ -122,9 +141,9 @@ test('the caixa accents the cell with the alfaias, ghost notes between; the ganz
   }
   assert.deepEqual(marked(GANZA), CELL);
   assert.equal(GANZA.split(' ').length, meter.stepsPerBar);
-  for (const bar of bars('coco')) assert.equal(stepsOf(bar, 'ganza').length, meter.stepsPerBar);
+  for (const bar of bars('caixa')) assert.equal(stepsOf(bar, 'ganza').length, meter.stepsPerBar);
   // the loudest caixa strokes are the syncopated ones, never the first beat
-  const [bar] = bars('coco');
+  const [bar] = bars('caixa');
   const loudest = Math.max(...hitsOf(bar, 'caixa').map(h => h.hit.velocity));
   assert.deepEqual(
     stepsOf(bar, 'caixa', h => h.hit.velocity === loudest),
@@ -134,7 +153,7 @@ test('the caixa accents the cell with the alfaias, ghost notes between; the ganz
 
 test('the riffs lock on the cell and leave space: guitar accents on the alfaia strokes, the bass an octave under each bar’s first chord', () => {
   const sounding = hits => new Set(hits.flatMap(h => [...Array(parseTone(h.hit.tone).steps).keys()].map(i => h.hit.step + i)));
-  for (const id of ['guitarra', 'banda'])
+  for (const id of ['guitarra', 'conversa', 'segunda', 'banda'])
     for (const bar of bars(id)) {
       const guitar = hitsOf(bar, 'guitarra', written),
         bass = hitsOf(bar, 'baixo', written);
