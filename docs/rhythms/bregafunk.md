@@ -244,3 +244,39 @@ The elements the show exalts (the owner accepted them on 2026-11-17, with the te
 The form, accepted the same day, about 1:30, with a 30-second cut that loops: the riff alone for two bars; the beat
 drops; riff and beat; a stop; the grave enters; a longer stop with a rise; the drop with everything;
 a last stop and the end on the riff.
+
+### The full recordings (2026-11-17)
+
+The owner fetched the whole of each reference; the lab read all four from start to end (bars from
+the tracked beats, each bar folded on its own, the drums stem in four bands). The audio is kept by
+the owner and is in no repository; its list is in the owner's private `batuque-references`.
+
+| Recording                 | Length         | Tempo felt | Bumbo (low band)    | Lata and snare band | Drum stops                        |
+| :------------------------ | :------------- | :--------- | :------------------ | :------------------ | :-------------------------------- |
+| «Dally»                   | 2:25, 110 bars | 171        | 1 and 9             | 5, 7 and 13         | 9, the full beat first at 0:31    |
+| «Cafajeste»               | 2:56, 110 bars | 171        | 1 and 9, soft on 13 | 7 and 13            | 15, the full beat first near 0:20 |
+| «Tuf Tuf Pof Pof» (remix) | 2:42, 106 bars | 150        | 1 and 9, soft on 12 | 5, 13 and 15        | 12, the full beat first at 0:38   |
+| «Viciou na Flauta»        | 2:22           | not read   | not read            | not read            | 2 found                           |
+
+What the whole recordings add to the first reading:
+
+- **The cell is confirmed.** In three full recordings the bumbo is on 1 and 9 and the lata on 13;
+  the lata's other stroke is on 7 («Dally», «Cafajeste») or 5 («Dally», «Tuf Tuf Pof Pof»), with a
+  pick-up on 15 in the remix. Trust is now high.
+- **The beat does not open the track.** Each recording runs 20 to 40 seconds on the riff, the voice
+  and teasing strokes before the first full beat. The previews, cut from the middle, hid this.
+- **Stops are the form.** Nine to fifteen stops in about 110 bars, most of one to three bars, most
+  often eight bars apart (then four, then sixteen). «Cafajeste» repeats one order of stops twice,
+  44 bars apart: a verse and chorus cycle.
+- **The grave plays the riff's notes.** In «Dally» and «Tuf Tuf Pof Pof» the bass and the melodic
+  stem hold the same three pitch classes (91 to 95 % of the time): the grave is the riff an octave
+  or two down, in short notes (1.1 to 2.1 sixteenths), four to nine a bar, not one note under each
+  bumbo.
+- **Not read:** «Viciou na Flauta». The beat tracker took it at 158 BPM with bars of 2.0 s, where
+  its preview read 171, so its fold is smeared; it needs the bar line set by hand or another
+  tracker. And the riff's length before it repeats still does not measure in any of the four.
+
+What this changes in the accepted plan: the grave follows the riff, not only the bumbo; and the
+form may tease for a few bars before the first drop, as the references do, while still opening on
+the hook ([`../research/round-two.md`](../research/round-two.md), «What is still missing»). Both are
+for the owner to confirm.
