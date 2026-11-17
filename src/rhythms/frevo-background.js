@@ -4,6 +4,7 @@
 // recent hits, so it is deterministic; only a light trail keeps the frames before it.
 // Safety (docs/research/colour-and-visuals.md, rule 6): no full-screen flash; the beat is carried by
 // motion (the sombrinhas snap forward on each beat), never by a change of brightness.
+import { REDUCED_MOTION_QUERY } from '../theme.js';
 import { hash, lerp } from '../util.js';
 
 export const FREVO_PALETTE = {
@@ -67,7 +68,7 @@ const SEED_STEP = 97; // spreads the seeds of neighbouring hits
 
 /** The background of the frevo show. `angleOf(step)`: a step's angle on the wheel. */
 export function createFrevoPainter({ beatsPerBar, stepsPerBar, angleOf }) {
-  const reduced = globalThis.matchMedia?.('(prefers-reduced-motion: reduce)');
+  const reduced = globalThis.matchMedia?.(REDUCED_MOTION_QUERY);
   const calm = () => Boolean(reduced?.matches);
 
   /** Beats elapsed, each beat's step eased so the motion has an impact point on the beat. */

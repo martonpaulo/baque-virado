@@ -6,7 +6,7 @@ import { COPY } from './copy.js';
 import { BAR_SECONDS, BEATS_PER_BAR, INSTRUMENTS, isHand, isOffbeat, STEPS_PER_BAR, STEPS_PER_BEAT, VOICE_ORDER, VOICES } from './music.js';
 import { RHYTHM } from './rhythms/index.js';
 import { barTimeline, recentHits } from './show.js';
-import { COLORS, MONO_FONT, ROLES, TINTS } from './theme.js';
+import { COLORS, MONO_FONT, REDUCED_MOTION_QUERY, ROLES, TINTS } from './theme.js';
 import { fixed2, pad2, polylinePath, setAttr, setStyle, setText, svgElement } from './util.js';
 
 // Radii, in SVG units of the viewBox, which spans -VIEWBOX_RADIUS..VIEWBOX_RADIUS on both axes.
@@ -70,7 +70,7 @@ const SHAPE_VOICES = RHYTHM.shapeVoices;
 // (degrees), scale }. It depends on the position only, and reduced motion keeps the wheel still.
 const WHEEL_MOTION = RHYTHM.wheelMotion || null;
 const MOTION_WINDOW = 0.5; // seconds of hits the motion reads
-const REDUCED_MOTION = globalThis.matchMedia?.('(prefers-reduced-motion: reduce)');
+const REDUCED_MOTION = globalThis.matchMedia?.(REDUCED_MOTION_QUERY);
 const SHAPE_GUIDE_OPACITY = 0.13,
   SHAPE_GUIDE_DASH = '1.5 2'; // the dashed full shape
 const SHAPE_LINE_OPACITY = 0.9,

@@ -6,7 +6,7 @@
 // Neither source writes the parts out: the patterns below are this project's reading, kept simple.
 // Choices and reasons: docs/rhythms/coco.md. Its background painter is the section below the imports.
 import { label, row, stat, stats } from '../readout-markup.js';
-import { COLORS } from '../theme.js';
+import { alphaOf, COLORS, REDUCED_MOTION_QUERY } from '../theme.js';
 import { lilt, recordedChoices, studioFiles, studioSounds, takes } from './studio-kit.js';
 
 // ---------- the background ----------
@@ -30,13 +30,6 @@ export const COCO_PALETTE = {
 };
 
 const TAU = Math.PI * 2;
-const HEX = /^#(..)(..)(..)$/;
-/** `rgba()` of a palette colour. */
-const alphaOf = (hex, alpha) =>
-  `rgba(${HEX.exec(hex)
-    .slice(1)
-    .map(pair => parseInt(pair, 16))
-    .join(',')},${alpha})`;
 
 export const CLEAR = 1.12; // wheel radii: nothing is drawn inside, where the wheel and its numbers sit
 const TRAIL_ALPHA = 0.32; // how much of the last frame each frame paints over
@@ -63,7 +56,7 @@ const VIGNETTE_STOPS = [
  * bar; `beatsPerBar`; `rufada` and `golpe`: the tones of the alfaia's rolls and of their landing.
  */
 export function createCocoPainter({ stepsPerBar, angleOf, barSeconds, beatsPerBar, rufada, golpe }) {
-  const reduced = globalThis.matchMedia?.('(prefers-reduced-motion: reduce)');
+  const reduced = globalThis.matchMedia?.(REDUCED_MOTION_QUERY);
   const calm = () => Boolean(reduced?.matches);
   const flashes = new Set(); // the start (seconds of the show) of every bloom drawn, for the flash limit's test
   const angleAt = h => angleOf((h.at % 1) * stepsPerBar);

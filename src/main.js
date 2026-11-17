@@ -12,6 +12,7 @@ import { createReadout } from './readout.js';
 import { RHYTHM, ROUTES, redirectFor, rhythmChoices } from './rhythms/index.js';
 import { createScope, SCOPE_GEOMETRY } from './scope.js';
 import { recentHits, SCENES, sceneAt, sceneIndexAt, TOTAL_BARS, TOTAL_SECONDS } from './show.js';
+import { REDUCED_MOTION_QUERY } from './theme.js';
 import { createTitle } from './title.js';
 import { formatClock, formatPrecise, pad2, setText } from './util.js';
 
@@ -23,7 +24,7 @@ if (redirect) location.replace(redirect + location.hash);
 const $ = id => document.getElementById(id);
 const DESKTOP_QUERY = '(min-width: 900px)'; // also where styles.css switches to the side panels
 const DESKTOP = window.matchMedia(DESKTOP_QUERY).matches; // at load: which sounds and volumes start
-const REDUCED_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)');
+const REDUCED_MOTION = window.matchMedia(REDUCED_MOTION_QUERY);
 const AUDIO_LEAD_IN = 0.03; // seconds of silence before the first hit in the offline render
 const MIN_VISUAL_SPEED = 0.55; // slowest background speed, as a multiple of real time
 const MAX_DPR = 2; // canvases never render above 2× device pixels

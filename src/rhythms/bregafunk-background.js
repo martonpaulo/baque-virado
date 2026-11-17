@@ -3,6 +3,7 @@
 // from the lata like the LEDs of a paredão, rings that sway like hips on alternate beats, and gold only on
 // the drop's horns. Bright emissions are limited to 3 per second (WCAG 2.3.1).
 // Palette and reasons: docs/rhythms/bregafunk.md.
+import { alphaOf, REDUCED_MOTION_QUERY } from '../theme.js';
 
 export const PALETTE = {
   ground: '#0d0612', // the night
@@ -29,15 +30,7 @@ const RINGS = { radii: [1.3, 1.65, 2.05], sway: 0.12, width: 1.2, alpha: 0.28 };
 const GOLD_RING = { life: 0.6, from: RAYS.from, travel: 2.2, width: 3 }; // born just outside the wheel, like the rays
 const SPARK = { life: 0.3, radius: 1.25, size: 2 };
 const MOTION_SCALE_REDUCED = 0.5;
-const REDUCED_MOTION = globalThis.matchMedia?.('(prefers-reduced-motion: reduce)');
-const HEX = /^#(..)(..)(..)$/;
-
-/** `rgba()` of a palette colour. */
-const alphaOf = (hex, alpha) =>
-  `rgba(${HEX.exec(hex)
-    .slice(1)
-    .map(pair => parseInt(pair, 16))
-    .join(',')},${alpha})`;
+const REDUCED_MOTION = globalThis.matchMedia?.(REDUCED_MOTION_QUERY);
 const angleAt = bar => (bar % 1) * TAU - Math.PI / 2; // where a hit sits on the wheel
 
 export function createBregafunkBackground() {

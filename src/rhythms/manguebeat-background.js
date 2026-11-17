@@ -7,6 +7,7 @@
 // Safety (WCAG 2.3.1): the one bright emission, a pale bloom on the guitar's first chord of a bar,
 // comes at most once a bar (2.4 s); it starts outside the wheel, so the wheel keeps its contrast.
 // Reduced motion drops the bloom, the jitter and the grain's change, and halves the travel.
+import { alphaOf, REDUCED_MOTION_QUERY } from '../theme.js';
 import { hash, lerp } from '../util.js';
 
 export const MANGUE_PALETTE = {
@@ -19,13 +20,6 @@ export const MANGUE_PALETTE = {
   cable: '#5c5a52',
   crab: '#e0703a', // the crab's orange, only on accents
 };
-const HEX = /^#(..)(..)(..)$/;
-/** `rgba()` of a palette colour. */
-const alphaOf = (hex, alpha) =>
-  `rgba(${HEX.exec(hex)
-    .slice(1)
-    .map(pair => parseInt(pair, 16))
-    .join(',')},${alpha})`;
 
 const TAU = Math.PI * 2;
 const TOP = -Math.PI / 2;
@@ -60,7 +54,7 @@ const VIGNETTE_STOPS = [
 
 /** The manguebeat background. `angleOf(step)`: a step's angle on the wheel. */
 export function createManguebeatPainter({ beatsPerBar, beatSeconds, stepsPerBar, angleOf }) {
-  const reduced = globalThis.matchMedia?.('(prefers-reduced-motion: reduce)');
+  const reduced = globalThis.matchMedia?.(REDUCED_MOTION_QUERY);
   const calm = () => Boolean(reduced?.matches);
   const flashes = new Set(); // when each bright bloom started (seconds of the show), for the flash limit's test
 

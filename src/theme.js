@@ -47,6 +47,12 @@ const rgbaOf = hex => {
   return alpha => `rgba(${channels},${alpha})`;
 };
 
+/** `rgba()` of a palette hex colour at an opacity: the one builder every background uses. */
+export const alphaOf = (hex, alpha) => rgbaOf(hex)(alpha);
+
+/** The media query for a viewer who asks for less motion. */
+export const REDUCED_MOTION_QUERY = '(prefers-reduced-motion: reduce)';
+
 /** Foreground colour at a given opacity. */
 export const fgAlpha = rgbaOf(COLORS.fg);
 

@@ -3,7 +3,7 @@
 
 import { COPY } from './copy.js';
 import { SCENES } from './show.js';
-import { TINTS } from './theme.js';
+import { REDUCED_MOTION_QUERY, TINTS } from './theme.js';
 import { hash, setStyle } from './util.js';
 
 const GLYPHS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789#%&*+=/<>';
@@ -30,7 +30,7 @@ const JITTER = 2.4; // cqw, peak-to-peak horizontal shake at full glitch
 const SKEW = 6; // degrees at full glitch
 const GLITCH_FADE = 0.25; // opacity lost at full glitch
 
-const REDUCED_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)');
+const REDUCED_MOTION = window.matchMedia(REDUCED_MOTION_QUERY);
 
 const scramble = (text, revealed, position, salt) =>
   [...text]
