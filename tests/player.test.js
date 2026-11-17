@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { createPlayer, DEFAULT_CHOICES, SOUND_CHOICES } from '../src/audio.js';
+import { createPlayer, DEFAULT_CHOICES, SOUND_CHOICES, useMediaPlayback } from '../src/audio.js';
 import { BAR_SECONDS } from '../src/music.js';
 
 // A fake audio context: enough of the Web Audio API for the player, with a clock the test moves.
@@ -154,4 +154,30 @@ test('a muted instrument plays no hit, and the others still play', async () => {
   await player.preview(choice, sound('caixa').preview);
   assert.ok(contexts[0].played.length > 0);
   assert.ok(contexts[0].played.every(([name]) => name === `caixa-${choice.caixa}`));
+});
+
+test('an iPhone with the ringer on silent still plays: the audio session is asked for playback', () => {
+  const session = { type: 'auto' };
+  assert.equal(useMediaPlayback({ navigator: { audioSession: session } }), null);
+  assert.equal(session.type, 'playback');
+});
+
+test('an iPhone without the Audio Session API plays a silent looping media element instead; other devices need nothing', () => {
+  const played = [];
+  class FakeAudio {
+    constructor(source) {
+      this.source = source;
+    }
+    setAttribute() {}
+    play() {
+      played.push(this.source);
+      return Promise.resolve();
+    }
+  }
+  const env = navigator => ({ navigator, Audio: FakeAudio, Blob: class {}, URL: { createObjectURL: () => 'blob:silence' } });
+  const element = useMediaPlayback(env({ userAgent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X)' }));
+  assert.equal(element.loop, true);
+  assert.deepEqual(played, ['blob:silence']);
+  assert.equal(useMediaPlayback(env({ userAgent: 'Mozilla/5.0 (Linux; Android 14)' })), null);
+  assert.equal(played.length, 1);
 });

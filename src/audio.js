@@ -185,6 +185,36 @@ export function createSampleBank(baseUrl = 'sounds/', synth = SYNTH) {
   };
 }
 
+// On an iPhone or iPad, Web Audio alone plays in the «ambient» audio session: the ringer switch set
+// to silent mutes it, in every browser there (all run WebKit). It sounds only after a media element
+// has played, which moves the session to «playback»; that is why the show stayed silent until another
+// site had played a video. The Audio Session API asks for «playback» directly
+// (https://www.w3.org/TR/audio-session/); where it is missing, a silent looping media element does it.
+const SILENCE_SECONDS = 0.5;
+const SILENCE_RATE = 8000;
+const APPLE_TOUCH = /iPhone|iPad|iPod/;
+const isAppleTouch = navigator => APPLE_TOUCH.test(navigator?.userAgent ?? '') || (navigator?.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+/**
+ * Make the show audible with the ringer switch on silent. Call inside the viewer's tap. Returns the
+ * silent media element when one was needed (to pause and play with the show), else null.
+ */
+export function useMediaPlayback(env = window) {
+  const session = env.navigator?.audioSession;
+  if (session) {
+    session.type = 'playback';
+    return null;
+  }
+  if (!isAppleTouch(env.navigator) || !env.Audio) return null;
+  const frames = SILENCE_SECONDS * SILENCE_RATE,
+    silence = new Float32Array(frames);
+  const wav = encodeWav({ length: frames, sampleRate: SILENCE_RATE, getChannelData: () => silence });
+  const element = new env.Audio(env.URL.createObjectURL(new env.Blob([wav], { type: 'audio/wav' })));
+  element.loop = true;
+  element.setAttribute('playsinline', '');
+  element.play().catch(() => {}); // refused outside a tap: the next tap tries again through start()
+  return element;
+}
+
 // A sound picked while paused is previewed in place (#5).
 const PREVIEW_BARS = 1.5; // a pick plays one and a half cycles of its instrument (owner, 2026-11-16)
 const PREVIEW_BAR = sceneById(RHYTHM.sounds.previewScene).start; // every instrument plays its basic part there
@@ -214,7 +244,8 @@ export function createPlayer(bank, choice, volume = {}) {
     startBar = 0,
     nextStep = 0,
     awakeUntil = 0, // performance.now() until which a preview still sounds
-    previewBus = null; // the bus of the preview sounding now, cut by the next pick or by Play
+    previewBus = null, // the bus of the preview sounding now, cut by the next pick or by Play
+    silentMedia = null; // the media element that keeps an old iPhone's audio session on «playback»
   /** Fade out the preview that is sounding, if any. */
   const cutPreview = () => {
     previewBus?.gain.setTargetAtTime(0, context.currentTime, FADE_SECONDS);
@@ -237,6 +268,7 @@ export function createPlayer(bank, choice, volume = {}) {
   /** One audio context for the visit; concurrent callers share the same creation. */
   function open() {
     if (!loading) {
+      silentMedia = useMediaPlayback(); // before the context opens, inside the viewer's tap
       loading = (async () => {
         const fresh = new (window.AudioContext || window.webkitAudioContext)();
         try {
@@ -268,6 +300,7 @@ export function createPlayer(bank, choice, volume = {}) {
     start(fromBar) {
       clearInterval(timer);
       context.resume(); // a stop's delayed suspend may have landed after prepare()
+      silentMedia?.play().catch(() => {});
       cutPreview();
       bus = context.createGain();
       bus.connect(master);
@@ -284,6 +317,7 @@ export function createPlayer(bank, choice, volume = {}) {
       const at = this.position();
       playing = false;
       clearInterval(timer);
+      silentMedia?.pause();
       const fading = bus;
       fading.gain.setTargetAtTime(0, context.currentTime, FADE_SECONDS);
       sleepLater(RELEASE_MS, () => fading.disconnect());
