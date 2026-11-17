@@ -22,6 +22,7 @@ Every choice below was made by the agent, as the owner asked, and can be changed
 - [Widgets](#widgets)
 - [Copy](#copy)
 - [Engine hooks this rhythm added](#engine-hooks-this-rhythm-added)
+- [Round two: a first reading of the references](#round-two-a-first-reading-of-the-references)
 
 ## Feeling and tempo
 
