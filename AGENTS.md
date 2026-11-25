@@ -7,7 +7,7 @@
 - Slug: `batuque`
 - Identifier name: `batuque`
 - Benefit-first description: See and hear what each maracatu instrument plays, where the swing sits and how seven baques differ, in a two-minute animated show.
-- Repository: `martonpaulo/baque-virado` (public), to be renamed `martonpaulo/batuque` by the owner: the cloud proxy refuses repository settings writes (HTTP 403, [#38](https://github.com/martonpaulo/baque-virado/issues/38)); GitHub then redirects the old URLs and remote, so the links in the docs keep working. The owner's local checkout moves to `~/proj/batuque`
+- Repository: `martonpaulo/batuque` (public), renamed from `martonpaulo/baque-virado` on 2026-11-25 ([#38](https://github.com/martonpaulo/baque-virado/issues/38)); GitHub redirects the old URLs and remote, so the links in the docs keep working. The owner's local checkout is `~/proj/batuque`
 - Public identifiers: the domain `batuque.martonpaulo.com` (moved from `baquevirado.martonpaulo.com`, which 301-redirects to it with the same path and query, [#28](https://github.com/martonpaulo/baque-virado/issues/28)), the localStorage prefix `baque-virado:` and the `window.baque` page contract, kept unchanged so viewers keep their settings and the exporter keeps working
 - Landing page: the site itself is the product, served by GitHub Pages at https://batuque.martonpaulo.com
 - License: `MIT`
