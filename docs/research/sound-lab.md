@@ -173,6 +173,9 @@ What changed in each show is in its own document: [`bregafunk.md`](../rhythms/br
 
 ## Getting reference audio and recordings
 
+- **The full recordings are already chosen.** The private repository `martonpaulo/batuque-references`
+  (`audio/README.md`) names the exact YouTube video for each reference. Fetch those ids; never pick a
+  video from a search.
 - **Previews work.** A music catalogue's public API serves a 30-second preview of most references;
   `lab/fetch-references.py` fetches them by id.
 - **YouTube does not work from a cloud session.** It answers «Sign in to confirm you're not a bot»
