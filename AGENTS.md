@@ -3,7 +3,7 @@
 ## Project identity and policy
 
 - Display name: `Batuque` (was `O Baque Virado`, [#38](https://github.com/martonpaulo/baque-virado/issues/38))
-- Code name: `batuque`
+- Code name: `Batuque`
 - Slug: `batuque`
 - Identifier name: `batuque`
 - Benefit-first description: See and hear what each maracatu instrument plays, where the swing sits and how seven baques differ, in a two-minute animated show.
