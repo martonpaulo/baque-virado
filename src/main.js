@@ -14,7 +14,7 @@ import { createScope, SCOPE_GEOMETRY } from './scope.js';
 import { recentHits, SCENES, sceneAt, sceneIndexAt, TOTAL_BARS, TOTAL_SECONDS } from './show.js';
 import { REDUCED_MOTION_QUERY } from './theme.js';
 import { createTitle } from './title.js';
-import { formatClock, formatPrecise, pad2, setText } from './util.js';
+import { formatClock, formatPrecise, pad2, pauseWhileHidden, setText } from './util.js';
 
 // `?ritmo=<id>` names a rhythm that has its own path, or the path moved (#37): move there, so each
 // rhythm has one address
@@ -221,6 +221,7 @@ const stepScene = direction => {
 
 showState('play');
 tapButton.addEventListener('click', toggle);
+pauseWhileHidden(document, { playing: () => player.playing, pause, play });
 // With two or more rhythms, a selector at the bottom of the left column, under the Roteiro (desktop),
 // and under Play (phones, stopped); a link opens the rhythm's path. With one rhythm nothing is added.
 const rhythms = rhythmChoices(RHYTHM.id);

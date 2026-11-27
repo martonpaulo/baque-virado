@@ -77,6 +77,10 @@ and the page plays smoothly to the end on a recent iPhone and an Android phone.
   (`useMediaPlayback` in `src/audio.js`): Web Audio alone plays in the «ambient» session, which the
   ringer switch mutes in every browser there, and the show stayed silent until another site had
   played a video.
+- With the page in the background a playing show pauses, as a video does, and resumes where it
+  stopped when the page is shown again; a show paused before stays paused (`pauseWhileHidden` in
+  `src/util.js`, [#45](https://github.com/martonpaulo/baque-virado/issues/45), D35). A hidden
+  page's timers are throttled, and the look-ahead scheduler would drop most hits.
 - The background takes its centre from the wheel's place in the stage, and measures again when the
   wheel moves without a stage resize (`sizeKey` in `src/main.js`): on a phone the column's padding
   follows the safe-area inset, which changes when the browser's bars hide.

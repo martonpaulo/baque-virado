@@ -90,3 +90,25 @@ export const setAttr = (element, name, value) => {
   const text = String(value);
   if (element.getAttribute(name) !== text) element.setAttribute(name, text);
 };
+
+/**
+ * Pause the show while the page is hidden, as a video does, and resume it where it stopped when the
+ * page is shown again (#45, D35). A hidden page's timers are throttled, so the look-ahead scheduler
+ * would drop most hits; pausing never plays wrong. A show paused before it was hidden stays paused.
+ * `show` has `playing()`, `pause()` and `play()`. Returns a function that removes the listener.
+ */
+export function pauseWhileHidden(doc, show) {
+  let pausedByHiding = false;
+  const onChange = () => {
+    if (doc.hidden) {
+      if (!show.playing()) return;
+      pausedByHiding = true;
+      show.pause();
+    } else if (pausedByHiding) {
+      pausedByHiding = false;
+      show.play();
+    }
+  };
+  doc.addEventListener('visibilitychange', onChange);
+  return () => doc.removeEventListener('visibilitychange', onChange);
+}

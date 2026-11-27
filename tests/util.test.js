@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { hash, setStyle } from '../src/util.js';
+import { hash, pauseWhileHidden, setStyle } from '../src/util.js';
 
 test('hash is deterministic and in [0, 1)', () => {
   for (let seed = -500; seed < 5000; seed += 7) {
@@ -36,4 +36,60 @@ test('setStyle writes a style only when it differs from its last write', () => {
     ['transform', ''],
     ['opacity', '1'],
   ]);
+});
+
+// A fake document: `hidden` and one visibilitychange listener, enough for pauseWhileHidden.
+function fakePage() {
+  const listeners = new Set();
+  return {
+    hidden: false,
+    addEventListener: (type, listener) => type === 'visibilitychange' && listeners.add(listener),
+    removeEventListener: (_type, listener) => listeners.delete(listener),
+    set(hidden) {
+      this.hidden = hidden;
+      for (const listener of listeners) listener();
+    },
+    listeners,
+  };
+}
+function fakeShow(playing) {
+  const calls = [];
+  return {
+    calls,
+    playing: () => playing,
+    pause: () => {
+      playing = false;
+      calls.push('pause');
+    },
+    play: () => {
+      playing = true;
+      calls.push('play');
+    },
+  };
+}
+
+test('a playing show pauses when the page is hidden and resumes when it is shown (#45)', () => {
+  const page = fakePage(),
+    show = fakeShow(true);
+  pauseWhileHidden(page, show);
+  page.set(true);
+  assert.deepEqual(show.calls, ['pause']);
+  page.set(false);
+  assert.deepEqual(show.calls, ['pause', 'play']);
+});
+
+test('a show paused before the page is hidden stays paused when it is shown again (#45)', () => {
+  const page = fakePage(),
+    show = fakeShow(false);
+  pauseWhileHidden(page, show);
+  page.set(true);
+  page.set(false);
+  assert.deepEqual(show.calls, []);
+});
+
+test('pauseWhileHidden returns a function that removes its listener', () => {
+  const page = fakePage();
+  const stop = pauseWhileHidden(page, fakeShow(true));
+  stop();
+  assert.equal(page.listeners.size, 0);
 });
