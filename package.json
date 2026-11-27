@@ -12,9 +12,9 @@
     "export": "node tools/export-video.mjs"
   },
   "devDependencies": {
-    "@biomejs/biome": "2.6.7",
+    "@biomejs/biome": "2.6.8",
     "@puppeteer/browsers": "3.2.7",
-    "puppeteer-core": "^25.17.0"
+    "puppeteer-core": "^25.18.1"
   },
   "packageManager": "pnpm@11.7.0"
 }
