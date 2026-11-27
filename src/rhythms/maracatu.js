@@ -358,6 +358,7 @@ const COPY = {
   name: 'maracatu de baque virado',
   selector: 'maracatu', // the rhythm selector's chip
   description: 'Maracatu de baque virado: 7 baques, 5 instrumentos, partitura e microtempo medido, com som de instrumentos reais.', // the page's search and preview description
+  themeColor: COLORS.void, // the page's theme-color: the rhythm's own ground colour
   feminineInstruments: FEMININE_INSTRUMENTS,
   scenes: {
     opening: { chip: 'Abertura', eyebrow: 'maracatu de baque virado', title: 'Baque virado' },

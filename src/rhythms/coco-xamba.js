@@ -590,6 +590,7 @@ const COPY = {
   name: 'Coco da Xambá',
   selector: 'coco', // the rhythm selector's chip
   description: 'Coco da Xambá, de Olinda: alfaia, ganzá, pandeiro, palmas e atabaques, um de cada vez e depois juntos, com som de instrumentos reais.', // the page's search and preview description
+  themeColor: COCO_PALETTE.ground, // the page's theme-color: the rhythm's own ground colour
   feminineInstruments: ['alfaia', 'caixa', 'palmas'],
   scenes: {
     intro: { chip: 'Introdução', eyebrow: 'rufadas de alfaia', title: 'Coco da Xambá' },

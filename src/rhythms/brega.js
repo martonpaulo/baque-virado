@@ -756,6 +756,7 @@ const READ = {
 const COPY = {
   name: 'brega',
   description: 'Brega do Recife: o xacumbum da bateria, baixo, teclado, cordas, guitarra em terças e metais, um de cada vez e depois juntos, em lá menor.', // the page's search and preview description
+  themeColor: BREGA_PALETTE.ground, // the page's theme-color: the rhythm's own ground colour
   feminineInstruments: ['caixa', 'guitarra'], // "som da caixa", "som do bumbo"
   scenes: {
     introducao: { chip: 'Introdução', eyebrow: 'a banda inteira, o tema no trompete', title: 'Brega' },

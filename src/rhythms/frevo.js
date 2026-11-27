@@ -787,6 +787,7 @@ const COPY = {
   name: 'frevo',
   description:
     'Frevo lírico em tom menor: surdo, caixa, pandeiro, tuba, saxofones, clarinete, trombones e trompetes, um de cada vez e depois juntos, com som de instrumentos reais.', // the page's search and preview description
+  themeColor: FREVO_PALETTE.ground, // the page's theme-color: the rhythm's own ground colour
   feminineInstruments: ['caixa', 'tuba'],
   scenes: {
     introducao: { chip: 'Introdução', eyebrow: 'frevo lírico, de orquestra', title: 'Frevo' },

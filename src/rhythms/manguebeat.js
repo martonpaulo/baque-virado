@@ -758,6 +758,7 @@ const READ = {
 const COPY = {
   name: 'manguebeat',
   description: 'Manguebeat do Recife: alfaias na célula do coco, caixa, ganzá, baixo, guitarra distorcida e eco de dub, um de cada vez e depois juntos.', // the page's search and preview description
+  themeColor: MANGUE_PALETTE.ground, // the page's theme-color: the rhythm's own ground colour
   feminineInstruments: ['alfaia', 'caixa', 'guitarra'],
   scenes: {
     introducao: { chip: 'Introdução', eyebrow: 'sampler e eco', title: 'Manguebeat' },

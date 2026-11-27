@@ -109,6 +109,9 @@ test('each rhythm path has its own description and structured data, and the site
       const description = html.match(/<meta name="description" content="([^"]+)">/)[1];
       assert.equal(html.match(/<meta property="og:description" content="([^"]+)">/)[1], description, id);
       assert.match(html, /<title>[^<]+ · Batuque<\/title>/, id);
+      assert.match(html, /<meta property="og:locale" content="pt_BR">/, id);
+      const rhythm = RHYTHMS.find(candidate => candidate.id === id);
+      if (rhythm) assert.equal(html.match(/<meta name="theme-color" content="([^"]+)">/)[1], rhythm.copy.themeColor, id); // the rhythm's own ground
       descriptions.add(description);
       const data = html.match(/<script type="application\/ld\+json">(.*)<\/script>/);
       if (data) assert.equal(JSON.parse(data[1]).url, `https://batuque.martonpaulo.com/${id}`, id);

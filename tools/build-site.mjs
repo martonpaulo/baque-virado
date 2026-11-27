@@ -37,7 +37,7 @@ const LD_JSON = /<script type="application\/ld\+json">(.*)<\/script>/;
 const capitalized = text => text.charAt(0).toUpperCase() + text.slice(1);
 
 /** index.html with the title, description, address, preview and structured data of one route (#31). */
-function withRoute(html, { id, title, description, origin, image }) {
+function withRoute(html, { id, title, description, origin, image, themeColor }) {
   const fullTitle = escapeHtml(`${title} · ${SITE_NAME}`);
   const url = `${origin}/${id}`;
   const text = escapeHtml(description);
@@ -59,6 +59,7 @@ function withRoute(html, { id, title, description, origin, image }) {
     .replace(/(<meta name="description" content=")[^"]*"/, `$1${text}"`)
     .replace(/(<meta property="og:description" content=")[^"]*"/, `$1${text}"`)
     .replace(/(<link rel="canonical" href=")[^"]*"/, `$1${url}"`)
+    .replace(/(<meta name="theme-color" content=")[^"]*"/, (all, start) => (themeColor ? `${start}${themeColor}"` : all))
     .replace(/(<meta property="og:url" content=")[^"]*"/, `$1${url}"`)
     .replace(/(<meta property="og:image" content=")[^"]*"/, (all, start) => (image ? `${start}${origin}/${image}"` : all))
     .replace(LD_JSON, () => `<script type="application/ld+json">${JSON.stringify(data).replace(/</g, '\\u003c')}</script>`);
@@ -167,7 +168,7 @@ export function buildSite(out, root = ROOT, version = '') {
       const title = capitalized(rhythm.copy.selector || rhythm.copy.name);
       writeFileSync(
         path.join(out, `${id}.html`),
-        finish(withRoute(html, { id, title, description: rhythm.copy.description, origin, image: `social/${id}.png` })),
+        finish(withRoute(html, { id, title, description: rhythm.copy.description, origin, themeColor: rhythm.copy.themeColor, image: `social/${id}.png` })),
       );
     } else if (PREPARING[id]) {
       writeFileSync(
