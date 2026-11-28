@@ -95,3 +95,24 @@ python lab/analyze.py refs                     # the references scored against t
 
 Add a reference: put its row in `references.json` (the key is `<genre>/<index>-<id>`), then run
 `fetch-references.py`, `sep.py` on the new file and `addrefs.py`.
+
+## Motion
+
+`motion.mjs` measures a show's background through the page, with motion on
+([#63](https://github.com/martonpaulo/batuque/issues/63)). It draws three seconds in the middle of
+each scene with the call the video export makes, reads the background scaled down to a grid of
+cells, and prints per scene: the engine's own energy, the share of cells whose lightness changes by
+one step (CIE L\*) in half a second, the mean change between two frames, and the flashes (opposing
+changes of 10 % relative luminance in one cell within a second, and the share of cells with more
+than three, the limit of WCAG 2.3.1). Per show it prints how the change follows the energy over the
+scenes. A cell is about a hundredth of the stage's width, so one small shape that crosses it counts
+as a change of that cell; the limit of WCAG 2.3.1 is about a quarter of a 10° field, which is far
+more cells at once.
+
+```sh
+node lab/motion.mjs coco                       # one show: about a minute
+node lab/motion.mjs coco frevo --seconds 2     # several, a shorter window
+node lab/motion.mjs brega --shots out/brega    # also one picture of the stage per scene
+```
+
+Measure a background before the owner looks at it, and compare with the run before the change.

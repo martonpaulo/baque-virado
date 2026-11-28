@@ -150,3 +150,115 @@ test('no two shows share a graphic of their own, and no show joins the ones with
   }
   assert.equal(MARACATU.graphics, undefined); // the wheel, the lanes and the score are its own set
 });
+
+// ---------- every rhythm's own background follows the music (#63) ----------
+// Each painter is drawn on a canvas that records every call, with the frame the engine hands it.
+const PAINTED = RHYTHMS.filter(rhythm => rhythm.background);
+const STAGE = { width: 400, height: 800, centreX: 200, centreY: 330, scopeRadius: 120, dpr: 1, shapes: [] };
+const HALF_SECOND = 0.5;
+const motion = { matches: false }; // the reduced-motion setting every painter reads
+globalThis.matchMedia = () => motion;
+
+/** What one frame draws at `position`: every canvas call with its arguments. `values` replaces the engine's energy and clock. */
+function drawn(rhythm, position, values = {}) {
+  const show = createShow(rhythm),
+    meter = meterOf(rhythm),
+    calls = [];
+  const record =
+    name =>
+    (...shape) => {
+      calls.push([name, ...shape]);
+    };
+  const gradient = { addColorStop: record('stop') };
+  const ctx = new Proxy(
+    {},
+    {
+      get: (_target, key) =>
+        key.startsWith('create')
+          ? (...shape) => {
+              record(key)(...shape);
+              return gradient;
+            }
+          : record(key),
+      set: (_target, key, value) => {
+        if (typeof value !== 'object') calls.push([key, value]);
+        return true;
+      },
+    },
+  );
+  const layer = rhythm.background.create({ stepsPerBar: meter.stepsPerBar, angleOf: step => (step / meter.stepsPerBar) * Math.PI * 2 }),
+    blend = show.blendAt(position, 1.5),
+    bar = Math.floor(position),
+    recent = show.recentHits(position, 1.2);
+  layer.draw(ctx, {
+    ...STAGE,
+    position,
+    totalBars: show.TOTAL_BARS,
+    params: { from: rhythm.looks[blend.from.id], to: rhythm.looks[blend.to.id], mix: blend.amount, sceneId: blend.scene.id },
+    recent,
+    time: position * meter.barSeconds,
+    step: 1 / 30,
+    fresh: true,
+    mode: blend.scene.mode(bar - blend.scene.start),
+    barStart: bar,
+    energy: show.energyOf(recent),
+    flow: show.flowAt(position),
+    ...values,
+  });
+  return calls;
+}
+const middleOf = scene => scene.start + scene.bars / 2 + 0.31; // off the beat, where nothing has just been hit
+
+test('every show but the maracatu paints its own background', () => {
+  assert.deepEqual(
+    RHYTHMS.filter(rhythm => !rhythm.background).map(rhythm => rhythm.id),
+    ['maracatu'],
+  );
+});
+
+test('with motion on, the background of every scene of every show moves', () => {
+  for (const rhythm of PAINTED) {
+    const show = createShow(rhythm),
+      { barSeconds } = meterOf(rhythm);
+    for (const scene of show.SCENES) {
+      const position = Math.min(middleOf(scene), scene.start + scene.bars - HALF_SECOND / barSeconds);
+      assert.notDeepEqual(drawn(rhythm, position), drawn(rhythm, position + HALF_SECOND / barSeconds / 2), `${rhythm.id}, ${scene.id}`);
+    }
+  }
+});
+
+test('every background moves by the energy clock and by the energy, with nothing else changed', () => {
+  for (const rhythm of PAINTED) {
+    const position = middleOf(createShow(rhythm).SCENES.at(-2));
+    assert.notDeepEqual(
+      drawn(rhythm, position, { energy: 0.5, flow: 20 }),
+      drawn(rhythm, position, { energy: 0.5, flow: 20.4 }),
+      `${rhythm.id}: the energy clock`,
+    );
+    assert.notDeepEqual(drawn(rhythm, position, { energy: 0.1, flow: 20 }), drawn(rhythm, position, { energy: 0.9, flow: 20 }), `${rhythm.id}: the energy`);
+  }
+});
+
+test('a frame with no energy and no clock, or in silence, still draws: no shape at a place that is not a number', () => {
+  for (const rhythm of PAINTED) {
+    const position = middleOf(createShow(rhythm).SCENES[1]);
+    for (const values of [
+      { energy: undefined, flow: undefined },
+      { energy: 0, flow: 0, recent: [] },
+    ])
+      for (const [name, ...shape] of drawn(rhythm, position, values))
+        for (const value of shape) if (typeof value === 'number') assert.ok(Number.isFinite(value), `${rhythm.id}: ${name}(${shape})`);
+  }
+});
+
+test('with reduced motion, the energy and its clock move nothing', () => {
+  motion.matches = true;
+  try {
+    for (const rhythm of PAINTED) {
+      const position = middleOf(createShow(rhythm).SCENES.at(-2));
+      assert.deepEqual(drawn(rhythm, position, { energy: 0.1, flow: 20 }), drawn(rhythm, position, { energy: 0.9, flow: 31.7 }), rhythm.id);
+    }
+  } finally {
+    motion.matches = false;
+  }
+});

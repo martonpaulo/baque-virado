@@ -316,7 +316,15 @@ function drawShow(record = {}) {
     const position = frame / FPS / meter.barSeconds;
     const blend = show.blendAt(position, 1.5);
     const params = { from: MANGUEBEAT.looks[blend.from.id], to: MANGUEBEAT.looks[blend.to.id], mix: blend.amount, sceneId: blend.scene.id };
-    layer.draw(ctx, { ...GEOMETRY, position, params, recent: show.recentHits(position, 2), fresh: frame === 0 });
+    layer.draw(ctx, {
+      ...GEOMETRY,
+      position,
+      params,
+      recent: show.recentHits(position, 2),
+      fresh: frame === 0,
+      energy: show.energyAt(position),
+      flow: show.flowAt(position),
+    });
   }
   return layer;
 }

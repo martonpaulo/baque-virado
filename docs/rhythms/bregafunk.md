@@ -171,7 +171,12 @@ pink `#ff2e88` of that note was dropped: the expansion decision says pink repeat
   out of the wheel and stays circular: a large dark purple bloom on the bumbo and the grave (the
   sub-bass felt, not flashed), lime rays thrown from where the lata sits on the wheel, three rings
   that lean wide over beats 1 and 2 and tall over 3 and 4, gold rings on the drop's horns, leather
-  rings for the tamborzão and small sparks for the chimbais of the quebra.
+  rings for the tamborzão and small sparks for the chimbais of the quebra. The party follows the
+  music's energy ([#63](https://github.com/martonpaulo/batuque/issues/63)): the rings lean further
+  the busier the beat is and turn slowly on the energy clock, up to four more rings join them one
+  by one as the energy rises, every ring is drawn bolder the busier the beat is, and the paredão's
+  small LEDs run outward from the wheel all the time.
+  Reduced motion drops the turn, the added rings and the LEDs.
 - The wheel stays readable over it: under the wheel the bloom keeps 30 % of its strength, and the
   rays and the gold and leather rings are born just outside the wheel. Measured on rendered frames,
   the darkest wheel colour, the bumbo's purple, keeps at least 3.5:1 against the brightest pixel

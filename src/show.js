@@ -12,6 +12,12 @@ export const LEAD_INS = Object.freeze(['fill', 'pickup', 'dropOut', 'ringOver'])
 /** A boundary that changes more than this share of the sounding voices is cold unless the entered
  * scene declares a lead-in (docs/product.md, Rhythm shows, Music). */
 export const COLD_BOUNDARY_SHARE = 0.25;
+/** Seconds of hits the background reacts to; also how far back the music's energy remembers. */
+export const RECENT_WINDOW = 1.2;
+/** The pace of the energy clock in silence, as a share of real time; at the show's busiest moment it runs at real time. */
+export const CALM_PACE = 0.2;
+/** The energy is 1 from this share of the show's steps up, ordered by how busy they are: its few busiest moments do not push every busy scene down the scale. */
+export const FULL_ENERGY_SHARE = 0.9;
 
 /** The show of one rhythm package: its scenes on the timeline, and every hit of every bar. */
 export function createShow(rhythm) {
@@ -108,14 +114,58 @@ export function createShow(rhythm) {
 
   /** Hits that sounded within the last `windowSeconds` before `position`, with their age `age` in seconds. */
   function recentHits(position, windowSeconds) {
-    const out = [];
-    for (let bar = Math.floor(position) - 1; bar <= Math.floor(position); bar++) {
+    const out = [],
+      last = Math.floor(position);
+    // as many bars back as the window reaches: a bar shorter than the window is not the only one before
+    for (let bar = last - Math.ceil(windowSeconds / barSeconds); bar <= last; bar++) {
       for (const h of hitsInBar(bar)) {
         const age = (position - h.at) * barSeconds;
         if (age >= 0 && age < windowSeconds) out.push({ ...h, age });
       }
     }
     return out;
+  }
+
+  // ---------- the music's energy ----------
+  // How busy the music is, read from the timeline alone, so the backgrounds can follow it (#63):
+  // each hit of the last RECENT_WINDOW seconds counts its velocity, a newer hit more.
+  const loadOf = recent => recent.reduce((sum, h) => sum + (h.age < RECENT_WINDOW ? Math.min(1, h.hit.velocity) * (1 - h.age / RECENT_WINDOW) : 0), 0);
+  let peakLoad = null; // the load that counts as full energy, read once from every step of the show
+  function peak() {
+    if (peakLoad === null) {
+      const loads = [];
+      for (let step = 0; step <= TOTAL_BARS * stepsPerBar; step++) loads.push(loadOf(recentHits(step / stepsPerBar, RECENT_WINDOW)));
+      loads.sort((a, b) => a - b);
+      peakLoad = loads[Math.floor((loads.length - 1) * FULL_ENERGY_SHARE)];
+    }
+    return peakLoad;
+  }
+  /** The energy of a list of recent hits (`recentHits(position, RECENT_WINDOW)`, or the heard ones among them): 0 in silence, 1 at the show's busiest moments. */
+  const energyOf = recent => (peak() > 0 ? Math.min(1, loadOf(recent) / peak()) : 0);
+  /** The energy of every voice written at a position. */
+  const energyAt = position => energyOf(recentHits(position, RECENT_WINDOW));
+
+  let flowTable = null; // the energy clock at each step of the show, in seconds
+  /**
+   * The energy clock at a position, in seconds: it runs at CALM_PACE of real time in silence and at
+   * real time at the busiest moment, so what a background moves by it is fast where the music is busy
+   * and slow where it is calm, and never stops. A function of the position alone.
+   * shortcut: it reads every written voice, also a muted one; upgrade if a muted show should also slow down.
+   */
+  function flowAt(position) {
+    if (flowTable === null) {
+      const paceAt = step => CALM_PACE + (1 - CALM_PACE) * energyAt(step / stepsPerBar),
+        stepSeconds = barSeconds / stepsPerBar;
+      flowTable = [0];
+      for (let step = 0, pace = paceAt(0); step < TOTAL_BARS * stepsPerBar; step++) {
+        const next = paceAt(step + 1);
+        flowTable.push(flowTable[step] + ((pace + next) / 2) * stepSeconds);
+        pace = next;
+      }
+    }
+    const at = Math.max(0, Math.min(TOTAL_BARS, position)) * stepsPerBar,
+      step = Math.min(flowTable.length - 2, Math.floor(at));
+    return flowTable[step] + (flowTable[step + 1] - flowTable[step]) * (at - step);
   }
 
   /** The voices a bar writes a hit for, among the ones playing: what the script wrote, sounding or a silent mark. */
@@ -137,7 +187,23 @@ export function createShow(rhythm) {
       return { from: from.id, to: to.id, changed, voices: voices.size, share, leadIn: to.leadIn, cold: share > COLD_BOUNDARY_SHARE && to.leadIn === null };
     });
   }
-  return { SCENES, TOTAL_BARS, TOTAL_SECONDS, sceneIndexAt, sceneAt, sceneById, blendAt, barTimeline, hitsInBar, recentHits, boundaries };
+  return {
+    SCENES,
+    TOTAL_BARS,
+    TOTAL_SECONDS,
+    sceneIndexAt,
+    sceneAt,
+    sceneById,
+    blendAt,
+    barTimeline,
+    hitsInBar,
+    recentHits,
+    energyOf,
+    energyAt,
+    flowAt,
+    boundaries,
+  };
 }
 
-export const { SCENES, TOTAL_BARS, TOTAL_SECONDS, sceneIndexAt, sceneAt, sceneById, blendAt, barTimeline, hitsInBar, recentHits } = createShow(RHYTHM);
+export const { SCENES, TOTAL_BARS, TOTAL_SECONDS, sceneIndexAt, sceneAt, sceneById, blendAt, barTimeline, hitsInBar, recentHits, energyOf, flowAt } =
+  createShow(RHYTHM);

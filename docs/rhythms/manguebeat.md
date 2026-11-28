@@ -202,7 +202,11 @@ What the numbers do not show: whether it grooves. No number here replaces the ow
   collage); an iron ring thrown by each stroke of the main hand, stepping outward on each beat,
   jagged by the scene's fury, rust on the bar's first beat; cables hanging from the wheel that
   shake on the guitar; an antenna on top that grows with the sampler; the echoes as thin mangrove
-  rings that step outward.
+  rings that step outward. The mud follows the music's energy
+  ([#63](https://github.com/martonpaulo/batuque/issues/63)): the tide creeps out from the wheel as
+  slow, uneven rings of mangrove green on the energy clock; the cables swing all the time, wider
+  the busier the band is; and the field heaves outward in one heavy step a beat. Reduced motion
+  drops all three.
 - Under the wheel the field is clear: every gradient stop under the wheel keeps the wheel colours at
   3:1 and every shape is born outside it (`tests/manguebeat.test.js`).
 - Flash safety: the one bright emission is a pale ring of light on the guitar's first chord of a

@@ -120,6 +120,11 @@ The zabumba leads the timing; the triângulo's off-beat sixteenths sit about 10 
   and coming out of the wheel: a dusk sky from bonfire orange to night indigo, whose warm light
   shrinks toward the wheel over the show (saudade is light leaving); a sanfona bellows that opens
   and closes once per bar around the wheel; bandeirinhas thrown outward by the zabumba's low head.
+  The night follows the music's energy ([#63](https://github.com/martonpaulo/batuque/issues/63)):
+  the bellows open wider the busier the trio is and their pleats travel round on the energy clock,
+  the warm light leans out and back with them, and sparks of the fogueira rise from the wheel all
+  the time, more of them and faster as the music fills. Reduced motion keeps the bellows as deep in
+  every bar and shows no spark.
   The sky stays night inside the wheel's edge, where its step numbers sit, and the light starts just
   outside; the bellows and the flags turn outside the numbers. Measured on screenshots at 393 x 852
   and 1440 x 900, the faintest wheel mark (an off-beat number) keeps 3.97:1 against what is behind

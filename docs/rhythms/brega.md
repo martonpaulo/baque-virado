@@ -197,7 +197,11 @@ Tried and measured on the chorus, not kept:
 - The background is circular and comes out of the wheel: a blue halo that breathes once every two
   bars, thin rings that contract towards the wheel on each beat (heartbreak pulls inward), rose
   petals that leave the wheel on each new chord and drift out and down, and a soft rose bloom
-  outward on a phrase accent only. Long trails (0.9 s).
+  outward on a phrase accent only. Long trails (0.9 s). The bar follows the music's energy
+  ([#63](https://github.com/martonpaulo/batuque/issues/63)), slowly, as the rhythm asks: motes of
+  dust fall through the cold light on the energy clock, more of them as the band fills; the halo
+  breathes deeper; and the rings never vanish, they only fade in the quiet scenes. Reduced motion
+  drops the motes and keeps each scene's own strength.
 - Flash safety: the bloom is the only bright change, six in the show, at least four bars apart
   (one per 7 s at most, far under WCAG 2.3.1's three per second). Nothing is drawn under the
   wheel but the ground. No red passes R/(R+G+B) 0.8. Reduced motion stops the rings and petals

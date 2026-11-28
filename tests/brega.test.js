@@ -288,7 +288,17 @@ function paintShow(record = {}) {
   for (let frame = 0; frame < show.TOTAL_SECONDS * FPS; frame++) {
     const position = frame / FPS / meter.barSeconds,
       look = BREGA.looks[show.sceneAt(Math.floor(position)).id] || LOOK;
-    layer.draw(ctx, { ...geometry, position, params: { from: look, to: look, mix: 0 }, recent: [], time: frame / FPS, step: 1 / FPS, fresh: frame === 0 });
+    layer.draw(ctx, {
+      ...geometry,
+      position,
+      params: { from: look, to: look, mix: 0 },
+      recent: [],
+      time: frame / FPS,
+      step: 1 / FPS,
+      fresh: frame === 0,
+      energy: show.energyAt(position),
+      flow: show.flowAt(position),
+    });
   }
   return { layer, geometry, RADIUS };
 }

@@ -82,10 +82,19 @@ test measures the low head's beat-to-beat correlation (pink, not white) and its 
   night, in candlelight, seen from above the wheel, as
   [`expansion-decisions.md`](../research/expansion-decisions.md) names the coco's picture. The
   burgundy of the earth glows from the wheel's edge outward, with the candles' copper light nearest
-  the wheel and the still grain of the floor. Six candles stand on the floor near the roda, one
-  more lit as the roda fills, each with its own slow flicker; a rufada makes the flames tremble.
+  the wheel and the grain of the floor. Six candles stand on the floor near the roda, one
+  more lit as the roda fills, each with its own flicker; a rufada makes the flames tremble.
   Each stroke of the low head and of the rum raises dust that drifts outward and fades: the
   pisada. On each golpe the earth's glow lifts once and the halos gain a little.
+- **Never still.** The owner found the floor too static
+  ([#63](https://github.com/martonpaulo/batuque/issues/63)); measured with motion on, it changed in
+  at most 12 % of the picture, and in 1 % in most scenes. Now the grain is dust in the candlelight:
+  specks and wide, soft clouds in the candles' copper drift outward from the wheel on the energy
+  clock, the flames and the light pooled on the floor waver on it (never faster than three times a
+  second), and on each beat the pool of light and the earth's glow reach further, the more the
+  busier the roda is. All of it is motion or a slow waver, not a flash. Nothing circles the wheel,
+  the candles keep their places and the colours stay. Reduced motion holds every speck, cloud and
+  flame still.
 - **Nothing circles the wheel.** The first background turned a ring of burgundy and earth wedges
   (the dancers' skirts) around the numbered wheel and threw sparks and rings; the owner saw a
   casino game in it, while the colours were right

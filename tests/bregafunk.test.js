@@ -192,7 +192,17 @@ test('the background flashes at most 3 times in any second (WCAG 2.3.1)', () => 
     const time = frame / FPS,
       position = time / meterOf(BREGAFUNK).barSeconds;
     const recent = show.recentHits(position, 1.2);
-    layer.draw(ctx, { ...geometry, position, params: { sceneId: show.sceneAt(Math.floor(position)).id }, recent, time, step: 1 / FPS, fresh: frame === 0 });
+    layer.draw(ctx, {
+      ...geometry,
+      position,
+      params: { sceneId: show.sceneAt(Math.floor(position)).id },
+      recent,
+      time,
+      step: 1 / FPS,
+      fresh: frame === 0,
+      energy: show.energyOf(recent),
+      flow: show.flowAt(position),
+    });
   }
   const flashes = [...new Set(layer.flashTimes())];
   assert.ok(flashes.length > 0);
@@ -240,7 +250,17 @@ test('under the wheel the background keeps the wheel colours at 3:1 or more', ()
       const time = scene.start * barSeconds + frame / FPS,
         position = time / barSeconds;
       const recent = show.recentHits(position, 1.2);
-      layer.draw(ctx, { ...geometry, position, params: { sceneId: id }, recent, time, step: 1 / FPS, fresh: frame === 0 });
+      layer.draw(ctx, {
+        ...geometry,
+        position,
+        params: { sceneId: id },
+        recent,
+        time,
+        step: 1 / FPS,
+        fresh: frame === 0,
+        energy: show.energyOf(recent),
+        flow: show.flowAt(position),
+      });
     }
   }
   assert.ok(darkest >= 3, `the wheel's purple at ${darkest.toFixed(2)}:1`);

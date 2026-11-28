@@ -135,7 +135,14 @@ The rules every rhythm package in `src/rhythms/` follows.
 - **Background.** Circular, coming out of the central wheel, in the rhythm's palette from section 5
   of [`colour-and-visuals.md`](research/colour-and-visuals.md): brega in desaturated blue
   and muted rose, bregafunk in purple, magenta and gold. The approved backgrounds are a sketch to
-  improve, not a finished design. Flashes stay within WCAG 2.3.1.
+  improve, not a finished design. Flashes stay within WCAG 2.3.1. A background moves through the
+  whole show and follows the music: faster and stronger where the music is busy, slower and softer
+  where it is calm ([#63](https://github.com/martonpaulo/batuque/issues/63)). The engine gives every
+  painter the music's energy and an energy clock, both read from the timeline at the show position
+  (`energyOf` and `flowAt` in `src/show.js`), and each painter moves by them in its own way; with
+  reduced motion they move nothing. `node lab/motion.mjs <id>` measures it through the page: how
+  much of the picture moves in each scene, whether that follows the energy, and the flashes
+  ([`lab/README.md`](../lab/README.md#motion)).
 - **Sound.** Real CC0 recordings first. A synthesized voice must sound like the real instrument.
   One sample repeated unchanged is not acceptable: use round robin, velocity layers, humanised
   timing and a mix bus, as [`human-feel.md`](research/human-feel.md) and

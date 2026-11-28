@@ -88,6 +88,9 @@ above and becomes one allowlist entry of the check until its step lands.
 - Backgrounds read the viewer's motion setting themselves: each `<id>-background.js` (and the coco
   painter inside `coco-xamba.js`) calls `globalThis.matchMedia(REDUCED_MOTION_QUERY)` (rule 2). The
   query and the `alphaOf` colour builder have one owner, `src/theme.js`.
+- Backgrounds follow the music through the frame the engine hands them: `energy` and `flow`, which
+  `src/show.js` reads from the timeline and `src/background.js` passes on. A painter never reads the
+  timeline or a clock of its own for this (rule 2).
 - The coco's painter lives inside its data file `coco-xamba.js` (rule 1): it moves to
   `coco-background.js` with the readout step.
 - Shared readout helpers: `sceneStarts` (`src/rhythms/meter.js`) and `rollReadout`

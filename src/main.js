@@ -11,7 +11,7 @@ import { BAR_SECONDS, BPM, STEPS_PER_BAR, VOICES } from './music.js';
 import { createReadout } from './readout.js';
 import { RHYTHM, ROUTES, redirectFor, rhythmChoices } from './rhythms/index.js';
 import { createScope, SCOPE_GEOMETRY } from './scope.js';
-import { hitsInBar, recentHits, SCENES, sceneAt, sceneIndexAt, TOTAL_BARS, TOTAL_SECONDS } from './show.js';
+import { hitsInBar, RECENT_WINDOW, recentHits, SCENES, sceneAt, sceneIndexAt, TOTAL_BARS, TOTAL_SECONDS } from './show.js';
 import { REDUCED_MOTION_QUERY } from './theme.js';
 import { createTitle } from './title.js';
 import { formatClock, formatPrecise, pad2, pauseWhileHidden, setText } from './util.js';
@@ -33,7 +33,6 @@ const LIVE_MAX_STEP = 0.1; // seconds; a longer frame gap (tab hidden) advances 
 const END_EPSILON = 1e-6; // bars; keeps the last position inside the final bar
 const REWIND_AT_END = 0.01; // bars from the end where Play starts over
 const SCENE_RESTART_BARS = 0.5; // bars into a scene before ← restarts it instead of going back
-const RECENT_HITS_WINDOW = 1.2; // seconds of hits the background reacts to
 const EXPORT_JUMP = 0.25; // seconds; a bigger jump between exported frames resets the clock
 const MS_PER_SECOND = 1000;
 // Shader resolution relative to the canvas: full for export, lighter on phones.
@@ -132,7 +131,7 @@ function render(at, force = false) {
   const p = Math.max(0, Math.min(TOTAL_BARS - END_EPSILON, at));
   const params = backgroundAt(p, !player.playing && !clock.exporting);
   // a muted instrument does not push the background either
-  const heard = recentHits(p, RECENT_HITS_WINDOW).filter(h => isHeard(volume, h.voice));
+  const heard = recentHits(p, RECENT_WINDOW).filter(h => isHeard(volume, h.voice));
   const drawBackground = () => background.draw(p, params, heard, clock.tick(p, params), shapes);
   if (p === renderedAt && !force) {
     if (!REDUCED_MOTION.matches) drawBackground(); // paused: only the background moves

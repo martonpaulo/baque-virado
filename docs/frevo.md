@@ -131,7 +131,11 @@ The bambeando and the Alto da Sé stay, inside the tune; the fotografia stays as
   the wheel: sombrinhas in the flag colours circle it on two rings, confetti bursts out of the
   wheel on the surdo's open beat (once per bar), the trompetes throw gold spikes, and the sax notes
   leave green arcs. The number of sombrinhas follows the density curve; the Final shakes them a
-  little (fury); a cut freezes them (the fotografia's pose).
+  little (fury); a cut freezes them (the fotografia's pose). The street follows the music's energy
+  ([#63](https://github.com/martonpaulo/batuque/issues/63)): on each beat the two rings jump
+  outward and land, higher the busier the orchestra is (the passo); each sombrinha also spins on
+  the energy clock; and serpentinas in the flag colours leave the wheel all the time, more of them
+  and faster as the music fills.
 - Flash safety: no full-screen flash. The beat is carried by motion: the sombrinhas snap forward
   on each beat. The ring turns a whole fraction of the beat (1 turn per 16 and per 32 beats).
   Reduced motion halves the rotation and drops the jitter, confetti and spikes. No red passes

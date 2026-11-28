@@ -153,3 +153,70 @@ test('a voice whose bar holds only a silent mark still counts as written in that
   }).boundaries();
   assert.deepEqual([boundary.changed, boundary.voices], [1, 2]); // the answer's mark is written before the boundary and gone after it
 });
+
+// ---------- the music's energy (#63) ----------
+const { RHYTHMS } = await import('../src/rhythms/index.js');
+const { meterOf } = await import('../src/music.js');
+const { CALM_PACE, RECENT_WINDOW } = await import('../src/show.js');
+
+// Found with the coco (a bar of 0.91 s): right after a bar line, the hits of the bar before the last
+// were missing from the window, so a shape that lives a second vanished there and came back.
+test('the recent hits reach as far back as the window, across bars shorter than it', () => {
+  for (const rhythm of RHYTHMS) {
+    const show = createShow(rhythm),
+      { barSeconds } = meterOf(rhythm);
+    for (let bar = 2; bar < show.TOTAL_BARS; bar++) {
+      const position = bar + 0.01,
+        expected = [bar - 2, bar - 1, bar].flatMap(b => show.hitsInBar(b)).filter(h => h.at <= position && (position - h.at) * barSeconds < RECENT_WINDOW);
+      assert.equal(show.recentHits(position, RECENT_WINDOW).length, expected.length, `${rhythm.id}, bar ${bar}`);
+    }
+  }
+});
+
+test('the energy is 0 in silence, 1 at the busiest moment of each show, and lower with a voice muted', () => {
+  for (const rhythm of RHYTHMS) {
+    const show = createShow(rhythm),
+      { stepsPerBar } = meterOf(rhythm);
+    assert.equal(show.energyOf([]), 0, rhythm.id);
+    let highest = 0;
+    for (let step = 0; step <= show.TOTAL_BARS * stepsPerBar; step++) {
+      const energy = show.energyAt(step / stepsPerBar);
+      assert.ok(energy >= 0 && energy <= 1, `${rhythm.id}: ${energy} at step ${step}`);
+      highest = Math.max(highest, energy);
+    }
+    assert.equal(highest, 1, rhythm.id);
+    const busiest = [...Array(show.TOTAL_BARS * stepsPerBar).keys()].map(step => step / stepsPerBar).find(position => show.energyAt(position) === 1),
+      recent = show.recentHits(busiest, RECENT_WINDOW),
+      muted = recent.filter(h => h.voice !== recent[0].voice);
+    assert.ok(show.energyOf(muted) < 1, `${rhythm.id}: muting ${recent[0].voice} calms it`);
+  }
+});
+
+test('each show has calm and busy scenes for the background to follow', () => {
+  for (const rhythm of RHYTHMS) {
+    const show = createShow(rhythm);
+    const mean = scene => [...Array(scene.bars * 4).keys()].reduce((sum, i) => sum + show.energyAt(scene.start + i / 4), 0) / (scene.bars * 4);
+    const means = show.SCENES.map(mean);
+    assert.ok(
+      Math.max(...means) - Math.min(...means) >= 0.3,
+      `${rhythm.id}: scene energies from ${Math.min(...means).toFixed(2)} to ${Math.max(...means).toFixed(2)}`,
+    );
+  }
+});
+
+test('the energy clock never stops or runs back: between CALM_PACE and real time, by the position alone', () => {
+  for (const rhythm of RHYTHMS) {
+    const show = createShow(rhythm),
+      { barSeconds, stepsPerBar } = meterOf(rhythm),
+      stepSeconds = barSeconds / stepsPerBar;
+    assert.equal(show.flowAt(0), 0);
+    for (let step = 0; step < show.TOTAL_BARS * stepsPerBar; step++) {
+      const pace = (show.flowAt((step + 1) / stepsPerBar) - show.flowAt(step / stepsPerBar)) / stepSeconds;
+      assert.ok(pace >= CALM_PACE - 1e-9 && pace <= 1 + 1e-9, `${rhythm.id}: pace ${pace} at step ${step}`);
+    }
+    assert.equal(show.flowAt(7.3), show.flowAt(7.3), 'the same position, the same clock');
+    assert.equal(show.flowAt(show.TOTAL_BARS + 5), show.flowAt(show.TOTAL_BARS), 'past the end it holds');
+    assert.equal(show.flowAt(-1), 0);
+    assert.ok(show.flowAt(show.TOTAL_BARS) < show.TOTAL_SECONDS, 'slower than real time over a whole show');
+  }
+});

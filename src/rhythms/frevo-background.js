@@ -1,7 +1,10 @@
 // The frevo background: an Olinda street at night seen from above the wheel. Sombrinhas in the
 // four colours of Pernambuco's flag circle the wheel, confetti bursts out of it on the surdo's
-// open beat, and the brass throws gold spikes. Everything is drawn from the show position and the
-// recent hits, so it is deterministic; only a light trail keeps the frames before it.
+// open beat, and the brass throws gold spikes. The street never stands still (#63): the sombrinhas
+// jump outward on each beat, higher the busier the music is, each one also spins on the energy clock,
+// and serpentinas leave the wheel all the time, more of them and faster as the orchestra fills.
+// Everything is drawn from the show position and the recent hits, so it is deterministic; only a
+// light trail keeps the frames before it.
 // Safety (docs/research/colour-and-visuals.md, rule 6): no full-screen flash; the beat is carried by
 // motion (the sombrinhas snap forward on each beat), never by a change of brightness.
 import { REDUCED_MOTION_QUERY } from '../theme.js';
@@ -65,6 +68,29 @@ const VIGNETTE_STOPS = [
   [1, 0.95],
 ];
 const SEED_STEP = 97; // spreads the seeds of neighbouring hits
+const JUMP = { height: 0.1, settle: 3 }; // the passo: how far a ring leaps on the beat at full energy (of its radius), and the easing of its landing
+const SPIN_FLOW = 0.35; // turns a sombrinha adds to its spin in a second of the energy clock
+// Serpentinas: paper streamers thrown from the wheel. Each leaves the wheel's edge and travels `reach`
+// wheel radii in 1 / `rate` seconds of the energy clock, a wavy line `length` long that curls as it
+// goes; `few` of them fly in silence and all at full energy. They fade in and out at the two ends.
+const STREAMERS = {
+  count: 12,
+  few: 0.4,
+  from: 1.14,
+  reach: 1.5,
+  length: 0.42,
+  rate: 0.5,
+  rates: 0.6,
+  wave: 0.07,
+  curls: 2.5,
+  points: 9,
+  width: 2,
+  alpha: 0.75,
+  rise: 0.12,
+  fall: 0.35,
+  draws: 3,
+};
+const SERPENTINA_SEED = 409;
 
 /** The background of the frevo show. `angleOf(step)`: a step's angle on the wheel. */
 export function createFrevoPainter({ beatsPerBar, stepsPerBar, angleOf }) {
@@ -88,10 +114,10 @@ export function createFrevoPainter({ beatsPerBar, stepsPerBar, angleOf }) {
     }
   }
 
-  function ring(ctx, g, ringSpec, count, beats, fury, jitterSeed) {
+  function ring(ctx, g, ringSpec, count, { beats, fury, jitterSeed, jump, spin }) {
     const whole = Math.floor(count),
       last = count - whole,
-      r = g.scopeRadius;
+      r = g.scopeRadius * (1 + jump);
     const turn = (beats / ringSpec.beatsPerTurn) * TAU * (calm() ? 1 / 2 : 1);
     for (let i = 0; i < Math.ceil(count); i++) {
       const a = turn + (i / Math.max(1, Math.ceil(count))) * TAU,
@@ -99,7 +125,7 @@ export function createFrevoPainter({ beatsPerBar, stepsPerBar, angleOf }) {
       const x = g.centreX + Math.cos(a) * ringSpec.radius * r + (hash(jitterSeed + i) - 1 / 2) * shake,
         y = g.centreY + Math.sin(a) * ringSpec.radius * r + (hash(jitterSeed + i + SEED_STEP) - 1 / 2) * shake;
       ctx.globalAlpha = ringSpec.alpha * (i < whole ? 1 : last);
-      umbrella(ctx, x, y, ringSpec.size * r, beats * ringSpec.spinPerBeat * TAU);
+      umbrella(ctx, x, y, ringSpec.size * g.scopeRadius, (beats * ringSpec.spinPerBeat + spin * Math.sign(ringSpec.spinPerBeat)) * TAU);
     }
     ctx.globalAlpha = 1;
   }
@@ -119,6 +145,35 @@ export function createFrevoPainter({ beatsPerBar, stepsPerBar, angleOf }) {
       ctx.rotate(a + progress * TAU);
       ctx.fillRect(-size / 2, -size, size, size * 2);
       ctx.restore();
+    }
+    ctx.globalAlpha = 1;
+  }
+
+  /** The serpentinas in the air at `flow`: `amount` of them (0 to 1 of the whole set). */
+  function streamers(ctx, g, flow, amount) {
+    const r = g.scopeRadius,
+      flying = STREAMERS.count * (STREAMERS.few + (1 - STREAMERS.few) * amount);
+    ctx.lineWidth = STREAMERS.width * g.dpr;
+    ctx.lineCap = 'round';
+    for (let i = 0; i < Math.ceil(flying); i++) {
+      const seed = SERPENTINA_SEED + i * STREAMERS.draws,
+        turns = hash(seed) + flow * STREAMERS.rate * (1 + STREAMERS.rates * hash(seed + 1)),
+        way = turns % 1,
+        // each throw of a streamer leaves in a new direction
+        angle = hash(seed + 2 + Math.floor(turns) * SEED_STEP) * TAU;
+      ctx.strokeStyle = WEDGES[i % WEDGES.length];
+      ctx.globalAlpha = STREAMERS.alpha * Math.min(1, way / STREAMERS.rise, (1 - way) / STREAMERS.fall, flying - i);
+      ctx.beginPath();
+      for (let k = 0; k < STREAMERS.points; k++) {
+        const along = k / (STREAMERS.points - 1),
+          radius = (STREAMERS.from + way * STREAMERS.reach + along * STREAMERS.length) * r,
+          side = Math.sin((along * STREAMERS.curls + turns) * TAU) * STREAMERS.wave * r * along;
+        const x = g.centreX + Math.cos(angle) * radius - Math.sin(angle) * side,
+          y = g.centreY + Math.sin(angle) * radius + Math.cos(angle) * side;
+        if (k) ctx.lineTo(x, y);
+        else ctx.moveTo(x, y);
+      }
+      ctx.stroke();
     }
     ctx.globalAlpha = 1;
   }
@@ -147,11 +202,19 @@ export function createFrevoPainter({ beatsPerBar, stepsPerBar, angleOf }) {
     ctx.fillStyle = halo;
     ctx.fillRect(0, 0, g.width, g.height);
     // a cut freezes the sombrinhas where the bar began: the dancers hold their pose
-    const beats = snappedBeats(position, frame.mode === 'cut' ? frame.barStart : null),
+    const held = frame.mode === 'cut',
+      beats = snappedBeats(position, held ? frame.barStart : null),
       fury = look('fury'),
-      jitterSeed = Math.floor(position * stepsPerBar) * SEED_STEP;
-    ring(ctx, g, OUTER, look('outer'), beats, fury, jitterSeed);
-    ring(ctx, g, INNER, look('inner'), beats, fury, jitterSeed + SEED_STEP);
+      jitterSeed = Math.floor(position * stepsPerBar) * SEED_STEP,
+      energy = frame.energy ?? 0,
+      flow = frame.flow ?? 0;
+    // the passo: on each beat the dancers leap outward and land before the next one
+    const beat = position * beatsPerBar,
+      jump = calm() || held ? 0 : JUMP.height * energy * (1 - (beat - Math.floor(beat))) ** JUMP.settle,
+      spin = calm() ? 0 : flow * SPIN_FLOW;
+    if (!calm()) streamers(ctx, g, flow, energy);
+    ring(ctx, g, OUTER, look('outer'), { beats, fury, jitterSeed, jump, spin });
+    ring(ctx, g, INNER, look('inner'), { beats, fury, jitterSeed: jitterSeed + SEED_STEP, jump, spin });
     if (!calm()) {
       ctx.fillStyle = GOLD;
       for (const h of recent) {

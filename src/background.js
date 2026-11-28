@@ -7,7 +7,7 @@ import { SCOPE_GEOMETRY } from './scope.js';
 
 const { angleOf, radius: SCOPE_RADIUS } = SCOPE_GEOMETRY;
 
-import { blendAt, sceneAt, TOTAL_BARS } from './show.js';
+import { blendAt, energyOf, flowAt, sceneAt, TOTAL_BARS } from './show.js';
 import { boneAlpha, COLORS, fgAlpha, TINTS, voidAlpha } from './theme.js';
 
 const CROSSFADE_BARS = 1.5; // ≈3 s, centred on each scene boundary
@@ -198,6 +198,9 @@ export function createBackground(fxCanvas, feedbackCanvas) {
   // The one hook for a rhythm's own background: `background.create({ stepsPerBar, angleOf })`
   // returns { draw(ctx, frame), vignette?(ctx, frame) }. It draws on the 2D canvas, over the frame
   // before unless `frame.fresh`, in place of the kaleidoscope and the feedback tunnel (src/rhythms/).
+  // The frame carries the music's energy (`energy`, 0 to 1, of the hits heard) and the energy clock
+  // (`flow`, seconds): a painter moves by them, so its picture is fast where the music is busy, slow
+  // where it is calm, and never still while the show plays (#63, src/show.js).
   const layer = RHYTHM.background?.create({ stepsPerBar: STEPS_PER_BAR, angleOf }) ?? null;
   const kaleidoscope = layer ? null : createKaleidoscope(fxCanvas);
   const ctx = feedbackCanvas.getContext('2d');
@@ -350,7 +353,20 @@ export function createBackground(fxCanvas, feedbackCanvas) {
       if (!fresh) ctx.drawImage(previous, 0, 0);
       const bar = Math.floor(position),
         scene = sceneAt(bar);
-      const frame = { ...geometry, position, totalBars: TOTAL_BARS, params, recent, shapes, clock, time: clock.time, step: clock.step, fresh };
+      const frame = {
+        ...geometry,
+        position,
+        totalBars: TOTAL_BARS,
+        params,
+        recent,
+        shapes,
+        clock,
+        time: clock.time,
+        step: clock.step,
+        fresh,
+        energy: energyOf(recent),
+        flow: flowAt(position),
+      };
       layer.draw(ctx, { ...frame, mode: scene.mode(bar - scene.start), barStart: bar });
     } else {
       if (clock.step > 0 && clock.step < FEEDBACK_MAX_STEP && hasFrame) drawFeedback(params, clock.step);

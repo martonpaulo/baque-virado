@@ -6,7 +6,7 @@ import { test } from 'node:test';
 import { fileURLToPath } from 'node:url';
 import { meterOf } from '../src/music.js';
 import { ATABAQUES, CANDLES, CLEAR, COCO_PALETTE, COCO_XAMBA, createCocoPainter, GOLPE, MIN_FLASH_GAP, RUFADA } from '../src/rhythms/coco-xamba.js';
-import { createShow } from '../src/show.js';
+import { createShow, RECENT_WINDOW } from '../src/show.js';
 import { planStudio } from '../src/studio.js';
 import { COLORS, TINTS } from '../src/theme.js';
 
@@ -198,6 +198,7 @@ const fromCentre = (x, y) => Math.hypot(x - GEOMETRY.centreX, y - GEOMETRY.centr
 function paint(record = {}, bars = [0, show.TOTAL_BARS]) {
   const painter = createCocoPainter({
     barSeconds: meterOf(COCO_XAMBA).barSeconds,
+    beatsPerBar: COCO_XAMBA.beatsPerBar,
     rufada: RUFADA,
     golpe: GOLPE,
   });
@@ -208,7 +209,8 @@ function paint(record = {}, bars = [0, show.TOTAL_BARS]) {
     const position = frame / FPS / barSeconds,
       blend = show.blendAt(position, 1.5);
     const params = { from: COCO_XAMBA.looks[blend.from.id], to: COCO_XAMBA.looks[blend.to.id], mix: blend.amount, sceneId: blend.scene.id };
-    painter.draw(ctx, { ...GEOMETRY, position, params, recent: show.recentHits(position, 1.2), fresh: frame === 0 });
+    const recent = show.recentHits(position, RECENT_WINDOW);
+    painter.draw(ctx, { ...GEOMETRY, position, params, recent, energy: show.energyOf(recent), flow: show.flowAt(position), fresh: frame === 0 });
   }
   return painter;
 }

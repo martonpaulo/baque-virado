@@ -15,15 +15,19 @@ import { lilt, recordedChoices, studioFiles, studioSounds, takes } from './studi
 // above the wheel (docs/research/expansion-decisions.md). Everything comes out of the wheel and
 // stays circular: the candles' copper light pooled on the floor and the burgundy of the earth
 // further out; candles standing on the floor around the roda, one more lit as the roda fills, each
-// with its own slow flicker; the dust the pisada raises on the low head's strokes; and, on each
-// golpe, the stroke a rufada lands on, the candlelight flaring once. Nothing turns and nothing
+// with its own flicker; the dust the pisada raises on the low head's strokes; and, on each
+// golpe, the stroke a rufada lands on, the candlelight flaring once. The floor is never still while
+// the roda plays (#63): the dust of the beaten earth drifts outward from the wheel and the flames
+// waver, both on the energy clock, so they quicken as the roda fills, and the light pooled on the
+// floor swells on each beat, further the busier the music is. Nothing turns and nothing
 // sparkles: trance is repetition, with tones close together. A ring of wedges turning around the
 // numbered wheel read as a roulette (the owner, 2026-11-28, #27), so no shape here circles the wheel.
 // No orixá imagery (docs/research/pernambuco-rhythms-feeling.md, Coco da Xambá, Avoid).
 // Safety (docs/research/colour-and-visuals.md, rule 6; WCAG 2.3.1): the golpe flares are the only
 // changes of the whole picture, never closer than MIN_FLASH_GAP, so at most three in any second;
-// reduced motion drops the flares and the dust and holds every flame still. Nothing is drawn under
-// the wheel, so its dots keep their contrast. Palette and reasons: docs/rhythms/coco.md.
+// the swell on the beat changes the size of the pool of light, not its brightness; reduced motion
+// drops the flares, the swell and the dust and holds every flame and every speck still. Nothing is
+// drawn under the wheel, so its dots keep their contrast. Palette and reasons: docs/rhythms/coco.md.
 
 /** Coco da Xambá, trance and devotion: ground, earth, burgundy, copper and cloth, from section 5. */
 export const COCO_PALETTE = {
@@ -38,18 +42,26 @@ const TAU = Math.PI * 2;
 
 export const CLEAR = 1.12; // wheel radii: nothing is drawn inside, where the wheel and its numbers sit
 const TRAIL_ALPHA = 0.32; // how much of the last frame each frame paints over
-const GLOW = { outer: 3.2, alpha: 0.42, rise: 0.15 }; // full strength `rise` of the way out // the burgundy of the earth, in wheel radii
-const LIGHT = { outer: 2.2, alpha: 0.1, rise: 0.1 }; // the candles' copper light pooled on the floor
-// Specks of the beaten earth, still: where each lies, its size in CSS px and how much it shows.
-const GRAIN = { count: 150, from: 1.16, reach: 1.7, size: 0.5, sizes: 0.9, alpha: 0.12, alphas: 0.25, draws: 3 }; // `draws`: the random values a speck takes
+const GLOW = { outer: 3.2, alpha: 0.42, rise: 0.15, waver: 0.3 }; // the burgundy of the earth, in wheel radii: full strength `rise` of the way out; it wavers as firelight does
+const LIGHT = { outer: 2.2, alpha: 0.1, rise: 0.1, waver: 0.4, rates: [0.6, 1.7] }; // the candles' copper light pooled on the floor; it wavers in two slow waves (turns a second of the energy clock)
+// The pisada: on each beat the pool of light and the earth's glow reach this much further (at full
+// energy), then settle before the next beat (`settle`: the easing's power).
+const SWELL = { reach: 0.2, settle: 2 };
+// Specks of the beaten earth: where each lies, its size in CSS px and how much it shows. With
+// motion they are dust in the candlelight: each drifts outward from the wheel, crossing `reach` in
+// 1 / `drift` seconds of the energy clock (some up to `drifts` faster), fading in over the first
+// `rise` of its way and out over the last `fall`, so none appears or vanishes at once.
+const GRAIN = { count: 220, from: 1.16, reach: 2, size: 0.7, sizes: 1.1, alpha: 0.2, alphas: 0.35, draws: 4, drift: 0.11, drifts: 0.8, rise: 0.08, fall: 0.3 }; // `draws`: the random values a speck takes
 // The candles on the floor. Each spot: where it stands, in wheel radii right of and below the wheel's
 // centre, and how tall its flame burns, in the order they are lit as the roda fills. They are set
 // down by hand in three groups at different distances, and one side of the wheel stays dark: lights
 // on one circle round a numbered wheel read as a game's. Every halo stays clear of the wheel, of the
 // title above, of the readout below and of the stage's sides, which are 1.43 wheel radii away on a
 // desktop (`tests/coco.test.js` keeps the three rules). Then, in wheel radii for a flame of size 1:
-// the halo it throws on the floor, the flame and its white heart; how far the heart sways and the
-// light wavers, and how fast (two slow waves, in turns a second).
+// the halo it throws on the floor, the flame and its white heart; how far the heart sways, the
+// light wavers and the halo draws in (`breath`, only inward: a halo never grows past its place), a
+// share of each more as the music fills (`lively`), and how fast (two waves, in turns a second of
+// the energy clock).
 export const CANDLES = {
   spots: [
     [1.16, 0.72, 1.1],
@@ -66,17 +78,23 @@ export const CANDLES = {
   flameAlpha: 0.9,
   core: 0.011,
   coreAlpha: 0.85,
-  sway: 0.008,
-  flicker: 0.14,
-  rates: [1.3, 2.9],
+  sway: 0.012,
+  flicker: 0.16,
+  breath: 0.16,
+  lively: 0.6,
+  rates: [1.3, 2.7], // both under three a second, so a flame's light never changes faster than that
 };
+// The haze: wide, soft clouds of the same dust, lit from the wheel's side. Each keeps its direction
+// and drifts outward like the specks, in wheel radii; its edge never comes inside CLEAR.
+const HAZE = { count: 18, reach: 1.1, size: 0.14, sizes: 0.2, alpha: 0.16, alphas: 0.14, draws: 4, drift: 0.13, drifts: 0.7, rise: 0.15, fall: 0.4, calm: 0.6 };
+const DRIFT_DRAW = 3; // which of its random values sets a speck's or a cloud's own speed
 const TREMBLE = { window: 0.2, full: 4, gain: 1.2 }; // a rufada makes the flames tremble: strokes in the window for full strength
-const DUST = { life: 1.1, from: CLEAR + 0.02, travel: 0.7, width: 0.4, alpha: 0.18 }; // raised by the pisada, in wheel radii
+const DUST = { life: 1.1, from: CLEAR + 0.02, travel: 0.8, width: 0.45, alpha: 0.4 }; // raised by the pisada, in wheel radii
 export const BLOOM = { life: 0.45, from: CLEAR, to: 2.3, alpha: 0.34, peak: 0.14, halo: 0.25 }; // a golpe's flare: where the earth's burgundy peaks, and how much the halos gain
 export const MIN_FLASH_GAP = 0.34; // seconds between golpe flares: under three a second
 const DUSTING = { low: 'earth', rum: 'burgundy' }; // the drums whose strokes raise dust, and its colour
 const ROLLING = new Set(['low', 'high']);
-const SEEDS = { phase: 37, grain: 101 }; // one stream of `hash` per random choice
+const SEEDS = { phase: 37, grain: 101, haze: 211 }; // one stream of `hash` per random choice
 const VIGNETTE_STOPS = [
   [0, 0.85],
   [0.12, 0.45],
@@ -87,10 +105,10 @@ const VIGNETTE_STOPS = [
 ];
 
 /**
- * The background of the coco show. `barSeconds`: one bar; `rufada` and `golpe`: the tones of the
- * alfaia's rolls and of their landing.
+ * The background of the coco show. `barSeconds`: one bar; `beatsPerBar`: its beats; `rufada` and
+ * `golpe`: the tones of the alfaia's rolls and of their landing.
  */
-export function createCocoPainter({ barSeconds, rufada, golpe }) {
+export function createCocoPainter({ barSeconds, beatsPerBar, rufada, golpe }) {
   const reduced = globalThis.matchMedia?.(REDUCED_MOTION_QUERY);
   const calm = () => Boolean(reduced?.matches);
   const flashes = new Set(); // the start (seconds of the show) of every flare drawn, for the flash limit's test
@@ -98,9 +116,18 @@ export function createCocoPainter({ barSeconds, rufada, golpe }) {
   const candles = CANDLES.spots.map(([right, down, size], i) => ({ right, down, size, phase: hash(SEEDS.phase + i) * TAU }));
   const grain = [...Array(GRAIN.count).keys()].map(i => ({
     angle: hash(SEEDS.grain + i * GRAIN.draws) * TAU,
-    ring: GRAIN.from + hash(SEEDS.grain + i * GRAIN.draws + 1) ** 2 * GRAIN.reach, // denser near the wheel, where the light is
+    way: hash(SEEDS.grain + i * GRAIN.draws + 1), // how far out it starts, 0 at the wheel to 1
     size: GRAIN.size + hash(SEEDS.grain + i * GRAIN.draws + 2) * GRAIN.sizes,
     alpha: GRAIN.alpha + hash(SEEDS.grain + i * GRAIN.draws + 2) * GRAIN.alphas,
+    drift: GRAIN.drift * (1 + GRAIN.drifts * hash(SEEDS.grain + i * GRAIN.draws + DRIFT_DRAW)),
+  }));
+
+  const haze = [...Array(HAZE.count).keys()].map(i => ({
+    angle: ((i + hash(SEEDS.haze + i * HAZE.draws)) / HAZE.count) * TAU, // spread round the wheel, unevenly
+    way: hash(SEEDS.haze + i * HAZE.draws + 1),
+    size: HAZE.size + hash(SEEDS.haze + i * HAZE.draws + 2) * HAZE.sizes,
+    alpha: HAZE.alpha + hash(SEEDS.haze + i * HAZE.draws + 2) * HAZE.alphas,
+    drift: HAZE.drift * (1 + HAZE.drifts * hash(SEEDS.haze + i * HAZE.draws + DRIFT_DRAW)),
   }));
 
   /** The golpes that flare: one per moment, none within MIN_FLASH_GAP after the one before. */
@@ -137,7 +164,13 @@ export function createCocoPainter({ barSeconds, rufada, golpe }) {
       { centreX: x, centreY: y, scopeRadius: r } = g;
     const look = key => params.from[key] + (params.to[key] - params.from[key]) * params.mix;
     const now = position * barSeconds,
-      still = calm();
+      still = calm(),
+      energy = frame.energy ?? 0,
+      flow = frame.flow ?? 0;
+    // the pisada: the floor's light reaches further on each beat and settles before the next
+    const beat = position * beatsPerBar,
+      swell = still ? 1 : 1 + SWELL.reach * energy * (1 - (beat - Math.floor(beat))) ** SWELL.settle,
+      lively = 1 - CANDLES.lively + CANDLES.lively * energy;
     ctx.save();
     ctx.globalAlpha = frame.fresh ? 1 : TRAIL_ALPHA;
     ctx.fillStyle = COCO_PALETTE.ground;
@@ -155,10 +188,29 @@ export function createCocoPainter({ barSeconds, rufada, golpe }) {
       }
 
     // the floor: the burgundy of the earth, the candles' copper light near the wheel, and its grain
-    softRing(ctx, g, CLEAR, GLOW.outer, GLOW.rise, COCO_PALETTE.burgundy, GLOW.alpha * look('glow'), COCO_PALETTE.ground);
-    softRing(ctx, g, CLEAR, LIGHT.outer, LIGHT.rise, COCO_PALETTE.copper, LIGHT.alpha * look('glow'), COCO_PALETTE.burgundy);
-    for (const speck of grain)
-      disc(ctx, x + Math.cos(speck.angle) * speck.ring * r, y + Math.sin(speck.angle) * speck.ring * r, speck.size * g.dpr, COCO_PALETTE.earth, speck.alpha);
+    const pool = still ? 0 : ((Math.sin(flow * TAU * LIGHT.rates[0]) + Math.sin(flow * TAU * LIGHT.rates[1])) / 2) * lively;
+    softRing(ctx, g, CLEAR, GLOW.outer * swell, GLOW.rise, COCO_PALETTE.burgundy, GLOW.alpha * look('glow') * (1 + GLOW.waver * pool), COCO_PALETTE.ground);
+    softRing(ctx, g, CLEAR, LIGHT.outer * swell, LIGHT.rise, COCO_PALETTE.copper, LIGHT.alpha * look('glow') * (1 + LIGHT.waver * pool), COCO_PALETTE.burgundy);
+    for (const cloud of haze) {
+      const way = still ? cloud.way : (cloud.way + flow * cloud.drift) % 1,
+        ring = (CLEAR + cloud.size + way * HAZE.reach) * r,
+        shown = Math.min(1, way / HAZE.rise, (1 - way) / HAZE.fall) * (still ? 1 : HAZE.calm + (1 - HAZE.calm) * energy),
+        hx = x + Math.cos(cloud.angle) * ring,
+        hy = y + Math.sin(cloud.angle) * ring,
+        reach = cloud.size * r;
+      const dust = ctx.createRadialGradient(hx, hy, 0, hx, hy, reach);
+      dust.addColorStop(0, alphaOf(COCO_PALETTE.copper, cloud.alpha * shown));
+      dust.addColorStop(1, alphaOf(COCO_PALETTE.copper, 0));
+      ctx.fillStyle = dust;
+      ctx.fillRect(hx - reach, hy - reach, 2 * reach, 2 * reach);
+    }
+    for (const speck of grain) {
+      // denser near the wheel, where the light is; with motion, on its way outward
+      const way = still ? speck.way : (speck.way + flow * speck.drift) % 1,
+        ring = GRAIN.from + way * way * GRAIN.reach,
+        shown = Math.min(1, way / GRAIN.rise, (1 - way) / GRAIN.fall);
+      disc(ctx, x + Math.cos(speck.angle) * ring * r, y + Math.sin(speck.angle) * ring * r, speck.size * g.dpr, COCO_PALETTE.earth, speck.alpha * shown);
+    }
     ctx.globalAlpha = 1;
 
     if (!still) {
@@ -180,10 +232,12 @@ export function createCocoPainter({ barSeconds, rufada, golpe }) {
     for (let i = 0; i < Math.min(candles.length, Math.ceil(lit)); i++) {
       const candle = candles[i],
         strength = Math.min(1, lit - i),
-        waver = still ? 0 : ((Math.sin(now * TAU * CANDLES.rates[0] + candle.phase) + Math.sin(now * TAU * CANDLES.rates[1] + candle.phase * 2)) / 2) * tremble,
+        waver = still
+          ? 0
+          : ((Math.sin(flow * TAU * CANDLES.rates[0] + candle.phase) + Math.sin(flow * TAU * CANDLES.rates[1] + candle.phase * 2)) / 2) * tremble * lively,
         cx = x + candle.right * r,
         cy = y + candle.down * r,
-        reach = CANDLES.halo * candle.size * r,
+        reach = CANDLES.halo * candle.size * r * (1 - CANDLES.breath * Math.min(1, Math.abs(waver))),
         light = CANDLES.haloAlpha * strength * (1 + CANDLES.flicker * waver + BLOOM.halo * flare);
       const halo = ctx.createRadialGradient(cx, cy, 0, cx, cy, reach);
       halo.addColorStop(0, alphaOf(COCO_PALETTE.copper, Math.min(1, light)));
@@ -745,7 +799,7 @@ export const COCO_XAMBA = {
   scenes: SCENE_LIST,
   looks: SCENE_LOOKS,
   background: {
-    create: options => createCocoPainter({ ...options, barSeconds: BAR_SECONDS, rufada: RUFADA, golpe: GOLPE }),
+    create: options => createCocoPainter({ ...options, barSeconds: BAR_SECONDS, beatsPerBar: BEATS_PER_BAR, rufada: RUFADA, golpe: GOLPE }),
   },
   readout,
   waves: null,
