@@ -132,7 +132,7 @@ What the four spans share, by how far the measurement can be trusted:
 | Trait                        | Evidence                                                                                                                                                                              | Trust  |
 | :--------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | :----- |
 | A heavy low drum leads       | In every span the band from 60 to 120 Hz holds the most energy, and each band above 2 kHz sits 8 to 17 dB under it                                                                    | High   |
-| Sung, not only drummed       | The percussive share of the energy is 0.17 to 0.24 in every span, and the bands from 250 Hz to 2 kHz hold 2 to 9 dB more than in the show, which has no voice                         | Medium |
+| Sung, not only drummed       | The percussive share of the energy is 0.17 to 0.24 in every span, and the bands from 250 Hz to 2 kHz hold 3 to 8 dB more than in the show, which has no voice                         | Medium |
 | A piece starts thin          | Three of the four spans open 6 to 10 dB under their body, and the fourth runs two and a half minutes sparse, at 3 to 5 onsets a second, before the whole band plays at 6 to 7.5       | Medium |
 | A dense, even pulse          | 5 to 7.5 onsets a second through every full section, and the level hardly moves inside one piece                                                                                      | Medium |
 | The low drum on and off beat | The low band, folded on four beats, shows a stroke on every beat and another on the off-beat or in the sixteenth before the beat                                                      | Medium |
@@ -158,12 +158,13 @@ palmas that do not sound natural and a rufo that does not sound natural.
 
 The show rendered through the page and read with the same tool, voices and all in the references
 ([`lab/show-sections.txt`](../../lab/show-sections.txt)): it holds its energy from 60 to 250 Hz,
-level with the references at 60 to 120 Hz and 5 to 6 dB over them at 120 to 250 Hz; it has almost
-nothing under 60 Hz (15 dB under the references, whose low drum has weight there); it is 2 to 9 dB
-short from 250 Hz to 2 kHz, where the references hold the voices; and its second half, with the
-whole band, is 2 dB over the references from 2 to 8 kHz. Its onsets repeat at the beat with a
-strength of 0.48 and 0.70 in its two halves, against 0.06 to 0.41 in the spans: it is more even
-than the players are.
+level with the references at 60 to 120 Hz and 6 dB over them at 120 to 250 Hz; it has almost
+nothing under 60 Hz (15 dB under the references, whose low drum has weight there); it is 3 to 8 dB
+short from 250 Hz to 2 kHz, where the references hold the voices; and it is level with them above
+2 kHz, within 2 dB. Its onsets repeat at the beat with a strength of 0.53, against 0.06 to 0.41 in
+the spans: it is more even than the players are. By its level it holds its body only from 32.5 s,
+as its instruments enter one by one, but its opening rufadas sit 2 dB under that body, where three
+spans open 6 to 10 dB under theirs.
 
 The elements proposed for the show to exalt, not yet accepted:
 
