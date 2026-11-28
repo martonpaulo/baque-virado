@@ -8,6 +8,7 @@ import { after, before, test } from 'node:test';
 import { COPY } from '../src/copy.js';
 import { RHYTHMS, redirectFor } from '../src/rhythms/index.js';
 import { createShow, SCENES } from '../src/show.js';
+import { REDUCED_MOTION_QUERY } from '../src/theme.js';
 import { openBrowser } from './support/browser.js';
 
 // The shipped rhythm registry with its list replaced, served in its place: maracatu and the
@@ -86,6 +87,9 @@ async function openPage(viewport, { delaySounds = false, videoExport = false, qu
     await request.continue();
   });
   await page.setViewport(viewport);
+  // Headless Chrome takes the machine's own Reduce Motion setting, which the owner's Mac has on and
+  // CI has off: every page test states the setting, so both run the same page.
+  await page.emulateMediaFeatures([{ name: 'prefers-reduced-motion', value: 'no-preference' }]);
   await page.goto(session.server.url + query, { waitUntil: 'load' });
   // `?ritmo=<id>` of a rhythm path reloads the page there: wait for the page at the final address
   const path = redirectFor(query, REGISTRY_ROUTES[registry]) ?? '/';
@@ -115,6 +119,12 @@ test('the page loads with no error and exposes the exporter contract', async () 
   const fonts = await page.evaluate(() => [...document.fonts].filter(font => font.status === 'loaded').map(font => font.family.replaceAll('"', '')));
   assert.deepEqual([...new Set(fonts)].sort(), ['JetBrains Mono', 'Space Grotesk']);
   assert.deepEqual(errors, []);
+  await page.close();
+});
+
+test('a page test runs with motion on, whatever the machine’s own Reduce Motion setting is', async () => {
+  const { page } = await openPage(DESKTOP);
+  assert.equal(await page.evaluate(query => matchMedia(query).matches, REDUCED_MOTION_QUERY), false);
   await page.close();
 });
 

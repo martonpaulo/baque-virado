@@ -33,6 +33,8 @@ const WARM_FRAMES = 2 * WARM_FPS; // two seconds before the captured frame, so t
 async function shareCard(browser, url, { route, position, heading, line }) {
   const page = await browser.newPage();
   await page.setViewport({ ...SOCIAL, deviceScaleFactor: 1 });
+  // the stage as most viewers see it: headless Chrome would take the machine's own Reduce Motion setting
+  await page.emulateMediaFeatures([{ name: 'prefers-reduced-motion', value: 'no-preference' }]);
   await page.goto(`${url}${route}`, { waitUntil: 'networkidle0' });
   await page.evaluate(
     async (wanted, frames, fps) => {
