@@ -50,18 +50,38 @@ const OUTLINE_PAST_ALPHA = 0.5,
 const OUTLINE_WIDTH = 1.6; // CSS px
 const OUTLINE_GAP = 2; // CSS px between block and outline
 
-// Labels and playhead.
-const LABEL_SIZE = 0.32; // font size as a fraction of the row height...
-const LABEL_MAX_SIZE = 0.07; // ...capped at this fraction of the canvas height
+// Labels and playhead. The names and the counts are drawn at the stage's label size, which the
+// canvas takes as its own font size (styles.css .lanes canvas), whatever the height of the rows (#65).
 const HIDDEN_ALPHA = 0.01; // rows fainter than this are skipped
 const MUTED_LABEL_ALPHA = 0.45, // a silent voice keeps its colour, fainter, so it stays named (#12)
   COUNT_ALPHA = 0.55;
 const COUNT_COLOR = fgAlpha(COUNT_ALPHA);
-const INSTRUMENT_LINE = 0.6; // a hand's label: the instrument ("ALFAIA") over the hand, this many font sizes up and down
+const NAME_LINE = 0.6; // a name of two lines (the instrument, "ALFAIA", over the hand): each this many font sizes from the row's middle
+const TWO_LINES = 2 * NAME_LINE + 1; // the font sizes those two lines take of a row's height
 const NO_COUNT = '—'; // count shown for a silent voice
-const HALF_PIXEL = 0.5; // CSS px: a canvas shorter than its whole height by more than this gave a line to the key
 const PLAYHEAD_WIDTH = 1.6; // CSS px
 const PLAYHEAD_OVERHANG = 4; // CSS px above and below the rows
+
+/**
+ * The lines a name may take in a row of `rowHeight` at the label size `labelSize`: two where the row
+ * holds both, else one, so a name never leaves its row and never shrinks under the label size (#65;
+ * the maracatu's seven rows).
+ */
+export const rowLines = (rowHeight, labelSize) => (rowHeight >= TWO_LINES * labelSize ? 2 : 1);
+
+/**
+ * A voice's name as the lines it is written on. `name`: its own name; `instrument`: the instrument a
+ * hand belongs to, else null; `lines`: what the row holds (`rowLines`); `fits(text)`: whether a text
+ * stays left of the plot. A hand is the instrument over the hand (#12), or the hand alone on one
+ * line. A longer name («GUITARRA COM ECO») breaks at the space nearest its middle (#65).
+ */
+export function nameLines({ name, instrument, lines, fits }) {
+  if (instrument) return lines > 1 ? [instrument, name] : [name];
+  if (lines < 2 || !name.includes(' ') || fits(name)) return [name];
+  const spaces = [...name.matchAll(/ /g)].map(match => match.index),
+    at = spaces.reduce((best, space) => (Math.abs(space - name.length / 2) < Math.abs(best - name.length / 2) ? space : best));
+  return [name.slice(0, at), name.slice(at + 1)];
+}
 
 function rowLayout(voices, height) {
   const rowHeight = Math.min(height / voices.length, height / MAX_ROWS),
@@ -140,7 +160,8 @@ export function createLanes(canvas, volume = {}) {
   const ctx = canvas.getContext('2d');
   let width = 0,
     height = 0,
-    labelHeight = 0, // the height the names are sized for
+    labelSize = 0, // the stage's label size, in the canvas's own pixels
+    names = new Map(), // each name's lines at this size, kept until the canvas is measured again: no text is measured in a frame
     dpr = 1;
 
   function drawGrid(start, toX, plotLeft, plotRight, sixteenthWidth, top, bottom) {
@@ -223,8 +244,7 @@ export function createLanes(canvas, volume = {}) {
     // another while the rows move (#62). A row that stays where it is keeps its name lit.
     const [layout, other] = scene === from ? [layoutFrom, layoutTo] : [layoutTo, layoutFrom],
       changing = Math.abs(1 - 2 * amount); // 1 away from a scene change, 0 on it
-    const fontSize = Math.round(Math.min(layout.rowHeight * LABEL_SIZE, labelHeight * LABEL_MAX_SIZE));
-    ctx.font = `${fontSize}px ${MONO_FONT}`;
+    ctx.font = `${labelSize}px ${MONO_FONT}`;
     ctx.textBaseline = 'middle';
     const counts = {};
     for (const h of hitsInBar(Math.floor(position))) counts[h.voice] = (counts[h.voice] || 0) + 1;
@@ -236,12 +256,24 @@ export function createLanes(canvas, volume = {}) {
       ctx.globalAlpha = alpha * (active.has(voice) ? 1 : MUTED_LABEL_ALPHA) * visualOf(volume, voice);
       ctx.fillStyle = VOICES[voice].color;
       ctx.textAlign = 'left';
-      if (isHand(voice)) {
-        // a hand of an instrument: name the instrument over the hand (#12)
-        const shift = fontSize * INSTRUMENT_LINE;
-        ctx.fillText(COPY.instruments[VOICES[voice].instrument].toUpperCase(), 0, row.y - shift);
-        ctx.fillText(COPY.voices[voice].toUpperCase(), 0, row.y + shift);
-      } else ctx.fillText(COPY.voices[voice].toUpperCase(), 0, row.y);
+      const lines = rowLines(layout.rowHeight, labelSize),
+        kept = `${voice} ${lines}`;
+      if (!names.has(kept))
+        names.set(
+          kept,
+          nameLines({
+            name: COPY.voices[voice].toUpperCase(),
+            instrument: isHand(voice) ? COPY.instruments[VOICES[voice].instrument].toUpperCase() : null,
+            lines,
+            fits: text => ctx.measureText(text).width <= plotLeft,
+          }),
+        );
+      const [first, second] = names.get(kept);
+      if (second) {
+        const shift = labelSize * NAME_LINE;
+        ctx.fillText(first, 0, row.y - shift);
+        ctx.fillText(second, 0, row.y + shift);
+      } else ctx.fillText(first, 0, row.y);
       ctx.globalAlpha = alpha;
       ctx.textAlign = 'right';
       ctx.fillStyle = COUNT_COLOR;
@@ -265,11 +297,11 @@ export function createLanes(canvas, volume = {}) {
         style = getComputedStyle(canvas);
       width = canvas.width = Math.round(box.width * dpr);
       height = canvas.height = Math.round(box.height * dpr);
-      // Where the stage has no room for a second line of the colour key, the canvas gives that line
-      // up (styles.css .lanes): the names keep the size of its whole height, its flex basis, here in
-      // the box's own pixels whatever the stage's zoom (#61).
-      const whole = (parseFloat(style.flexBasis) * box.width) / parseFloat(style.width);
-      labelHeight = whole - box.height > HALF_PIXEL ? Math.round(whole * dpr) : height;
+      // the canvas's font size is the stage's label size in the page's pixels, before the stage's
+      // zoom (a desktop zooms the stage to its column): here in the canvas's own pixels, by the
+      // pixels it really has for each of the page's, never rounded down
+      labelSize = width ? (parseFloat(style.fontSize) * width) / parseFloat(style.width) : 0;
+      names.clear();
     },
   };
 }

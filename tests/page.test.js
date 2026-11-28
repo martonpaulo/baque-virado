@@ -446,6 +446,7 @@ function keepLaneTexts() {
       const ink = this.measureText(text);
       window.__laneTexts.push({
         text,
+        size: parseFloat(this.font),
         left: x - ink.actualBoundingBoxLeft,
         right: x + ink.actualBoundingBoxRight,
         top: y - ink.actualBoundingBoxAscent,
@@ -460,13 +461,26 @@ function keepLaneTexts() {
 function laneTextsInPage(scenes) {
   const AROUND = 0.3, // bars each side of a scene's start: wider than the half bar the rows take to move
     STEP = 0.02;
-  const problems = new Map();
-  let most = 0;
+  const PLOT = { left: 0.2, right: 0.9 }; // src/lanes.js: where the plot starts and ends, as shares of the canvas's width
+  const canvas = document.getElementById('lanes'),
+    key = document.getElementById('key');
+  // the stage's label size, the key's, in the canvas's own pixels (a desktop zooms the stage)
+  const label = (parseFloat(getComputedStyle(key).fontSize) * canvas.width) / parseFloat(getComputedStyle(canvas).width);
+  const problems = new Map(),
+    inPlot = new Set();
+  let most = 0,
+    smallest = Number.POSITIVE_INFINITY;
   const drawAt = (scene, offset) => {
     window.__laneTexts.length = 0;
     window.baque.render(scene.start + offset);
     const texts = window.__laneTexts;
     most = Math.max(most, texts.length);
+    for (const text of texts) {
+      smallest = Math.min(smallest, text.size);
+      // a name is written from the canvas's left edge, a count up to its right edge
+      const name = text.left < canvas.width / 2;
+      if (name ? text.right > PLOT.left * canvas.width : text.left < PLOT.right * canvas.width) inPlot.add(`${scene.id}: «${text.text}» reaches the plot`);
+    }
     for (const [i, a] of texts.entries())
       for (const b of texts.slice(i + 1)) {
         if (!(a.left < b.right && b.left < a.right && a.top < b.bottom && b.top < a.bottom)) continue;
@@ -478,7 +492,7 @@ function laneTextsInPage(scenes) {
     if (scene.start > 0) for (let step = -Math.round(AROUND / STEP); step <= Math.round(AROUND / STEP); step++) drawAt(scene, step * STEP);
     drawAt(scene, scene.bars / 2);
   }
-  return { problems: [...problems.values()], most };
+  return { problems: [...problems.values()], most, smallest, label, inPlot: [...inPlot] };
 }
 
 /** In the page: every row of strokes of every scene's readout, against its name and the readout's edge. */
@@ -613,6 +627,23 @@ test('no two lane names overlap at any position of any show, at a scene’s star
   const { results, problems } = await stageCheck('laneTexts');
   assert.deepEqual(problems, []);
   for (const { where, most } of results) assert.ok(most >= 2, `${where}: the lanes drew ${most} texts at most`); // a name and its count
+});
+
+// #65: a name was sized by its row, a third of the row's height and at most 7 % of the canvas's:
+// 7.6 px on a desktop and 5 px on a small phone, where the stage's label size is 8.6 and 7.4 px.
+test('the lanes draw every name and count at the stage’s label size, clear of the plot, in every scene of every show', async () => {
+  const { results } = await stageCheck('laneTexts');
+  const TOLERANCE = 0.01; // px: the canvas keeps a font size to a hundredth
+  assert.deepEqual(
+    results
+      .filter(({ smallest, label }) => !(smallest >= label - TOLERANCE))
+      .map(({ where, smallest, label }) => `${where}: ${smallest} px, under the label's ${label.toFixed(2)}`),
+    [],
+  );
+  assert.deepEqual(
+    results.flatMap(({ where, inPlot }) => inPlot.map(problem => `${where} ${problem}`)),
+    [],
+  );
 });
 
 // #66: on a phone the size container was the column with its padding, and cqw reads a container's

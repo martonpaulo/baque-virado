@@ -489,6 +489,7 @@ body {
   flex: 0 1 calc(var(--lanes-height) - var(--key-line) - var(--key-margin));
   min-height: 0;
   width: 100%;
+  font-size: var(--stage-label); /* src/lanes.js draws the rows' names and counts at this size, the key's (#65) */
 }
 
 /* ---------- controls (outside the reel) ---------- */
