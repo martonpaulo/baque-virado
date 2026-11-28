@@ -394,8 +394,10 @@ test('every cell of the chart and every piece of the kit sits inside the main ci
   for (const piece of KIT_PIECES) {
     assert.ok(Math.hypot(piece.x - MAIN_SQUARE / 2, piece.y - MAIN_SQUARE / 2) + piece.radius <= MAIN_SQUARE / 2, `${piece.id} is inside the circle`);
     assert.ok(piece.y - piece.radius > chartBottom, `${piece.id} is under the chart`);
+    // clear ground between two pieces even when both are lit and grown by 7 %
     for (const other of KIT_PIECES)
-      if (other !== piece) assert.ok(Math.hypot(piece.x - other.x, piece.y - other.y) > piece.radius + other.radius, `${piece.id} and ${other.id} overlap`);
+      if (other !== piece)
+        assert.ok(Math.hypot(piece.x - other.x, piece.y - other.y) > (piece.radius + other.radius) * 1.07 + 0.25, `${piece.id} and ${other.id} touch`);
   }
 });
 

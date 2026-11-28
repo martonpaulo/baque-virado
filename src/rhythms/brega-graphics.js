@@ -15,21 +15,23 @@ const LABEL_SPACING = 0.3;
 // The chart: up to two rows of four cells, centred on CHART_Y.
 const CELLS_PER_ROW = 4;
 const CELL = { width: 15.5, height: 11, gap: 1.5, radius: 1.6 };
-const CHART_Y = 27; // the middle of the chart's rows
+const CHART_Y = 26; // the middle of the chart's rows
 const CHART_LABEL_Y = 9.5;
 const SYMBOL_SIZE = 6; // a chord symbol: 4.4cqw, the readout's larger text
 const SYMBOL_BASELINE = 2.1; // from a cell's middle down to the symbol's baseline
 const REST = '–'; // a bar with no chord (the Breque's silence)
 // The kit, seen from above as the drummer sits: chimbal on the left, caixa in front, bumbo in the
 // middle, the three toms from high to low, left to right. `ring`: seconds a stroke stays lit.
-const KIT_LABEL_Y = 44;
+// `dark`: the light from which the piece's fill is bright enough for its name in the ground's colour
+// (where that ink and the light one read alike on the piece's colour).
+const KIT_LABEL_Y = 42.3; // clear of the chart above and of the toms under it, lit or not
 export const KIT_PIECES = [
-  { id: 'chimbal', voice: 'chimbal', x: 19, y: 66, radius: 10, ring: 0.14 },
-  { id: 'caixa', voice: 'caixa', x: 33, y: 83, radius: 8.5, ring: 0.22 },
-  { id: 'bumbo', voice: 'bumbo', x: 53, y: 72, radius: 12.5, ring: 0.3 },
-  { id: 'tom-agudo', voice: 'tom', tone: 'agudo', x: 40, y: 56, radius: 7.5, ring: 0.26 },
-  { id: 'tom-medio', voice: 'tom', tone: 'medio', x: 59, y: 52.5, radius: 7.5, ring: 0.28 },
-  { id: 'tom-grave', voice: 'tom', tone: 'grave', x: 76, y: 74, radius: 8.5, ring: 0.32 },
+  { id: 'chimbal', voice: 'chimbal', x: 19, y: 66, radius: 10, ring: 0.14, dark: 0.64 },
+  { id: 'caixa', voice: 'caixa', x: 33, y: 83, radius: 8.5, ring: 0.22, dark: 0.49 },
+  { id: 'bumbo', voice: 'bumbo', x: 53, y: 72, radius: 12.5, ring: 0.3, dark: 0.79 },
+  { id: 'tom-agudo', voice: 'tom', tone: 'agudo', x: 39, y: 55, radius: 7, ring: 0.26, dark: 0.66 },
+  { id: 'tom-medio', voice: 'tom', tone: 'medio', x: 60, y: 51.5, radius: 7, ring: 0.28, dark: 0.66 },
+  { id: 'tom-grave', voice: 'tom', tone: 'grave', x: 76, y: 74, radius: 8.5, ring: 0.32, dark: 0.66 },
 ];
 const OPEN = { tone: 'aberto', ring: 0.36, grow: 1.6 }; // the open chimbal rings longer, and its outer ring opens
 const OPEN_RING_GAP = 1.6; // the chimbal's second ring, outside its edge
@@ -37,7 +39,7 @@ const REST_FILL = 0.1; // a piece at rest: its colour, faint
 const LIT_FILL = 0.9;
 const OUTLINE = 0.55;
 const PIECE_STROKE = 0.5;
-const NAME_HALO = 0.7; // a piece's name keeps a rim of the ground's colour, so it reads on the fill at rest, lit and between
+const NAME_HALO = 0.7; // a light name keeps a rim of the ground's colour, so it reads on a fill that is filling or fading
 const SWELL = 0.07; // a lit piece grows by this share, with motion on
 const WAITING = 0.62; // a cell that is not the bar that sounds: still read at 4.5:1 on the ground
 const DIM = 0.38; // a muted instrument's piece
@@ -181,6 +183,9 @@ export function createBregaGraphics(element, { voices, copy, symbolAt, labelPixe
         setAttr(piece.group, 'data-lit', light > 0 ? 'true' : 'false');
         setAttr(piece.group, 'opacity', muted ? String(DIM) : '1');
         setAttr(piece.disc, 'fill-opacity', (REST_FILL + (LIT_FILL - REST_FILL) * light).toFixed(3));
+        // on a bright fill the name is the ground's colour, with no rim; under it, light with its rim
+        setAttr(piece.name, 'fill', light > piece.dark ? COLORS.void : COLORS.fg);
+        setAttr(piece.name, 'stroke-width', light > piece.dark ? '0' : String(NAME_HALO));
         setAttr(piece.body, 'transform', still?.matches ? '' : `scale(${(1 + SWELL * clamp(light, 0, 1)).toFixed(3)})`);
         if (piece.open) setAttr(piece.open, 'stroke-opacity', opened && !muted ? String(OUTLINE) : '0');
       }
