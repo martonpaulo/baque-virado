@@ -434,7 +434,11 @@ function keyInPage(scenes) {
     }
   if (heights.size > 1) problems.add(`the lanes change height through the show: ${[...heights].join(', ')} px`);
   const lines = Math.round(key.offsetHeight / parseFloat(getComputedStyle(key).lineHeight)); // both before the desktop zoom
-  return { problems: [...problems], most, lines, nameSize };
+  // the room over the key and the room between it and the canvas, both in the page's pixels (a desktop zooms the stage)
+  const zoom = canvas.getBoundingClientRect().width / parseFloat(getComputedStyle(canvas).width),
+    over = parseFloat(getComputedStyle(key).marginTop),
+    under = (canvas.getBoundingClientRect().top - key.getBoundingClientRect().bottom) / zoom;
+  return { problems: [...problems], most, lines, nameSize, over, under };
 }
 
 /** In the page, before anything is measured: keep the ink box of every text the lanes draw. */
@@ -462,18 +466,43 @@ function laneTextsInPage(scenes) {
   const AROUND = 0.3, // bars each side of a scene's start: wider than the half bar the rows take to move
     STEP = 0.02;
   const PLOT = { left: 0.2, right: 0.9 }; // src/lanes.js: where the plot starts and ends, as shares of the canvas's width
+  const NAMES_APART = 2; // two rows' names are at least this many times as far apart as a name's own two lines
   const canvas = document.getElementById('lanes'),
     key = document.getElementById('key');
   // the stage's label size, the key's, in the canvas's own pixels (a desktop zooms the stage)
   const label = (parseFloat(getComputedStyle(key).fontSize) * canvas.width) / parseFloat(getComputedStyle(canvas).width);
   const problems = new Map(),
-    inPlot = new Set();
+    inPlot = new Set(),
+    unnamed = new Set(),
+    crowded = new Set();
   let most = 0,
     smallest = Number.POSITIVE_INFINITY;
   const drawAt = (scene, offset) => {
     window.__laneTexts.length = 0;
     window.baque.render(scene.start + offset);
     const texts = window.__laneTexts;
+    // in the middle of a scene every row is named: each hand's name holds its instrument's, on a line of its own or in the same line
+    if (offset === scene.bars / 2)
+      for (const instrument of new Set(scene.hands)) {
+        const rows = scene.hands.filter(hand => hand === instrument).length,
+          named = texts.filter(({ text }) => text.includes(instrument)).length;
+        if (named < rows) unnamed.add(`${scene.id}: ${rows} hands of «${instrument}», ${named} named with it`);
+      }
+    // and a name's own two lines are nearer each other than any two names are: a row's texts are its
+    // name's one or two lines, then its count, in the order the lanes draw them
+    if (offset === scene.bars / 2) {
+      const names = [[]];
+      for (const text of texts) text.left < canvas.width / 2 ? names.at(-1).push(text) : names.push([]);
+      const rows = names.filter(lines => lines.length).sort((a, b) => a[0].top - b[0].top);
+      const within = Math.max(0, ...rows.filter(lines => lines.length > 1).map(([first, second]) => second.top - first.bottom));
+      for (const [i, lines] of rows.slice(1).entries()) {
+        const between = lines[0].top - rows[i].at(-1).bottom;
+        if (within > 0 && between < NAMES_APART * within)
+          crowded.add(
+            `${scene.id}: «${rows[i].at(-1).text}» is ${between.toFixed(1)} px over «${lines[0].text}», and a name's lines ${within.toFixed(1)} px apart`,
+          );
+      }
+    }
     most = Math.max(most, texts.length);
     for (const text of texts) {
       smallest = Math.min(smallest, text.size);
@@ -492,7 +521,7 @@ function laneTextsInPage(scenes) {
     if (scene.start > 0) for (let step = -Math.round(AROUND / STEP); step <= Math.round(AROUND / STEP); step++) drawAt(scene, step * STEP);
     drawAt(scene, scene.bars / 2);
   }
-  return { problems: [...problems.values()], most, smallest, label, inPlot: [...inPlot] };
+  return { problems: [...problems.values()], most, smallest, label, inPlot: [...inPlot], unnamed: [...unnamed], crowded: [...crowded] };
 }
 
 /** In the page: every row of strokes of every scene's readout, against its name and the readout's edge. */
@@ -557,7 +586,13 @@ let everyStage;
 async function measureEveryStage() {
   const results = [];
   for (const rhythm of RHYTHMS) {
-    const scenes = createShow(rhythm).SCENES.map(({ id, start, bars }) => ({ id, start, bars }));
+    // `hands`: for each row of the scene that is a hand, its instrument's name as the lanes write it
+    const scenes = createShow(rhythm).SCENES.map(({ id, start, bars, lanes }) => ({
+      id,
+      start,
+      bars,
+      hands: lanes.filter(voice => rhythm.voices[voice].hand).map(voice => rhythm.copy.instruments[rhythm.voices[voice].instrument].toUpperCase()),
+    }));
     const { page, errors } = await openPage(STAGE_SIZES[0], { query: `?ritmo=${rhythm.id}`, still: true });
     await page.evaluate(keepLaneTexts);
     for (const viewport of STAGE_SIZES) {
@@ -642,6 +677,42 @@ test('the lanes draw every name and count at the stage’s label size, clear of 
   );
   assert.deepEqual(
     results.flatMap(({ where, inPlot }) => inPlot.map(problem => `${where} ${problem}`)),
+    [],
+  );
+});
+
+// #65: in the maracatu's Orquestra, whose seven rows hold one line each, the alfaia's hands read
+// «PRINCIPAL» and «RESPOSTA», and «ALFAIA» over each in every other scene. A row of one line keeps
+// the instrument in the name; and a show whose rows fall to one line with no such name fails here
+// (the coco's four rows on a phone, were the lanes any shorter).
+test('a hand’s row names its instrument in every scene of every show, on one line as on two', async () => {
+  const { results } = await stageCheck('laneTexts');
+  assert.deepEqual(
+    results.flatMap(({ where, unnamed }) => unnamed.map(problem => `${where} ${problem}`)),
+    [],
+  );
+});
+
+// #65: the key sat flush on the canvas. On a phone it was 7 device pixels over a first row's name of
+// two lines, whose own lines are 4 apart, and the two read as one list. With the margin over it
+// under it too, the key's own two lines (the coco) were still as near each other as the key and the name.
+test('the colour key stands twice as far over the lanes as under the line above it, in every show', async () => {
+  const { results } = await stageCheck('key');
+  const TOLERANCE = 0.05; // px: a box is placed to a fraction of a device pixel
+  assert.deepEqual(
+    results
+      .filter(({ over, under }) => !(over > 0 && under >= 2 * over - TOLERANCE))
+      .map(({ where, over, under }) => `${where}: ${over} px over the key, ${under.toFixed(2)} under it`),
+    [],
+  );
+});
+
+// #65: on a phone two hands, one row over the other (the manguebeat's Célula), were four lines 8, 11
+// and 8 device pixels apart: the eye could not tell which two were one name.
+test('two rows’ names are at least twice as far apart as a name’s own two lines, in every scene of every show', async () => {
+  const { results } = await stageCheck('laneTexts');
+  assert.deepEqual(
+    results.flatMap(({ where, crowded }) => crowded.map(problem => `${where} ${problem}`)),
     [],
   );
 });

@@ -56,7 +56,10 @@ const HIDDEN_ALPHA = 0.01; // rows fainter than this are skipped
 const MUTED_LABEL_ALPHA = 0.45, // a silent voice keeps its colour, fainter, so it stays named (#12)
   COUNT_ALPHA = 0.55;
 const COUNT_COLOR = fgAlpha(COUNT_ALPHA);
-const NAME_LINE = 0.6; // a name of two lines (the instrument, "ALFAIA", over the hand): each this many font sizes from the row's middle
+// A name of two lines (the instrument, "ALFAIA", over the hand): each this many font sizes from the
+// row's middle, so the two sit one line apart with no leading and read as one name: two rows' names
+// are always farther apart than a name's own lines (#65)
+const NAME_LINE = 0.5;
 const TWO_LINES = 2 * NAME_LINE + 1; // the font sizes those two lines take of a row's height
 const NO_COUNT = '—'; // count shown for a silent voice
 const PLAYHEAD_WIDTH = 1.6; // CSS px
@@ -71,12 +74,14 @@ export const rowLines = (rowHeight, labelSize) => (rowHeight >= TWO_LINES * labe
 
 /**
  * A voice's name as the lines it is written on. `name`: its own name; `instrument`: the instrument a
- * hand belongs to, else null; `lines`: what the row holds (`rowLines`); `fits(text)`: whether a text
- * stays left of the plot. A hand is the instrument over the hand (#12), or the hand alone on one
- * line. A longer name («GUITARRA COM ECO») breaks at the space nearest its middle (#65).
+ * hand belongs to, else null; `oneLine`: the hand with its instrument on one line, where its package
+ * writes one; `lines`: what the row holds (`rowLines`); `fits(text)`: whether a text stays left of
+ * the plot. A hand is the instrument over the hand (#12), and on one line its package's short form,
+ * which keeps the instrument («ALFAIA PRINC.»), so a show names a hand one way in every scene. A
+ * longer name («GUITARRA COM ECO») breaks at the space nearest its middle (#65).
  */
-export function nameLines({ name, instrument, lines, fits }) {
-  if (instrument) return lines > 1 ? [instrument, name] : [name];
+export function nameLines({ name, instrument, oneLine, lines, fits }) {
+  if (instrument) return lines > 1 ? [instrument, name] : [oneLine ?? name];
   if (lines < 2 || !name.includes(' ') || fits(name)) return [name];
   const spaces = [...name.matchAll(/ /g)].map(match => match.index),
     at = spaces.reduce((best, space) => (Math.abs(space - name.length / 2) < Math.abs(best - name.length / 2) ? space : best));
@@ -264,6 +269,7 @@ export function createLanes(canvas, volume = {}) {
           nameLines({
             name: COPY.voices[voice].toUpperCase(),
             instrument: isHand(voice) ? COPY.instruments[VOICES[voice].instrument].toUpperCase() : null,
+            oneLine: COPY.handsOnOneLine?.[voice]?.toUpperCase(),
             lines,
             fits: text => ctx.measureText(text).width <= plotLeft,
           }),

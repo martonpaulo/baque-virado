@@ -437,10 +437,10 @@ body {
   }
 }
 
-/* the lanes: the colour key over the canvas. --lanes-height is the box with a key of one line, and
-   the box is never under it. A key of two lines adds its second line where the stage's column has
-   the room; where it has none (a desktop), the box keeps that height and the canvas gives the
-   line up (src/lanes.js keeps the size of its names) */
+/* the lanes: the colour key over the canvas. --lanes-height is the least the box takes. The key's
+   bottom margin and a second line of the key add to the box where the stage's column has the room;
+   where it has none (a desktop), the box keeps that height and the canvas gives them up
+   (src/lanes.js keeps the size of its names) */
 .lanes {
   --lanes-height: 37cqw;
   --key-leading: 1.3;
@@ -455,7 +455,10 @@ body {
 }
 /* names the wheel's dot colours the lanes do not show as rows (#12), on the lines the names need.
    The key in view and, unseen, every other key of the show (src/lanes.js) share one grid cell: the
-   box is as tall as the show's tallest key, so the canvas keeps its height from scene to scene (#61) */
+   box is as tall as the show's tallest key, so the canvas keeps its height from scene to scene (#61).
+   The margin under the key is twice the one over it, more than the room between the key's own
+   lines: flush on the canvas, the key and the first row's name of two lines read as one list on a
+   phone (#65) */
 .key {
   --key-gap: 1.6cqw; /* between two names */
   --key-tracking: 0.04em;
@@ -463,7 +466,7 @@ body {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
   min-height: var(--key-line);
-  margin: var(--key-margin) 0 0;
+  margin: var(--key-margin) 0 calc(2 * var(--key-margin));
   font-family: var(--f-mono);
   font-size: var(--stage-label);
   line-height: var(--key-leading);

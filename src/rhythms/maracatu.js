@@ -389,6 +389,9 @@ const COPY = {
   voices: { main: 'principal', answer: 'resposta', stick: 'baqueta', caixa: 'caixa', agbe: 'agbê', ganza: 'ganzá', agogo: 'agogô', whistle: 'apito' },
   instruments: { alfaia: READ.alfaia }, // an instrument with hands is named over each hand
   hands: { main: READ.mainHand, answer: READ.answerHand }, // a hand as the entry readout names it
+  // a hand where its lane holds one line (the Orquestra's seven rows): the instrument stays in the
+  // name, inside the thirteen letters the lanes have left of the plot (#65)
+  handsOnOneLine: { main: `${READ.alfaia} princ.`, answer: `${READ.alfaia} resp.` },
   centre: { whistle: 'APITO', roll: 'RUFO', break: 'VIRADA', cut: 'CORTE', end: 'FIM', offbeat: 'CONTRATEMPO' },
   read: READ,
 };
