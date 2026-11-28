@@ -39,6 +39,9 @@ const EXPORT_FRAME = { width: 1080, height: 1920 }; // tools/export-video.mjs, t
 const COPY_ALFAIA = COPY.read.alfaia.toUpperCase(),
   COPY_PRINCIPAL = COPY.voices.main.toUpperCase();
 const SOUND_DELAY_MS = 600; // holds every sample back, so Space lands while they decode
+// A loaded machine takes over half a minute to open a page (a landing gate beside other builds failed
+// twice on the browser's own 30 seconds): the limit is for a page that is stuck, never for a slow one.
+const PAGE_OPEN_MS = 120000;
 const DETERMINISM_POSITION = 20.3; // bars: a baque scene, wheel, score and background all busy
 const BAQUE_SCENES = SCENES.filter(scene => scene.named && scene.id !== 'summary').map(scene => scene.id);
 
@@ -60,6 +63,8 @@ after(async () => {
  */
 async function openPage(viewport, { delaySounds = false, videoExport = false, query = '', registry = null, still = false } = {}) {
   const page = await session.browser.newPage();
+  page.setDefaultNavigationTimeout(PAGE_OPEN_MS);
+  page.setDefaultTimeout(PAGE_OPEN_MS);
   if (still)
     await page.evaluateOnNewDocument(() => {
       const getContext = HTMLCanvasElement.prototype.getContext;
