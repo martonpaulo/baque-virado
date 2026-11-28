@@ -111,6 +111,9 @@ export function createBregafunkBackground() {
     ctx.globalAlpha = 1;
   }
 
+  /** A ring's half-width on one axis for a lean: wider without limit, narrower by RINGS.sway at most, so no ring crosses the wheel's numbers. */
+  const across = lean => Math.max(1 - RINGS.sway, 1 + lean);
+
   function draw(ctx, frame) {
     const { width, height, centreX: cx, centreY: cy, scopeRadius: r, dpr, position, params, recent, time, step, fresh } = frame;
     const reduced = reducedMotion(),
@@ -145,7 +148,7 @@ export function createBregafunkBackground() {
       const last = i === RINGS.radii.length - 1;
       ctx.strokeStyle = alphaOf(drop && last ? PALETTE.gold : PALETTE.purple, Math.min(1, RINGS.alpha * weight));
       ctx.beginPath();
-      ctx.ellipse(cx, cy, r * radius * (1 + lean), r * radius * (1 - lean), reduced ? 0 : flow * RINGS.turn * (1 - RINGS.lag * i) * TAU, 0, TAU);
+      ctx.ellipse(cx, cy, r * radius * across(lean), r * radius * across(-lean), reduced ? 0 : flow * RINGS.turn * (1 - RINGS.lag * i) * TAU, 0, TAU);
       ctx.stroke();
     });
     if (!reduced) {
@@ -156,7 +159,7 @@ export function createBregafunkBackground() {
         if (shown <= 0) return;
         ctx.globalAlpha = shown;
         ctx.beginPath();
-        ctx.ellipse(cx, cy, r * radius * (1 - lean), r * radius * (1 + lean), -flow * RINGS.turn * TAU, 0, TAU);
+        ctx.ellipse(cx, cy, r * radius * across(-lean), r * radius * across(lean), -flow * RINGS.turn * TAU, 0, TAU);
         ctx.stroke();
       });
       ctx.globalAlpha = 1;

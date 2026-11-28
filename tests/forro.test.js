@@ -271,3 +271,58 @@ test('a key sounds for as long as its note is written, a button lights as strong
   assert.equal(pressLight(0.9, 0.45, true), 1); // lit whole, however faint the stroke
   assert.equal(pressLight(1, 1, true), 0);
 });
+
+// Found while every background was read for #63: the forró's never read the viewer's motion setting,
+// so its bellows and its flags moved for a viewer who asked for reduced motion.
+test('with reduced motion the background holds still: the bellows rest and no flag or spark flies', () => {
+  const FPS = 30,
+    BAR = 40, // a bar of the Rabeca scene, far from a scene change
+    geometry = { width: 400, height: 800, centreX: 200, centreY: 330, scopeRadius: 120, dpr: 1 };
+  /** What each frame of the bar draws: every path point, arc and gradient. */
+  const framesOf = () => {
+    const layer = FORRO.background.create({}),
+      frames = [];
+    const record =
+      name =>
+      (...shape) => {
+        frames.at(-1).push([name, ...shape]);
+      };
+    const ctx = new Proxy(
+      {},
+      {
+        get: (_target, key) =>
+          key.startsWith('create')
+            ? (...shape) => {
+                record(key)(...shape);
+                return { addColorStop: record('stop') };
+              }
+            : record(key),
+        set: () => true,
+      },
+    );
+    for (let frame = 0; frame < meterOf(FORRO).barSeconds * FPS; frame++) {
+      const position = BAR + frame / FPS / meterOf(FORRO).barSeconds,
+        recent = show.recentHits(position, 1.2);
+      frames.push([]);
+      layer.draw(ctx, { ...geometry, position, totalBars: BAR + 1, recent, energy: show.energyOf(recent), flow: show.flowAt(position) }); // `totalBars`: the dusk's slow change, held for the bar
+    }
+    return frames;
+  };
+  const motion = { matches: false };
+  const saved = globalThis.matchMedia;
+  globalThis.matchMedia = () => motion;
+  try {
+    const moving = framesOf();
+    assert.ok(
+      moving.some(frame => JSON.stringify(frame) !== JSON.stringify(moving[0])),
+      'with motion the bellows breathe',
+    );
+    motion.matches = true;
+    const still = framesOf().map(frame => frame.filter(([name]) => name !== 'createRadialGradient' && name !== 'stop')); // but the sky, which dims over the whole show
+    assert.ok(still.length > 1);
+    for (const frame of still) assert.deepEqual(frame, still[0], 'every frame draws the same picture');
+  } finally {
+    motion.matches = false;
+    globalThis.matchMedia = saved;
+  }
+});

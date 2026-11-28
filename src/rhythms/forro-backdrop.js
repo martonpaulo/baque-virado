@@ -8,7 +8,8 @@
 // It depends only on the show position and the hits, never on earlier frames. Flash safety (WCAG
 // 2.3.1): nothing changes brightness in a beat; the pulse is motion (the bellows, the flags and the
 // sparks), and each flag or spark covers far less than a quarter of a 10° field. Reduced motion
-// keeps the picture as it was before the energy moved it: no spark, and the bellows as deep in every bar.
+// holds the picture still: the bellows rest where a bar begins, and no flag or spark flies; only
+// the dusk goes on, over the whole show.
 
 import { FORRO, REDUCED_MOTION_QUERY } from '../theme.js';
 import { hash } from '../util.js';
@@ -32,8 +33,8 @@ const SKY = {
   dim: 0.82, // the sky's opacity over the night colour: it never reaches full brightness
   lean: 0.12, // with the bellows, the warm stops lean this much further out and back at full energy
 };
-// `depth`: how far the bellows open in a bar with reduced motion; with motion, from `calm` of it in
-// silence to `full` of it at full energy. `travel`: turns the pleats go round in a second of the energy clock.
+// `depth`: how far the bellows open in a bar, from `calm` of it in silence to `full` of it at full
+// energy. `travel`: turns the pleats go round in a second of the energy clock.
 const BELLOWS = { radius: 1.45, depth: 0.07, calm: 0.5, full: 1.8, travel: 0.012, folds: 28, pleat: 0.08, width: 2, alpha: 0.75, innerAlpha: 0.35 };
 // Sparks of the fogueira: each leaves the wheel's edge, drifts `reach` wheel radii outward and `rise`
 // upward in 1 / `rate` seconds of the energy clock, swaying a little; `few` of them fly in silence
@@ -165,10 +166,12 @@ export function drawForroBackdrop(ctx, frame) {
     energy = frame.energy ?? 0,
     flow = frame.flow ?? 0;
   // the bellows open on the bar's first half and close on its second, wider the busier the music is
-  const depth = BELLOWS.depth * (still ? 1 : BELLOWS.calm + (BELLOWS.full - BELLOWS.calm) * energy),
-    breath = Math.sin((position % 1) * TAU);
-  sky(ctx, frame, Math.min(1, position / totalBars), still ? 0 : SKY.lean * energy * breath);
-  bellows(ctx, frame, depth * breath, still ? 0 : flow * BELLOWS.travel);
-  if (!still) sparks(ctx, frame, flow, energy);
+  const depth = BELLOWS.depth * (BELLOWS.calm + (BELLOWS.full - BELLOWS.calm) * energy),
+    breath = still ? 0 : Math.sin((position % 1) * TAU);
+  sky(ctx, frame, Math.min(1, position / totalBars), SKY.lean * energy * breath);
+  // they open wider with the energy, and close no further than `depth`: the pleats stay outside the wheel's numbers
+  bellows(ctx, frame, Math.max(-BELLOWS.depth, depth * breath), still ? 0 : flow * BELLOWS.travel);
+  if (still) return;
+  sparks(ctx, frame, flow, energy);
   flags(ctx, frame, recent);
 }

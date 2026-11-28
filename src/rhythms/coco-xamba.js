@@ -26,7 +26,7 @@ import { lilt, recordedChoices, studioFiles, studioSounds, takes } from './studi
 // Safety (docs/research/colour-and-visuals.md, rule 6; WCAG 2.3.1): the golpe flares are the only
 // changes of the whole picture, never closer than MIN_FLASH_GAP, so at most three in any second;
 // the swell on the beat changes the size of the pool of light, not its brightness; reduced motion
-// drops the flares, the swell and the dust and holds every flame and every speck still. Nothing is
+// drops the flares, the swell, the haze and the dust and holds every flame and every speck still. Nothing is
 // drawn under the wheel, so its dots keep their contrast. Palette and reasons: docs/rhythms/coco.md.
 
 /** Coco da Xambá, trance and devotion: ground, earth, burgundy, copper and cloth, from section 5. */
@@ -191,10 +191,10 @@ export function createCocoPainter({ barSeconds, beatsPerBar, rufada, golpe }) {
     const pool = still ? 0 : ((Math.sin(flow * TAU * LIGHT.rates[0]) + Math.sin(flow * TAU * LIGHT.rates[1])) / 2) * lively;
     softRing(ctx, g, CLEAR, GLOW.outer * swell, GLOW.rise, COCO_PALETTE.burgundy, GLOW.alpha * look('glow') * (1 + GLOW.waver * pool), COCO_PALETTE.ground);
     softRing(ctx, g, CLEAR, LIGHT.outer * swell, LIGHT.rise, COCO_PALETTE.copper, LIGHT.alpha * look('glow') * (1 + LIGHT.waver * pool), COCO_PALETTE.burgundy);
-    for (const cloud of haze) {
-      const way = still ? cloud.way : (cloud.way + flow * cloud.drift) % 1,
+    for (const cloud of still ? [] : haze) {
+      const way = (cloud.way + flow * cloud.drift) % 1,
         ring = (CLEAR + cloud.size + way * HAZE.reach) * r,
-        shown = Math.min(1, way / HAZE.rise, (1 - way) / HAZE.fall) * (still ? 1 : HAZE.calm + (1 - HAZE.calm) * energy),
+        shown = Math.min(1, way / HAZE.rise, (1 - way) / HAZE.fall) * (HAZE.calm + (1 - HAZE.calm) * energy),
         hx = x + Math.cos(cloud.angle) * ring,
         hy = y + Math.sin(cloud.angle) * ring,
         reach = cloud.size * r;

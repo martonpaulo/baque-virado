@@ -18,6 +18,8 @@ export const RECENT_WINDOW = 1.2;
 export const CALM_PACE = 0.2;
 /** The energy is 1 from this share of the show's steps up, ordered by how busy they are: its few busiest moments do not push every busy scene down the scale. */
 export const FULL_ENERGY_SHARE = 0.9;
+/** Seconds a hit takes to count in full: the energy rises to it and never jumps, so nothing a background counts by it appears at once. */
+export const ENERGY_RISE = 0.15;
 
 /** The show of one rhythm package: its scenes on the timeline, and every hit of every bar. */
 export function createShow(rhythm) {
@@ -129,7 +131,11 @@ export function createShow(rhythm) {
   // ---------- the music's energy ----------
   // How busy the music is, read from the timeline alone, so the backgrounds can follow it (#63):
   // each hit of the last RECENT_WINDOW seconds counts its velocity, a newer hit more.
-  const loadOf = recent => recent.reduce((sum, h) => sum + (h.age < RECENT_WINDOW ? Math.min(1, h.hit.velocity) * (1 - h.age / RECENT_WINDOW) : 0), 0);
+  const loadOf = recent =>
+    recent.reduce(
+      (sum, h) => sum + (h.age < RECENT_WINDOW ? Math.min(1, h.hit.velocity) * Math.min(1, h.age / ENERGY_RISE) * (1 - h.age / RECENT_WINDOW) : 0),
+      0,
+    );
   let peakLoad = null; // the load that counts as full energy, read once from every step of the show
   function peak() {
     if (peakLoad === null) {

@@ -37,7 +37,7 @@ const TRAIL_SECONDS = 0.9; // long trails: the frame before fades slowly into th
 const HALO = { inside: 1, peak: 1.35, reach: 3.2, alpha: 0.42, breathBars: 2, breath: 0.07, deep: 2.4 };
 // Rings born far out that contract towards the wheel over `beats`, one each beat.
 // With motion a scene never shows less than `least` of them, and they show `calm` of their strength in silence.
-const RINGS = { from: 2.7, to: 1.12, beats: 2, alpha: 0.3, width: 1.5, least: 0.45, calm: 0.6 };
+const RINGS = { from: 2.7, to: 1.12, beats: 2, alpha: 0.3, width: 1.5, least: 0.45, calm: 0.6, still: { alpha: 0.16, width: 1 } }; // `still`: as drawn with reduced motion
 // Motes of dust in the cold light: each appears beside the wheel and, in 1 / `rate` seconds of the
 // energy clock, falls `fall` wheel radii while it drifts `out`, further out than down, so none falls
 // back across the wheel; `few` of them hang in silence and all at full energy. Sizes in wheel radii.
@@ -96,12 +96,13 @@ export function createBregaPainter({ beatsPerBar, barSeconds, petalBars, accentB
   function rings(ctx, g, position, strength) {
     if (strength <= 0) return;
     const beats = position * beatsPerBar;
-    ctx.lineWidth = RINGS.width * g.dpr;
+    const drawn = calm() ? RINGS.still : RINGS;
+    ctx.lineWidth = drawn.width * g.dpr;
     for (let k = 0; k < RINGS.beats; k++) {
       // a reduced-motion viewer sees the rings resting, not moving
       const phase = calm() ? (k + 1) / (RINGS.beats + 1) : (beats - Math.floor(beats) + k) / RINGS.beats;
       const eased = 1 - (1 - phase) ** 2; // fast out of the beat, settling on the wheel
-      ctx.strokeStyle = alphaOf(BREGA_PALETTE.light, RINGS.alpha * strength * Math.sin(Math.PI * phase));
+      ctx.strokeStyle = alphaOf(BREGA_PALETTE.light, drawn.alpha * strength * Math.sin(Math.PI * phase));
       ctx.beginPath();
       ctx.arc(g.centreX, g.centreY, g.scopeRadius * lerp(RINGS.from, RINGS.to, eased), 0, TAU);
       ctx.stroke();
