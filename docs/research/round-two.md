@@ -325,9 +325,12 @@ Asked by the owner on 2026-11-17; read from Anthropic's model reference of that 
 ## Unfinished work kept
 
 The rewrites of the frevo, forró and bregafunk scripts that the owner stopped on 2026-11-17 are on
-GitHub as the branches `wip/frevo`, `wip/forro` and `wip/bregafunk` (pushed with the owner's
-permission). Each is one commit ahead of `main`, does not pass its test, and is a starting point
-for round two, not something to merge as it is.
+GitHub (pushed with the owner's permission) as archived references, not branches:
+`refs/archive/wip/frevo`, `refs/archive/wip/forro` and `refs/archive/wip/bregafunk`. A clone does
+not fetch them by default: `git fetch origin refs/archive/wip/frevo` reads one. Each is one commit
+ahead of the `main` of 2026-11-17, does not pass its test, and is a starting point for round two,
+not something to merge as it is. They were pushed as the branches `wip/frevo`, `wip/forro` and
+`wip/bregafunk`, which no longer exist: a branch named `wip/<rhythm>` on `origin` is new work.
 
 The owner's view of the first round: every show but the maracatu still has a lot to improve, the
 delivered ones included.
