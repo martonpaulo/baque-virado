@@ -273,13 +273,13 @@ test('a note shows its accidental where it leaves the key or returns to it, and 
   assert.deepEqual(signs(palhetas + 13), [null, 1, 0, null, 0, null]);
   // a note tied over the bar line shows no sign again; the si natural after it does
   assert.deepEqual(signs(palhetas + 7), [null, 'r', null, 0, null]);
-  // a bar with no sign next to a neighbour, and no flag before its bar line, is spaced evenly
-  const even = barLayout(shown(palhetas + 1), STEPS_PER_BAR);
+  // a bar with no sign next to a neighbour, and an eighth before its bar line, is spaced evenly («d5 - - f5 - - d5 -»)
+  const even = barLayout(shown(startOf('segunda')), STEPS_PER_BAR);
   for (const [step, middle] of even.entries()) assert.ok(Math.abs(middle - (step + 1 / 2) / STEPS_PER_BAR) < 1e-9, `step ${step} at ${middle}`);
   // «- - - - . g4 b4 d5»: the natural stands after a sixteenth whose flags reach right, so its sixteenth is wider
   const wide = barLayout(shown(palhetas + 7), STEPS_PER_BAR),
     gaps = wide.slice(1).map((middle, step) => middle - wide[step]);
-  assert.ok(gaps[5] > 1.7 * gaps[0] && gaps[5] < 1.8 * gaps[0], `the natural's sixteenth is ${(gaps[5] / gaps[0]).toFixed(2)} of a plain one`);
+  assert.ok(gaps[5] > 2 * gaps[0] && gaps[5] < 2.3 * gaps[0], `the natural's sixteenth is ${(gaps[5] / gaps[0]).toFixed(2)} of a plain one`);
   for (const step of [0, 1, 2, 3, 4, 6]) assert.ok(Math.abs(gaps[step] - gaps[0]) < 1e-9, `step ${step}`);
   assert.ok(wide[STEPS_PER_BAR - 1] < 1, 'the last note stands inside its bar');
 });

@@ -150,7 +150,7 @@ The bambeando and the Alto da Sé stay, inside the tune; the fotografia stays as
     bar with no note is one whole rest. The 3 + 3 + 2 is written as two dotted eighths and an
     eighth. A bar is spaced by its sixteenths, and a sixteenth is wider where the sign on it needs
     room before it: an accidental or a rest right after a sixteenth, more after one whose flags
-    reach right, and a flag before the bar line (`barLayout`); the cursor and the band follow the
+    reach right, and a flag or a last sixteenth before the bar line (`barLayout`); the cursor and the band follow the
     same places. The note that sounds is at full strength over a band of the saxofone's green as long
     as the note, with every piece it is tied to; a cursor in the interface's accent stands at the
     show's place. A scene where the tune does not play shows its bars as rests. A page starts at

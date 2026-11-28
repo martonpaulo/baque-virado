@@ -26,11 +26,11 @@ const MIDDLE_LINE = 34; // B4: a note on it or above has its stem down
 const DEGREES_PER_OCTAVE = 7;
 const HEAD = { rx: 1.3, ry: 0.92, tilt: -20, hollow: 0.42 }; // `hollow`: the outline of a half note's head
 const STEM = { length: 3.3 * SPACE, width: 0.3, inset: 0.92 }; // `inset`: where the stem meets the head, of its half width
-const FLAG = { scale: 0.8, narrow: 0.5, step: 1.7 }; // `narrow`: of its width, so a flag stays over its own sixteenth // of the percussion score's flag at this staff's size; from a flag along the stem to the second one
+const FLAG = { scale: 0.8, narrow: 0.72, step: 1.7 }; // `narrow`: of its width, so a flag stays over its own sixteenth // of the percussion score's flag at this staff's size; from a flag along the stem to the second one
 const DOT = { radius: 0.34, gap: 0.95 };
 const TIE = { rise: 1.5, width: 0.3, gap: 0.5, stub: 2.2 }; // `stub`: a tie that comes from, or goes to, another staff
 const LEDGER = { reach: 0.75, width: 0.3 }; // past the head on each side
-const ACCIDENTAL = { gap: 0.75, width: 0.26, bar: 0.4 }; // from the head's edge to its accidental's middle; `bar`: a sharp's two thick strokes
+const ACCIDENTAL = { gap: 0.75, stem: 0.4, width: 0.26, bar: 0.4 }; // from the head's edge to its accidental's middle; `bar`: a sharp's two thick strokes
 const CLEF = { x: 16.6, scale: 0.8, width: 0.3 }; // `scale`: of the staff's space, so two staves' clefs stand clear of each other
 const KEY_X = 20.6; // the first flat of the key signature
 const KEY_STEP = 1.9;
@@ -52,8 +52,8 @@ const ONE_FLAG = 3; // a dotted eighth or shorter has a flag
 const TWO_FLAGS = 1;
 // The room a piece needs before it when the piece before it is one sixteenth long, in sixteenths: an
 // accidental after a flag that reaches right, an accidental or a rest in the next slot; and the room
-// a flag needs before the bar line.
-const ROOM = { afterFlag: 0.75, tight: 0.5, end: 0.3 };
+// a flag, or a note on the bar's last sixteenth, needs before the bar line.
+const ROOM = { afterFlag: 1.15, tight: 0.6, end: 0.45 };
 const CURSOR = { width: 0.4, reach: 1.6 * SPACE };
 // The trompete's valves: three casings, each with its button on a stem, the first nearest the mouthpiece.
 const VALVES_LABEL_Y = 72.5;
@@ -116,7 +116,8 @@ export function barLayout(pieces, stepsPerBar) {
     if (!piece.rest && piece.accidental !== null) return flagsRight(previous) ? ROOM.afterFlag : ROOM.tight;
     return flagsRight(previous) && piece.rest ? ROOM.tight : 0;
   });
-  const end = pieces.length > 0 && flagsRight(pieces.at(-1)) ? ROOM.end : 0,
+  const last = pieces.at(-1),
+    end = last && !last.rest && (flagsRight(last) || last.steps === 1) ? ROOM.end : 0,
     total = stepsPerBar + before.reduce((sum, room) => sum + room, 0) + end,
     middles = [];
   let room = 0;
@@ -381,7 +382,8 @@ export function createFrevoGraphics(
       svgElement('circle', { cx: x + HEAD.rx + DOT.gap, cy: y - ((piece.degree - BOTTOM_LINE) % 2 === 0 ? SPACE / 2 : 0), r: DOT.radius, fill: INK }, group);
     // the accidental it shows, with room of its own before the head (barLayout)
     if (piece.accidental !== null) {
-      ACCIDENTALS[piece.accidental](x - HEAD.rx - ACCIDENTAL.gap, y, svgElement('g', { 'data-mark': 'accidental' }, group));
+      // clear of the head, and of the stem when it goes down on that side
+      ACCIDENTALS[piece.accidental](x - HEAD.rx - ACCIDENTAL.gap - (down ? ACCIDENTAL.stem : 0), y, svgElement('g', { 'data-mark': 'accidental' }, group));
       setAttr(group, 'data-accidental', piece.accidental);
     }
     // a tie to the piece after it, on the side away from the stem; into the next staff it is cut short
