@@ -185,7 +185,9 @@ export function buildSite(out, root = ROOT, version = '') {
   for (const [from, to] of Object.entries(MOVED)) writeFileSync(path.join(out, `${from}.html`), movedPage(to, origin));
 }
 
-if (process.argv[1] === fileURLToPath(import.meta.url)) {
+// the platform's own flag, never a comparison of paths: called through a linked folder, the path Node
+// was given is not the file's real path (tests/linked-tools.test.js)
+if (import.meta.main) {
   const out = process.argv[2];
   if (!out) throw new Error('usage: node tools/build-site.mjs <out> [<commit>]');
   buildSite(path.resolve(out), ROOT, process.argv[3] || '');

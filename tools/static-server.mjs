@@ -87,7 +87,9 @@ export function startStaticServer(root = REPO_ROOT, port = 0, { routes = [] } = 
   });
 }
 
-if (process.argv[1] === fileURLToPath(import.meta.url)) {
+// the platform's own flag, never a comparison of paths: called through a linked folder, the path Node
+// was given is not the file's real path (tests/linked-tools.test.js)
+if (import.meta.main) {
   const { url } = await startStaticServer(REPO_ROOT, Number(process.argv[2]) || 8000, { routes: [...ROUTES, ...Object.keys(MOVED)] });
   console.log(`serving ${REPO_ROOT} at ${url}`);
 }

@@ -138,4 +138,6 @@ async function main() {
   console.log(parsed.out);
 }
 
-if (process.argv[1] === fileURLToPath(import.meta.url)) await main();
+// the platform's own flag, never a comparison of paths: called through a linked folder, the path Node
+// was given is not the file's real path (tests/linked-tools.test.js)
+if (import.meta.main) await main();
