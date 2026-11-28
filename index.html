@@ -79,7 +79,8 @@
   <section class="stage" id="stage" aria-label="Animação: o baque virado do maracatu">
     <canvas id="fx"></canvas>
     <canvas id="bg"></canvas>
-    <div class="inner">
+    <!-- the column has no padding: it is the size container on a phone, and cqw reads a container's content box -->
+    <div class="column"><div class="inner">
       <div class="hud"><div><b id="hBar"></b><br><b id="hStep"></b></div><div class="r">♩ = <b id="hBpm"></b> bpm<br><b id="hTime"></b></div></div>
       <header class="head" id="head"></header>
       <!-- a rhythm's own graphic takes the main square; the wheel then sits smaller beside the readout (.has-graphic) -->
@@ -89,7 +90,7 @@
         <section class="read" id="read"></section>
       </div>
       <div class="lanes"><p class="key" id="key"></p><canvas id="lanes"></canvas></div>
-    </div>
+    </div></div>
     <!-- phones: the whole stage is the Play and Pause button -->
     <button class="tap" id="tap" type="button"><span class="tap-label" id="tapLabel"></span><span class="tap-time" id="tapTime"></span></button>
   </section>

@@ -615,6 +615,43 @@ test('no two lane names overlap at any position of any show, at a scene’s star
   for (const { where, most } of results) assert.ok(most >= 2, `${where}: the lanes drew ${most} texts at most`); // a name and its count
 });
 
+// #66: on a phone the size container was the column with its padding, and cqw reads a container's
+// content box, so every size of the stage was a tenth under the desktop's share of the stage's width.
+test('a phone draws the stage’s sizes at the desktop’s share of the column’s width', async () => {
+  const sharesAt = async viewport => {
+    const { page, errors } = await openPage(viewport, { still: true });
+    const found = await page.evaluate(() => {
+      const size = (element, property) => parseFloat(getComputedStyle(element)[property]),
+        column = document.querySelector('.inner').offsetWidth; // the column, its padding and all, before the stage's zoom
+      return { column, text: size(document.getElementById('key'), 'fontSize') / column, gap: size(document.querySelector('.hud'), 'columnGap') / column };
+    });
+    assert.deepEqual(errors, []);
+    await page.close();
+    return found;
+  };
+  const CLOSE = 1e-4, // of the column's width: a column of 370.69 px is measured as 371
+    desktop = await sharesAt(DESKTOP);
+  assert.equal(desktop.column, 393, 'the desktop stage is laid out at a 393 px phone’s width');
+  // a phone as tall as the desktop's stage, and one whose window is shorter than 9:16 of its width
+  // (a browser with its toolbars), where the column is narrower than the screen
+  for (const [viewport, column] of [
+    [{ width: 393, height: 852 }, 393],
+    [{ width: 393, height: 659 }, 371],
+  ]) {
+    const phone = await sharesAt(viewport),
+      where = `${viewport.width}x${viewport.height}`;
+    assert.equal(phone.column, column, `${where}: the column's width`);
+    assert.ok(
+      Math.abs(phone.text - desktop.text) < CLOSE,
+      `${where}: the key's text is ${(phone.text * 100).toFixed(2)} % of the column, ${(desktop.text * 100).toFixed(2)} % on desktop`,
+    );
+    assert.ok(
+      Math.abs(phone.gap - desktop.gap) < CLOSE,
+      `${where}: the HUD's gap is ${(phone.gap * 100).toFixed(2)} % of the column, ${(desktop.gap * 100).toFixed(2)} % on desktop`,
+    );
+  }
+});
+
 // #59: the name column was one width in every show, and a longer word («PRINCIPAL» in the
 // manguebeat, «CAVAQUINHO» in the forró) ran under the first strokes of its row.
 test('no part name runs under its row of strokes in any show’s notation, and no row of strokes leaves the readout', async () => {

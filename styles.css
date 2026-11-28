@@ -149,6 +149,13 @@ body {
   mix-blend-mode: overlay;
   background: repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.35) 0 1px, transparent 1px 3px);
 }
+/* the column: the box the stage's content is laid out in. It is the whole stage, but for a phone,
+   where it is the size container (the block for phones). It has no padding of its own, so 1cqw
+   inside it is a hundredth of its whole width: cqw reads a container's content box (#66) */
+.column {
+  position: absolute;
+  inset: 0;
+}
 .inner {
   position: absolute;
   inset: 0;
@@ -1128,15 +1135,18 @@ html:not(.video-export) .read .row .k {
     border-radius: 0;
   }
   /* the content column is as wide as a 9:16 box of the screen height allows (a tablet keeps the
-     phone proportions), and it is the size container, so the cqw sizes inside match desktop. It
-     fills the whole height: the HUD at the top and the lanes low but clear of the bottom edge. */
-  .inner {
+     phone proportions), and it is the size container: 1cqw inside is a hundredth of the column's
+     width, as on desktop it is a hundredth of the stage's, so a phone draws every size at the
+     desktop's share (#66): the sizes :root states for a 393px stage are a 393px column's too. */
+  .column {
     container-type: inline-size;
     left: 50%;
     right: auto;
     width: min(100%, 100svh * 9 / 16);
     translate: -50% 0;
-    box-sizing: border-box;
+  }
+  /* its content fills the whole height: the HUD at the top and the lanes low but clear of the bottom edge */
+  .inner {
     /* --room: the screen height a 9:16 column leaves over. Every phone-only extra below takes a
        capped share of it, so a 9:16 phone (iPhone SE) gets the desktop layout and a taller one
        the full extras. */
