@@ -29,7 +29,10 @@ revision of [#27](https://github.com/martonpaulo/baque-virado/issues/27) and why
   playing, and the next scene lands on a golpe. In Alfaia, before the second head enters, the low
   head rolls alone. Toque goes into the Rufo, which is one long rufada of four bars, and the Final
   lands on a golpe and ends on a cut. The sources name the coco's phrases joining into a final
-  «rufo»; the rufadas between scenes are this project's reading of that.
+  «rufo»; the rufadas between scenes are this project's reading of that. Each scene a rufada
+  leads into declares it (`leadIn: 'fill'`), the engine's way of saying how a scene is entered
+  ([`../product.md`](../product.md#rhythm-shows), Lead-ins); the Rufo alone is entered cold, the
+  band stopping on the bar line.
 - **Atabaques.** The terreiro's trio, low to high: rum, rumpi and lé (written «lê» in some sources).
   The lé keeps a steady figure (steps 1, 3, 4, 5, 7, 8), the rumpi answers on the off-beats (3, 5,
   7), and the rum, the lead, changes its phrase every two bars and plays a fill in the last bar of
@@ -129,7 +132,7 @@ What the four spans share, by how far the measurement can be trusted:
 | Trait                        | Evidence                                                                                                                                                                              | Trust  |
 | :--------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | :----- |
 | A heavy low drum leads       | In every span the band from 60 to 120 Hz holds the most energy, and each band above 2 kHz sits 8 to 17 dB under it                                                                    | High   |
-| Sung, not only drummed       | The percussive share of the energy is 0.17 to 0.24 in every span: most of the sound is sustained, which is the voices of the roda                                                     | High   |
+| Sung, not only drummed       | The percussive share of the energy is 0.17 to 0.24 in every span, and the bands from 250 Hz to 2 kHz hold 2 to 9 dB more than in the show, which has no voice                         | Medium |
 | A piece starts thin          | Three of the four spans open 6 to 10 dB under their body, and the fourth runs two and a half minutes sparse, at 3 to 5 onsets a second, before the whole band plays at 6 to 7.5       | Medium |
 | A dense, even pulse          | 5 to 7.5 onsets a second through every full section, and the level hardly moves inside one piece                                                                                      | Medium |
 | The low drum on and off beat | The low band, folded on four beats, shows a stroke on every beat and another on the off-beat or in the sixteenth before the beat                                                      | Medium |
@@ -141,15 +144,26 @@ What the reading could not do:
   the feet are inside the bands above.
 - Name the songs, or find a bar line: the fold starts on the strongest low stroke, which may be
   the off-beat.
-- Measure the show itself in the same bands. The lab's renderer needs Playwright, which this Mac
-  does not hold.
+- Prove the voices by measurement. The show itself, which has no voice, reads a percussive share
+  of 0.16: drums that ring are «held sound» to this measure too. That a coco is sung comes from the
+  performance and the literature, not from that number.
 
 Against the show as it is (132 BPM, percussion only, thirteen scenes that add one instrument
 each): it has nothing in the place of the voices; it opens on rufadas at full level, where three
 of the four spans start thin; and the first round measured it 7 to 10 dB too bright from 1 to
-8 kHz ([`sound-lab.md`](../research/sound-lab.md#the-shows-after-the-first-round)). The owner's
+8 kHz against the references without their voices
+([`sound-lab.md`](../research/sound-lab.md#the-shows-after-the-first-round)). The owner's
 hearing of 2026-11-28 agrees with the last point and adds three: instruments that sound loose,
 palmas that do not sound natural and a rufo that does not sound natural.
+
+The show rendered through the page and read with the same tool, voices and all in the references
+([`lab/show-sections.txt`](../../lab/show-sections.txt)): it holds its energy from 60 to 250 Hz,
+level with the references at 60 to 120 Hz and 5 to 6 dB over them at 120 to 250 Hz; it has almost
+nothing under 60 Hz (15 dB under the references, whose low drum has weight there); it is 2 to 9 dB
+short from 250 Hz to 2 kHz, where the references hold the voices; and its second half, with the
+whole band, is 2 dB over the references from 2 to 8 kHz. Its onsets repeat at the beat with a
+strength of 0.48 and 0.70 in its two halves, against 0.06 to 0.41 in the spans: it is more even
+than the players are.
 
 The elements proposed for the show to exalt, not yet accepted:
 

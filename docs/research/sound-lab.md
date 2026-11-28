@@ -29,7 +29,7 @@ is nearer before the owner listens.
 
 ## The method
 
-1. **Render.** `lab/render.mjs` opens the real page in Chromium and calls
+1. **Render.** `lab/render.mjs` opens the real page in the browser the page tests use and calls
    `window.baque.renderAudio`, so the lab hears what a viewer hears: the same samples, studio, mix
    bus and master chain. It renders the whole show, a bar range, or some instruments alone.
 2. **Reference audio.** For each reference the lab holds the official 30-second preview a music
@@ -226,8 +226,9 @@ Three ways, as researched on 2026-11-17.
 
 - The owner has not yet judged the first round by ear.
 - Frevo, forró and bregafunk still bring their parts in one at a time; the rule since that day is
-  that only the maracatu does ([`../product.md`](../product.md), Rhythm shows). Their rewrite waits
-  for the full recordings of their four references ([`round-two.md`](round-two.md)).
+  that only the maracatu does ([`../product.md`](../product.md), Rhythm shows). The full recordings
+  were read on 2026-11-28; the rewrite of frevo and forró waits for the owner's approval of their
+  elements ([`round-two.md`](round-two.md#how-to-read-four-references)).
 - The next round, with four references of equal weight per rhythm and the whole of each recording, is
   planned in [`round-two.md`](round-two.md).
 - The brega needs a recorded drum kit and a better keyboard.

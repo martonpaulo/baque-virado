@@ -11,6 +11,7 @@ why ([#21](https://github.com/martonpaulo/baque-virado/issues/21)).
 - [Music](#music)
 - [Sounds](#sounds)
 - [Visuals](#visuals)
+- [Round two: a first reading of the references](#round-two-a-first-reading-of-the-references)
 
 ## Music
 
@@ -136,3 +137,68 @@ The zabumba leads the timing; the triângulo's off-beat sixteenths sit about 10 
   each scene teaches: the triângulo's closed and open strokes, the zabumba cell, the bacalhau on
   the off-beats, the chords and their degrees, the mode with its flat seventh, the doubling, the
   3 + 3 + 2 accents, and the totals at the end. The centre names the Baião, the BREQUE and the FIM.
+
+## Round two: a first reading of the references
+
+The forró's reading, made on 2026-11-28 from the whole of the four recordings the owner named
+([`references.md`](../research/references.md)), by the method of
+[`round-two.md`](../research/round-two.md#how-to-read-four-references), which also says what a reading is: a
+proposal, with nothing built. The forró's section maps are in
+[`lab/reference-sections.txt`](../../lab/reference-sections.txt) and its pulse periods and level shapes in
+[`lab/reference-pulse.txt`](../../lab/reference-pulse.txt). The first round read one
+of the four, «Forró no Malagueta».
+
+The four are three dance feels: two xotes («Numa Sala de Reboco» and «Meu Cenário»), a baião-paced
+forró («Forró no Malagueta») and a faster forró («Forrobodó»).
+
+What the four forró recordings share, each trait with the trust its measurement earns:
+
+| Trait                             | Evidence                                                                                                                                                                                                                            | Trust  |
+| :-------------------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :----- |
+| The band plays from the first bar | Each recording holds its body level from its first 0 to 5 seconds, and none has a dip of 8 dB longer than half a second: no build-up and no long stop                                                                               | High   |
+| The sanfona's range leads         | The bands from 250 Hz to 1 kHz hold the most energy in the mean of the four; the low drum sits from 60 to 120 Hz, and under 60 Hz there is almost nothing (23 dB under the whole)                                                   | High   |
+| Held sound over the percussion    | The percussive share of the energy is 0.13 to 0.27: the sanfona and the voice, not the zabumba and the triângulo, make most of the sound                                                                                            | High   |
+| Three tempos, one family          | The onsets repeat at a beat of 784 ms, 714 ms, 610 ms and 453 ms: about 76, 84, 98 and 132 BPM. Their mean is 97. The beat tracker read three of them at a ratio (152, 172 and 129)                                                 | Medium |
+| A steady grid of sixteenths       | The shortest strong period is the sixteenth in three of the four (180, 157 and 116 ms), and the onsets repeat at the beat with a strength of 0.31 to 0.61 through a whole song                                                      | Medium |
+| The low drum's cell               | In «Forrobodó», whose bars fold at the felt tempo, the low band has a stroke on the beat, one on the third or fourth sixteenth and a pick-up before the next bar. In the two xotes it has a stroke on each eighth of the first beat | Low    |
+| Minor keys                        | By the chroma, three of the four sit in a minor key (E minor with its dominant, A minor with D minor, B minor); «Forrobodó» is in D and G major                                                                                     | Low    |
+| The sanfona frames the song       | In «Meu Cenário» the opening, the middle passage and the ending are one alike section, the least percussive of the song (0.07 to 0.09): the sanfona alone with the trio. The other maps do not separate it                          | Low    |
+
+The forró against the literature ([`brega-forro.md`](../research/brega-forro.md),
+[`pernambuco-rhythms-feeling.md`](../research/pernambuco-rhythms-feeling.md)):
+
+- **Agrees.** The order of the tempos, xote under baião under the faster forró. The trio led by the
+  sanfona, with the triângulo keeping sixteenths. The zabumba's cell of a dotted eighth and a
+  sixteenth. The sanfona that plays «melody, intros and interludes».
+- **Disagrees.** No tempo range of the sources holds all four: the two xotes sit at 76 and 84,
+  between a dissertation's 70 to 80 and a web source's 85 to 110.
+- **Not measured.** The mixolydian or dorian mode: the chroma gives a key, not a scale. The
+  triângulo's open stroke and the bacalhau: both are inside the bands above 2 kHz.
+
+What the reading could not do:
+
+- Tell the instruments apart. No stems were separated on this Mac.
+- Find the bar line: the fold starts on the strongest low stroke.
+- Say which passages are the sanfona alone in three of the four songs.
+
+Against the show as it is, rendered through the page and read with the same tool: its tempo, 100
+BPM, is the middle of the four. It holds its energy from 60 to 250 Hz, 2 to 4 dB over the
+references, and is 5 to 8 dB short from 250 Hz to 2 kHz, where the sanfona's body is: the tune sits
+under the zabumba and the bass, as the first round measured. Its onsets repeat at the beat with a
+strength of 0.74, above every reference (0.31 to 0.61): it is more even than people play.
+
+The elements proposed for the forró show to exalt, which the owner has not answered yet:
+
+1. **The sanfona as the singer**: one opening riff a room can sing back, stated in the first bars,
+   that returns between the parts and closes the piece.
+2. **The resfolego**: the bellows pushed and pulled in rhythm, the sanfona's own percussion.
+3. **Zabumba and triângulo as one swing**: the maceta low, the bacalhau answering on the off-beat,
+   the triângulo opening on the off-beat; under the tune, never over it.
+4. **The longing in the mode**: a minor colour with the flat seventh held, as three of the four
+   references are in a minor key.
+5. **The breque**: one short stop of the whole band, and the sanfona alone bringing it back.
+
+The form proposed, about 1:40 at 100 BPM: the riff with the trio from the first bar; the tune's
+first part; the riff again; the second part, on the flat seventh; the jogo de fole, with the
+zabumba and the triângulo in front; the breque and the sanfona's pick-up; the first part with
+everyone; the riff once more and a held chord. The tempo stays at 100 BPM.

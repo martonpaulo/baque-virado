@@ -281,3 +281,20 @@ form may tease for a few bars before the first drop, as the references do, while
 the hook ([`../research/round-two.md`](../research/round-two.md), «What is still missing»). The owner
 approved both on 2026-11-17 (D39): the grave plays the riff's notes, and four to eight bars tease
 before the first drop, no longer, because the show has no voice to hold a listener.
+
+### The pulse periods and the show (2026-11-28)
+
+Read with `lab/sections.py pulse` and `map`
+([`lab/reference-pulse.txt`](../../lab/reference-pulse.txt),
+[`lab/show-sections.txt`](../../lab/show-sections.txt)), with no stems.
+
+- **«Viciou na Flauta» is read now.** Its onsets repeat at a beat of 366 ms: 164 BPM, between the
+  158 the beat tracker took and the 171 of its preview. «Dally» and «Cafajeste» repeat at 354 ms
+  (170 BPM) and «Tuf Tuf Pof Pof» at 401 ms (150), as the first reading had them. The accepted
+  171 BPM stands: three of the four sit at 164 to 170.
+- **The beat does not open the track**, by the level too: «Dally» and «Cafajeste» hold their body
+  level only from 27 and 24 seconds.
+- **The show as it is**, rendered through the page: it holds its body level from 15.5 s, because
+  its parts enter one at a time; it is 3 dB over the references under 250 Hz and 4 to 7 dB short
+  from 500 Hz to 4 kHz, where the riff is. The first round measured the same from the stems: the
+  flute about 13 dB under the bumbo.

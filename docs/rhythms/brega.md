@@ -17,6 +17,7 @@ and why. The package is [`src/rhythms/brega.js`](../../src/rhythms/brega.js), it
 - [Measured against the references](#measured-against-the-references)
 - [Visuals](#visuals)
 - [Widgets per scene](#widgets-per-scene)
+- [Round two: a first reading of the references](#round-two-a-first-reading-of-the-references)
 - [Open points](#open-points)
 
 ## References
@@ -217,6 +218,77 @@ Tried and measured on the chorus, not kept:
 | Vinheta      | a roll of the guitar's calls and the horns | call and answer             |
 | Refrão final | a roll of theme and guitar, the key change | a whole tone up             |
 | Final        | scenes, voices, bars                       | the totals                  |
+
+## Round two: a first reading of the references
+
+The brega's reading, made on 2026-11-28 from the whole of the five recordings the owner named
+([`references.md`](../research/references.md)), by the method of
+[`round-two.md`](../research/round-two.md#how-to-read-four-references), which also says what a reading is: a
+proposal, with nothing built. The brega's section maps are in
+[`lab/reference-sections.txt`](../../lab/reference-sections.txt) and its pulse periods and level shapes in
+[`lab/reference-pulse.txt`](../../lab/reference-pulse.txt). The five weigh the same
+now: [References](#references) above still calls one of them the main one, as the first round did,
+and it measured thirty-second previews, «Ainda Bem» in another recording and «Diz na Minha Cara» in
+other bands' versions. This reading has Banda Torpedo's recording and the television performance
+(the 144 seconds where the band plays, `lab/full-spans.json`).
+
+What the five brega recordings share, each trait with the trust its measurement earns:
+
+| Trait                        | Evidence                                                                                                                                                                           | Trust  |
+| :--------------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :----- |
+| One tempo                    | The onsets repeat at a beat of 424 to 459 ms in all five: 131 to 142 BPM, with a mean of 136. The beat tracker agrees on each                                                      | High   |
+| The bumbo on 1 and 7         | In every song the low band, folded on the bar, has its two heavy strokes six sixteenths apart: the bar opens 3 + 3                                                                 | High   |
+| A steady level               | Inside a song the sections stay within 1 to 2 dB, and no song has a dip of 8 dB longer than half a second: the drama is in the arrangement, not in the level                       | High   |
+| An opening section           | Four of the five open with a section of 23 to 32 seconds before the body's sections start. In «Novo Namorado» it returns at 1:27, and in «Milk Shake» it returns to close the song | Medium |
+| A minor key                  | By the chroma all five open in a minor key (C, B, A, A and E minor); two move to the relative major inside the song (E flat, D)                                                    | Medium |
+| A full, even spectrum        | The five bands from 20 Hz to 1 kHz hold the energy within 2 dB of each other in the mean of the five, and the percussive share is 0.14 to 0.29                                     | Medium |
+| No step up for the last part | No last section reads a whole tone above an earlier one, in any of the five                                                                                                        | Low    |
+
+The brega against the literature ([`brega-forro.md`](../research/brega-forro.md),
+[`pernambuco-rhythms-feeling.md`](../research/pernambuco-rhythms-feeling.md)):
+
+- **Agrees.** The keyboard that «plays the hook in the intro and interlude» fits the opening
+  section that returns. A tempo of 130 to 150 on the quarter note, which the research marks as
+  inferred; the other document's 70 to 100 is the same music counted in half time, the slow
+  two-step.
+- **Disagrees.** Both are marked as inferred in the research. The xacumbum as a kick on 1 and 9
+  with a snare on 5 and 13: all five put the second bumbo on 7. Major ballad progressions with a
+  key change up a step on the last chorus: all five read in a minor key, and none shows the step.
+- **Not measured.** The drum viradas into the choruses and the lead's vibrato, which the sources
+  name as the marks of the genre: both need stems.
+
+What the reading could not do:
+
+- Tell the instruments apart, or the voice from the lead instrument: no stems were separated on
+  this Mac, so the opening section is not proven to be the instrumental solinho.
+- Read the caixa: its stroke is in the bands above the bumbo, with the chimbal and the voice.
+- Hear a key change: the chroma gives one key a section, to within a related key.
+
+Against the show as it is, rendered through the page and read with the same tool: its tempo, 136
+BPM, is the mean of the five, and its bumbo is on 1 and 7. It is 3 to 4 dB over the references
+under 250 Hz and 4 to 6 dB short from 500 Hz to 4 kHz, where the keyboard, the guitar and the lead
+sit. Its onsets repeat at the beat with a strength of 0.89, where the references read 0.36 to
+0.53: every bar is too much the same bar. The first round's finding stands: the bumbo is an
+808-style kick, the caixa an orchestral snare and the chords an FM piano.
+
+The elements proposed for the brega show to exalt, which the owner has not answered yet:
+
+1. **The solinho**: the opening hook on one lead instrument with character, eight bars; it returns
+   between the parts and closes the piece.
+2. **The xacumbum**: bumbo on 1 and 7 and caixa on 13 at 136 BPM, the slow two-step a couple
+   dances.
+3. **A lead that sings**: the theme phrased as a voice, with vibrato, breaths and wide leaps; the
+   guitar answers in thirds and sixths where the lead breathes.
+4. **Viradas and the breque**: a tom fill into each chorus and one stop of the whole band before
+   the last.
+5. **Minor to its relative major**: the first part in the minor, the chorus lifting to the
+   relative major, the last chorus the fullest.
+
+The form proposed, about 1:40 at 136 BPM: the solinho with the band from the first bar; the
+theme's first part, in the minor; four bars where the lead rests and the xacumbum shows; a virada;
+the chorus in the relative major, the guitar answering; the solinho again; the breque; the last
+chorus with everyone and the horns; the solinho's first phrase and one held chord. The last chorus
+stays in its key: the step up a whole tone the show has today is in none of the five references.
 
 ## Open points
 

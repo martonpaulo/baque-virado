@@ -80,6 +80,21 @@ A plan for the analysis, to run once the full recordings are in the lab.
    (introduction, theme, contrast, break, return, ending), dynamics that build, and an ending that
    lands. The teaching is in what the scenes point at; the music has to stand without the screen.
 
+A rhythm's reading is a proposal: nothing in it is built, and the elements and the form it ends
+with wait for the owner's answer.
+
+Where it stands on 2026-11-28: steps 1 to 5 are done for every rhythm, without stems. The maps are
+in [`lab/reference-sections.txt`](../../lab/reference-sections.txt) and the pulse periods in
+[`lab/reference-pulse.txt`](../../lab/reference-pulse.txt); each show's own render, read with the
+same tool, is in [`lab/show-sections.txt`](../../lab/show-sections.txt). Each rhythm's document
+has its reading, under «Round two: a first reading of the references», with the elements and the
+form it proposes: [`coco.md`](../rhythms/coco.md), [`frevo.md`](../frevo.md),
+[`forro.md`](../rhythms/forro.md), [`manguebeat.md`](../rhythms/manguebeat.md),
+[`brega.md`](../rhythms/brega.md) and [`bregafunk.md`](../rhythms/bregafunk.md), whose elements
+the owner accepted on 2026-11-17. Two things showed in all six shows: each is 3 to 9 dB
+short of its references somewhere from 250 Hz to 2 kHz, where the lead instrument or the voice is,
+and 2 to 6 dB over them somewhere under 250 Hz.
+
 ## Sound in the background on phones
 
 Reported: with the browser in the background the music breaks and some instruments stop.

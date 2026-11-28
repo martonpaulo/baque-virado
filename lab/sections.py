@@ -3,6 +3,7 @@
 # Needs ffmpeg, numpy, scipy and librosa only: no model is downloaded and no stem is separated.
 # usage: python sections.py map <audio file> [--from S] [--to S]   one recording
 #        python sections.py rhythm <rhythm>                        every counted full recording of it
+#        python sections.py pulse <rhythm> | <audio file>          the periods its onsets repeat at, and its level's shape
 #        python sections.py selftest                               the checks at the end of this file
 # A full recording is <data>/refs-full/<rhythm>/<NN>-<name> [<YouTube id>].webm; a name whose number
 # ends in «x» is an extra version and is not counted. full-spans.json names, for a recording that
@@ -28,6 +29,12 @@ MAJOR = np.array([6.35, 2.23, 3.48, 2.33, 4.38, 4.09, 2.52, 5.19, 2.39, 3.66, 2.
 MINOR = np.array([6.33, 2.68, 3.52, 5.38, 2.60, 3.53, 2.54, 4.75, 3.98, 2.69, 3.34, 3.17])
 NOTES = ['C', 'C#', 'D', 'Eb', 'E', 'F', 'F#', 'G', 'Ab', 'A', 'Bb', 'B']
 NUMERIC = ['bpm', 'rms', 'crest', 'onsets', 'percussive', 'pulse']  # the facts a mean is taken of
+PULSE_HOP, PULSE_NFFT = 128, 1024  # the pulse's onset strength every 6 ms: fine enough to tell a sixteenth from a triplet
+PULSE_LAGS_S = (0.07, 2.6)     # from a fast frevo's sixteenth to a slow xote's two bars
+PULSE_PEAKS, PULSE_FLOOR = 9, 0.02  # the strongest periods kept, and the strength under which one is noise
+PULSE_SPAN = (0.15, 0.9)       # the part of a recording the periods are read from: past its introduction, before its ending
+LEVEL_HZ = 2                   # the level's shape is read twice a second
+BODY_DB, DIP_DB, HELD_S = 3, 8, 3  # «at its body level» is within BODY_DB of the median, held HELD_S; a dip is DIP_DB under it
 
 
 def load(path, start=None, end=None):
@@ -230,6 +237,55 @@ def set_mean(songs):
     return out
 
 
+def pulse_periods(audio):
+    """The periods the onsets repeat at, as (seconds, strength 0 to 1), shortest first. A beat tracker
+    may lock on a dotted value or on half the beat; the shortest strong period is the subdivision that
+    is played (a sixteenth, an eighth, a third of a beat), and the felt beat is a multiple of it."""
+    import librosa
+    spectrum = np.abs(librosa.stft(audio, n_fft=PULSE_NFFT, hop_length=PULSE_HOP, center=False))
+    rise = np.maximum(0, np.diff(np.log1p(spectrum), axis=1)).sum(axis=0)
+    rise = rise - rise.mean()
+    size = 1 << int(np.ceil(np.log2(2 * len(rise))))
+    transform = np.fft.rfft(rise, size)
+    repeat = np.fft.irfft(transform * np.conj(transform))[:len(rise)]
+    repeat = repeat / (repeat[0] + 1e-12)
+    rate = SR / PULSE_HOP
+    first, last = int(PULSE_LAGS_S[0] * rate), min(int(PULSE_LAGS_S[1] * rate), len(repeat) - 1)
+    near = int(0.035 * rate)  # two peaks closer than this are one
+    peaks = [i for i in range(first, last) if repeat[i] > PULSE_FLOOR and repeat[i] == repeat[max(first, i - near):i + near + 1].max()]
+    strongest = sorted(peaks, key=lambda i: -repeat[i])[:PULSE_PEAKS]
+    return sorted((i / rate, float(repeat[i])) for i in strongest)
+
+
+def level_shape(audio):
+    """(body level in dB, the second from which that level is first held or None, the dips after it as
+    (start, seconds, dB under the body)): whether a piece opens whole or thin, and where it stops."""
+    step = SR // LEVEL_HZ
+    level = np.array([10 * np.log10(float(np.mean(audio[at:at + step] ** 2)) + 1e-20) for at in range(0, len(audio) - step + 1, step)])
+    body = float(np.median(level[level > SILENT_DB])) if (level > SILENT_DB).any() else SILENT_DB
+    held = int(HELD_S * LEVEL_HZ)
+    full = next((i / LEVEL_HZ for i in range(len(level) - held) if (level[i:i + held] >= body - BODY_DB).all()), None)
+    dips, start = [], None
+    for i, value in enumerate([*level, body]):
+        low = value < body - DIP_DB
+        if low and start is None:
+            start = i
+        elif not low and start is not None:
+            if full is not None and start / LEVEL_HZ > full and i < len(level) - held:  # not the introduction, not the ending
+                dips.append((start / LEVEL_HZ, (i - start) / LEVEL_HZ, float(level[start:i].min() - body)))
+            start = None
+    return body, full, dips
+
+
+def show_pulse(title, audio):
+    seconds = len(audio) / SR
+    periods = pulse_periods(audio[int(PULSE_SPAN[0] * seconds) * SR:int(PULSE_SPAN[1] * seconds) * SR])
+    body, full, dips = level_shape(audio)
+    print(f'# {title}')
+    print('  periods, ms:strength  ' + ' '.join(f'{period * 1000:.0f}:{strength:.2f}' for period, strength in periods))
+    print(f'  body {body:.1f} dB, held from {full if full is not None else "never"} s of {seconds:.0f} s; dips: ' + (', '.join(f'{at:.0f} s ({length:.1f} s, {depth:.0f} dB)' for at, length, depth in dips) or 'none'))
+
+
 def counted(rhythm):
     """The rhythm's full recordings that count, as (name, path, [[from, to], ...] or None)."""
     spans = json.load(open(os.path.join(HERE, 'full-spans.json')))
@@ -281,6 +337,16 @@ def selftest():
     rows = section_map(np.concatenate([clicks, clicks, np.zeros(30 * SR, dtype=np.float32)]))
     assert rows[-1]['silent'] and rows[-1]['section'] == '-' and not rows[0]['silent'], [(row['start'], row['silent']) for row in rows]
     assert abs(song_mean(rows)['seconds'] - 48) <= 3, song_mean(rows)['seconds']
+    # the pulse: clicks every half second repeat at half a second and its multiples, and at nothing shorter
+    periods = pulse_periods(clicks)
+    assert abs(periods[0][0] - 0.5) < 0.02 and periods[0][1] > 0.5, periods
+    assert all(abs(period / 0.5 - round(period / 0.5)) < 0.05 for period, _strength in periods), periods
+    # the level's shape: ten quiet seconds, then the body, with a stop of one second in it
+    quiet = (clicks[:10 * SR] * 0.01).astype(np.float32)
+    stopped = np.concatenate([clicks, np.zeros(SR, dtype=np.float32), clicks])
+    body, full, dips = level_shape(np.concatenate([quiet, stopped]))
+    assert full is not None and abs(full - 10) <= 1, full
+    assert len(dips) == 1 and abs(dips[0][0] - 34) <= 1 and abs(dips[0][1] - 1) <= 0.5, dips
     print('selftest: ok')
 
 
@@ -293,6 +359,13 @@ if __name__ == '__main__':
         start, end = float(options.get('--from', 0)) or None, float(options.get('--to', 0)) or None
         print(f'# {os.path.basename(sys.argv[2])}' + (f' from {start} to {end}' if start or end else ''))
         show(section_map(load(sys.argv[2], start, end)))
+    elif mode == 'pulse':
+        if os.path.exists(sys.argv[2]):
+            show_pulse(os.path.basename(sys.argv[2]), load(sys.argv[2]))
+        else:
+            for name, path, spans in counted(sys.argv[2]):
+                for index, (start, end) in enumerate(spans or [[None, None]]):
+                    show_pulse(f'{sys.argv[2]}/{name}' + (f' ({index + 1})' if spans and len(spans) > 1 else '') + (f' from {start} s to {end} s' if start or end else ''), load(path, start, end))
     elif mode == 'rhythm':
         rhythm, songs = sys.argv[2], []
         for name, path, spans in counted(rhythm):
@@ -307,4 +380,4 @@ if __name__ == '__main__':
             print(line(f"{title} [{facts['form']}]", facts))
         print(line(f'mean of {len(songs)} songs', set_mean([facts for _title, facts in songs])))
     else:
-        sys.exit(__doc__ or 'usage: python sections.py map <audio> | rhythm <rhythm> | selftest')
+        sys.exit(__doc__ or 'usage: python sections.py map <audio> | rhythm <rhythm> | pulse <rhythm or audio> | selftest')

@@ -17,6 +17,7 @@ mix were rewritten against the owner's reference recordings, measured: see
 - [Measured against the references](#measured-against-the-references)
 - [Visuals](#visuals)
 - [Widgets per scene](#widgets-per-scene)
+- [Round two: a first reading of the references](#round-two-a-first-reading-of-the-references)
 - [Open points](#open-points)
 
 ## References
@@ -227,6 +228,70 @@ What the numbers do not show: whether it grooves. No number here replaces the ow
 | Parte B        | a roll of the second part over the bass, its chords       | the variation                         |
 | Banda completa | a roll of the riff over the bass for the 8 bars           | the whole band                        |
 | Final          | scenes, instruments, bars                                 | the totals                            |
+
+## Round two: a first reading of the references
+
+The manguebeat's reading, made on 2026-11-28 from the whole of the four recordings the owner named
+([`references.md`](../research/references.md)), by the method of
+[`round-two.md`](../research/round-two.md#how-to-read-four-references), which also says what a reading is: a
+proposal, with nothing built. The manguebeat's section maps are in
+[`lab/reference-sections.txt`](../../lab/reference-sections.txt) and its pulse periods and level shapes in
+[`lab/reference-pulse.txt`](../../lab/reference-pulse.txt). The four weigh the same
+now: [References](#references) above still calls «Coco Dub» the main one, as the first round did.
+«Meu Maracatu Pesa uma Tonelada» was read in the live television performance the owner's list
+names.
+
+What the four manguebeat recordings share, each trait with the trust its measurement earns:
+
+| Trait                        | Evidence                                                                                                                                                                                                                                 | Trust  |
+| :--------------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :----- |
+| The weight is in the low end | In every song the two bands from 60 to 250 Hz hold the most energy, and each band above 4 kHz sits 12 dB or more under them                                                                                                              | High   |
+| One riff, one key            | «Defeito Perfeito» reads F sharp minor in all seven of its sections and the live «Meu Maracatu Pesa uma Tonelada» reads E in all; «Cicatriz» is two long sections. Once the band is whole, the sections of a song stay within about 1 dB | High   |
+| A thin opening               | Three of the four hold their body level only from 14, 28 and 35 seconds. The live recording opens and ends on the drums alone (a percussive share of 0.44 and 0.50, against 0.20 to 0.27 in its body)                                    | Medium |
+| The tempo                    | The onsets repeat at a beat of 555 ms, 575 ms and 610 ms in three songs: 108, 104 and 98 BPM. «Cicatriz» repeats at 418 ms: 144 BPM, or 72 felt in half time                                                                             | Medium |
+| Threes against the beat      | «Coco Dub» repeats at three sixteenths (412 ms) and at the half bar; «Defeito Perfeito» at six sixteenths, and its low strokes fold three sixteenths apart; the live recording splits its beat in three (192 ms of 575)                  | Medium |
+| A drop                       | «Coco Dub» falls 4 dB for 18 seconds with half the onsets (3.9 a second against 6 to 7), then returns whole; «Defeito Perfeito» thins to 4.7 onsets a second for 25 seconds at the same level                                            | Low    |
+
+The manguebeat against the literature ([`frevo-manguebeat-coco.md`](../research/frevo-manguebeat-coco.md),
+[`pernambuco-rhythms-feeling.md`](../research/pernambuco-rhythms-feeling.md)):
+
+- **Agrees.** «A thundering drum core, booming bass»: the low end leads. «Riffs, not songs: one or
+  two chords»: one key through a song. The dub's space: the drop. The tempo of about 90 to 105
+  BPM, which the research marks as inferred: three of the four sit at 98 to 108.
+- **Not measured.** The «heavy backbeat» a source describes. The first round found none in the
+  separated drums of «Coco Dub»; this reading has no stems and cannot say for the other three.
+
+What the reading could not do:
+
+- Tell the alfaias from the bass, or the guitar from the caixa: no stems were separated on this Mac.
+- Fold the bars of «Coco Dub» and «Cicatriz»: the beat tracker read both at 143.6 BPM, which is a
+  dotted value of 108 in the first and may be double the felt tempo in the second.
+- Read the riffs: their notes and their length before they repeat.
+
+Against the show as it is, rendered through the page and read with the same tool: its tempo, 105
+BPM, is inside the three songs' 98 to 108, and its onsets repeat at the same two periods as «Coco
+Dub»'s (430 ms and 1144 ms against 412 and 1109). It is 3 dB over the references under 120 Hz and
+5 to 7 dB short from 500 Hz to 4 kHz, where the guitars and the caixa are; its percussive share is
+0.16 against 0.22 to 0.27. It is whole from its fourth second, where three references open thin.
+
+The elements proposed for the manguebeat show to exalt, which the owner has not answered yet:
+
+1. **The wall**: several alfaias and the bass as one weight, the loudest thing in the mix.
+2. **One riff with an identity**: guitar and bass on one chord, two bars long, repeated until it
+   is the hook.
+3. **Threes against the beat**: the cell 3 + 3 + 2, played by the whole drum section together.
+4. **The drop and the echo**: the band stops, one stroke is thrown into the dotted-eighth echo,
+   and the band returns whole.
+5. **The drums alone at the edges**: the drum section opens the piece and has the last word.
+
+The form proposed, about 1:55 at 105 BPM: four bars of the drum section alone, over the record's
+noise; the riff enters with the bass and the band is whole; rounds of the riff, each bringing one
+thing forward (the cell, the caixa's ghost notes, the bass under the alfaia, the guitar); the drop
+into the echo; the return, one layer a bar; the second part, the riff a fourth up; the whole band
+with the clean guitar answering, the loudest round; one stroke for everyone, two bars of the drums
+alone, and the last stroke into the echo. The four bars of drums alone are an exception to «the
+band plays from the start» ([`../product.md`](../product.md), Rhythm shows), as the bregafunk's
+bars of teasing are: the owner decides.
 
 ## Open points
 
