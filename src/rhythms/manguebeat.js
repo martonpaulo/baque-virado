@@ -736,7 +736,7 @@ const READ = {
   barValue: `${BAR_SECONDS.toFixed(2).replace('.', ',')} s`,
   instruments: 'instrumentos',
   echo: 'eco',
-  echoValue: `colcheia pontuada, ${Math.round(seconds(ECHO_STEPS) * MS_PER_SECOND)} ms`,
+  echoValue: `colcheia\u00a0pontuada, ${Math.round(seconds(ECHO_STEPS) * MS_PER_SECOND)}\u00a0ms`, // no-break spaces: a line never ends inside the term or before the unit
   unison: 'uníssono',
   unisonValue: 'mão principal e resposta juntas',
   cell: 'célula',
@@ -763,7 +763,7 @@ const READ = {
   held: 'guitarra e baixo',
   heldValue: 'um acorde por compasso',
   locks: 'baixo e alfaia',
-  locksValue: 'juntos no tempo 1; depois, pausas',
+  locksValue: 'juntos no tempo\u00a01; depois, pausas', // a line never ends between «tempo» and its number
   call: 'pergunta',
   callValue: 'guitarra distorcida, 1ª metade',
   response: 'resposta',

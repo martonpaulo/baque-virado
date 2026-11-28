@@ -43,9 +43,9 @@ const NAME_X = 19.5; // the strings' names, left of the tablature; the neck abov
 const NUMBER_SIZE = 4;
 const NUMBER_WEIGHT = 700; // bold, as the stage's figures
 const NUMBER_BOX = { width: 3, height: 4, radius: 0.8 };
-const NUMBER_BASELINE = 1.4;
+const NUMBER_BASELINE = 1.4; // from a line down to its number's baseline
 const NAME_BASELINE = 1; // from a line down to the baseline of its string's name
-const MID_STEP = 0.5; // a note's number stands in the middle of its sixteenth // from a line down to its number's baseline
+const MID_STEP = 0.5; // a note's number stands in the middle of its sixteenth
 // The echo: the thrown stroke on the left, its copies to the right, one every repeat.
 const ECHO_LABEL_Y = 67.5;
 const ECHO = { y: 76.5, radius: 5.2, least: 1.1, gap: 1.7, stroke: 0.5 }; // `least`: the smallest copy drawn; `gap`: clear ground between two copies
@@ -135,7 +135,20 @@ export function createManguebeatGraphics(
   for (let n = 1; n <= FRETS; n++) line(fretX(n), neckY(0), fretX(n), neckY(STRINGS.length - 1), NECK.fret, tab);
   const strings = STRINGS.map(({ name }, string) => {
     label(name, NAME_X, tabY(string) + NAME_BASELINE, tab);
-    line(TAB.left, tabY(string), TAB.right, tabY(string), TAB.line, tab);
+    // a staff line ends where the first and the last number's boxes end, so no speck of it shows beside a number
+    svgElement(
+      'line',
+      {
+        x1: stepX(0) - NUMBER_BOX.width / 2,
+        x2: stepX(stepsPerBar - 1) + NUMBER_BOX.width / 2,
+        y1: tabY(string),
+        y2: tabY(string),
+        stroke: COLORS.fg,
+        'stroke-width': TAB.line,
+        'stroke-opacity': OUTLINE,
+      },
+      tab,
+    );
     return { wire: line(NECK.left, neckY(string), NECK.right, neckY(string), NECK.string, tab, bass.color, REST_LINE) };
   });
   // the finger's place on the neck: one dot, moved to the note that sounds
