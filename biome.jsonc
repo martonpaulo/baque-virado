@@ -1,6 +1,6 @@
 {
   // Biome is the linter and formatter (fleet convention). Indentation matches .editorconfig.
-  "$schema": "https://biomejs.dev/schemas/2.6.7/schema.json",
+  "$schema": "./node_modules/@biomejs/biome/configuration_schema.json", // the installed version's own schema, so a dependency update never leaves it behind
   "vcs": { "enabled": true, "clientKind": "git", "useIgnoreFile": true }, // skip what Git ignores (.scratch/)
   "files": { "includes": ["**", "!node_modules", "!sounds", "!docs/sketches", "!vendor"] }, // sketches are throwaway research prototypes, not product code
   "formatter": { "indentStyle": "space", "indentWidth": 2, "lineWidth": 160 },
