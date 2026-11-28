@@ -24,6 +24,8 @@
 - Commit subject: a commit made for an issue ends with `(#<issue number>)`, never the pull request's.
 - Delete branches after merge: enabled
 - Release, signing, and secret-storage policy: not applicable: no releases, no signing, no secrets; every push to `main` deploys through the Deploy workflow.
+- Interface paths: `index.html` by `node tools/render-stage.mjs` (dark), `styles.css` by `node tools/render-stage.mjs` (dark), `src/graphics.js` by `node tools/render-stage.mjs` (dark), `src/scope.js` by `node tools/render-stage.mjs` (dark), `src/lanes.js` by `node tools/render-stage.mjs` (dark), `src/readout*.js` by `node tools/render-stage.mjs` (dark), `src/score.js` by `node tools/render-stage.mjs` (dark), `src/title.js` by `node tools/render-stage.mjs` (dark), `src/controls.js` by `node tools/render-stage.mjs` (dark), `src/rhythms/*-graphics.js` by `node tools/render-stage.mjs` (dark), `src/rhythms/*-background.js` by `node tools/render-stage.mjs` (dark), `src/rhythms/*-backdrop.js` by `node tools/render-stage.mjs` (dark)
+- Quick check: `pnpm lint`
 - Skills baseline revision: `4ba75dbb9f6875449054f546858e675e09896528`
 - Skills baseline applied: `2026-11-13`
 

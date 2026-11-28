@@ -67,6 +67,9 @@ Depois abra <http://127.0.0.1:8000>.
 - O site publicado não exporta vídeo. Na página que o `pnpm serve` abre, no computador, o botão
   «Exportar vídeo», no meio da coluna da esquerda, grava o show do ritmo aberto num vídeo vertical,
   com som, no próprio navegador: em MP4 quando o navegador consegue, ou em WebM.
+- `node tools/render-stage.mjs --out <pasta> maracatu` grava uma imagem do palco por cena do show,
+  sem abrir janela, em três tamanhos: celular (375 x 667), desktop (1440 x 900) e desktop grande
+  (1920 x 1200). Sem nome de show, grava todos. É o que acompanha uma mudança na interface.
 - `pnpm export index.html out/maracatu.mp4` exporta o vídeo pela linha de comando, com o Chrome
   sem janela e o `ffmpeg`. `--from` e `--to` escolhem o trecho em segundos; `--loudnorm`
   normaliza o volume para -14 LUFS. Como root, numa sessão na nuvem, o Chrome abre sem sandbox.
