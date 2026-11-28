@@ -42,12 +42,14 @@ const SOUND_DELAY_MS = 600; // holds every sample back, so Space lands while the
 // A loaded machine takes over half a minute to open a page (a landing gate beside other builds failed
 // twice on the browser's own 30 seconds): the limit is for a page that is stuck, never for a slow one.
 const PAGE_OPEN_MS = 120000;
+// And the browser may take minutes to answer one call there (a new tab took over the 180 seconds it allows by default).
+const BROWSER_CALL_MS = 600000;
 const DETERMINISM_POSITION = 20.3; // bars: a baque scene, wheel, score and background all busy
 const BAQUE_SCENES = SCENES.filter(scene => scene.named && scene.id !== 'summary').map(scene => scene.id);
 
 let session;
 before(async () => {
-  session = await openBrowser();
+  session = await openBrowser({ protocolTimeout: BROWSER_CALL_MS });
 });
 after(async () => {
   await session?.close();
