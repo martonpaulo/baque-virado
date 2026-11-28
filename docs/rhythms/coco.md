@@ -126,14 +126,14 @@ checked by ear, and a span may hold more than one song.
 
 What the four spans share, by how far the measurement can be trusted:
 
-| Trait                         | Evidence                                                                                                                                                                             | Trust  |
-| :---------------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :----- |
-| A heavy low drum leads        | In every span the band from 60 to 120 Hz holds the most energy, and each band above 2 kHz sits 8 to 17 dB under it                                                                   | High   |
-| Sung, not only drummed        | The percussive share of the energy is 0.17 to 0.24 in every span: most of the sound is sustained, which is the voices of the roda                                                    | High   |
-| A piece starts thin           | Three of the four spans open 6 to 10 dB under their body, and the fourth runs two and a half minutes sparse, at 3 to 5 onsets a second, before the whole band plays at 6 to 7.5      | Medium |
-| A dense, even pulse           | 5 to 7.5 onsets a second through every full section, and the level hardly moves inside one piece                                                                                     | Medium |
-| The low drum on and off beat  | The low band, folded on four beats, shows a stroke on every beat and another on the off-beat or in the sixteenth before the beat                                                     | Medium |
-| Tempo                         | Tracked at about 136 to 144 BPM in the first two spans and at 117.5 in the fourth; the third read 103.4, three quarters of 138, which a tracker gives when it locks on a dotted value      | Low    |
+| Trait                        | Evidence                                                                                                                                                                              | Trust  |
+| :--------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | :----- |
+| A heavy low drum leads       | In every span the band from 60 to 120 Hz holds the most energy, and each band above 2 kHz sits 8 to 17 dB under it                                                                    | High   |
+| Sung, not only drummed       | The percussive share of the energy is 0.17 to 0.24 in every span: most of the sound is sustained, which is the voices of the roda                                                     | High   |
+| A piece starts thin          | Three of the four spans open 6 to 10 dB under their body, and the fourth runs two and a half minutes sparse, at 3 to 5 onsets a second, before the whole band plays at 6 to 7.5       | Medium |
+| A dense, even pulse          | 5 to 7.5 onsets a second through every full section, and the level hardly moves inside one piece                                                                                      | Medium |
+| The low drum on and off beat | The low band, folded on four beats, shows a stroke on every beat and another on the off-beat or in the sixteenth before the beat                                                      | Medium |
+| Tempo                        | Tracked at about 136 to 144 BPM in the first two spans and at 117.5 in the fourth; the third read 103.4, three quarters of 138, which a tracker gives when it locks on a dotted value | Low    |
 
 What the reading could not do:
 
