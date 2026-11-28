@@ -433,10 +433,54 @@ function keyInPage(scenes) {
   return { problems: [...problems], most, lines, nameSize };
 }
 
+/** In the page, before anything is measured: keep the ink box of every text the lanes draw. */
+function keepLaneTexts() {
+  window.__laneTexts = [];
+  const fillText = CanvasRenderingContext2D.prototype.fillText;
+  CanvasRenderingContext2D.prototype.fillText = function (text, x, y, ...rest) {
+    if (this.canvas.id === 'lanes') {
+      const ink = this.measureText(text);
+      window.__laneTexts.push({
+        text,
+        left: x - ink.actualBoundingBoxLeft,
+        right: x + ink.actualBoundingBoxRight,
+        top: y - ink.actualBoundingBoxAscent,
+        bottom: y + ink.actualBoundingBoxDescent,
+      });
+    }
+    return fillText.call(this, text, x, y, ...rest);
+  };
+}
+
+/** In the page: the lanes' texts in small steps through each scene change, and in the middle of each scene. */
+function laneTextsInPage(scenes) {
+  const AROUND = 0.3, // bars each side of a scene's start: wider than the half bar the rows take to move
+    STEP = 0.02;
+  const problems = new Map();
+  let most = 0;
+  const drawAt = (scene, offset) => {
+    window.__laneTexts.length = 0;
+    window.baque.render(scene.start + offset);
+    const texts = window.__laneTexts;
+    most = Math.max(most, texts.length);
+    for (const [i, a] of texts.entries())
+      for (const b of texts.slice(i + 1)) {
+        if (!(a.left < b.right && b.left < a.right && a.top < b.bottom && b.top < a.bottom)) continue;
+        const pair = `${scene.id}: «${a.text}» and «${b.text}» overlap`;
+        if (!problems.has(pair)) problems.set(pair, `${pair}, ${offset.toFixed(2)} bars in`);
+      }
+  };
+  for (const scene of scenes) {
+    if (scene.start > 0) for (let step = -Math.round(AROUND / STEP); step <= Math.round(AROUND / STEP); step++) drawAt(scene, step * STEP);
+    drawAt(scene, scene.bars / 2);
+  }
+  return { problems: [...problems.values()], most };
+}
+
 // One pass serves every test under it that measures each show, on one page a show: opening a page is
 // what takes the time, and a window that changes size lays the stage out as a fresh load does (the
 // test of the desktop breakpoint, below). Each page is still (openPage): a test asks for the positions it measures.
-const STAGE_CHECKS = { key: keyInPage };
+const STAGE_CHECKS = { key: keyInPage, laneTexts: laneTextsInPage };
 let everyStage;
 /** What each check of STAGE_CHECKS found in every show's page at every size of STAGE_SIZES, as `{ where, found }`. */
 async function measureEveryStage() {
@@ -444,6 +488,7 @@ async function measureEveryStage() {
   for (const rhythm of RHYTHMS) {
     const scenes = createShow(rhythm).SCENES.map(({ id, start, bars }) => ({ id, start, bars }));
     const { page, errors } = await openPage(STAGE_SIZES[0], { query: `?ritmo=${rhythm.id}`, still: true });
+    await page.evaluate(keepLaneTexts);
     for (const viewport of STAGE_SIZES) {
       await page.setViewport(viewport);
       // two frames: the stage is laid out and its canvases are measured for the new size
@@ -503,6 +548,14 @@ test('the video export cuts no name of the colour key', async () => {
   assert.deepEqual([most, lines], [10, 2]); // its ten names, on two lines
   assert.deepEqual(errors, []);
   await page.close();
+});
+
+// #62: while the rows of one scene moved to the next scene's, a name crossed another: «ZABUMBA
+// MACETA» over «TRIÂNGULO», 0.03 bars into the forró's Trio.
+test('no two lane names overlap at any position of any show, at a scene’s start too', async () => {
+  const { results, problems } = await stageCheck('laneTexts');
+  assert.deepEqual(problems, []);
+  for (const { where, most } of results) assert.ok(most >= 2, `${where}: the lanes drew ${most} texts at most`); // a name and its count
 });
 
 // #61: the key's height follows its text, so the lanes canvas can change height with no stage resize

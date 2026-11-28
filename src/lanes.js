@@ -207,9 +207,6 @@ export function createLanes(canvas, volume = {}) {
       toX = bars => plotLeft + ((bars - start) / WINDOW_BARS) * plotWidth;
 
     ctx.clearRect(0, 0, width, height);
-    const fontSize = Math.round(Math.min(lerp(layoutFrom.rowHeight, layoutTo.rowHeight, amount) * LABEL_SIZE, labelHeight * LABEL_MAX_SIZE));
-    ctx.font = `${fontSize}px ${MONO_FONT}`;
-    ctx.textBaseline = 'middle';
     drawGrid(start, toX, plotLeft, plotRight, sixteenthWidth, top, bottom);
 
     for (let bar = Math.floor(start); bar <= Math.floor(start + WINDOW_BARS); bar++) {
@@ -221,12 +218,22 @@ export function createLanes(canvas, volume = {}) {
       }
     }
 
+    // The names and the counts are the scene's own, at its own rows, never at a row on its way: they
+    // fade out before a scene change and the next scene's fade in after it, so no name crosses
+    // another while the rows move (#62). A row that stays where it is keeps its name lit.
+    const [layout, other] = scene === from ? [layoutFrom, layoutTo] : [layoutTo, layoutFrom],
+      changing = Math.abs(1 - 2 * amount); // 1 away from a scene change, 0 on it
+    const fontSize = Math.round(Math.min(layout.rowHeight * LABEL_SIZE, labelHeight * LABEL_MAX_SIZE));
+    ctx.font = `${fontSize}px ${MONO_FONT}`;
+    ctx.textBaseline = 'middle';
     const counts = {};
     for (const h of hitsInBar(Math.floor(position))) counts[h.voice] = (counts[h.voice] || 0) + 1;
-    for (const voice in rows) {
-      const row = rows[voice];
-      if (row.alpha < HIDDEN_ALPHA || visualOf(volume, voice) === 0) continue; // a muted voice's row shows nothing
-      ctx.globalAlpha = row.alpha * (active.has(voice) ? 1 : MUTED_LABEL_ALPHA) * visualOf(volume, voice);
+    for (const voice of scene.lanes) {
+      const row = layout.rows[voice],
+        stays = other.rows[voice]?.y === row.y && other.rowHeight === layout.rowHeight,
+        alpha = stays ? 1 : changing;
+      if (alpha < HIDDEN_ALPHA || visualOf(volume, voice) === 0) continue; // a muted voice's row shows nothing
+      ctx.globalAlpha = alpha * (active.has(voice) ? 1 : MUTED_LABEL_ALPHA) * visualOf(volume, voice);
       ctx.fillStyle = VOICES[voice].color;
       ctx.textAlign = 'left';
       if (isHand(voice)) {
@@ -235,7 +242,7 @@ export function createLanes(canvas, volume = {}) {
         ctx.fillText(COPY.instruments[VOICES[voice].instrument].toUpperCase(), 0, row.y - shift);
         ctx.fillText(COPY.voices[voice].toUpperCase(), 0, row.y + shift);
       } else ctx.fillText(COPY.voices[voice].toUpperCase(), 0, row.y);
-      ctx.globalAlpha = row.alpha;
+      ctx.globalAlpha = alpha;
       ctx.textAlign = 'right';
       ctx.fillStyle = COUNT_COLOR;
       ctx.fillText(active.has(voice) ? String(counts[voice] || 0) : NO_COUNT, width, row.y);
