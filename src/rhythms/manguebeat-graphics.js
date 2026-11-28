@@ -5,22 +5,13 @@
 // `build` draws a scene's echo slots and `update` reads the bar's notes and the newest thrown stroke.
 // Nothing here has a clock of its own, so the video export matches playback (docs/product.md,
 // Constraints).
-import { COLORS, fgAlpha, MONO_FONT, REDUCED_MOTION_QUERY } from '../theme.js';
+import { createGraphicImage, DECIMALS, DIM, fillAt, LIT_FILL, OUTLINE, REST_LINE, VIEW, WAITING } from '../graphics.js';
+import { COLORS, MONO_FONT, REDUCED_MOTION_QUERY } from '../theme.js';
 import { clamp, setAttr, svgElement } from '../util.js';
 
 export const MANGUEBEAT_GRAPHICS = ['tablatura', 'eco']; // the ids of this show's graphics: no other show uses them
 
-const VIEW = 100; // the main square, in SVG units; everything sits about 42 from its centre at most, inside the ring the background's shapes are born on
-const LABEL_SIZE = 3; // the stage's label size in the video export; the page's is larger
-const LABEL_MAX = 3.9; // the largest label the tablature's string names still fit at
-const LABEL_SPACING = 0.3;
-const DECIMALS = 3; // of an opacity or a scale written into the SVG
-const OUTLINE = 0.55; // a label, and a part at rest in the foreground's colour
-const REST_LINE = 0.7; // a line or an outline at rest in an instrument's colour: 3:1 on the ground
-const REST_FILL = 0.1;
-const LIT_FILL = 0.9;
-const DIM = 0.38; // a muted instrument's part
-const WAITING = 0.62; // a note of the bar that does not sound now: still read at 4.5:1 on the ground
+// Everything sits about 42 units from the main square's centre at most, inside the ring the background's shapes are born on.
 
 // The bass, four strings from the highest (drawn on top, as a tablature is written) to the lowest.
 export const STRINGS = [
@@ -107,19 +98,7 @@ export function createManguebeatGraphics(
   const still = matchMedia?.(REDUCED_MOTION_QUERY);
   const words = copy.graphics;
   const bass = voices.baixo;
-  element.replaceChildren();
-  const svg = svgElement('svg', { viewBox: `0 0 ${VIEW} ${VIEW}`, role: 'img', 'aria-label': words.label }, element);
-  const labels = []; // every text at the stage's label size: resized with the stage
-  const label = (text, x, y, parent = svg, anchor = 'middle') => {
-    const element = svgElement(
-      'text',
-      { x, y, 'text-anchor': anchor, fill: fgAlpha(OUTLINE), 'font-family': MONO_FONT, 'font-size': LABEL_SIZE, 'letter-spacing': LABEL_SPACING },
-      parent,
-    );
-    element.textContent = text.toUpperCase();
-    labels.push(element);
-    return element;
-  };
+  const { svg, label, resize } = createGraphicImage(element, words.label, labelPixels);
   const line = (x1, y1, x2, y2, width, parent, stroke = COLORS.fg, opacity = OUTLINE) =>
     svgElement('line', { x1, y1, x2, y2, stroke, 'stroke-width': width, 'stroke-opacity': opacity, 'stroke-linecap': 'round' }, parent);
 
@@ -168,12 +147,6 @@ export function createManguebeatGraphics(
   let notes = [], // the bar's notes as drawn: { step, steps, place, box, text, hold }
     shownBar = null,
     copies = [];
-  /** Set every label to the stage's label size as the page renders it (the page's is larger than the export's). */
-  const resize = () => {
-    const unit = element.clientWidth / VIEW; // CSS px per SVG unit, before any zoom of the stage
-    const size = unit > 0 && labelPixels ? clamp(labelPixels() / unit, LABEL_SIZE, LABEL_MAX) : LABEL_SIZE;
-    for (const text of labels) setAttr(text, 'font-size', size.toFixed(2));
-  };
   /** Draw a bar's notes on the tablature: a fret number where each starts, and a line for as long as it is held. */
   const drawBar = bar => {
     shownBar = bar;
@@ -294,7 +267,7 @@ export function createManguebeatGraphics(
         setAttr(circle, 'stroke', color);
         setAttr(circle, 'stroke-opacity', holds ? String(REST_LINE) : String(OUTLINE));
         setAttr(circle, 'data-lit', light > 0 ? 'true' : 'false');
-        setAttr(circle, 'fill-opacity', (REST_FILL + (LIT_FILL - REST_FILL) * light).toFixed(DECIMALS));
+        setAttr(circle, 'fill-opacity', fillAt(light));
       });
       setAttr(trail, 'data-voice', holds ? thrown.voice : '');
       setAttr(trail, 'opacity', muted ? String(DIM) : '1'); // a muted instrument's stroke: its copies and its name disabled, none lit

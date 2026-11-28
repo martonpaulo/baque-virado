@@ -7,6 +7,7 @@
 import { label, row, stat, stats } from '../readout-markup.js';
 import { FORRO } from '../theme.js';
 import { drawForroBackdrop } from './forro-backdrop.js';
+import { createForroGraphics, FORRO_GRAPHICS } from './forro-graphics.js';
 import { straightMeter } from './meter.js';
 import { lilt, midiOf, recordedChoices, studioSounds, takes } from './studio-kit.js';
 
@@ -35,14 +36,20 @@ function thirdBelow(name) {
 
 // ---------- the harmony ----------
 // name: as the readout says it; degree: in A; left: the sanfona's bass buttons [root, fifth];
-// hand: its chord button; strum: the cavaquinho's four strings.
+// hand: its chord button, in the row `button`; strum: the cavaquinho's four strings.
 const CHORDS = {
-  Am: { name: 'Lám', degree: 'i', left: ['A2', 'E3'], hand: ['A3', 'C4', 'E4'], strum: ['E4', 'A4', 'C5', 'E5'] },
-  D: { name: 'Ré', degree: 'IV', left: ['D3', 'A2'], hand: ['A3', 'D4', 'F#4'], strum: ['D4', 'A4', 'D5', 'F#5'] },
-  G: { name: 'Sol', degree: '♭VII', left: ['G3', 'D3'], hand: ['G3', 'B3', 'D4'], strum: ['D4', 'G4', 'B4', 'D5'] },
-  C: { name: 'Dó', degree: '♭III', left: ['C3', 'G3'], hand: ['G3', 'C4', 'E4'], strum: ['E4', 'G4', 'C5', 'E5'] },
-  E7: { name: 'Mi7', degree: 'V7', left: ['E3', 'B2'], hand: ['G#3', 'B3', 'D4'], strum: ['E4', 'G#4', 'B4', 'D5'] },
+  Am: { name: 'Lám', degree: 'i', button: 'menor', left: ['A2', 'E3'], hand: ['A3', 'C4', 'E4'], strum: ['E4', 'A4', 'C5', 'E5'] },
+  D: { name: 'Ré', degree: 'IV', button: 'maior', left: ['D3', 'A2'], hand: ['A3', 'D4', 'F#4'], strum: ['D4', 'A4', 'D5', 'F#5'] },
+  G: { name: 'Sol', degree: '♭VII', button: 'maior', left: ['G3', 'D3'], hand: ['G3', 'B3', 'D4'], strum: ['D4', 'G4', 'B4', 'D5'] },
+  C: { name: 'Dó', degree: '♭III', button: 'maior', left: ['C3', 'G3'], hand: ['G3', 'C4', 'E4'], strum: ['E4', 'G4', 'C5', 'E5'] },
+  E7: { name: 'Mi7', degree: 'V7', button: 'setima', left: ['E3', 'B2'], hand: ['G#3', 'B3', 'D4'], strum: ['E4', 'G#4', 'B4', 'D5'] },
 };
+// The sanfona's left hand, as the instrument has it (src/rhythms/forro-graphics.js): one column a
+// note, each a fifth above the one before, and one row a kind, the bass first.
+const BASS_COLUMNS = ['C', 'G', 'D', 'A', 'E', 'B'];
+const BUTTON_ROWS = ['baixo', 'maior', 'menor', 'setima'];
+/** A note's name without its octave (`F#4` gives F#). */
+const pitchName = note => note.slice(0, -1);
 
 // ---------- the tune ----------
 // A line is one string per bar, one token per sixteenth: a note name starts a note, `-` holds it one
@@ -430,11 +437,17 @@ const BUS_TONE = [
 ];
 const RETURN_STRINGS = 3;
 const RING = 1.6; // a plucked note rings past its written length
-/** A hit's tone read back: its notes (MIDI), its length in seconds and whether it slides in. */
+/** A hit's tone read back: its notes (MIDI), its length in sixteenths and in seconds, and whether it slides in. */
 function written(tone) {
-  const [head, steps] = tone.split(TOKEN.length),
-    grace = head.startsWith(TOKEN.grace);
-  return { notes: (grace ? head.slice(1) : head).split(TOKEN.join).map(midiOf), seconds: Number(steps) * STEP_SECONDS, grace };
+  const [head, length] = tone.split(TOKEN.length),
+    grace = head.startsWith(TOKEN.grace),
+    steps = Number(length);
+  return { notes: (grace ? head.slice(1) : head).split(TOKEN.join).map(midiOf), steps, seconds: steps * STEP_SECONDS, grace };
+}
+/** The button a hit of the left hand presses: its row (of BUTTON_ROWS) and its column (of BASS_COLUMNS). */
+function leftHand(tone) {
+  const [kind, value] = tone.split(TOKEN.length);
+  return kind === LEFT.bass ? { row: BUTTON_ROWS[0], column: pitchName(value) } : { row: CHORDS[value].button, column: pitchName(CHORDS[value].left[0]) };
 }
 const STUDIO = {
   room: 'sala-pequena',
@@ -641,6 +654,14 @@ const READ = {
 };
 const COPY = {
   name: 'forró pé-de-serra',
+  // the words of its own graphics (src/rhythms/forro-graphics.js)
+  graphics: {
+    label:
+      'Sanfona: o teclado da mão direita, com as teclas que soam em destaque, e os botões da mão esquerda, uma coluna por nota e uma fileira para os baixos e para cada tipo de acorde, que acendem quando são apertados. Zabumba: as duas peles, a de cima tocada pela maceta e a de baixo pelo bacalhau.',
+    sanfona: 'sanfona',
+    zabumba: 'zabumba',
+    rows: { baixo: 'baixos', maior: 'maior', menor: 'menor', setima: '7ª' },
+  },
   selector: 'forró', // the rhythm selector's chip
   description: 'Forró pé-de-serra: triângulo, zabumba e sanfona, um de cada vez e depois juntos, com o baião em 3 + 3 + 2.', // the page's search and preview description
   themeColor: FORRO.night, // the page's theme-color: the rhythm's own ground colour
@@ -745,7 +766,26 @@ const FOCUS = { triangulo: 'triangulo', zabumba: 'zabumba', bacalhau: 'zabumba',
 /** The readout for a scene: its markup, no score, and the instrument it is about. */
 const readout = (scene, show) => ({ markup: LAYOUTS[scene.id](show), score: null, focus: FOCUS[scene.id] || '' });
 
-export const FORRO_PIECES = { WRITTEN, PARTS, CHORDS, MODE, LEADING_NOTE, PATTERNS, TOKEN, midiOf, thirdBelow }; // for the tests
+// The keyboard's range: the lowest and the highest note the right hand plays in the whole show.
+const TUNE_NOTES = [...Object.values(PARTS).flatMap(bars => bars.flatMap(bar => bar.sanfona)), ...CUT, ...FINAL].flatMap(note => note.notes.map(midiOf));
+const KEYBOARD_RANGE = [Math.min(...TUNE_NOTES), Math.max(...TUNE_NOTES)];
+
+export const FORRO_PIECES = {
+  WRITTEN,
+  PARTS,
+  CHORDS,
+  MODE,
+  LEADING_NOTE,
+  PATTERNS,
+  TOKEN,
+  midiOf,
+  thirdBelow,
+  BASS_COLUMNS,
+  BUTTON_ROWS,
+  KEYBOARD_RANGE,
+  rightHand: written,
+  leftHand,
+}; // for the tests
 
 export const FORRO_PE_DE_SERRA = {
   id: 'forro',
@@ -761,4 +801,18 @@ export const FORRO_PE_DE_SERRA = {
   readout,
   waves: null,
   copy: COPY,
+  // its own graphics in the stage's main square: the sanfona's two hands and the zabumba's two heads (#54)
+  graphics: {
+    ids: FORRO_GRAPHICS,
+    create: (element, context) =>
+      createForroGraphics(element, {
+        ...context,
+        stepsPerBar: STEPS_PER_BAR,
+        rightHand: written,
+        leftHand,
+        range: KEYBOARD_RANGE,
+        rows: BUTTON_ROWS,
+        columns: BASS_COLUMNS.map(note => ({ note, name: SOLFEGE[note] })),
+      }),
+  },
 };

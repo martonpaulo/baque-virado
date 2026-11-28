@@ -125,14 +125,43 @@ The zabumba leads the timing; the triângulo's off-beat sixteenths sit about 10 
   and 1440 x 900, the faintest wheel mark (an off-beat number) keeps 3.97:1 against what is behind
   it, and the sanfona's red dots 4.08:1 against the face; with the light at the rim, they fell to
   1.4:1 and 2.6:1.
-- **Flash safety (WCAG 2.3.1).** Nothing changes brightness on the beat. The pulse is motion: the
-  wheel's hand, the bellows and the flags. Measured in headless Chromium, 30 frames per second over
+- **Flash safety (WCAG 2.3.1).** The background changes no brightness on the beat. The pulse is motion: the
+  wheel's hand, the bellows and the flags. The show's own graphics do light on a stroke, in small
+  parts: the largest, a head of the zabumba, is 1.4 % of the main square, and the fastest, one
+  button of the jogo de fole on every sixteenth (6.7 a second), is 0.1 % of it, both far under the
+  quarter of the central field a flash needs; with reduced motion nothing fades. The measure that
+  follows is of the background alone, taken before the graphics. Measured in headless Chromium, 30 frames per second over
   two bars of the Rabeca e bandolim scene: the largest change of mean relative luminance in any
   eighth of the screen's width and height is 0.004 per frame, far below the 0.10 of a flash.
 - **Only what sounds.** The wheel draws only the voices the scene plays, with no ghost of the ones
   to come (the maracatu draws them faint): the parts enter one by one on the wheel too, and the key
   over the lanes, one line, names at most six voices; nine names did not fit a phone's width.
-- **Widgets.** The wheel, the lanes and the readout stay; the maracatu score, swing table and
+- **Graphics of its own** ([#54](https://github.com/martonpaulo/batuque/issues/54),
+  [`forro-graphics.js`](../../src/rhythms/forro-graphics.js)), in the stage's main square, with
+  the wheel smaller beside the readout:
+  - **Sanfona.** The right hand's keyboard, the white and black keys from the lowest to the
+    highest note the tune plays in the whole show (mi to lá, an octave and a fourth). A key is lit,
+    in the sanfona's red with a brighter outline and a dot where the finger is, for as long as its
+    note is written, over the bar line too; thirds and the
+    last chord light their keys together. Under it, the left hand's buttons as the instrument has
+    them: one column a note, each a fifth above the one before (dó, sol, ré, lá, mi, si), and one
+    row a kind (the bass, the major chord, the minor chord, the seventh), each row standing to the
+    right of the one above by an eighth of a column, so it stays under its own note's name. A button lights with its stroke, in the buttons' pearl, as bright as
+    the stroke is strong, for a sixteenth, and fades over the next: the bass alternates between a
+    column and its neighbour, and the jogo de fole shows its accents in 3 + 3 + 2 on one button.
+  - **Zabumba.** The drum from the side: the head the maceta plays above, the head the bacalhau
+    plays below, the shell between them and each head's name beside it. A head lights while its
+    stroke rings (0.3 s for the maceta's open stroke, 0.14 s for the bacalhau). A stroke of the
+    maceta pressed into the skin lights the middle of the head alone, for 0.14 s, and stops the
+    ring of the open stroke before it, as the hand does.
+  - Both read the show position alone: the keys and the buttons from the engine's hits of the bar
+    and of the bar before, the heads from the strokes that just sounded. With reduced motion a
+    key, a button or a head is lit while it sounds and plain otherwise: nothing fades. A muted
+    sanfona or zabumba shows disabled and lights nothing. In a scene where the instrument does not
+    play, its graphic is at rest.
+  - Every label is the stage's label size as the page renders it, no two names overlap and
+    nothing is drawn outside the main circle (`tests/page.test.js`).
+- **Widgets.** The wheel, smaller, the lanes and the readout stay; the maracatu score, swing table and
   waves do not, as forró has no measured swing and no notated baques here. The readout shows what
   each scene teaches: the triângulo's closed and open strokes, the zabumba cell, the bacalhau on
   the off-beats, the chords and their degrees, the mode with its flat seventh, the doubling, the

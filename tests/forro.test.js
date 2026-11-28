@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { meterOf } from '../src/music.js';
 import { FORRO_PE_DE_SERRA as FORRO, FORRO_PIECES } from '../src/rhythms/forro.js';
+import { FORRO_GRAPHICS, keysBetween, pressLight, soundingAt } from '../src/rhythms/forro-graphics.js';
 import { createShow } from '../src/show.js';
 
 const show = createShow(FORRO);
@@ -199,4 +200,74 @@ test('only the voices a scene plays reach the wheel, so the key fits one line', 
     const named = Object.keys(voices).filter(voice => voices[voice].length && !scene.lanes.includes(voice));
     assert.ok(named.length <= MAX_KEY_NAMES, `bar ${bar}: ${named}`);
   }
+});
+
+// ---------- its own graphics: the sanfona's two hands and the zabumba's two heads (#54) ----------
+const { BASS_COLUMNS, BUTTON_ROWS, KEYBOARD_RANGE, rightHand, leftHand } = FORRO_PIECES;
+const FIFTH = 7; // semitones
+const octave = name => midiOf(`${name}3`);
+
+test('the keyboard holds every note the right hand plays, from a white key to a white key', () => {
+  assert.deepEqual(FORRO.graphics.ids, FORRO_GRAPHICS);
+  assert.equal(typeof FORRO.graphics.create, 'function');
+  const keys = keysBetween(...KEYBOARD_RANGE),
+    onIt = new Set(keys.map(key => key.midi));
+  assert.deepEqual(KEYBOARD_RANGE, [midiOf('E4'), midiOf('A5')]);
+  assert.deepEqual([keys.at(0).black, keys.at(-1).black, keys.filter(key => !key.black).length, keys.filter(key => key.black).length], [false, false, 11, 7]);
+  // a black key stands on the line after the white keys to its left: F#4 after E4 and F4
+  assert.deepEqual(
+    keys.find(key => key.midi === midiOf('F#4')),
+    { midi: midiOf('F#4'), black: true, at: 2 },
+  );
+  // a range that starts or ends on a black key is widened to the white keys around it
+  assert.deepEqual(
+    keysBetween(midiOf('C#4'), midiOf('D#4')).map(key => key.midi),
+    [midiOf('C4'), midiOf('C#4'), midiOf('D4'), midiOf('D#4'), midiOf('E4')],
+  );
+  let played = 0;
+  for (let bar = 0; bar < show.TOTAL_BARS; bar++)
+    for (const h of hitsOf(bar, 'sanfona')) {
+      const { notes, steps } = rightHand(h.hit.tone);
+      played += notes.length;
+      for (const note of notes) assert.ok(onIt.has(note), `bar ${bar}: no key for MIDI ${note}`);
+      // the graphic reads the bar and the one before it: a note ends in the bar after its own at the latest
+      assert.ok(h.hit.step + steps <= 2 * STEPS_PER_BAR, `bar ${bar}: a note of ${steps} sixteenths from step ${h.hit.step}`);
+    }
+  assert.ok(played > 200, `the right hand plays only ${played} notes`);
+});
+
+test('every stroke of the left hand has its button, in columns a fifth apart', () => {
+  assert.deepEqual(BUTTON_ROWS, ['baixo', 'maior', 'menor', 'setima']);
+  for (const [i, column] of BASS_COLUMNS.slice(1).entries())
+    assert.equal((octave(column) - octave(BASS_COLUMNS[i]) + PITCH_CLASSES) % PITCH_CLASSES, FIFTH, `${BASS_COLUMNS[i]} to ${column}`);
+  const pressed = new Set();
+  for (let bar = 0; bar < show.TOTAL_BARS; bar++)
+    for (const h of hitsOf(bar, 'fole')) {
+      const { row, column } = leftHand(h.hit.tone);
+      assert.ok(BUTTON_ROWS.includes(row) && BASS_COLUMNS.includes(column), `bar ${bar}: no button for ${h.hit.tone}`);
+      pressed.add(`${row}-${column}`);
+    }
+  // the tonic's bass and its fifth, the minor tonic, the three major chords and the dominant seventh
+  for (const button of ['baixo-A', 'baixo-E', 'menor-A', 'maior-D', 'maior-G', 'maior-C', 'setima-E']) assert.ok(pressed.has(button), button);
+  assert.deepEqual(leftHand('a:E7'), { row: 'setima', column: 'E' });
+  assert.deepEqual(leftHand('b:D3'), { row: 'baixo', column: 'D' });
+  for (const row of BUTTON_ROWS) assert.ok(FORRO.copy.graphics.rows[row].length > 0, row);
+});
+
+test('a key sounds for as long as its note is written, a button lights as strong as its stroke, and with reduced motion nothing fades', () => {
+  const notes = [
+    { from: 3.875, to: 4.25, notes: [81] }, // held over the bar line
+    { from: 4.25, to: 4.375, notes: [79] },
+  ];
+  assert.deepEqual(
+    [3.8, 3.875, 4.1, 4.25, 4.3, 4.375].map(position => soundingAt(notes, position).flatMap(note => note.notes)),
+    [[], [81], [81], [79], [79], []],
+  );
+  assert.equal(pressLight(0, 1, false), 1);
+  assert.equal(pressLight(0.9, 0.45, false), 0.45); // a faint stroke of the jogo de fole
+  assert.ok(Math.abs(pressLight(1.5, 1, false) - 0.5) < 1e-9); // fading
+  assert.equal(pressLight(2, 1, false), 0);
+  assert.equal(pressLight(-0.1, 1, false), 0); // a stroke still to come
+  assert.equal(pressLight(0.9, 0.45, true), 1); // lit whole, however faint the stroke
+  assert.equal(pressLight(1, 1, true), 0);
 });

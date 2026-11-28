@@ -121,12 +121,16 @@ The rules every rhythm package in `src/rhythms/` follows.
   rhythm's own graphic takes the main space ([#49](https://github.com/martonpaulo/baque-virado/issues/49)).
   A package gives its graphics as `graphics` (their ids and a `create`); the stage then draws them
   in the main square, where the wheel is in the other shows, and the wheel sits beside the readout.
-  A graphic is built once a scene and updated from the show position alone; with reduced motion a
-  part is lit or not, and nothing grows or fades. The brega was the first: its chord chart and its
-  drum kit ([`rhythms/brega.md`](rhythms/brega.md#visuals)). The manguebeat draws the bass
+  A graphic is built once a scene and updated from the show position alone: it reads what sounds
+  from the engine's own timeline (`hitsInBar`, which the stage hands it) or from its package's
+  notes, never from a clock; with reduced motion a part is lit or not, and nothing grows or fades.
+  What every graphic shares (the square's units, the stage's label, how strong a part is at rest,
+  lit or disabled) has one owner, `src/graphics.js`. The brega was the first: its chord chart and
+  its drum kit ([`rhythms/brega.md`](rhythms/brega.md#visuals)). The manguebeat draws the bass
   tablature on the neck and the echo's copies
-  ([`rhythms/manguebeat.md`](rhythms/manguebeat.md#visuals)). `tests/rhythms.test.js` lists the
-  shows that still have none; the list only shrinks.
+  ([`rhythms/manguebeat.md`](rhythms/manguebeat.md#visuals)). The forró draws the sanfona's keys
+  and buttons and the zabumba's two heads ([`rhythms/forro.md`](rhythms/forro.md#visuals)).
+  `tests/rhythms.test.js` lists the shows that still have none; the list only shrinks.
 - **Background.** Circular, coming out of the central wheel, in the rhythm's palette from section 5
   of [`colour-and-visuals.md`](research/colour-and-visuals.md): brega in desaturated blue
   and muted rose, bregafunk in purple, magenta and gold. The approved backgrounds are a sketch to

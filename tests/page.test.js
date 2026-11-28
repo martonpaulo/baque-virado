@@ -98,15 +98,17 @@ async function openPage(viewport, { delaySounds = false, videoExport = false, qu
   return { page, errors, contexts: () => page.evaluate(() => window.__audioContexts) };
 }
 
-/** Render the scene with this id at `offset` bars in, through the exporter API. */
-const showScene = (page, id, offset = 0.5) =>
+/** Render the scene `id` of a show's `scenes` at `offset` bars in, through the exporter API. */
+const drawAt = (page, scenes, id, offset) =>
   page.evaluate(
     async start => {
       window.baque.render(start);
       await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
     },
-    SCENES.find(scene => scene.id === id).start + offset,
+    scenes.find(scene => scene.id === id).start + offset,
   );
+const showScene = (page, id, offset = 0.5) => drawAt(page, SCENES, id, offset);
+const scenesOf = id => createShow(RHYTHMS.find(rhythm => rhythm.id === id)).SCENES;
 
 test('the page loads with no error and exposes the exporter contract', async () => {
   const { page, errors } = await openPage(DESKTOP);
@@ -756,15 +758,54 @@ const boxOf = (page, selector) =>
     const box = element.getBoundingClientRect();
     return { x: box.x, y: box.y, width: box.width, height: box.height, shown: getComputedStyle(element).display !== 'none' };
   });
-const BREGA_SCENES = createShow(RHYTHMS.find(rhythm => rhythm.id === 'brega')).SCENES;
-const bregaAt = (page, id, offset) =>
-  page.evaluate(
-    async start => {
-      window.baque.render(start);
-      await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
-    },
-    BREGA_SCENES.find(scene => scene.id === id).start + offset,
-  );
+const BREGA_SCENES = scenesOf('brega');
+const bregaAt = (page, id, offset) => drawAt(page, BREGA_SCENES, id, offset);
+/**
+ * Every text of the graphic is at least the stage's own label size (the HUD's), font size against
+ * font size in the same CSS px: an SVG unit is a hundredth of the square's layout width.
+ */
+async function assertLabelSizes(page) {
+  const sizes = await page.evaluate(() => {
+    const unit = document.querySelector('#graphic').clientWidth / 100;
+    return {
+      label: parseFloat(getComputedStyle(document.querySelector('.hud')).fontSize),
+      texts: [...document.querySelectorAll('#graphic text')].map(text => [text.textContent, Number(text.getAttribute('font-size')) * unit]),
+    };
+  });
+  for (const [text, size] of sizes.texts)
+    assert.ok(size >= sizes.label * 0.99, `«${text}» at ${size.toFixed(2)}px is under the stage's label of ${sizes.label}px`);
+}
+/** The boxes of the graphic's `selector` elements that are drawn, each with a `name`, and the main square's. */
+const drawnBoxes = (page, selector) =>
+  page.evaluate(marks => {
+    const box = element => {
+      const { left, right, top, bottom } = element.getBoundingClientRect();
+      return { left, right, top, bottom };
+    };
+    return {
+      square: box(document.querySelector('#graphic svg')),
+      marks: [...document.querySelectorAll(marks)]
+        .filter(element => getComputedStyle(element).display !== 'none' && element.getAttribute('stroke-opacity') !== '0')
+        .map(element => ({ ...box(element), name: `${element.tagName} ${element.textContent}` })),
+    };
+  }, selector);
+/** A desktop page of a show, for a viewer who asks for reduced motion. */
+async function openStill(query) {
+  const opened = await openPage(DESKTOP, { query });
+  await opened.page.emulateMediaFeatures([{ name: 'prefers-reduced-motion', value: 'reduce' }]);
+  return opened;
+}
+const apart = (a, b) => a.right <= b.left || b.right <= a.left || a.bottom <= b.top || b.bottom <= a.top;
+/** Nothing of the graphic is drawn outside the main circle, the square's inscribed one. */
+async function assertInsideMainCircle(page) {
+  const { square, marks } = await drawnBoxes(page, '#graphic svg text, #graphic svg circle, #graphic svg ellipse, #graphic svg line, #graphic svg rect');
+  const radius = (square.right - square.left) / 2,
+    centre = [square.left + radius, square.top + radius];
+  for (const mark of marks) {
+    const reach = Math.hypot(Math.max(centre[0] - mark.left, mark.right - centre[0]), Math.max(centre[1] - mark.top, mark.bottom - centre[1]));
+    assert.ok(reach <= radius + 1, `«${mark.name}» reaches ${reach.toFixed(1)}px from the centre of a main circle of ${radius.toFixed(1)}px`);
+  }
+}
 
 for (const viewport of [PHONES[0], DESKTOP])
   test(`the brega draws its chords and its drum kit in the main square, with the wheel smaller beside the readout, at ${viewport.width} px`, async () => {
@@ -802,17 +843,7 @@ for (const viewport of [PHONES[0], DESKTOP])
     assert.equal(await page.$$eval('#graphic [data-bar]', cells => cells.length), 0);
     assert.equal(await page.$eval('#graphic svg > text', label => getComputedStyle(label).display), 'none'); // and no «cifras» over an empty chart
     assert.ok((await page.$$eval('#graphic [data-lit="true"]', pieces => pieces.map(piece => piece.dataset.piece))).includes('tom-agudo'));
-    // every text of the graphic is at least the stage's own label size (the HUD's), font size against
-    // font size in the same CSS px: an SVG unit is a hundredth of the square's layout width
-    const sizes = await page.evaluate(() => {
-      const unit = document.querySelector('#graphic').clientWidth / 100;
-      return {
-        label: parseFloat(getComputedStyle(document.querySelector('.hud')).fontSize),
-        texts: [...document.querySelectorAll('#graphic text')].map(text => [text.textContent, Number(text.getAttribute('font-size')) * unit]),
-      };
-    });
-    for (const [text, size] of sizes.texts)
-      assert.ok(size >= sizes.label * 0.99, `«${text}» at ${size.toFixed(2)}px is under the stage's label of ${sizes.label}px`);
+    await assertLabelSizes(page);
     // each name fits inside its piece, and no row of the readout is wider than its box (the Base: a notation row with its count)
     const fits = await page.$$eval('#graphic [data-piece]', pieces =>
       pieces.map(piece => [
@@ -870,17 +901,10 @@ test('with reduced motion the brega kit lights without growing, and a muted piec
 });
 
 // ---------- the manguebeat's own graphics (#56) ----------
-const MANGUE_SCENES = createShow(RHYTHMS.find(rhythm => rhythm.id === 'manguebeat')).SCENES;
+const MANGUE_SCENES = scenesOf('manguebeat');
 const SIXTEENTH = 1 / 16;
 /** Draw the manguebeat's scene `id` at `offset` bars into it. */
-const mangueAt = (page, id, offset) =>
-  page.evaluate(
-    async start => {
-      window.baque.render(start);
-      await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
-    },
-    MANGUE_SCENES.find(scene => scene.id === id).start + offset,
-  );
+const mangueAt = (page, id, offset) => drawAt(page, MANGUE_SCENES, id, offset);
 const tabNow = page => page.$eval('#graphic [data-graphic="tablatura"]', tab => [tab.dataset.string, tab.dataset.fret]);
 const litCopies = page => page.$$eval('#graphic [data-copy][data-lit="true"]', copies => copies.map(copy => Number(copy.dataset.copy)));
 
@@ -927,43 +951,14 @@ for (const viewport of [PHONES[0], DESKTOP])
     assert.deepEqual(await tabNow(page), ['', '']);
     await mangueAt(page, 'baixo', 5.5 * SIXTEENTH);
     assert.deepEqual(await tabNow(page), ['D', '2']);
-    // every text is at least the stage's own label size, in the same CSS px
-    const sizes = await page.evaluate(() => {
-      const unit = document.querySelector('#graphic').clientWidth / 100;
-      return {
-        label: parseFloat(getComputedStyle(document.querySelector('.hud')).fontSize),
-        texts: [...document.querySelectorAll('#graphic text')].map(text => [text.textContent, Number(text.getAttribute('font-size')) * unit]),
-      };
-    });
-    for (const [text, size] of sizes.texts)
-      assert.ok(size >= sizes.label * 0.99, `«${text}» at ${size.toFixed(2)}px is under the stage's label of ${sizes.label}px`);
+    await assertLabelSizes(page);
     // no two numbers of a bar overlap (the last bar of the second part plays four sixteenths in a row), and
     // nothing of the graphic leaves the main circle
     await mangueAt(page, 'segunda', 3 + 13.5 * SIXTEENTH);
-    const drawn = await page.evaluate(() => {
-      const box = element => {
-        const { left, right, top, bottom } = element.getBoundingClientRect();
-        return { left, right, top, bottom };
-      };
-      const square = box(document.querySelector('#graphic svg'));
-      return {
-        square,
-        numbers: [...document.querySelectorAll('#graphic [data-step] text')].map(box),
-        marks: [...document.querySelectorAll('#graphic svg text, #graphic svg circle, #graphic svg line, #graphic svg rect')]
-          .filter(element => getComputedStyle(element).display !== 'none' && element.getAttribute('stroke-opacity') !== '0')
-          .map(element => ({ ...box(element), name: `${element.tagName} ${element.textContent}` })),
-      };
-    });
-    assert.ok(drawn.numbers.length >= 7, 'the bar of four sixteenths in a row');
-    for (const [i, a] of drawn.numbers.entries())
-      for (const b of drawn.numbers.slice(i + 1))
-        assert.ok(a.right <= b.left || b.right <= a.left || a.bottom <= b.top || b.bottom <= a.top, 'two fret numbers overlap');
-    const radius = (drawn.square.right - drawn.square.left) / 2,
-      centre = [drawn.square.left + radius, drawn.square.top + radius];
-    for (const mark of drawn.marks) {
-      const reach = Math.hypot(Math.max(centre[0] - mark.left, mark.right - centre[0]), Math.max(centre[1] - mark.top, mark.bottom - centre[1]));
-      assert.ok(reach <= radius + 1, `«${mark.name}» reaches ${reach.toFixed(1)}px from the centre of a main circle of ${radius.toFixed(1)}px`);
-    }
+    const { marks: numbers } = await drawnBoxes(page, '#graphic [data-step] text');
+    assert.ok(numbers.length >= 7, 'the bar of four sixteenths in a row');
+    for (const [i, a] of numbers.entries()) for (const b of numbers.slice(i + 1)) assert.ok(apart(a, b), 'two fret numbers overlap');
+    await assertInsideMainCircle(page);
     assert.deepEqual(errors, []);
     await page.close();
   });
@@ -994,6 +989,115 @@ test('with reduced motion the manguebeat lights one copy at a time and nothing f
   assert.deepEqual(await page.$eval('#graphic [data-graphic="eco"]', trail => [trail.dataset.voice, trail.getAttribute('opacity')]), ['main', '0.38']);
   assert.equal(await page.$eval('#graphic svg > text:last-of-type', name => `${name.textContent}|${getComputedStyle(name).display !== 'none'}`), 'ALFAIA|true');
   await page.evaluate(() => localStorage.removeItem('baque-virado:volume-alfaia'));
+  assert.deepEqual(errors, []);
+  await page.close();
+});
+
+// ---------- the forró's own graphics (#54) ----------
+const FORRO_SCENES = scenesOf('forro');
+const STEP = 1 / 8; // a sixteenth of its 2/4 bar
+const forroAt = (page, id, offset) => drawAt(page, FORRO_SCENES, id, offset);
+const litKeys = page => page.$$eval('#graphic [data-key][data-lit="true"]', keys => keys.map(key => Number(key.dataset.key)).sort());
+const litButtons = page => page.$$eval('#graphic [data-button][data-lit="true"]', buttons => buttons.map(button => button.dataset.button).sort());
+const litHeads = page => page.$$eval('#graphic [data-head][data-lit="true"]', heads => heads.map(head => `${head.dataset.head}:${head.dataset.stroke}`));
+const fillOf = (page, selector) => page.$eval(selector, element => element.getAttribute('fill-opacity'));
+const [A4, C5, A5] = [69, 72, 81]; // MIDI numbers
+
+for (const viewport of [PHONES[0], DESKTOP])
+  test(`the forró draws the sanfona's keys and buttons and the zabumba's two heads in the main square, at ${viewport.width} px`, async () => {
+    const { page, errors } = await openPage(viewport, { query: '?ritmo=forro' });
+    assert.equal(await page.$eval('#stage', stage => stage.classList.contains('has-graphic')), true);
+    assert.match(await page.$eval('#graphic svg', svg => `${svg.getAttribute('role')}: ${svg.getAttribute('aria-label')}`), /^img: Sanfona: .*Zabumba: /);
+    assert.deepEqual(await page.$$eval('#graphic [data-graphic]', groups => groups.map(group => group.dataset.graphic)), ['sanfona', 'zabumba']);
+    assert.deepEqual(await page.$$eval('#graphic [data-key], #graphic [data-button]', parts => parts.length), 18 + 24); // E4 to A5, four rows of six
+    // the first scene: the triângulo alone, so both instruments are at rest
+    await forroAt(page, 'triangulo', 0.3);
+    assert.deepEqual([await litKeys(page), await litButtons(page), await litHeads(page)], [[], [], []]);
+    // the trio: the bass button and the maceta's open stroke on the bar's first sixteenth
+    await forroAt(page, 'trio', 0.2 * STEP);
+    assert.deepEqual([await litButtons(page), await litHeads(page)], [['baixo-A'], ['grave:aberto']]);
+    // the bacalhau on the off-beat, under the chord button's second stroke
+    await forroAt(page, 'trio', 2.3 * STEP);
+    assert.deepEqual(await litHeads(page), ['bacalhau:aberto']);
+    assert.ok((await litButtons(page)).includes('menor-A'));
+    // the second beat: the fifth's bass button, and the maceta pressed into the skin lights the middle alone
+    await forroAt(page, 'trio', 4.3 * STEP);
+    assert.ok((await litButtons(page)).includes('baixo-E'));
+    assert.deepEqual(await litHeads(page), ['grave:abafada']);
+    assert.equal(await fillOf(page, '#graphic [data-head="grave"] ellipse'), '0.100');
+    assert.ok(Number(await fillOf(page, '#graphic [data-head="grave"] ellipse:last-of-type')) > 0.4);
+    // the tune: a key is lit while its note is held, over the bar line too (the top note arrives a sixteenth early)
+    await forroAt(page, 'sanfona', 4.5 * STEP);
+    assert.deepEqual(await litKeys(page), [A5]);
+    await forroAt(page, 'sanfona', 1 + 0.5 * STEP);
+    assert.deepEqual(await litKeys(page), [A5]);
+    await forroAt(page, 'sanfona', 1 + 2.5 * STEP);
+    assert.deepEqual(await litKeys(page), [79]); // G5: the held note has ended
+    // thirds: two keys together
+    await forroAt(page, 'rabeca', 4 + 0.5 * STEP);
+    assert.deepEqual(await litKeys(page), [A4, C5]);
+    // a lit key also carries a dot where the finger is, so it differs from a key at rest by more than its red
+    assert.equal(
+      await page.$$eval(
+        '#graphic [data-graphic="sanfona"] circle:not([data-button])',
+        dots => dots.filter(dot => dot.getAttribute('display') !== 'none').length,
+      ),
+      2,
+    );
+    // every button stands nearer its own column's name than any other, in the last row too
+    const columns = await page.evaluate(() => {
+      const middle = element => {
+        const box = element.getBoundingClientRect();
+        return box.left + box.width / 2;
+      };
+      const names = [...document.querySelectorAll('#graphic [data-graphic="sanfona"] text')].slice(0, 6).map(text => [text.textContent, middle(text)]);
+      return [...document.querySelectorAll('#graphic [data-button]')].map(button => {
+        const x = middle(button);
+        return [button.dataset.button.split('-')[1], names.reduce((near, name) => (Math.abs(name[1] - x) < Math.abs(near[1] - x) ? name : near))[0]];
+      });
+    });
+    const NAME_OF = { C: 'DÓ', G: 'SOL', D: 'RÉ', A: 'LÁ', E: 'MI', B: 'SI' };
+    for (const [note, nearest] of columns) assert.equal(nearest, NAME_OF[note], `a ${note} button stands under «${nearest}»`);
+    // the jogo de fole: the chord button on every sixteenth, bright on the accents of 3 + 3 + 2 and faint between them
+    await forroAt(page, 'fole', 0.5 * STEP);
+    assert.equal(await fillOf(page, '#graphic [data-button="menor-A"]'), '0.900');
+    await forroAt(page, 'fole', 2.5 * STEP);
+    assert.equal(await fillOf(page, '#graphic [data-button="menor-A"]'), '0.460');
+    await forroAt(page, 'fole', 3.5 * STEP);
+    assert.equal(await fillOf(page, '#graphic [data-button="menor-A"]'), '0.900');
+    await assertLabelSizes(page);
+    const { marks: names } = await drawnBoxes(page, '#graphic text');
+    for (const [i, a] of names.entries()) for (const b of names.slice(i + 1)) assert.ok(apart(a, b), `«${a.name}» and «${b.name}» overlap`);
+    await assertInsideMainCircle(page);
+    assert.deepEqual(errors, []);
+    await page.close();
+  });
+
+test('with reduced motion the forró lights a button and a head whole and nothing fades, and a muted sanfona or zabumba shows disabled', async () => {
+  const { page, errors } = await openStill('?ritmo=forro');
+  await forroAt(page, 'fole', 2.5 * STEP); // a faint stroke: lit whole
+  assert.equal(await fillOf(page, '#graphic [data-button="menor-A"]'), '0.900');
+  await forroAt(page, 'trio', 1.5 * STEP); // half way through the open stroke's ring: as lit as at its start
+  assert.equal(await fillOf(page, '#graphic [data-head="grave"] ellipse'), '0.900');
+  assert.deepEqual(await litButtons(page), []); // the bass button's sixteenth has passed: plain, not fading
+  // the sanfona muted (the volume a desktop viewer stored): its keys and buttons are dimmed and none lights
+  await page.evaluate(() => localStorage.setItem('baque-virado:volume-sanfona', 'mute'));
+  await page.reload({ waitUntil: 'load' });
+  await page.waitForFunction(() => window.baque && document.readyState === 'complete');
+  await forroAt(page, 'rabeca', 4 + 0.5 * STEP);
+  assert.equal(await page.$eval('#graphic [data-graphic="sanfona"]', group => group.getAttribute('opacity')), '0.38');
+  assert.deepEqual([await litKeys(page), await litButtons(page)], [[], []]);
+  assert.deepEqual(await litHeads(page), ['grave:aberto']); // the zabumba still plays
+  await page.evaluate(() => localStorage.removeItem('baque-virado:volume-sanfona'));
+  // the zabumba muted: its heads are dimmed and none lights
+  await page.evaluate(() => localStorage.setItem('baque-virado:volume-zabumba', 'mute'));
+  await page.reload({ waitUntil: 'load' });
+  await page.waitForFunction(() => window.baque && document.readyState === 'complete');
+  await forroAt(page, 'trio', 0.2 * STEP);
+  assert.equal(await page.$eval('#graphic [data-graphic="zabumba"]', group => group.getAttribute('opacity')), '0.38');
+  assert.deepEqual(await litHeads(page), []);
+  assert.deepEqual(await litButtons(page), ['baixo-A']);
+  await page.evaluate(() => localStorage.removeItem('baque-virado:volume-zabumba'));
   assert.deepEqual(errors, []);
   await page.close();
 });
