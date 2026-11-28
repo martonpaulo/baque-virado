@@ -19,6 +19,8 @@ export const COPY = {
     comeBack: n => `VOLTA EM ${n}`,
     ...RHYTHM.copy.centre,
   },
+  // the card of an instrument that enters, in a scene whose title already names it (#71)
+  entry: { strokes: 'batidas no compasso' },
   controls: {
     rhythm: 'Ritmo', // the rhythm selector, shown only with two or more rhythms
     play: '▶ Tocar',

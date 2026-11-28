@@ -735,6 +735,8 @@ const READ = {
   bar: '1 compasso',
   barValue: `${BAR_SECONDS.toFixed(2).replace('.', ',')} s`,
   instruments: 'instrumentos',
+  enters: 'volta', // the card of the part that returns (the engine's «entra» card)
+  entersMuted: 'sem som',
   echo: 'eco',
   echoValue: `colcheia\u00a0pontuada, ${Math.round(seconds(ECHO_STEPS) * MS_PER_SECOND)}\u00a0ms`, // no-break spaces: a line never ends inside the term or before the unit
   unison: 'uníssono',

@@ -321,6 +321,13 @@ body {
   gap: 0.1cqw 2cqw;
   line-height: 1.15;
 }
+/* the part's strokes stand a little under its count, in the card of a scene the title names (#71) */
+[data-entry] > .notation {
+  margin-top: 1cqw;
+}
+[data-entry].muted .notation {
+  opacity: 0.2; /* as the muted card's other parts */
+}
 .stats {
   display: grid;
   grid-template-columns: repeat(3, 1fr);

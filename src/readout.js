@@ -2,7 +2,7 @@
 
 import { isHeard } from './audio.js';
 import { COPY } from './copy.js';
-import { BAR_SECONDS, isHand, STEPS_PER_BAR, VOICES } from './music.js';
+import { BAR_SECONDS, isHand, STEPS_PER_BAR, STEPS_PER_BEAT, VOICES } from './music.js';
 import { label, row } from './readout-markup.js';
 import { RHYTHM } from './rhythms/index.js';
 import { barTimeline, TOTAL_BARS } from './show.js';
@@ -49,6 +49,19 @@ function waveMarkup(option) {
       );
     }).join('')
   );
+}
+
+/** True when a scene's title already says `name`, whatever the case. */
+const named = (title, name) => title.toLocaleLowerCase().includes(name.toLocaleLowerCase());
+
+/** One bar of a part as a row of marks: a stroke or a rest per step, a line between beats. */
+function strokes(hits, color) {
+  const played = new Set(hits.map(({ hit }) => Math.floor(hit.step)));
+  const marks = Array.from({ length: STEPS_PER_BAR }, (_, step) => {
+    const line = step % STEPS_PER_BEAT === STEPS_PER_BEAT - 1 && step < STEPS_PER_BAR - 1 ? '|' : '';
+    return (played.has(step) ? '●' : '·') + line;
+  });
+  return `<span class="seq" style="color:${color}">${marks.join('')}</span>`;
 }
 
 /** `volume` maps an instrument to its volume level: a muted one shows as disabled. */
@@ -113,9 +126,15 @@ export function createReadout(element, volume = {}) {
           hand = COPY.hands?.[voice] || '';
         const muted = !isHeard(volume, voice);
         entry.classList.toggle('muted', muted);
-        entry.innerHTML =
-          `<div class="k">${muted ? T.entersMuted : T.enters}</div><div class="big" style="color:${color}">${name}</div>` +
-          row(label(hand, color), `${barTimeline(scene.start + barInScene).voices[voice].length}/${STEPS_PER_BAR}`);
+        const hits = barTimeline(scene.start + barInScene).voices[voice],
+          count = `${hits.length}/${STEPS_PER_BAR}`,
+          state = `<div class="k">${muted ? T.entersMuted : T.enters}</div>`;
+        // A scene whose title already names the instrument says it once: the card then shows the
+        // part itself, its count in the large type and its strokes on the bar, named by its hand (#71).
+        entry.innerHTML = named(COPY.scenes[scene.id].title, name)
+          ? `<div class="k">${muted ? T.entersMuted : COPY.entry.strokes}</div><div class="big" style="color:${color}">${count}</div>` +
+            `<div class="notation">${label(hand || name, color)}${strokes(hits, color)}</div>`
+          : `${state}<div class="big" style="color:${color}">${name}</div>${row(label(hand, color), count)}`;
         replayFade(entry);
       }
       const listening = element.querySelector('[data-listening]');

@@ -503,10 +503,37 @@ function notationInPage(scenes) {
   return { problems: [...problems], rows };
 }
 
+/** In the page: each scene's title against the largest text of its readout, in every bar of a scene that brings parts in. */
+function saidTwiceInPage(scenes) {
+  const said = text => text.trim().toLocaleLowerCase();
+  const problems = new Set();
+  let cards = 0;
+  for (const scene of scenes) {
+    window.baque.render(scene.start + 0.5);
+    const bars = document.querySelector('#read [data-entry]') ? scene.bars : 1; // the card names a new part each bar
+    for (let bar = 0; bar < bars; bar++) {
+      window.baque.render(scene.start + bar + 0.5);
+      if (document.querySelector('#read [data-entry]')) cards++;
+      const title = said(document.querySelector('#head .title').textContent);
+      // a text of the readout: an element with words of its own
+      const texts = [...document.querySelectorAll('#read *')].filter(part =>
+        [...part.childNodes].some(node => node.nodeType === Node.TEXT_NODE && node.data.trim()),
+      );
+      const largest = Math.max(...texts.map(part => parseFloat(getComputedStyle(part).fontSize)));
+      // a word the show's package does not hold shows as «undefined» (the manguebeat's card did)
+      for (const part of texts) if (/undefined|NaN/.test(part.textContent)) problems.add(`${scene.id}: the readout shows «${part.textContent}»`);
+      for (const part of texts)
+        if (parseFloat(getComputedStyle(part).fontSize) === largest && said(part.textContent) === title)
+          problems.add(`${scene.id}: the readout says «${part.textContent}» in its largest type, as the title does`);
+    }
+  }
+  return { problems: [...problems], cards };
+}
+
 // One pass serves every test under it that measures each show, on one page a show: opening a page is
 // what takes the time, and a window that changes size lays the stage out as a fresh load does (the
 // test of the desktop breakpoint, below). Each page is still (openPage): a test asks for the positions it measures.
-const STAGE_CHECKS = { key: keyInPage, laneTexts: laneTextsInPage, notation: notationInPage };
+const STAGE_CHECKS = { key: keyInPage, laneTexts: laneTextsInPage, notation: notationInPage, saidTwice: saidTwiceInPage };
 let everyStage;
 /** What each check of STAGE_CHECKS found in every show's page at every size of STAGE_SIZES, as `{ where, found }`. */
 async function measureEveryStage() {
@@ -590,6 +617,17 @@ test('no part name runs under its row of strokes in any show’s notation, and n
   const { results, problems } = await stageCheck('notation');
   assert.deepEqual(problems, []);
   for (const { where, rows } of results) assert.ok(rows > 0, `${where}: no notation row was measured`); // every show draws some
+});
+
+// #71: the coco and the bregafunk bring an instrument in under a title that is its name, and the
+// card under the wheel said the name again, as large («CAIXA» over «CAIXA»). The manguebeat's card
+// had no word for «entra» and showed «undefined».
+test('no scene of any show says its title again in the largest type of its readout', async () => {
+  const { results, problems } = await stageCheck('saidTwice');
+  assert.deepEqual(problems, []);
+  // the shows with a card of what enters were measured: the maracatu, the coco, the manguebeat and the bregafunk
+  const withCards = new Set(results.filter(({ cards }) => cards > 0).map(({ where }) => where.split(' ')[0]));
+  assert.deepEqual([...withCards].sort(), ['bregafunk', 'coco', 'manguebeat', 'maracatu']);
 });
 
 // #61: the key's height follows its text, so the lanes canvas can change height with no stage resize
