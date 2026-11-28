@@ -356,9 +356,9 @@ function phraseHits(phraseKey, bar) {
 // Special bars (the bar modes the engine knows):
 //   roll – the alfaia alone in rufadas (the opening, then the Rufo)
 //   cut  – everyone on 1, then silence
-// A scene that hands over to the next (`rufadaOut`) rolls into it in its last bar, and a scene
-// entered that way lands on a golpe.
-function barHits(scene, barInScene) {
+// A scene entered by a rufada declares it (`leadIn: 'fill'`, src/show.js): the scene before rolls into
+// it in its last bar (`leadsInto`), and the entered scene lands on a golpe.
+function barHits(scene, barInScene, { leadsInto } = {}) {
   const mode = scene.mode(barInScene),
     bar = scene.start + barInScene;
   if (mode === 'roll' && scene.id === 'intro') {
@@ -370,12 +370,12 @@ function barHits(scene, barInScene) {
   }
   if (mode === 'roll') return { ...silentBar(), ...rufada(0, scene.bars * STEPS_PER_BAR - 1, barInScene * STEPS_PER_BAR) };
   const hits = phraseHits(mode === 'cut' ? 'base' : scene.phrase(barInScene), bar);
-  if (barInScene === 0 && scene.landsOnGolpe) hits.low = hits.low.map(h => (h.step === 0 ? hit(0, 1, GOLPE) : h));
+  if (barInScene === 0 && scene.leadIn === 'fill') hits.low = hits.low.map(h => (h.step === 0 ? hit(0, 1, GOLPE) : h));
   if (mode === 'cut')
     return Object.fromEntries(
       VOICE_ORDER.map(voice => [voice, hits[voice].filter(h => h.step === 0).map(h => (ALFAIA.includes(voice) ? hit(0, 1, GOLPE) : h))]),
     );
-  if (scene.rufadaOut && barInScene === scene.bars - 1) {
+  if (leadsInto === 'fill') {
     // before the second head enters, the low head rolls alone
     const roll = rufada(SCENE_RUFADA_FROM, STEPS_PER_BAR - 1, 0, scene.voices(barInScene).includes('high'));
     for (const voice of ALFAIA) hits[voice] = [...hits[voice].filter(h => h.step < SCENE_RUFADA_FROM), ...roll[voice]];
@@ -389,7 +389,7 @@ const always = value => () => value;
 const entering = [];
 const adds = (id, voices, lanes = ['low', ...voices]) => {
   entering.push(...voices);
-  return { id, bars: 8, voices: always([...entering]), lanes, rufadaOut: true, landsOnGolpe: true };
+  return { id, bars: 8, voices: always([...entering]), lanes, leadIn: 'fill' };
 };
 
 const SCENE_LIST = [
@@ -407,12 +407,12 @@ const SCENE_LIST = [
     bars: PHRASE_BARS * PHRASE_ORDER.length,
     phrase: bar => PHRASE_ORDER[Math.floor(bar / PHRASE_BARS)],
     lanes: ALFAIA,
-    rufadaOut: true,
-    landsOnGolpe: true,
+    leadIn: 'fill',
   },
-  { id: 'toque', bars: 16, phrase: always('toque'), pattern: 'toque', lanes: ALFAIA, named: true, landsOnGolpe: true },
+  { id: 'toque', bars: 16, phrase: always('toque'), pattern: 'toque', lanes: ALFAIA, named: true, leadIn: 'fill' },
+  // the Rufo is entered cold: the band stops on the bar line and the alfaia rolls alone (pinned in tests/rhythms.test.js)
   { id: 'rufo', bars: 4, mode: always('roll'), lanes: ALFAIA },
-  { id: 'finale', bars: 8, mode: bar => (bar === 7 ? 'cut' : 'normal'), lanes: ALFAIA, isEnd: true, landsOnGolpe: true },
+  { id: 'finale', bars: 8, mode: bar => (bar === 7 ? 'cut' : 'normal'), lanes: ALFAIA, isEnd: true, leadIn: 'fill' },
 ];
 
 // How the background behaves in each scene (createCocoPainter above): how many candles burn around the

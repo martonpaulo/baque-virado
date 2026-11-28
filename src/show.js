@@ -6,15 +6,34 @@ import { smooth } from './util.js';
 
 const always = value => () => value;
 
+/** How a scene may be entered: the bar before it plays a fill or a pickup, parts drop out of it, or a
+ * sound rings over the bar line. The entered scene declares it (`leadIn`) and the script writes it. */
+export const LEAD_INS = Object.freeze(['fill', 'pickup', 'dropOut', 'ringOver']);
+/** A boundary that changes more than this share of the sounding voices is cold unless the entered
+ * scene declares a lead-in (docs/product.md, Rhythm shows, Music). */
+export const COLD_BOUNDARY_SHARE = 0.25;
+
 /** The show of one rhythm package: its scenes on the timeline, and every hit of every bar. */
 export function createShow(rhythm) {
   const { barSeconds, stepsPerBar, swingOffset, voiceOrder } = meterOf(rhythm);
-  const defaults = { mode: always('normal'), voices: always(voiceOrder), swing: always(true), gain: {}, named: false, isEnd: false, ...rhythm.sceneDefaults };
+  const defaults = {
+    mode: always('normal'),
+    voices: always(voiceOrder),
+    swing: always(true),
+    gain: {},
+    named: false,
+    isEnd: false,
+    leadIn: null,
+    ...rhythm.sceneDefaults,
+  };
 
   const SCENES = [];
   let cursor = 0;
   for (const definition of rhythm.scenes) {
-    SCENES.push({ ...defaults, ...definition, start: cursor });
+    const scene = { ...defaults, ...definition, start: cursor };
+    if (scene.leadIn !== null && !LEAD_INS.includes(scene.leadIn)) throw new Error(`scene ${scene.id}: unknown lead-in «${scene.leadIn}»`);
+    if (scene.leadIn !== null && SCENES.length === 0) throw new Error(`scene ${scene.id}: the first scene has no bar before it to lead in`);
+    SCENES.push(scene);
     cursor += definition.bars;
   }
   const TOTAL_BARS = cursor;
@@ -53,7 +72,9 @@ export function createShow(rhythm) {
     if (!timelineCache.has(bar)) {
       const scene = sceneAt(bar),
         barInScene = bar - scene.start,
-        hits = rhythm.barHits(scene, barInScene),
+        // the last bar of a scene leads into the next one: the script reads how that scene is entered
+        leadsInto = barInScene === scene.bars - 1 ? (SCENES[SCENES.indexOf(scene) + 1]?.leadIn ?? null) : null,
+        hits = rhythm.barHits(scene, barInScene, { leadsInto }),
         swingOn = scene.swing(barInScene),
         voices = {};
       for (const voice of voiceOrder) {
@@ -96,7 +117,27 @@ export function createShow(rhythm) {
     }
     return out;
   }
-  return { SCENES, TOTAL_BARS, TOTAL_SECONDS, sceneIndexAt, sceneAt, sceneById, blendAt, barTimeline, hitsInBar, recentHits };
+
+  /** The voices a bar writes a hit for, among the ones playing: what the script wrote, sounding or a silent mark. */
+  const writtenIn = bar => new Set(hitsInBar(bar).map(h => h.voice));
+  /**
+   * Every scene boundary, in order: the scenes on each side, how many of the voices written in the
+   * last settled bar before it (the bar before a lead-in bar; the scene's only bar when it has one)
+   * or in the first bar after it are on one side only (`changed` of `voices`, and their `share`),
+   * the entered scene's declared lead-in, and `cold`: over COLD_BOUNDARY_SHARE with none declared.
+   */
+  function boundaries() {
+    return SCENES.slice(1).map((to, index) => {
+      const from = SCENES[index],
+        before = writtenIn(from.start + Math.max(0, from.bars - 2)),
+        after = writtenIn(to.start),
+        voices = new Set([...before, ...after]),
+        changed = [...voices].filter(voice => before.has(voice) !== after.has(voice)).length,
+        share = voices.size ? changed / voices.size : 0;
+      return { from: from.id, to: to.id, changed, voices: voices.size, share, leadIn: to.leadIn, cold: share > COLD_BOUNDARY_SHARE && to.leadIn === null };
+    });
+  }
+  return { SCENES, TOTAL_BARS, TOTAL_SECONDS, sceneIndexAt, sceneAt, sceneById, blendAt, barTimeline, hitsInBar, recentHits, boundaries };
 }
 
 export const { SCENES, TOTAL_BARS, TOTAL_SECONDS, sceneIndexAt, sceneAt, sceneById, blendAt, barTimeline, hitsInBar, recentHits } = createShow(RHYTHM);

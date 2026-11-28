@@ -96,3 +96,36 @@ test('a 2/4 rhythm runs on an 8-step bar, one bar per turn, with its own tempo a
   assert.equal(show.sceneAt(2).id, 'roda');
   assert.deepEqual(show.barTimeline(3).playing, ['main', 'answer', 'agogo']);
 });
+
+// One scene leads into the next as a band does, never cold on the bar line (docs/product.md, Rhythm
+// shows; #46). The maracatu is outside the rule. A show whose round-two rewrite has not landed keeps
+// the cold boundaries it has today: its list only shrinks, and its rewrite (#47) empties it.
+const COLD_BOUNDARIES = {
+  coco: ['toque>rufo'],
+  frevo: ['introducao>surdo', 'surdo>caixa', 'caixa>pandeiro', 'palhetas>metais', 'metais>la-e-ca', 'fotografia>final'],
+  forro: ['triangulo>zabumba', 'zabumba>bacalhau', 'sanfona>baixo', 'rabeca>fole', 'fole>baiao'],
+  manguebeat: ['introducao>celula', 'guitarra>dub', 'dub>retorno', 'conversa>corte', 'corte>segunda'],
+  brega: ['introducao>base', 'base>baixo', 'guitarra>virada', 'virada>refrao'],
+  bregafunk: ['tema>bumbo', 'bumbo>lata', 'lata>palmas', 'batida>tamborzao', 'tamborzao>quebra', 'quebra>drop'],
+};
+
+test('no show but the maracatu gains a scene that arrives cold on the bar line', () => {
+  const others = RHYTHMS.filter(rhythm => rhythm !== MARACATU);
+  assert.deepEqual(others.map(rhythm => rhythm.id).sort(), Object.keys(COLD_BOUNDARIES).sort());
+  for (const rhythm of others) {
+    const cold = createShow(rhythm)
+      .boundaries()
+      .filter(boundary => boundary.cold)
+      .map(boundary => `${boundary.from}>${boundary.to}`);
+    assert.deepEqual(cold, COLD_BOUNDARIES[rhythm.id], `${rhythm.id}: declare how the scene is entered (leadIn), or shorten its list when one is fixed`);
+  }
+});
+
+test('the coco declares the rufada that leads into each scene but the Rufo', () => {
+  const coco = RHYTHMS.find(rhythm => rhythm.id === 'coco');
+  const entered = createShow(coco).boundaries();
+  assert.deepEqual(
+    entered.map(boundary => boundary.leadIn),
+    ['fill', 'fill', 'fill', 'fill', 'fill', 'fill', 'fill', 'fill', 'fill', 'fill', null, 'fill'],
+  );
+});

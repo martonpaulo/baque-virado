@@ -103,6 +103,13 @@ The rules every rhythm package in `src/rhythms/` follows.
   characteristic and something people want to listen to, never only a demonstration, and one scene
   leads into the next as a band does, never cold on the bar line. One tempo for the whole show. A 2/4
   rhythm draws its bar on an 8-step wheel.
+- **Lead-ins.** A scene declares how it is entered (`leadIn` in its package: a fill, a pickup, parts
+  that drop out, or a sound that rings over the bar line), and its script writes the bar that leads
+  into it; the engine hands the declaration to the script and invents nothing. A boundary that
+  changes more than a quarter of the voices without a declared lead-in is cold
+  (`COLD_BOUNDARY_SHARE` in `src/show.js`). `tests/rhythms.test.js` lists the cold boundaries each
+  show still has; a list only shrinks, and a show's round-two rewrite empties its own
+  ([#46](https://github.com/martonpaulo/batuque/issues/46)). The maracatu is outside this rule.
 - **Felt tempo.** The tempo a listener feels sits inside the genre's researched range in
   [`brega-forro.md`](research/brega-forro.md) and
   [`frevo-manguebeat-coco.md`](research/frevo-manguebeat-coco.md), and the agent checks it before
