@@ -41,7 +41,7 @@ const TRAIL_ALPHA = 0.32; // how much of the last frame each frame paints over
 const GLOW = { outer: 3.2, alpha: 0.42, rise: 0.15 }; // full strength `rise` of the way out // the burgundy of the earth, in wheel radii
 const LIGHT = { outer: 2.2, alpha: 0.1, rise: 0.1 }; // the candles' copper light pooled on the floor
 // Specks of the beaten earth, still: where each lies, its size in CSS px and how much it shows.
-const GRAIN = { count: 150, from: 1.16, reach: 1.7, size: 0.5, sizes: 0.9, alpha: 0.12, alphas: 0.25 };
+const GRAIN = { count: 150, from: 1.16, reach: 1.7, size: 0.5, sizes: 0.9, alpha: 0.12, alphas: 0.25, draws: 3 }; // `draws`: the random values a speck takes
 // The candles on the floor. Each spot: where it stands, in wheel radii right of and below the wheel's
 // centre, and how tall its flame burns, in the order they are lit as the roda fills. They are set
 // down by hand in three groups at different distances, and one side of the wheel stays dark: lights
@@ -61,6 +61,7 @@ export const CANDLES = {
   ],
   halo: 0.21,
   haloAlpha: 0.6,
+  haloMid: 0.33,
   flame: 0.06,
   flameAlpha: 0.9,
   core: 0.011,
@@ -96,10 +97,10 @@ export function createCocoPainter({ barSeconds, rufada, golpe }) {
   const secondsOf = h => h.at * barSeconds;
   const candles = CANDLES.spots.map(([right, down, size], i) => ({ right, down, size, phase: hash(SEEDS.phase + i) * TAU }));
   const grain = [...Array(GRAIN.count).keys()].map(i => ({
-    angle: hash(SEEDS.grain + i * 3) * TAU,
-    ring: GRAIN.from + hash(SEEDS.grain + i * 3 + 1) ** 2 * GRAIN.reach, // denser near the wheel, where the light is
-    size: GRAIN.size + hash(SEEDS.grain + i * 3 + 2) * GRAIN.sizes,
-    alpha: GRAIN.alpha + hash(SEEDS.grain + i * 3 + 2) * GRAIN.alphas,
+    angle: hash(SEEDS.grain + i * GRAIN.draws) * TAU,
+    ring: GRAIN.from + hash(SEEDS.grain + i * GRAIN.draws + 1) ** 2 * GRAIN.reach, // denser near the wheel, where the light is
+    size: GRAIN.size + hash(SEEDS.grain + i * GRAIN.draws + 2) * GRAIN.sizes,
+    alpha: GRAIN.alpha + hash(SEEDS.grain + i * GRAIN.draws + 2) * GRAIN.alphas,
   }));
 
   /** The golpes that flare: one per moment, none within MIN_FLASH_GAP after the one before. */
@@ -186,7 +187,7 @@ export function createCocoPainter({ barSeconds, rufada, golpe }) {
         light = CANDLES.haloAlpha * strength * (1 + CANDLES.flicker * waver + BLOOM.halo * flare);
       const halo = ctx.createRadialGradient(cx, cy, 0, cx, cy, reach);
       halo.addColorStop(0, alphaOf(COCO_PALETTE.copper, Math.min(1, light)));
-      halo.addColorStop(1 / 2, alphaOf(COCO_PALETTE.copper, Math.min(1, light) / 3));
+      halo.addColorStop(1 / 2, alphaOf(COCO_PALETTE.copper, Math.min(1, light) * CANDLES.haloMid));
       halo.addColorStop(1, alphaOf(COCO_PALETTE.copper, 0));
       ctx.globalAlpha = 1;
       ctx.fillStyle = halo;
