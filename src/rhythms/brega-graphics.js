@@ -18,6 +18,8 @@ const CELL = { width: 15.5, height: 11, gap: 1.5, radius: 1.6 };
 const CHART_Y = 26; // the middle of the chart's rows
 const CHART_LABEL_Y = 9.5;
 const SYMBOL_SIZE = 6; // a chord symbol: 4.4cqw, the readout's larger text
+const SYMBOL_WEIGHT = 700; // bold, as the stage's figures
+const DECIMALS = 3; // of an opacity or a scale written into the SVG
 const SYMBOL_BASELINE = 2.1; // from a cell's middle down to the symbol's baseline
 const REST = '–'; // a bar with no chord (the Breque's silence)
 // The kit, seen from above as the drummer sits: chimbal on the left, caixa in front, bumbo in the
@@ -156,7 +158,7 @@ export function createBregaGraphics(element, { voices, copy, symbolAt, labelPixe
               fill: COLORS.fg,
               'font-family': MONO_FONT,
               'font-size': SYMBOL_SIZE,
-              'font-weight': 700,
+              'font-weight': SYMBOL_WEIGHT,
             },
             group,
           );
@@ -182,11 +184,11 @@ export function createBregaGraphics(element, { voices, copy, symbolAt, labelPixe
         const light = muted ? 0 : Math.max(0, ...strokes.map(h => lightOf(h.age, h.hit.tone === OPEN.tone ? OPEN.ring : piece.ring, still?.matches)));
         setAttr(piece.group, 'data-lit', light > 0 ? 'true' : 'false');
         setAttr(piece.group, 'opacity', muted ? String(DIM) : '1');
-        setAttr(piece.disc, 'fill-opacity', (REST_FILL + (LIT_FILL - REST_FILL) * light).toFixed(3));
+        setAttr(piece.disc, 'fill-opacity', (REST_FILL + (LIT_FILL - REST_FILL) * light).toFixed(DECIMALS));
         // on a bright fill the name is the ground's colour, with no rim; under it, light with its rim
         setAttr(piece.name, 'fill', light > piece.dark ? COLORS.void : COLORS.fg);
         setAttr(piece.name, 'stroke-width', light > piece.dark ? '0' : String(NAME_HALO));
-        setAttr(piece.body, 'transform', still?.matches ? '' : `scale(${(1 + SWELL * clamp(light, 0, 1)).toFixed(3)})`);
+        setAttr(piece.body, 'transform', still?.matches ? '' : `scale(${(1 + SWELL * clamp(light, 0, 1)).toFixed(DECIMALS)})`);
         if (piece.open) setAttr(piece.open, 'stroke-opacity', opened && !muted ? String(OUTLINE) : '0');
       }
     },
