@@ -4,7 +4,7 @@
 // group the bar as 3 + 3 + 2 eighths), a palma with the second bumbo, a few dry chimbais, the sliding
 // 808 «grave», a keyboard stab with the lata, and a flute hook in A Phrygian. Hard-quantized: no swing.
 // Research and choices: docs/research/brega-forro.md, docs/rhythms/bregafunk.md.
-import { label, row, stat, stats } from '../readout-markup.js';
+import { label, marksAt, notation, row, stat, stats } from '../readout-markup.js';
 import { BEATS_PER_LEAN, createBregafunkBackground, PALETTE } from './bregafunk-background.js';
 import { SYNTH_TAKES, synthOf } from './bregafunk-synth.js';
 import { straightMeter } from './meter.js';
@@ -18,7 +18,6 @@ const STEPS_PER_BEAT = 4;
 const STEPS_PER_BAR = BEATS_PER_BAR * STEPS_PER_BEAT;
 const STEP_SECONDS = 60 / BPM / STEPS_PER_BEAT;
 const BAR_SECONDS = STEP_SECONDS * STEPS_PER_BAR;
-const SIXTEENTHS = [...Array(STEPS_PER_BAR).keys()];
 const STEPS_PER_EIGHTH = 2;
 const ID = 'bregafunk';
 
@@ -651,12 +650,14 @@ const COPY = {
 
 // ---------- readout layouts ----------
 const T = READ;
-const beatSeparator = step => (step % STEPS_PER_BEAT === STEPS_PER_BEAT - 1 && step < STEPS_PER_BAR - 1 ? '|' : '');
-const sequence = (steps, color) =>
-  `<span class="seq" style="color:${color}">${SIXTEENTHS.map(step => (steps.includes(step) ? '●' : '·') + beatSeparator(step)).join('')}</span>`;
-const notationRow = (text, steps, voice) =>
-  `${label(text, VOICES[voice].color, voice)}${sequence(steps, VOICES[voice].color)}<span class="n">${steps.length}</span>`;
-const notation = (...rows) => `<div class="notation">${rows.join('')}</div>`;
+const notationRow = (text, steps, voice) => ({
+  name: text,
+  color: VOICES[voice].color,
+  inst: voice,
+  marks: marksAt(STEPS_PER_BAR, steps),
+  count: steps.length,
+});
+const rows = (...list) => notation(STEPS_PER_BEAT, list);
 const entry = `<div data-entry></div>`;
 const registerRow = (band, text) =>
   row(
@@ -673,14 +674,14 @@ const LAYOUTS = {
     row(label(T.hook), T.hookValue, 'flauta'),
   bumbo: () => entry + row(label(T.heads), countFromOne(BEAT.bumbo.steps), 'bumbo'),
   lata: () =>
-    notation(notationRow(COPY.voices.bumbo, BEAT.bumbo.steps, 'bumbo'), notationRow(COPY.voices.lata, BEAT.lata.steps, 'lata')) +
+    rows(notationRow(COPY.voices.bumbo, BEAT.bumbo.steps, 'bumbo'), notationRow(COPY.voices.lata, BEAT.lata.steps, 'lata')) +
     row(label(T.grouping), `${T.groupingValue} ${T.groupingUnit}`),
   palmas: () => entry + row(label(T.withKick), countFromOne(BEAT.palma.steps), 'palma') + row(label(T.few), T.fewValue, 'chimbal'),
   grave: () => entry + row(label(T.notes), T.notesValue, 'grave') + row(label(T.glide), T.glideValue, 'grave'),
   teclado: () => entry + row(label(T.withLata), countFromOne(STAB_AT.map(([step]) => step)), 'teclado') + row(label(T.stabNotes), T.stabNotesValue, 'teclado'),
   batida: () => registerRow('low', T.low) + registerRow('mid', T.mid) + registerRow('high', T.high),
   tamborzao: () =>
-    notation(notationRow(T.rio, TAMBORZAO.drum.steps, 'tamborzao'), notationRow(T.recife, TRESILLO, 'lata')) +
+    rows(notationRow(T.rio, TAMBORZAO.drum.steps, 'tamborzao'), notationRow(T.recife, TRESILLO, 'lata')) +
     row(label(T.rio), RIO_GROUPING.join(' ')) +
     row(label(T.recife), `${T.groupingValue} ${T.groupingUnit}`),
   quebra: () => stats('two', stat(1, T.silentBeat, PALETTE.gold), stat(sceneOf('quebra').voices().length, T.voices, PALETTE.tin)),
@@ -689,7 +690,7 @@ const LAYOUTS = {
     row(label(T.horns, PALETTE.gold), T.hornsValue, 'metais') +
     row(label(T.hookChange), T.hookChangeValue, 'flauta'),
   passinho: () =>
-    notation(
+    rows(
       notationRow(COPY.voices.bumbo, BEAT.bumbo.steps, 'bumbo'),
       notationRow(T.doubled, PASSINHO.bumbo.steps, 'bumbo'),
       notationRow(COPY.voices.lata, PASSINHO.lata.steps, 'lata'),

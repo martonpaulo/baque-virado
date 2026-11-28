@@ -5,7 +5,7 @@
 // horns' answer (vinheta). 4/4 at one tempo, a 16-step wheel, one bar per turn. A minor (heartbreak),
 // the last chorus a whole tone higher. The melodies are original to this project; choices, sources
 // and the measurements on the owner's reference: docs/rhythms/brega.md.
-import { label, row, stat, stats } from '../readout-markup.js';
+import { label, marksAt, notation, row, stat, stats } from '../readout-markup.js';
 import { rollReadout } from '../roll.js';
 import { fgAlpha } from '../theme.js';
 import { BREGA_PALETTE, createBregaPainter } from './brega-background.js';
@@ -812,16 +812,10 @@ const COPY = {
 
 // ---------- readout layouts ----------
 const T = READ;
-const beatSeparator = step => (step % STEPS_PER_BEAT === STEPS_PER_BEAT - 1 && step < STEPS_PER_BAR - 1 ? '|' : '');
-/** One bar of hits as marks: ● for a loud hit, ○ for a soft one, · for a rest. */
-const marks = hits =>
-  SIXTEENTHS.map(step => {
-    const h = hits.find(candidate => candidate.step === step);
-    return (h ? (h.velocity > SOFT ? '●' : '○') : '·') + beatSeparator(step);
-  }).join('');
-const seqRow = (voice, text, hits) =>
-  `${label(text, VOICES[voice].color, voice)}<span class="seq" data-inst="${voice}" style="color:${VOICES[voice].color}">${marks(hits)}</span><span class="n">${hits.length}</span>`;
-const notation = (...rows) => ['<div class="notation">', ...rows, '</div>'].join('');
+/** One bar of hits as marks: a stroke for a loud hit, a soft stroke for a soft one. */
+const marks = hits => hits.reduce((bar, h) => bar.with(h.step, h.velocity > SOFT ? 'strong' : 'soft'), marksAt(STEPS_PER_BAR, []));
+const seqRow = (voice, text, hits) => ({ name: text, color: VOICES[voice].color, inst: voice, marks: marks(hits), count: hits.length });
+const rows = (...list) => notation(STEPS_PER_BEAT, list);
 const SHORT = 1;
 
 /** The melody roll of a scene: its melodic voices, bar by bar (the guitar's two lines alike). */
@@ -860,22 +854,19 @@ const LAYOUTS = {
     row(label(T.key), T.keyValue) +
     row(label(T.theme, COLOR.tema), T.themeValue, 'metais'),
   base: () =>
-    notation(
-      seqRow('bumbo', COPY.voices.bumbo, BEAT.bumbo),
-      seqRow('caixa', COPY.voices.caixa, BEAT.caixa),
-      seqRow('chimbal', COPY.voices.chimbal, BEAT.chimbal),
-    ) + row(label(T.groove), T.grooveValue),
+    rows(seqRow('bumbo', COPY.voices.bumbo, BEAT.bumbo), seqRow('caixa', COPY.voices.caixa, BEAT.caixa), seqRow('chimbal', COPY.voices.chimbal, BEAT.chimbal)) +
+    row(label(T.groove), T.grooveValue),
   baixo: () => {
     const bass = bassBar(sceneOf('baixo').start, 0, chordAt(sceneOf('baixo').start));
-    return notation(seqRow('bumbo', COPY.voices.bumbo, BEAT.bumbo), seqRow('baixo', COPY.voices.baixo, bass)) + row(label(T.withBumbo), T.bassValue, 'baixo');
+    return rows(seqRow('bumbo', COPY.voices.bumbo, BEAT.bumbo), seqRow('baixo', COPY.voices.baixo, bass)) + row(label(T.withBumbo), T.bassValue, 'baixo');
   },
   teclado: () =>
     row(label(T.progression), progression(BASE_CHORDS)) +
-    notation(seqRow('teclado', COPY.voices.teclado, COMP[0])) +
+    rows(seqRow('teclado', COPY.voices.teclado, COMP[0])) +
     row(label(T.stabs, COLOR.teclado), countFromOne(COMP[0].map(h => h.step)), 'teclado') +
     row(label(T.pad, COLOR.cordas), T.padValue, 'cordas'),
   virada: () =>
-    notation(
+    rows(
       ...['agudo', 'medio', 'grave'].map((tone, i) =>
         seqRow(
           'tom',
@@ -885,7 +876,7 @@ const LAYOUTS = {
       ),
     ),
   breque: () =>
-    stats('two', stat(1, T.pause, COLOR.caixa), stat(HEARTBEAT.length, T.heartbeat, COLOR.bumbo)) + notation(seqRow('bumbo', COPY.voices.bumbo, HEARTBEAT)),
+    stats('two', stat(1, T.pause, COLOR.caixa), stat(HEARTBEAT.length, T.heartbeat, COLOR.bumbo)) + rows(seqRow('bumbo', COPY.voices.bumbo, HEARTBEAT)),
 };
 const ROLLS = {
   guitarra: scene => ({ ...sceneRoll(scene, ['guitarra']), rows: row(label(T.thirds, COLOR.guitarra), T.thirdsValue, 'guitarra') }),

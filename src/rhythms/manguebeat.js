@@ -8,7 +8,7 @@
 // of a dotted eighth (three sixteenths) in the studio; the parts also write each repeat as a silent
 // mark, softer each time, so the wheel shows it. The riffs are original to this project. Choices and
 // sources: docs/rhythms/manguebeat.md.
-import { label, row, stat, stats } from '../readout-markup.js';
+import { label, notation, row, stat, stats } from '../readout-markup.js';
 import { rollReadout } from '../roll.js';
 import { fgAlpha } from '../theme.js';
 import { createManguebeatPainter, MANGUE_PALETTE } from './manguebeat-background.js';
@@ -747,8 +747,6 @@ const READ = {
   mainHand: 'mão principal',
   answerHand: 'resposta',
   pickUp: 'resposta antes dos tempos 1 e 3',
-  accent: 'acento',
-  ghost: 'nota fraca',
   repeat: 'repetição do eco',
   withAlfaia: 'acentos',
   withAlfaiaValue: 'os da alfaia; os mais fortes fora do tempo',
@@ -833,16 +831,11 @@ const COPY = {
 
 // ---------- readout layouts ----------
 const T = READ;
-const beatSeparator = step => (step % STEPS_PER_BEAT === STEPS_PER_BEAT - 1 && step < STEPS_PER_BAR - 1 ? '|' : '');
-/** One bar as marks: ● for a mark in `strong`, ○ for one in `weak`, ◌ for an echo. */
+/** One bar as marks: a stroke for a mark in `strong`, a soft one for a mark in `weak`, an echo at a step of `echo`. */
 const marks = (text, strong, weak = [], echo = []) =>
-  tokens(text)
-    .map((token, step) => (strong.includes(token) ? '●' : weak.includes(token) ? '○' : echo.includes(step) ? '◌' : '·') + beatSeparator(step))
-    .join('');
-const seqRow = (name, text, color, id) =>
-  `${label(name)}<span class="seq"${id ? ` data-inst="${id}"` : ''} style="color:${color}">${text}</span><span class="n"></span>`;
-const ROW_JOIN = '';
-const notation = rows => `<div class="notation">${rows.join(ROW_JOIN)}</div>`;
+  tokens(text).map((token, step) => (strong.includes(token) ? 'strong' : weak.includes(token) ? 'soft' : echo.includes(step) ? 'echo' : 'rest'));
+const seqRow = (name, bar, color, id) => ({ name, color, inst: id, marks: bar });
+const rows = list => notation(STEPS_PER_BEAT, list);
 /** The steps the echo of the dub's first stroke fills in its bar. */
 const dubEchoSteps = () => echoesInto(SCENE_STARTS[SCENE_LIST.findIndex(scene => scene.id === 'dub')]).main.map(h => h.step);
 
@@ -868,19 +861,18 @@ const LAYOUTS = {
     row(label(T.echo), T.echoValue) +
     row(label(T.instruments), INSTRUMENT_COUNT),
   celula: () =>
-    notation([seqRow(T.unison, marks(MAIN, ['X']), COLOR.main, 'alfaia')]) +
+    rows([seqRow(T.unison, marks(MAIN, ['X']), COLOR.main, 'alfaia')]) +
     row(label(T.cell), T.cellValue, 'alfaia') +
     row(label(T.strokes), countFromOne(stepsOf(MAIN, ['X'])), 'alfaia'),
   maos: () =>
-    notation([seqRow(T.mainHand, marks(MAIN, ['X']), COLOR.main, 'alfaia'), seqRow(T.answerHand, marks(ANSWER[0], ['X'], ['x']), COLOR.answer, 'alfaia')]) +
+    rows([seqRow(T.mainHand, marks(MAIN, ['X']), COLOR.main, 'alfaia'), seqRow(T.answerHand, marks(ANSWER[0], ['X'], ['x']), COLOR.answer, 'alfaia')]) +
     row(label(T.answerHand, COLOR.answer), T.pickUp, 'alfaia') +
     row(label(T.held), T.heldValue),
   caixa: () =>
-    notation([seqRow(T.mainHand, marks(MAIN, ['X']), COLOR.main, 'alfaia'), seqRow('caixa', marks(CAIXA[0], ['X'], ['x']), COLOR.caixa, 'caixa')]) +
-    row(label(`● ${T.accent} · ○ ${T.ghost}`), '', 'caixa') +
+    rows([seqRow(T.mainHand, marks(MAIN, ['X']), COLOR.main, 'alfaia'), seqRow(COPY.voices.caixa, marks(CAIXA[0], ['X'], ['x']), COLOR.caixa, 'caixa')]) +
     row(label(T.withAlfaia), T.withAlfaiaValue, 'caixa'),
   dub: () =>
-    notation([seqRow(T.mainHand, marks(DUB_MAIN, ['X'], [], dubEchoSteps()), COLOR.main, 'alfaia')]) +
+    rows([seqRow(T.mainHand, marks(DUB_MAIN, ['X'], [], dubEchoSteps()), COLOR.main, 'alfaia')]) +
     row(label(`◌ ${T.repeat}`), T.echoValue) +
     row(label(T.echoPlays), T.echoPlaysValue) +
     row(label(T.space), T.spaceValue),

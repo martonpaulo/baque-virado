@@ -4,7 +4,7 @@
 // with a major sixth, F sharp); its second part moves to D mixolydian, the same scale heard from D,
 // whose flat seventh is C natural. Each part is eight bars and ends on a cadence.
 // Choices and their reasons: docs/rhythms/forro.md.
-import { label, row, stat, stats } from '../readout-markup.js';
+import { label, marksAt, notation, row, stat, stats } from '../readout-markup.js';
 import { FORRO } from '../theme.js';
 import { drawForroBackdrop } from './forro-backdrop.js';
 import { createForroGraphics, FORRO_GRAPHICS } from './forro-graphics.js';
@@ -643,6 +643,7 @@ const READ = {
   shakeValue: 'o fole vai e volta a cada semicolcheia',
   bass: 'baixos',
   chordButtons: 'acordes',
+  leftButtons: 'sanfona, mão esquerda', // the name over the two rows of buttons
   baseCell: 'base',
   baiaoCell: 'baião',
   breque: 'breque',
@@ -699,12 +700,9 @@ const COPY = {
 
 // ---------- readout layouts ----------
 const T = READ;
-const beatSeparator = step => (step % STEPS_PER_BEAT === STEPS_PER_BEAT - 1 && step < STEPS_PER_BAR - 1 ? '|' : '');
-const sequence = (steps, mark) => STEPS.map(step => (steps.includes(step) ? mark : '·') + beatSeparator(step)).join('');
 const countFromOne = steps => steps.map(step => step + 1).join(' ');
-const seqRow = (name, steps, color, id, mark = '●') =>
-  `${label(name, color, id)}<span class="seq" style="color:${color}"${id ? ` data-inst="${id}"` : ''}>${sequence(steps, mark)}</span><span class="n">${steps.length}</span>`;
-const notation = (...rows) => `<div class="notation">${rows.join('')}</div>`;
+const seqRow = (name, steps, color, id) => ({ name, color, inst: id, marks: marksAt(STEPS_PER_BAR, steps), count: steps.length });
+const rows = (...list) => notation(STEPS_PER_BEAT, list);
 const CLOSED = STEPS.filter(step => !TRIANGLE_OPEN.includes(step));
 const BASE_GRAVE = stepsOf(PATTERNS.base.grave);
 const BAIAO_GRAVE = stepsOf(PATTERNS.baiao.grave);
@@ -720,19 +718,23 @@ const changes = (part, key) =>
 
 const LAYOUTS = {
   triangulo: () =>
-    notation(seqRow(T.closed, CLOSED, FORRO.steel, 'triangulo'), seqRow(T.open, TRIANGLE_OPEN, FORRO.steel, 'triangulo', '○')) +
+    rows(seqRow(T.closed, CLOSED, FORRO.steel, 'triangulo'), seqRow(T.open, TRIANGLE_OPEN, FORRO.steel, 'triangulo')) +
     row(label(T.meter), T.meterValue) +
     row(label(T.tempo), T.tempoValue),
   zabumba: () =>
-    notation(seqRow(T.grave, BASE_GRAVE, FORRO.leather, 'zabumba')) +
+    rows(seqRow(T.grave, BASE_GRAVE, FORRO.leather, 'zabumba')) +
     row(label(T.cell), T.cellValue) +
     row(label(T.grave), T.pressed) +
     row(label(T.pickUp), T.pickUpValue),
   bacalhau: () =>
-    notation(seqRow(T.grave, BASE_GRAVE, FORRO.leather, 'zabumba'), seqRow(T.bacalhau, PATTERNS.base.bacalhau, FORRO.bamboo, 'zabumba')) +
+    rows(seqRow(T.grave, BASE_GRAVE, FORRO.leather, 'zabumba'), seqRow(T.bacalhau, PATTERNS.base.bacalhau, FORRO.bamboo, 'zabumba')) +
     row(label(T.onOffbeat, FORRO.bamboo), countFromOne(PATTERNS.base.bacalhau), 'zabumba'),
   trio: () =>
-    notation(seqRow(T.bass, LEFT_BAR.bass, FORRO.pearl, 'sanfona'), seqRow(T.chordButtons, LEFT_BAR.chord, FORRO.pearl, 'sanfona', '○')) +
+    notation(
+      STEPS_PER_BEAT,
+      [seqRow(T.bass, LEFT_BAR.bass, FORRO.pearl, 'sanfona'), seqRow(T.chordButtons, LEFT_BAR.chord, FORRO.pearl, 'sanfona')],
+      T.leftButtons,
+    ) +
     row(label(T.chords), changes(PART_A, 'name')) +
     row(label(T.degrees), changes(PART_A, 'degree')),
   sanfona: () =>
@@ -741,7 +743,7 @@ const LAYOUTS = {
     row(label(T.mode), T.modeValue) +
     row(label(T.phrase), T.phraseValue),
   baixo: () =>
-    notation(seqRow(T.baixo, BASS_STEPS, FORRO.dusk, 'baixo'), seqRow(T.cavaquinho, STRUM_BAR, FORRO.teal, 'cavaquinho')) +
+    rows(seqRow(T.baixo, BASS_STEPS, FORRO.dusk, 'baixo'), seqRow(T.cavaquinho, STRUM_BAR, FORRO.teal, 'cavaquinho')) +
     row(label(T.baixo, FORRO.dusk), T.baixoValue, 'baixo') +
     row(label(T.secondPart), T.secondPartValue) +
     row(label(T.chords), changes(PART_B, 'name')),
@@ -750,11 +752,11 @@ const LAYOUTS = {
     row(label(T.rabeca, FORRO.varnish), T.rabecaValue, 'rabeca') +
     row(label(T.bandolim, FORRO.spruce), T.thirdBelow, 'bandolim'),
   fole: () =>
-    notation(seqRow(T.accents, JOGO_ACCENTS, FORRO.pearl, 'sanfona'), seqRow(T.grave, BASE_GRAVE, FORRO.leather, 'zabumba')) +
+    rows(seqRow(T.accents, JOGO_ACCENTS, FORRO.pearl, 'sanfona'), seqRow(T.grave, BASE_GRAVE, FORRO.leather, 'zabumba')) +
     row(label(T.accents), T.groups) +
     row(label(T.shake), T.shakeValue, 'sanfona'),
   baiao: () =>
-    notation(seqRow(T.baseCell, BASE_GRAVE, FORRO.leather, 'zabumba', '○'), seqRow(T.baiaoCell, BAIAO_GRAVE, FORRO.leather, 'zabumba')) +
+    rows(seqRow(T.baseCell, BASE_GRAVE, FORRO.leather, 'zabumba'), seqRow(T.baiaoCell, BAIAO_GRAVE, FORRO.leather, 'zabumba')) +
     row(label(T.accents), T.groups),
   breque: () => row(label(T.breque), T.brequeValue) + row(label(T.back), T.backValue, 'sanfona'),
   final: show =>

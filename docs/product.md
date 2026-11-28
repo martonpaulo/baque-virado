@@ -135,6 +135,13 @@ The rules every rhythm package in `src/rhythms/` follows.
   and buttons and the zabumba's two heads ([`rhythms/forro.md`](rhythms/forro.md#visuals)). The frevo
   draws the tune's score with a cursor and the trompete's valves ([`frevo.md`](frevo.md#visuals)).
   `tests/rhythms.test.js` lists the shows that still have none; the list only shrinks.
+- **Rows of strokes.** Every show but the maracatu, whose rows are its approved look, draws its
+  rows of strokes with one builder (`notation` in `src/readout-markup.js`) and one layout
+  (`.strokes` in `styles.css`): each row has a name, beside it on one line; the marks take the rest
+  of the readout's width, one cell a step; a cell of more than one bar has one heading and one named
+  row a bar; and one legend line closes each block, with only the marks the block uses and the same
+  words in every show (`COPY.marks` in `src/copy.js`). A package writes no row markup of its own
+  ([#73](https://github.com/martonpaulo/batuque/issues/73), D46).
 - **Background.** Circular, coming out of the central wheel, in the rhythm's palette from section 5
   of [`colour-and-visuals.md`](research/colour-and-visuals.md): brega in desaturated blue
   and muted rose, bregafunk in purple, magenta and gold. The approved backgrounds are a sketch to

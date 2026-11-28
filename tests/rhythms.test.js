@@ -1,7 +1,10 @@
 // The engine takes a rhythm package; a path `/<id>` or `?ritmo=<id>` picks one (the 2/4 fixture is tests-only).
 import assert from 'node:assert/strict';
+import { readdirSync, readFileSync } from 'node:fs';
 import { test } from 'node:test';
+import { COPY } from '../src/copy.js';
 import { meterOf } from '../src/music.js';
+import { MARKS, marksAt, notation } from '../src/readout-markup.js';
 import { FORRO_PE_DE_SERRA } from '../src/rhythms/forro.js';
 import { FREVO } from '../src/rhythms/frevo.js';
 import { preparingIds, RHYTHM, RHYTHMS, ROUTES, redirectFor, rhythmChoices, rhythmFor } from '../src/rhythms/index.js';
@@ -261,4 +264,36 @@ test('with reduced motion, the energy and its clock move nothing', () => {
   } finally {
     motion.matches = false;
   }
+});
+
+// #73: each package drew its rows of strokes, its names and its legend by hand, and no two shows
+// drew them alike. One builder draws them; the maracatu alone keeps its own rows, its approved look
+// (the owner's instruction of 2026-11-28).
+test('no rhythm package but the maracatu writes the markup of a row of strokes: the shared builder draws them', () => {
+  const OWN_ROWS = ['maracatu.js'];
+  const folder = new URL('../src/rhythms/', import.meta.url);
+  const writes = readdirSync(folder)
+    .filter(name => name.endsWith('.js'))
+    .filter(name => /class="(?:notation|strokes|seq|legend)\b/.test(readFileSync(new URL(name, folder), 'utf8')));
+  assert.deepEqual(writes, OWN_ROWS);
+});
+
+test('the builder of rows of strokes names every row, draws the line between beats and lists only the marks it used', () => {
+  const block = notation(2, [
+    { name: 'surdo', marks: ['strong', 'rest', 'rest', 'soft'], count: 2 },
+    { name: 'caixa', color: '#fff', inst: 'caixa', marks: marksAt(4, [0, 3], 'roll') },
+  ]);
+  const kinds = text => [...text.matchAll(/data-mark="([a-z]+)"/g)].map(match => match[1]);
+  assert.deepEqual(kinds(block), ['strong', 'soft', 'roll', 'rest', 'beat']); // the legend's one order
+  assert.equal((block.match(/class="beat"/g) || []).length, 2); // one line a row, between its two beats
+  assert.match(block, /<span class="k" data-inst="caixa" style="color:#fff">caixa<\/span><span class="seq" data-inst="caixa"/);
+  assert.match(block, /<p class="legend">.*<\/p><\/div>$/); // the legend closes the block
+  // a block of strokes alone lists no rest, and one of a single beat no line
+  assert.deepEqual(kinds(notation(4, [{ name: 'ganzá', marks: marksAt(4, [0, 1, 2, 3]) }])), ['strong']);
+  assert.match(notation(2, [{ name: 'compasso 1', marks: marksAt(4, [0]) }], 'célula'), /^<div class="strokes"><span class="k heading">célula<\/span>/);
+  assert.throws(() => notation(2, [{ name: '', marks: marksAt(4, [0]) }]), /needs a name/);
+  assert.throws(() => notation(2, [{ name: 'surdo', marks: ['loud'] }]), /loud is not a mark/);
+  assert.throws(() => notation(2, [{ name: 'surdo', marks: ['beat'] }]), /beat is not a mark/);
+  // every mark has a word for the legend, and no word is without a mark
+  assert.deepEqual(Object.keys(COPY.marks).sort(), Object.keys(MARKS).sort());
 });

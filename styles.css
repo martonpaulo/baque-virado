@@ -264,7 +264,8 @@ body {
 [data-entry].muted .row {
   opacity: 0.2;
 }
-/* rows of strokes: a part's name, its strokes, its count. The name column is 13cqw, or as wide as
+/* the maracatu's rows of strokes, its approved look (every other show: .strokes, below): a part's
+   name, its strokes, its count. The name column is 13cqw, or as wide as
    the longest word of its names when that is wider: a name wraps between its words and never runs
    under its strokes (#59). The count column is as wide as its counts, which end at the right edge,
    so rows with no count leave that room to the strokes */
@@ -328,11 +329,64 @@ body {
   gap: 0.1cqw 2cqw;
   line-height: 1.15;
 }
-/* the part's strokes stand a little under its count, in the card of a scene the title names (#71) */
-[data-entry] > .notation {
-  margin-top: 1cqw;
+/* ---------- rows of strokes, one layout for every show but the maracatu (#73) ----------
+   `notation` in src/readout-markup.js builds every block: an optional heading, then a row a part
+   (its name, its strokes, its count), then the legend of the marks the block uses.
+   The name stands beside its strokes on one line, in a column as wide as the block's longest name.
+   The strokes take the rest of the readout's width, one cell a step, so the rows of a block line up
+   step by step; the count column is as wide as its counts. */
+.strokes {
+  display: grid;
+  grid-template-columns: max-content 1fr auto;
+  gap: 0.6cqw 2.4cqw;
+  align-items: center;
 }
-[data-entry].muted .notation {
+.strokes > .k {
+  white-space: nowrap;
+}
+.strokes > .heading,
+.strokes > .legend {
+  grid-column: 1 / -1;
+}
+.strokes .seq {
+  display: flex;
+  justify-content: space-between;
+  font-size: var(--stage-text);
+}
+.strokes .seq > * {
+  font-style: normal;
+  width: 1ch;
+  text-align: center;
+}
+/* a rest and the line between beats stand back from the strokes */
+.strokes .seq .rest,
+.strokes .seq .beat {
+  opacity: 0.6;
+}
+.strokes .n {
+  text-align: right;
+  color: var(--dim);
+  font-size: var(--stage-label);
+}
+/* the legend: one dim line under the rows, each mark with its word, the same words in every show */
+.strokes .legend {
+  margin: 0.4cqw 0 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 2cqw;
+  color: var(--dim);
+  font-size: var(--stage-label);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+.strokes .legend > * {
+  white-space: nowrap;
+}
+/* the part's strokes stand a little under its count, in the card of a scene the title names (#71) */
+[data-entry] > .strokes {
+  margin-top: 0.4cqw;
+}
+[data-entry].muted .strokes {
   opacity: 0.2; /* as the muted card's other parts */
 }
 .stats {
@@ -1084,7 +1138,9 @@ html:not(.video-export) .stats.small b {
    13px there), so the desktop stage reads in the same proportions */
 html:not(.video-export) .hud,
 html:not(.video-export) .read .k,
-html:not(.video-export) .notation .n {
+html:not(.video-export) .notation .n,
+html:not(.video-export) .strokes .n,
+html:not(.video-export) .strokes .legend {
   font-size: max(var(--stage-label), var(--label-at-phone));
 }
 html:not(.video-export) .read {

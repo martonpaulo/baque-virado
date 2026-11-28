@@ -237,7 +237,7 @@ test('on phones every stage label stays readable and every readout fits its box'
       const found = await page.evaluate(() => {
         const small = [];
         const floor = 9; // px: the smallest a phone label may render (iPhone SE)
-        for (const selector of ['.hud', '.read .k', '.notation .n'])
+        for (const selector of ['.hud', '.read .k', '.notation .n', '.strokes .n', '.strokes .legend'])
           for (const element of document.querySelectorAll(selector)) {
             const size = parseFloat(getComputedStyle(element).fontSize);
             if (size < floor) small.push(`${selector} ${size}px`);
@@ -531,7 +531,11 @@ function laneTextsInPage(scenes) {
   return { problems: [...problems.values()], most, smallest, label, inPlot: [...inPlot], unnamed: [...unnamed], crowded: [...crowded] };
 }
 
-/** In the page: every row of strokes of every scene's readout, against its name and the readout's edge. */
+/**
+ * In the page: every row of strokes of every scene's readout, against its name and the readout's
+ * edge; and every block the shared builder drew (`.strokes`, #73): a name for each row, on one
+ * line, and a legend that lists the marks the block uses and no other, each with its word.
+ */
 function notationInPage(scenes) {
   /** The box of an element's own text, whatever its lines. */
   const textBox = element => {
@@ -541,20 +545,46 @@ function notationInPage(scenes) {
     return lines.length ? { left: Math.min(...lines.map(line => line.left)), right: Math.max(...lines.map(line => line.right)) } : null;
   };
   const problems = new Set();
-  let rows = 0;
+  let rows = 0,
+    blocks = 0,
+    own = 0; // rows a package drew with markup of its own
   for (const scene of scenes) {
     window.baque.render(scene.start + 0.5);
     const read = document.getElementById('read').getBoundingClientRect();
-    for (const strokes of document.querySelectorAll('#read .notation .seq')) {
+    for (const strokes of document.querySelectorAll('#read .notation .seq, #read .strokes .seq')) {
       const part = strokes.previousElementSibling,
         name = textBox(part),
         marks = textBox(strokes);
       rows++;
+      if (!strokes.closest('.strokes')) own++;
       if (name && name.right > marks.left) problems.add(`${scene.id}: «${part.textContent}» runs ${(name.right - marks.left).toFixed(1)} px under its strokes`);
-      if (marks.right > read.right + 0.5) problems.add(`${scene.id}: the strokes of «${part.textContent}» leave the readout`);
+      if (marks.right > read.right + 0.5 || strokes.getBoundingClientRect().right > read.right + 0.5)
+        problems.add(`${scene.id}: the strokes of «${part.textContent}» leave the readout`);
+      const count = strokes.nextElementSibling.getBoundingClientRect();
+      if (count.right > read.right + 0.5) problems.add(`${scene.id}: the count of «${part.textContent}» leaves the readout`);
+    }
+    for (const block of document.querySelectorAll('#read .strokes')) {
+      blocks++;
+      const used = new Set();
+      for (const strokes of block.querySelectorAll('.seq')) {
+        const part = strokes.previousElementSibling;
+        if (!part.matches('.k') || !part.textContent.trim()) problems.add(`${scene.id}: a row of strokes has no name`);
+        else if (part.getClientRects().length !== 1) problems.add(`${scene.id}: «${part.textContent}» takes ${part.getClientRects().length} lines`);
+        for (const mark of strokes.children) used.add(mark.textContent);
+      }
+      const legend = block.querySelector('.legend'),
+        items = [...legend.children].map(item => item.textContent.split(' '));
+      if (legend !== block.lastElementChild) problems.add(`${scene.id}: the legend is not the last line of its block`);
+      const listed = items.map(([mark]) => mark);
+      if ([...used].sort().join('') !== [...listed].sort().join(''))
+        problems.add(`${scene.id}: the block uses ${[...used].join(' ')} and its legend lists ${listed.join(' ')}`);
+      for (const [mark, ...word] of items) if (!word.join('') || word.join('') === 'undefined') problems.add(`${scene.id}: the legend has no word for ${mark}`);
+      const box = legend.getBoundingClientRect();
+      if (box.right > read.right + 0.5 || [...legend.children].some(item => item.getBoundingClientRect().right > read.right + 0.5))
+        problems.add(`${scene.id}: the legend leaves the readout`);
     }
   }
-  return { problems: [...problems], rows };
+  return { problems: [...problems], rows, blocks, own };
 }
 
 /** In the page: each scene's title against the largest text of its readout, in every bar of a scene that brings parts in. */
@@ -763,10 +793,18 @@ test('a phone draws the stage’s sizes at the desktop’s share of the column�
 
 // #59: the name column was one width in every show, and a longer word («PRINCIPAL» in the
 // manguebeat, «CAVAQUINHO» in the forró) ran under the first strokes of its row.
-test('no part name runs under its row of strokes in any show’s notation, and no row of strokes leaves the readout', async () => {
+// #73: every show but the maracatu, whose rows are its approved look, draws its rows with the shared
+// builder: each row has a name on one line («CÉLULA DE 2 COMPASSOS» took three, beside two rows, and
+// the second row had none), and each block ends in a legend of the marks it uses.
+test('every row of strokes has a name beside it on one line, stays in the readout, and its block has a legend of its marks', async () => {
   const { results, problems } = await stageCheck('notation');
   assert.deepEqual(problems, []);
-  for (const { where, rows } of results) assert.ok(rows > 0, `${where}: no notation row was measured`); // every show draws some
+  for (const { where, rows, blocks, own } of results) {
+    assert.ok(rows > 0, `${where}: no notation row was measured`); // every show draws some
+    const maracatu = where.startsWith('maracatu ');
+    assert.equal(blocks > 0, !maracatu, `${where}: ${blocks} blocks from the shared builder`);
+    assert.equal(own > 0, maracatu, `${where}: ${own} rows drawn with markup of the package's own`);
+  }
 });
 
 // #71: the coco and the bregafunk bring an instrument in under a title that is its name, and the

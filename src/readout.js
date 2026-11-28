@@ -3,7 +3,7 @@
 import { isHeard } from './audio.js';
 import { COPY } from './copy.js';
 import { BAR_SECONDS, isHand, STEPS_PER_BAR, STEPS_PER_BEAT, VOICES } from './music.js';
-import { label, row } from './readout-markup.js';
+import { fillLegends, label, marksAt, notation, row } from './readout-markup.js';
 import { RHYTHM } from './rhythms/index.js';
 import { barTimeline, TOTAL_BARS } from './show.js';
 import { fgAlpha, ROLES } from './theme.js';
@@ -54,16 +54,6 @@ function waveMarkup(option) {
 /** True when a scene's title already says `name`, whatever the case. */
 const named = (title, name) => title.toLocaleLowerCase().includes(name.toLocaleLowerCase());
 
-/** One bar of a part as a row of marks: a stroke or a rest per step, a line between beats. */
-function strokes(hits, color) {
-  const played = new Set(hits.map(({ hit }) => Math.floor(hit.step)));
-  const marks = Array.from({ length: STEPS_PER_BAR }, (_, step) => {
-    const line = step % STEPS_PER_BEAT === STEPS_PER_BEAT - 1 && step < STEPS_PER_BAR - 1 ? '|' : '';
-    return (played.has(step) ? '●' : '·') + line;
-  });
-  return `<span class="seq" style="color:${color}">${marks.join('')}</span>`;
-}
-
 /** `volume` maps an instrument to its volume level: a muted one shows as disabled. */
 export function createReadout(element, volume = {}) {
   let score = null,
@@ -92,6 +82,7 @@ export function createReadout(element, volume = {}) {
     build(current) {
       const layout = RHYTHM.readout(current, SHOW_TOTALS);
       element.innerHTML = layout.markup;
+      fillLegends(element, COPY.marks);
       waves = element.querySelector('.wave');
       cursor = element.querySelector('.scur');
       shownWaves = null;
@@ -133,8 +124,18 @@ export function createReadout(element, volume = {}) {
         // part itself, its count in the large type and its strokes on the bar, named by its hand (#71).
         entry.innerHTML = named(COPY.scenes[scene.id].title, name)
           ? `<div class="k">${muted ? T.entersMuted : COPY.entry.strokes}</div><div class="big" style="color:${color}">${count}</div>` +
-            `<div class="notation">${label(hand || name, color)}${strokes(hits, color)}</div>`
+            notation(STEPS_PER_BEAT, [
+              {
+                name: hand || name,
+                color,
+                marks: marksAt(
+                  STEPS_PER_BAR,
+                  hits.map(({ hit }) => Math.floor(hit.step)),
+                ),
+              },
+            ])
           : `${state}<div class="big" style="color:${color}">${name}</div>${row(label(hand, color), count)}`;
+        fillLegends(entry, COPY.marks);
         replayFade(entry);
       }
       const listening = element.querySelector('[data-listening]');

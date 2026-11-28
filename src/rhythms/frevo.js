@@ -4,7 +4,7 @@
 // metais (trompetes and trombones) answering. 2/4 at one tempo, an 8-step wheel, one bar per turn.
 // Positions are sixteenths of the bar (0–7). The melodies are original to this project; choices and
 // sources are in docs/frevo.md.
-import { label, row, stat, stats } from '../readout-markup.js';
+import { label, notation, row, stat, stats } from '../readout-markup.js';
 import { rollReadout } from '../roll.js';
 import { fgAlpha } from '../theme.js';
 import { createFrevoPainter, FREVO_PALETTE } from './frevo-background.js';
@@ -771,10 +771,9 @@ const READ = {
   voices: 'vozes',
   open: 'aberto',
   muted: 'abafado',
-  cell: 'célula de\u00a02 compassos', // no-break space: a line never ends between «de» and its number
-  accent: 'acento',
-  soft: 'nota fraca',
-  rufo: 'rufo',
+  cell: 'célula de 2 compassos', // the name over the cell's two rows
+  bar: n => `compasso ${n}`, // one row of the cell
+  inTheCell: 'na célula',
   caixaCount: `${
     CAIXA_CELL.join(' ')
       .split(' ')
@@ -877,15 +876,16 @@ const COPY = {
 // ---------- readout layouts ----------
 const T = READ;
 const ROLL_LINE = { trompete: COLOR.trompete, trombone: COLOR.trombone, sax: COLOR.sax, clarinete: COLOR.clarinete };
-const beatSeparator = step => (step % STEPS_PER_BEAT === STEPS_PER_BEAT - 1 && step < STEPS_PER_BAR - 1 ? '|' : '');
-/** One bar of a cell as marks: ● for a mark in `strong`, ○ for one in `weak`, ≈ for the rufo. */
+/** One bar of a cell as marks: a stroke for a mark in `strong`, a soft one for a mark in `weak`, a roll for the rufo. */
 const marks = (text, strong, weak) =>
-  text
-    .split(' ')
-    .map((token, step) => (strong.includes(token) ? '●' : weak.includes(token) ? '○' : token === 'r' ? '≈' : '·') + beatSeparator(step))
-    .join('');
-const seqRow = (name, text, color, id) =>
-  `${label(name)}<span class="seq"${id ? ` data-inst="${id}"` : ''} style="color:${color}">${text}</span><span class="n"></span>`;
+  text.split(' ').map(token => (strong.includes(token) ? 'strong' : weak.includes(token) ? 'soft' : token === 'r' ? 'roll' : 'rest'));
+/** A cell as a block of rows: one row a bar, each named by its bar, under the cell's name when it has more than one. */
+const cellRows = (name, bars, strong, weak, color, id) =>
+  notation(
+    STEPS_PER_BEAT,
+    bars.map((text, i) => ({ name: bars.length > 1 ? T.bar(i + 1) : name, color, inst: id, marks: marks(text, strong, weak) })),
+    bars.length > 1 ? name : '',
+  );
 
 /** The melody roll of a scene: its melodic voices, bar by bar, each note as long as it is held, with the scene's band. */
 function sceneRoll(scene, voices, band) {
@@ -917,14 +917,12 @@ const LAYOUTS = {
   introducao: () =>
     row(label(T.tempo), T.tempoValue) + row(label(T.meter), T.meterValue) + row(label(T.key), T.keyValue) + row(label(T.voices), INSTRUMENT_COUNT),
   surdo: () =>
-    `<div class="notation">${SURDO_CELL.map((text, i) => seqRow(i ? '' : T.cell, marks(text, ['X'], ['o']), COLOR.surdo, 'surdo')).join('')}</div>` +
+    cellRows(T.cell, SURDO_CELL, ['X'], ['o'], COLOR.surdo, 'surdo') +
     row(label(`● ${T.open}`, COLOR.surdo), countFromOne(cellSteps(SURDO_CELL[0], 'X')), 'surdo') +
     row(label(`○ ${T.muted}`), countFromOne(cellSteps(SURDO_CELL[0], 'o')), 'surdo'),
-  caixa: () =>
-    `<div class="notation">${CAIXA_CELL.map((text, i) => seqRow(i ? '' : T.cell, marks(text, ['X'], ['x']), COLOR.tarol, 'tarol')).join('')}</div>` +
-    row(label(`● ${T.accent} · ○ ${T.soft} · ≈ ${T.rufo}`), T.caixaCount, 'tarol'),
+  caixa: () => cellRows(T.cell, CAIXA_CELL, ['X'], ['x'], COLOR.tarol, 'tarol') + row(label(T.inTheCell), T.caixaCount, 'tarol'),
   pandeiro: () =>
-    `<div class="notation">${seqRow('', marks(PANDEIRO_BAR, ['X'], ['x']), COLOR.pandeiro, 'pandeiro')}</div>` +
+    cellRows(COPY.voices.pandeiro, [PANDEIRO_BAR], ['X'], ['x'], COLOR.pandeiro, 'pandeiro') +
     row(label(`● ${T.grave}`, COLOR.pandeiro), countFromOne(cellSteps(PANDEIRO_BAR, 'X')), 'pandeiro') +
     row(label(`○ ${T.platinela}`), countFromOne(cellSteps(PANDEIRO_BAR, 'x')), 'pandeiro'),
   tuba: scene =>

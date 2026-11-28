@@ -5,7 +5,7 @@
 // rhythmic phrases that join and end in a «rufo»); Revista Continente, «O coco ancestral do Bongar».
 // Neither source writes the parts out: the patterns below are this project's reading, kept simple.
 // Choices and reasons: docs/rhythms/coco.md. Its background painter is the section below the imports.
-import { label, row, stat, stats } from '../readout-markup.js';
+import { label, marksAt, notation, row, stat, stats } from '../readout-markup.js';
 import { alphaOf, COLORS, REDUCED_MOTION_QUERY } from '../theme.js';
 import { hash } from '../util.js';
 import { lilt, recordedChoices, studioFiles, studioSounds, takes } from './studio-kit.js';
@@ -731,18 +731,15 @@ const COPY = {
 
 // ---------- readout layouts ----------
 const T = READ;
-const beatSeparator = step => (step % STEPS_PER_BEAT === STEPS_PER_BEAT - 1 && step < STEPS_PER_BAR - 1 ? '|' : '');
+/** One bar of the alfaia as marks: each stroke in the colour of its head. */
 const marks = (low, high) =>
-  STEPS.map(
-    step =>
-      (low.includes(step) ? `<b style="color:${VOICES.low.color}">●</b>` : high.includes(step) ? `<b style="color:${VOICES.high.color}">●</b>` : '·') +
-      beatSeparator(step),
-  ).join('');
-const dots = (steps, color) => STEPS.map(step => (steps.includes(step) ? `<b style="color:${color}">●</b>` : '·') + beatSeparator(step)).join('');
-const seqRow = (name, color, inst, markup, count) =>
-  `${label(name, color)}<span class="seq" data-inst="${inst}">${markup}</span><span class="n" data-inst="${inst}">${T.hits(count)}</span>`;
+  STEPS.map(step =>
+    low.includes(step) ? { kind: 'strong', color: VOICES.low.color } : high.includes(step) ? { kind: 'strong', color: VOICES.high.color } : 'rest',
+  );
+const seqRow = (name, color, inst, bar, count) => ({ name, color, inst, marks: bar, count: T.hits(count) });
 const phraseRow = key => seqRow(COPY.patterns[key], undefined, 'alfaia', marks(PHRASES[key].low, PHRASES[key].high), phraseHitCount(key));
-const atabaqueRow = (voice, steps) => seqRow(T[voice], VOICES[voice].color, 'atabaque', dots(steps, VOICES[voice].color), steps.length);
+const atabaqueRow = (voice, steps) => seqRow(T[voice], VOICES[voice].color, 'atabaque', marksAt(STEPS_PER_BAR, steps), steps.length);
+const rows = (...list) => notation(STEPS_PER_BEAT, list);
 const entry = () => `<div data-entry></div>`;
 const allHits = phrase => [...phrase.low, ...phrase.high];
 
@@ -755,16 +752,16 @@ const LAYOUTS = {
   alfaia: entry,
   heads: () =>
     stats('two', stat(BEAT_STEPS.length, T.beatHeads, VOICES.low.color), stat(STEPS_PER_BAR - BEAT_STEPS.length, T.offbeats, VOICES.high.color)) +
-    `<div class="notation tight">${phraseRow('base')}</div>`,
+    rows(phraseRow('base')),
   ganza: entry,
   pandeiro: entry,
   palmas: entry,
   agogoAbe: entry,
   caixa: entry,
   atabaques: () =>
-    `<div class="notation tight">${atabaqueRow('rum', RUM_PHRASES[0].steps)}${atabaqueRow('rumpi', ATABAQUE.rumpi.steps)}${atabaqueRow('le', ATABAQUE.le.steps)}</div>` +
+    rows(atabaqueRow('rum', RUM_PHRASES[0].steps), atabaqueRow('rumpi', ATABAQUE.rumpi.steps), atabaqueRow('le', ATABAQUE.le.steps)) +
     row(label(T.trio), T.leadVaries, 'atabaque'),
-  phrases: () => `<div class="notation tight">${PHRASE_ORDER.map(phraseRow).join('')}</div>${row(label(T.sameTempo), T.sameTempoValue)}`,
+  phrases: () => rows(...PHRASE_ORDER.map(phraseRow)) + row(label(T.sameTempo), T.sameTempoValue),
   toque: () => {
     const phrase = PHRASES.toque,
       all = allHits(phrase);
@@ -773,7 +770,7 @@ const LAYOUTS = {
       stat(phrase.low.length, T.hitsLow, VOICES.low.color),
       stat(phrase.high.length, T.hitsHigh, VOICES.high.color),
       stat(`${all.filter(isOffbeat).length}<small>/${all.length}</small>`, T.onOffbeat, COLORS.fg),
-    )}<div class="notation tight">${phraseRow('base')}${phraseRow('toque')}</div>`;
+    )}${rows(phraseRow('base'), phraseRow('toque'))}`;
   },
   rufo: () => row(label(T.rufada), T.rufadaValue, 'alfaia') + row(label(T.sameTempo), T.sameTempoValue),
   finale: show =>
