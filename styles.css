@@ -386,10 +386,10 @@ body {
   white-space: nowrap;
   word-spacing: normal;
 }
-/* the count of a part's strokes, in the card of a scene the title names: as large as the title, so
-   the card, its rows and its legend fit the readout on a short phone (#71, #73) */
+/* the count of a part's strokes, in the card of a scene the title names: a little under the title's
+   size, so the card, its rows and its legend fit the readout on a short phone (#71, #73) */
 .read .big.count {
-  font-size: var(--stage-title);
+  font-size: calc(var(--stage-title) * 0.9);
 }
 /* the part's strokes stand a little under its count, in the card of a scene the title names (#71) */
 [data-entry] > .strokes {
