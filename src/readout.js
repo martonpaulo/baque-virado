@@ -123,7 +123,7 @@ export function createReadout(element, volume = {}) {
         // A scene whose title already names the instrument says it once: the card then shows the
         // part itself, its count in the large type and its strokes on the bar, named by its hand (#71).
         entry.innerHTML = named(COPY.scenes[scene.id].title, name)
-          ? `<div class="k">${muted ? T.entersMuted : COPY.entry.strokes}</div><div class="big" style="color:${color}">${count}</div>` +
+          ? `<div class="k">${muted ? T.entersMuted : COPY.entry.strokes}</div><div class="big count" style="color:${color}">${count}</div>` +
             notation(STEPS_PER_BEAT, [
               {
                 name: hand || name,

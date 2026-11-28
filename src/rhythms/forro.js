@@ -627,9 +627,9 @@ const READ = {
   phrase: 'frase',
   phraseValue: `${PHRASE_BARS} compassos, pergunta e resposta`,
   secondPart: 'segunda parte',
-  secondPartValue: `ré mixolídio: a mesma escala, com sétima menor (${SOLFEGE[FLAT_SEVENTH]})`,
+  secondPartValue: `ré mixolídio, com sétima menor (${SOLFEGE[FLAT_SEVENTH]})`,
   baixo: 'baixo',
-  baixoValue: 'caminha com a maceta e puxa o acorde seguinte',
+  baixoValue: 'puxa o acorde seguinte', // one line: the scene's readout is the show's tallest
   cavaquinho: 'cavaquinho',
   sanfona: 'sanfona',
   melody: 'melodia',

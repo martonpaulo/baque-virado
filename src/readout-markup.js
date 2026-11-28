@@ -42,10 +42,10 @@ export function notation(stepsPerBeat, rows, heading = '') {
   const legend = Object.keys(MARKS)
     .filter(kind => used.has(kind))
     .map(kind => `<span data-mark="${kind}">${MARKS[kind]}</span>`);
-  return `<div class="strokes">${heading ? `<span class="k heading">${heading}</span>` : ''}${lines.join('')}<p class="legend">${legend.join('')}</p></div>`;
+  return `<div class="strokes">${heading ? `<span class="k heading">${heading}</span>` : ''}${lines.join('')}<p class="legend">${legend.join(' ')}</p></div>`;
 }
 
 /** Write each legend's words beside its marks, in `element`: `words` maps a kind of MARKS to its word. */
 export function fillLegends(element, words) {
-  for (const item of element.querySelectorAll('.legend [data-mark]')) item.textContent = `${MARKS[item.dataset.mark]} ${words[item.dataset.mark]}`;
+  for (const item of element.querySelectorAll('.legend [data-mark]')) item.textContent = `${MARKS[item.dataset.mark]}\u00a0${words[item.dataset.mark]}`;
 }

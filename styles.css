@@ -338,7 +338,7 @@ body {
 .strokes {
   display: grid;
   grid-template-columns: max-content 1fr auto;
-  gap: 0.6cqw 2.4cqw;
+  gap: 0.4cqw 2.4cqw;
   align-items: center;
 }
 .strokes > .k {
@@ -359,21 +359,24 @@ body {
   text-align: center;
 }
 /* a rest and the line between beats stand back from the strokes */
-.strokes .seq .rest,
+/* a rest stays plain to see over a bright background; the line between beats stands back */
+.strokes .seq .rest {
+  opacity: 0.85;
+}
 .strokes .seq .beat {
-  opacity: 0.6;
+  opacity: 0.5;
 }
 .strokes .n {
+  padding-left: 1.6cqw; /* a count never reads as one more mark of its row */
   text-align: right;
   color: var(--dim);
   font-size: var(--stage-label);
 }
 /* the legend: one dim line under the rows, each mark with its word, the same words in every show */
 .strokes .legend {
-  margin: 0.4cqw 0 0;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0 2cqw;
+  margin: 0;
+  word-spacing: 1.2cqw; /* between two marks; a mark and its word keep one no-break space */
+  text-wrap: balance; /* a legend of two lines leaves no mark alone on the second */
   color: var(--dim);
   font-size: var(--stage-label);
   text-transform: uppercase;
@@ -381,10 +384,16 @@ body {
 }
 .strokes .legend > * {
   white-space: nowrap;
+  word-spacing: normal;
+}
+/* the count of a part's strokes, in the card of a scene the title names: as large as the title, so
+   the card, its rows and its legend fit the readout on a short phone (#71, #73) */
+.read .big.count {
+  font-size: var(--stage-title);
 }
 /* the part's strokes stand a little under its count, in the card of a scene the title names (#71) */
 [data-entry] > .strokes {
-  margin-top: 0.4cqw;
+  margin-top: 0;
 }
 [data-entry].muted .strokes {
   opacity: 0.2; /* as the muted card's other parts */
@@ -1264,6 +1273,11 @@ html:not(.video-export) .read .row .k {
 .has-graphic .below .read {
   flex: 1;
   min-width: 0;
+  /* its values wrap in the narrower box: closer lines and rows keep the tallest readout, the
+     forró's «Baixo e cavaquinho», inside it on a short phone (#73) */
+  line-height: 1.2;
+  gap: 1cqw;
+  padding-block: 0.3cqw; /* the letters of a close line reach a little past it, above and below */
 }
 /* a value that wraps in the narrower readout ends at the right edge, as a one-line value does, and
    leaves no word alone on its last line */

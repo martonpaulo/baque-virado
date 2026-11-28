@@ -918,13 +918,13 @@ const LAYOUTS = {
     row(label(T.tempo), T.tempoValue) + row(label(T.meter), T.meterValue) + row(label(T.key), T.keyValue) + row(label(T.voices), INSTRUMENT_COUNT),
   surdo: () =>
     cellRows(T.cell, SURDO_CELL, ['X'], ['o'], COLOR.surdo, 'surdo') +
-    row(label(`● ${T.open}`, COLOR.surdo), countFromOne(cellSteps(SURDO_CELL[0], 'X')), 'surdo') +
-    row(label(`○ ${T.muted}`), countFromOne(cellSteps(SURDO_CELL[0], 'o')), 'surdo'),
+    row(label(T.open, COLOR.surdo), countFromOne(cellSteps(SURDO_CELL[0], 'X')), 'surdo') +
+    row(label(T.muted), countFromOne(cellSteps(SURDO_CELL[0], 'o')), 'surdo'),
   caixa: () => cellRows(T.cell, CAIXA_CELL, ['X'], ['x'], COLOR.tarol, 'tarol') + row(label(T.inTheCell), T.caixaCount, 'tarol'),
   pandeiro: () =>
     cellRows(COPY.voices.pandeiro, [PANDEIRO_BAR], ['X'], ['x'], COLOR.pandeiro, 'pandeiro') +
-    row(label(`● ${T.grave}`, COLOR.pandeiro), countFromOne(cellSteps(PANDEIRO_BAR, 'X')), 'pandeiro') +
-    row(label(`○ ${T.platinela}`), countFromOne(cellSteps(PANDEIRO_BAR, 'x')), 'pandeiro'),
+    row(label(T.grave, COLOR.pandeiro), countFromOne(cellSteps(PANDEIRO_BAR, 'X')), 'pandeiro') +
+    row(label(T.platinela), countFromOne(cellSteps(PANDEIRO_BAR, 'x')), 'pandeiro'),
   tuba: scene =>
     row(label(T.progression), progression(scene), 'tuba') + row(label(T.bassLine), T.bassLineValue, 'tuba') + row(label(T.approach), T.approachValue, 'tuba'),
 };

@@ -873,7 +873,7 @@ const LAYOUTS = {
     row(label(T.withAlfaia), T.withAlfaiaValue, 'caixa'),
   dub: () =>
     rows([seqRow(T.mainHand, marks(DUB_MAIN, ['X'], [], dubEchoSteps()), COLOR.main, 'alfaia')]) +
-    row(label(`◌ ${T.repeat}`), T.echoValue) +
+    row(label(T.repeat), T.echoValue) +
     row(label(T.echoPlays), T.echoPlaysValue) +
     row(label(T.space), T.spaceValue),
   retorno: () => `<div data-entry></div>`,

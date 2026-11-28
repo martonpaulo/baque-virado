@@ -573,7 +573,7 @@ function notationInPage(scenes) {
         for (const mark of strokes.children) used.add(mark.textContent);
       }
       const legend = block.querySelector('.legend'),
-        items = [...legend.children].map(item => item.textContent.split(' '));
+        items = [...legend.children].map(item => item.textContent.split(/\s/));
       if (legend !== block.lastElementChild) problems.add(`${scene.id}: the legend is not the last line of its block`);
       const listed = items.map(([mark]) => mark);
       if ([...used].sort().join('') !== [...listed].sort().join(''))
@@ -585,6 +585,28 @@ function notationInPage(scenes) {
     }
   }
   return { problems: [...problems], rows, blocks, own };
+}
+
+/** In the page: what each scene's readout draws, in its first and last bar, against its box and the lanes under it. */
+function readoutFitsInPage(scenes) {
+  const problems = new Set();
+  for (const scene of scenes)
+    for (const bar of new Set([0, scene.bars - 1])) {
+      window.baque.render(scene.start + bar + 0.5);
+      const read = document.getElementById('read'),
+        box = (read.closest('.has-graphic .below') || read).getBoundingClientRect(), // beside the wheel, the two share one box
+        lanes = document.querySelector('.lanes').getBoundingClientRect();
+      const drawn = [...read.querySelectorAll('*')].filter(part => part.getClientRects().length).map(part => part.getBoundingClientRect());
+      if (!drawn.length) continue;
+      const top = Math.min(...drawn.map(part => part.top)),
+        bottom = Math.max(...drawn.map(part => part.bottom));
+      if (top < box.top - 0.5 || bottom > box.bottom + 0.5)
+        problems.add(
+          `${scene.id}: the readout is drawn from ${top.toFixed(0)} to ${bottom.toFixed(0)} px, and its box goes from ${box.top.toFixed(0)} to ${box.bottom.toFixed(0)}`,
+        );
+      if (bottom > lanes.top + 0.5) problems.add(`${scene.id}: the readout runs ${(bottom - lanes.top).toFixed(0)} px into the lanes`);
+    }
+  return { problems: [...problems] };
 }
 
 /** In the page: each scene's title against the largest text of its readout, in every bar of a scene that brings parts in. */
@@ -617,7 +639,7 @@ function saidTwiceInPage(scenes) {
 // One pass serves every test under it that measures each show, on one page a show: opening a page is
 // what takes the time, and a window that changes size lays the stage out as a fresh load does (the
 // test of the desktop breakpoint, below). Each page is still (openPage): a test asks for the positions it measures.
-const STAGE_CHECKS = { key: keyInPage, laneTexts: laneTextsInPage, notation: notationInPage, saidTwice: saidTwiceInPage };
+const STAGE_CHECKS = { key: keyInPage, laneTexts: laneTextsInPage, notation: notationInPage, saidTwice: saidTwiceInPage, readoutFits: readoutFitsInPage };
 let everyStage;
 /** What each check of STAGE_CHECKS found in every show's page at every size of STAGE_SIZES, as `{ where, found }`. */
 async function measureEveryStage() {
@@ -805,6 +827,14 @@ test('every row of strokes has a name beside it on one line, stays in the readou
     assert.equal(blocks > 0, !maracatu, `${where}: ${blocks} blocks from the shared builder`);
     assert.equal(own > 0, maracatu, `${where}: ${own} rows drawn with markup of the package's own`);
   }
+});
+
+// #73: a readout beside the wheel is as tall as its rows, inside a box of a fixed height, so a tall
+// one (the forró's «Baixo e cavaquinho», the bregafunk's card with its rows) grew out of the box on
+// both sides and reached the lanes; the readout's own scroll height does not show that.
+test('what every readout draws stays inside its box and above the lanes, in every show', async () => {
+  const { problems } = await stageCheck('readoutFits');
+  assert.deepEqual(problems, []);
 });
 
 // #71: the coco and the bregafunk bring an instrument in under a title that is its name, and the

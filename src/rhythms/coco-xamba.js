@@ -682,9 +682,9 @@ const READ = {
   bars: 'compassos',
   howItEnds: 'como termina',
   rufoAndCut: 'rufo e corte',
-  rum: 'rum · grave',
-  rumpi: 'rumpi · médio',
-  le: 'lé · agudo',
+  rum: 'rum, grave',
+  rumpi: 'rumpi, médio',
+  le: 'lé, agudo',
   trio: 'atabaques',
   leadVaries: 'o rum varia a cada 2 compassos',
 };
