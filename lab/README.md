@@ -23,6 +23,33 @@ python lab/addrefs.py                          # the reference features cache
 The first run downloads the models (Demucs, CLAP, audiobox-aesthetics, beat_this) from their
 public hosts. Everything runs on a CPU.
 
+## Full recordings
+
+Round two reads the whole of each reference
+([`docs/research/round-two.md`](../docs/research/round-two.md#how-to-read-four-references)). The
+full recordings are on the owner's Mac only, as YouTube refuses a cloud session:
+
+- `lab/.data/refs-full/<rhythm>/<NN>-<name> [<YouTube id>].webm`: Opus at 48 kHz, as
+  `yt-dlp -f bestaudio` saved it. A number that ends in «x» is an extra version of a song and is
+  not one of the rhythm's counted references.
+- `lab/.data/refs-full/manifest.tsv`: one line per file with its id, length, channel and title.
+- Which video stands for which reference is listed in the owner's private `batuque-references`
+  (`audio/README.md`). Fetch a missing one by the id listed there, never from a search:
+
+```sh
+yt-dlp --no-playlist -f bestaudio -o "lab/.data/refs-full/<rhythm>/<NN>-<name> [%(id)s].%(ext)s" "https://www.youtube.com/watch?v=<id>"
+```
+
+`sections.py` needs only ffmpeg, NumPy, SciPy and librosa, so a Mac that will not hold the models
+can still map the recordings:
+
+```sh
+python3 -m venv lab/.data/venv && lab/.data/venv/bin/pip install librosa==1.0.1 scipy==1.18.1
+lab/.data/venv/bin/python lab/sections.py selftest
+lab/.data/venv/bin/python lab/sections.py map "lab/.data/refs-full/forro/04-numa-sala-de-reboco [Y8I75h26EIw].webm"
+lab/.data/venv/bin/python lab/sections.py rhythm forro      # each song's map, each song's mean, then the mean of the songs
+```
+
 ## Use
 
 ```sh
@@ -44,6 +71,9 @@ python lab/analyze.py refs                     # the references scored against t
 | `analyze.py`                | Scores a render against the genre's references; zero-shot tags a render with CLAP     |
 | `toy.py`                    | The probe that follows the owner's complaint: a band of the genre or a toy keyboard   |
 | `style.py`                  | Tempo, the drum grid per sixteenth in three bands, bass and melody note facts         |
+| `sections.py`               | Maps a full recording into sections with facts; weighs a rhythm's songs the same      |
+| `full-spans.json`           | The spans that are music in a recording that holds several songs, or some talk        |
+| `reference-sections.txt`    | `sections.py rhythm` over every counted full recording, as measured on 2026-11-28     |
 | `addrefs.py`                | Rebuilds the reference features after `references.json` or the audio changes          |
 | `fetch-references.py`       | Downloads the previews `references.json` lists                                        |
 | `references.json`           | The owner's references the lab holds, each with its catalogue id                      |

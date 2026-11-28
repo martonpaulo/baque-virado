@@ -11,6 +11,7 @@ revision of [#27](https://github.com/martonpaulo/baque-virado/issues/27) and why
 - [Sound](#sound)
 - [Feel](#feel)
 - [Visuals](#visuals)
+- [Round two: a first reading of the references](#round-two-a-first-reading-of-the-references)
 - [Open points](#open-points)
 
 ## Music
@@ -109,6 +110,63 @@ test measures the low head's beat-to-beat correlation (pink, not white) and its 
 - **Widgets.** The wheel, the lanes and the readout; no score (the score renderer is written for
   4/4). The Atabaques readout shows the three parts on the 8 steps; the Introdução and the Rufo
   name the rufada.
+
+## Round two: a first reading of the references
+
+A reading made on 2026-11-28 from the whole of the video the owner named (Bongar at «Observa e
+Toca», 25:28), with `lab/sections.py`; the maps are in
+[`lab/reference-sections.txt`](../../lab/reference-sections.txt). Nothing here is built, and the
+elements at the end wait for the owner. The method is in
+[`../research/round-two.md`](../research/round-two.md#how-to-read-four-references).
+
+The map finds four spans where the band plays, with talk and demonstrations between them: 1:22 to
+5:02, 8:30 to 12:40, 13:56 to 17:52 and 17:52 to 24:28 (`lab/full-spans.json`). The owner points to
+the part from 18:00, the fourth span. Which span holds which of the four named songs was not
+checked by ear, and a span may hold more than one song.
+
+What the four spans share, by how far the measurement can be trusted:
+
+| Trait                         | Evidence                                                                                                                                                                             | Trust  |
+| :---------------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :----- |
+| A heavy low drum leads        | In every span the band from 60 to 120 Hz holds the most energy, and each band above 2 kHz sits 8 to 17 dB under it                                                                   | High   |
+| Sung, not only drummed        | The percussive share of the energy is 0.17 to 0.24 in every span: most of the sound is sustained, which is the voices of the roda                                                    | High   |
+| A piece starts thin           | Three of the four spans open 6 to 10 dB under their body, and the fourth runs two and a half minutes sparse, at 3 to 5 onsets a second, before the whole band plays at 6 to 7.5      | Medium |
+| A dense, even pulse           | 5 to 7.5 onsets a second through every full section, and the level hardly moves inside one piece                                                                                     | Medium |
+| The low drum on and off beat  | The low band, folded on four beats, shows a stroke on every beat and another on the off-beat or in the sixteenth before the beat                                                     | Medium |
+| Tempo                         | Tracked at about 136 to 144 BPM in the first two spans and at 117.5 in the fourth; the third read 103.4, three quarters of 138, which a tracker gives when it locks on a dotted value      | Low    |
+
+What the reading could not do:
+
+- Tell the instruments apart. No stems were separated on this Mac, so the palmas, the ganzá and
+  the feet are inside the bands above.
+- Name the songs, or find a bar line: the fold starts on the strongest low stroke, which may be
+  the off-beat.
+- Measure the show itself in the same bands. The lab's renderer needs Playwright, which this Mac
+  does not hold.
+
+Against the show as it is (132 BPM, percussion only, thirteen scenes that add one instrument
+each): it has nothing in the place of the voices; it opens on rufadas at full level, where three
+of the four spans start thin; and the first round measured it 7 to 10 dB too bright from 1 to
+8 kHz ([`sound-lab.md`](../research/sound-lab.md#the-shows-after-the-first-round)). The owner's
+hearing of 2026-11-28 agrees with the last point and adds three: instruments that sound loose,
+palmas that do not sound natural and a rufo that does not sound natural.
+
+The elements proposed for the show to exalt, not yet accepted:
+
+1. **The low drum and the feet as one body**: the alfaia's low head with the pisada on every beat,
+   heavy, the loudest thing in the mix.
+2. **The roda's answer**: the palmas and the feet of many people, a little apart in time, answering
+   a call. It takes the place of the sung chorus.
+3. **The call**: one lead, the alfaia's second head and then the rum, phrasing as a singer does,
+   two bars of call and two of answer.
+4. **The ganzá's even sixteenths**, holding the pulse under everything.
+5. **The roda heating up**: thin at the start, one layer more each round, the rufo as the peak, and
+   a cut.
+
+The form proposed, about 1:40: a thin opening, the call alone over the ganzá; the roda answers
+with palmas and feet; the low drum enters and the band is whole by 0:25; two rounds of call and
+answer, each fuller; a stop of one bar; the hottest round, with the atabaques; the rufo and the
+cut. The tempo stays at 132 BPM until a count by hand of the fourth span settles it.
 
 ## Open points
 
