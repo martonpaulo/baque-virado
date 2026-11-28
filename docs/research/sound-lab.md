@@ -176,6 +176,10 @@ What changed in each show is in its own document: [`bregafunk.md`](../rhythms/br
 - **The full recordings are already chosen.** The private repository `martonpaulo/batuque-references`
   (`audio/README.md`) names the exact YouTube video for each reference. Fetch those ids; never pick a
   video from a search.
+- **The full recordings are on the owner's Mac** since 2026-11-25, in `lab/.data/refs-full/<rhythm>/`
+  (ignored by Git), one file per listed video, with a `manifest.tsv`; each decodes and has the
+  length the list gives ([#48](https://github.com/martonpaulo/batuque/issues/48)).
+  [`lab/README.md`](../../lab/README.md#full-recordings) gives the file names and the fetch command.
 - **Previews work.** A music catalogue's public API serves a 30-second preview of most references;
   `lab/fetch-references.py` fetches them by id.
 - **YouTube does not work from a cloud session.** It answers «Sign in to confirm you're not a bot»
