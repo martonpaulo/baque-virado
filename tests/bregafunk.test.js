@@ -1,9 +1,10 @@
-// The bregafunk package: one tempo, its sparse beat, the flute hook's form, the synthesized sounds, its
+// The bregafunk package: one tempo, its sparse beat, the riff and the form of round two (the riff alone,
+// the beat dropping whole, the grave on the riff's notes, the stops), the synthesized sounds, its
 // background and the flash limit.
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { meterOf } from '../src/music.js';
-import { BEAT, BREGAFUNK, HOOK, HOOK_VARIED_BAR, PASSINHO, ROOTS, TAMBORZAO } from '../src/rhythms/bregafunk.js';
+import { BEAT, BREGAFUNK, GRAVE_RIFF, HOOK, HOOK_VARIED_BAR, PASSINHO, ROOTS, TAMBORZAO } from '../src/rhythms/bregafunk.js';
 import { createBregafunkBackground, PALETTE } from '../src/rhythms/bregafunk-background.js';
 import { SYNTH_TAKES } from '../src/rhythms/bregafunk-synth.js';
 import { TAKES } from '../src/rhythms/recorded-takes.js';
@@ -28,68 +29,87 @@ const fluteBars = () =>
 const asHits = bar => bar.map(([step, note, length, ornament]) => [step, `${note}:${length}${ornament ? `:${ornament}` : ''}`]);
 const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
 
-test('one tempo for the whole show, 170 BPM: one 16-sixteenth bar of 1.41 s per turn', () => {
+test('one tempo for the whole show, 171 BPM: one 16-sixteenth bar of 1.40 s per turn, 64 bars in nine scenes', () => {
   const meter = meterOf(BREGAFUNK);
-  assert.equal(BREGAFUNK.bpm, 170);
+  assert.equal(BREGAFUNK.bpm, 171); // the owner's accepted tempo for round two: three of the four references sit at 164 to 170
   assert.equal(meter.stepsPerBar, 16);
-  assert.ok(Math.abs(meter.barSeconds - 1.41) < 0.01, `${meter.barSeconds} s per turn`);
-  assert.equal(show.TOTAL_BARS, 65);
-  assert.ok(show.TOTAL_SECONDS >= 80 && show.TOTAL_SECONDS <= 130, `${show.TOTAL_SECONDS} s`);
-  assert.equal(show.SCENES.length, 12);
+  assert.ok(Math.abs(meter.barSeconds - 1.4) < 0.01, `${meter.barSeconds} s per turn`);
+  assert.equal(show.TOTAL_BARS, 64);
+  assert.ok(show.TOTAL_SECONDS >= 85 && show.TOTAL_SECONDS <= 95, `${show.TOTAL_SECONDS} s`); // about 1:30
+  assert.deepEqual(
+    show.SCENES.map(scene => [scene.id, scene.bars]),
+    [
+      ['tema', 4],
+      ['batida', 4],
+      ['juntos', 8],
+      ['grave', 8],
+      ['parada', 4],
+      ['drop', 16],
+      ['respiro', 4],
+      ['passinho', 12],
+      ['final', 4],
+    ],
+  );
   for (let bar = 0; bar < show.TOTAL_BARS; bar++) for (const h of show.hitsInBar(bar)) assert.equal(h.swing, 0, 'hard-quantized: no swing');
 });
 
 // The reference recordings play about 5 onsets a second; the first version of this show played 10.
 test('the beat is sparse: a few hard hits with space between them, never a wall of sixteenths', () => {
-  const batida = show.sceneById('batida');
+  const drop = show.sceneById('drop');
   let onsets = 0;
-  for (let bar = batida.start; bar < batida.start + batida.bars; bar++) {
+  for (let bar = drop.start; bar < drop.start + drop.bars; bar++) {
     const steps = new Set(show.hitsInBar(bar).map(h => h.hit.step));
     onsets += steps.size;
     assert.ok(steps.size <= 12, `bar ${bar} sounds on ${steps.size} of 16 sixteenths`);
     assert.ok(stepsOf(bar, 'chimbal').length <= 5, `the chimbal plays ${stepsOf(bar, 'chimbal').length} strokes in bar ${bar}`);
   }
-  const rate = onsets / (batida.bars * meterOf(BREGAFUNK).barSeconds);
-  assert.ok(rate >= 4 && rate <= 7.5, `${rate.toFixed(1)} onsets a second`);
+  const rate = onsets / (drop.bars * meterOf(BREGAFUNK).barSeconds);
+  assert.ok(rate >= 4 && rate <= 8, `${rate.toFixed(1)} onsets a second`);
 });
 
 test('the bumbo on 1 and 9 and the lata on 7 and 13 group the bar as 3 + 3 + 2 eighths, the palma with the second bumbo', () => {
-  const lata = show.sceneById('lata');
-  assert.deepEqual(stepsOf(lata.start, 'lata'), BEAT.lata.steps);
-  assert.deepEqual(stepsOf(lata.start, 'lata'), [6, 12]);
-  assert.deepEqual(stepsOf(lata.start, 'bumbo'), [0, 8]);
+  const batida = show.sceneById('batida');
+  assert.deepEqual(stepsOf(batida.start, 'lata'), BEAT.lata.steps);
+  assert.deepEqual(stepsOf(batida.start, 'lata'), [6, 12]);
+  assert.deepEqual(stepsOf(batida.start, 'bumbo'), [0, 8]);
+  assert.deepEqual(stepsOf(batida.start, 'palma'), [8]);
   const tresillo = [BEAT.bumbo.steps[0], ...BEAT.lata.steps];
   assert.deepEqual(
     tresillo.map((step, i) => ((tresillo[(i + 1) % tresillo.length] - step + 16) % 16) / 2),
     [3, 3, 2],
   );
-  assert.deepEqual(stepsOf(show.sceneById('palmas').start, 'palma'), [8]);
-  // the contrast scene drops the lata for the Rio atabaque line
-  const rio = show.sceneById('tamborzao').start;
-  assert.equal(stepsOf(rio, 'lata').length, 0);
-  assert.deepEqual(stepsOf(rio, 'tamborzao'), TAMBORZAO.drum.steps);
   // the passinho doubles the bumbo
   assert.deepEqual(stepsOf(show.sceneById('passinho').start, 'bumbo'), PASSINHO.bumbo.steps);
 });
 
-test('each part enters on its own: a scene draws and plays only its voices', () => {
+// Round two (docs/rhythms/bregafunk.md): the riff opens the show, a few strokes tease the beat, and
+// the beat drops whole after four bars, as the references hold their beat back.
+test('the riff opens alone, the beat is teased and then drops whole, and a scene plays only its voices', () => {
   assert.deepEqual([...new Set(show.hitsInBar(0).map(h => h.voice))], ['flauta']);
-  assert.deepEqual([...new Set(show.hitsInBar(show.sceneById('bumbo').start).map(h => h.voice))], ['bumbo']);
-  const entering = ['tema', 'bumbo', 'lata', 'palmas', 'grave', 'teclado', 'batida'].map(id => show.barTimeline(show.sceneById(id).start).playing.length);
-  assert.deepEqual(entering, [1, 1, 2, 4, 5, 6, 7], 'the parts add up, scene by scene');
+  assert.deepEqual([...new Set(show.hitsInBar(1).map(h => h.voice))], ['flauta']);
+  assert.deepEqual(new Set(show.hitsInBar(2).map(h => h.voice)), new Set(['flauta', 'palma', 'lata']));
+  assert.deepEqual(stepsOf(3, 'bumbo'), [14]); // the pick-up that pulls the first bar of the beat
+  const batida = show.sceneById('batida');
+  assert.equal(batida.start, 4);
+  assert.deepEqual(new Set(show.hitsInBar(batida.start).map(h => h.voice)), new Set(['bumbo', 'lata', 'palma', 'chimbal']));
   for (let bar = 0; bar < show.TOTAL_BARS; bar++) {
     const { voices, playing } = show.barTimeline(bar);
     for (const voice of Object.keys(voices)) if (!playing.includes(voice)) assert.equal(voices[voice].length, 0, `${voice} in bar ${bar}`);
   }
+  // every scene but the first declares how it is entered: no boundary of this show is cold
+  assert.deepEqual(
+    show.boundaries().filter(boundary => boundary.cold),
+    [],
+  );
 });
 
-test('the hook is an eight-bar flute tune: stated alone, played whole, varied once on the drop, back at the end', () => {
+test('the riff has three notes and is two bars long: stated alone, repeated, varied once on the drop, back at the end', () => {
   const bars = fluteBars();
-  assert.equal(HOOK.length, 8);
-  const tema = show.sceneById('tema');
-  for (let i = 0; i < tema.bars; i++) assert.deepEqual(bars[tema.start + i].notes, asHits(HOOK[i]), `tema, bar ${i}`);
-  const batida = show.sceneById('batida');
-  for (let i = 0; i < HOOK.length; i++) assert.deepEqual(bars[batida.start + i].notes, asHits(HOOK[i]), `batida, bar ${i}`);
+  assert.equal(HOOK.length, 2);
+  const classes = new Set(HOOK.flat().map(([, note]) => note.slice(0, -1)));
+  assert.deepEqual([...classes].sort(), ['A', 'Bb', 'E']);
+  for (const id of ['tema', 'juntos', 'grave'])
+    for (let i = 0; i < 4; i++) assert.deepEqual(bars[show.sceneById(id).start + i].notes, asHits(HOOK[i % HOOK.length]), `${id}, bar ${i}`);
   const variations = bars.filter(b => same(b.notes, asHits(HOOK_VARIED_BAR)));
   assert.deepEqual(
     variations.map(b => b.scene),
@@ -97,61 +117,76 @@ test('the hook is an eight-bar flute tune: stated alone, played whole, varied on
     'varied once, in one bar of the drop',
   );
   const final = show.sceneById('final');
-  for (let i = 0; i < final.bars - 1; i++) assert.deepEqual(bars[final.start + i].notes, asHits(HOOK[i]), `final, bar ${i}`);
+  for (let i = 0; i < final.bars - 1; i++) assert.deepEqual(bars[final.start + i].notes, asHits(HOOK[i % HOOK.length]), `final, bar ${i}`);
+  assert.deepEqual([...new Set(show.hitsInBar(final.start).map(h => h.voice))], ['flauta']); // the end on the riff
 });
 
-// What the reference's hook is like: high, short notes, fast repeated notes, one line at a time.
-test('the hook is written for a flute: high, monophonic, with repeated notes, slides and room to breathe', () => {
+// What the references' riffs are like: high, short notes, a repeated note, one line at a time, room after it.
+test('the riff is written for a flute: high, monophonic, with a slide into each long note and room at its end', () => {
   const NOTES = { C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11 };
   const midi = note => 12 * (Number(note.at(-1)) + 1) + NOTES[note[0]] + (note.includes('#') ? 1 : note.includes('b') ? -1 : 0);
-  const pitches = HOOK.flat().map(([, note]) => midi(note));
+  const pitches = [...HOOK.flat(), ...HOOK_VARIED_BAR].map(([, note]) => midi(note));
   assert.ok(Math.min(...pitches) >= midi('G4') && Math.max(...pitches) <= midi('A5'), 'inside the flute takes: G4 to A5');
   for (const [i, bar] of HOOK.entries()) {
     assert.ok(bar.length >= 4 && bar.length <= 9, `bar ${i} has ${bar.length} notes`);
     for (const [j, [step, , length]] of bar.entries())
       assert.ok(step + length <= (bar[j + 1]?.[0] ?? 16), `bar ${i}: the note on ${step + 1} runs into the next`);
   }
-  const all = HOOK.flat();
-  const repeated = all.filter(([step, note], i) => all[i + 1]?.[1] === note && all[i + 1][0] === step + 1);
-  assert.ok(repeated.length >= 6, `${repeated.length} fast repeated notes`);
-  assert.ok(all.filter(([, , , ornament]) => ornament).length >= 4, 'slides into the long notes');
-  assert.ok(!same(HOOK[2], HOOK[0]) && !same(HOOK[6], HOOK[2]) && !same(HOOK[7], HOOK[3]), 'the phrase develops: it is not a two-bar loop');
+  assert.ok(HOOK.flat().filter(([, , , ornament]) => ornament).length >= 2, 'a slide into each long note');
+  const [lastStep, , lastLength] = HOOK[1].at(-1);
+  assert.ok(lastStep + lastLength <= 12, 'the last beat of the riff is left empty');
 });
 
-test('the grave follows the bumbo, on the roots of an eight-bar harmony, and slides into the next bar', () => {
+// In the references the bass holds the riff's own pitch classes, in notes of one to two sixteenths,
+// four to nine a bar (docs/rhythms/bregafunk.md, The full recordings).
+test('the grave plays the notes of the riff, short, with the drums, and slides into the next phrase', () => {
   const grave = show.sceneById('grave');
-  const notesOf = i => show.hitsInBar(grave.start + (i % grave.bars)).filter(h => h.voice === 'grave');
-  const roots = [];
+  const riff = new Set(HOOK.flat().map(([, note]) => note.slice(0, -1)));
   for (let i = 0; i < grave.bars; i++) {
-    const notes = notesOf(i);
-    assert.deepEqual(
-      notes.slice(0, 2).map(h => h.hit.step),
-      BEAT.bumbo.steps,
-      `bar ${i}`,
+    const notes = show.hitsInBar(grave.start + i).filter(h => h.voice === 'grave');
+    assert.ok(notes.length >= 4 && notes.length <= 9, `bar ${i}: ${notes.length} notes`);
+    assert.equal(notes[0].hit.step, BEAT.bumbo.steps[0], `bar ${i} starts with the bumbo`);
+    assert.ok(
+      notes.some(h => h.hit.step === BEAT.bumbo.steps[1]),
+      `bar ${i}: a note with the second bumbo`,
     );
-    roots.push(notes[0].hit.tone.split('>')[0]);
-    if (i % 2) assert.equal(notes.at(-1).hit.tone.split(/[>:]/)[1], notesOf(i + 1)[0].hit.tone.split('>')[0], `bar ${i} slides into the next root`);
+    for (const h of notes) {
+      const [from, to, length] = h.hit.tone.split(/[>:]/);
+      assert.ok(riff.has(from.slice(0, -1)) && riff.has(to.slice(0, -1)), `bar ${i}: ${h.hit.tone} is not a note of the riff`);
+      assert.ok(Number(length) <= 2, `bar ${i}: a note of ${length} sixteenths`);
+    }
   }
-  assert.deepEqual(roots, ['A1', 'Bb1', 'G1', 'A1', 'A1', 'Bb1', 'G1', 'E2']);
+  assert.deepEqual(GRAVE_RIFF[1].at(-1).slice(1), ['E2', 2, 0.85, 'A1']); // the slide back to the tonic
   assert.equal(ROOTS.Am, 'A1');
+  // the Rio contrast left the script: the form is the riff, the beat, the grave and the stops
+  assert.equal(TAMBORZAO.drum.steps.length, 5);
+  assert.ok(!show.SCENES.some(scene => scene.id === 'tamborzao'));
 });
 
-test('the quebra drops the drums, stutters the hook and leaves its last beat silent before the pancadão', () => {
-  const quebra = show.sceneById('quebra');
-  for (let i = 0; i < quebra.bars; i++) {
-    assert.equal(stepsOf(quebra.start + i, 'bumbo').length, 0, 'no bumbo in the quebra');
-    assert.equal(stepsOf(quebra.start + i, 'grave').length, 0, 'no grave in the quebra');
+test('the drums stop for a bar and come back whole, every eight bars of the drop, and the parada leaves its last beat silent', () => {
+  const DRUMS = ['bumbo', 'lata', 'chimbal', 'grave'];
+  const stops = [...Array(show.TOTAL_BARS).keys()].filter(
+    bar => show.hitsInBar(bar).some(h => h.voice === 'flauta') && DRUMS.every(voice => stepsOf(bar, voice).length === 0) && bar > 1,
+  );
+  const drop = show.sceneById('drop');
+  for (const bar of [show.sceneById('juntos').start + 7, drop.start + 7, drop.start + 15, show.sceneById('passinho').start + 11])
+    assert.ok(stops.includes(bar), `bar ${bar} is a stop`);
+  assert.deepEqual(stepsOf(drop.start + 8, 'bumbo'), [0, 8]); // back whole after the stop in the middle
+  const parada = show.sceneById('parada');
+  for (let i = 0; i < parada.bars; i++) {
+    assert.equal(stepsOf(parada.start + i, 'bumbo').length, 0, 'no bumbo in the parada');
+    assert.equal(stepsOf(parada.start + i, 'grave').length, 0, 'no grave in the parada');
   }
-  const last = show.hitsInBar(quebra.start + quebra.bars - 1);
+  const last = show.hitsInBar(parada.start + parada.bars - 1);
   assert.ok(last.length > 0);
   for (const h of last) assert.ok(h.hit.step < 12, `${h.voice} on ${h.hit.step + 1}`);
   // and no note rings into it, the riser included
   for (const h of last.filter(h => h.voice === 'flauta')) assert.ok(h.hit.step + Number(h.hit.tone.split(':')[1]) <= 12);
-  const riser = show.hitsInBar(quebra.start + quebra.bars - 2).find(h => h.voice === 'teclado' && h.hit.tone.startsWith('subida'));
+  const riser = show.hitsInBar(parada.start + parada.bars - 2).find(h => h.voice === 'teclado' && h.hit.tone.startsWith('subida'));
   assert.equal(riser.hit.step + Number(riser.hit.tone.split(':')[1]), 16 + 12);
   // the pancadão comes back with everything
-  assert.equal(show.barTimeline(quebra.start + quebra.bars).playing.length, 8);
-  assert.deepEqual(stepsOf(quebra.start + quebra.bars, 'bumbo'), [0, 8]);
+  assert.equal(show.barTimeline(parada.start + parada.bars).playing.length, 8);
+  assert.deepEqual(stepsOf(parada.start + parada.bars, 'bumbo'), [0, 8]);
 });
 
 // Owner limit: a synthesized voice is never one sample repeated unchanged, and all sound is a pure
@@ -234,7 +269,7 @@ test('under the wheel the background keeps the wheel colours at 3:1 or more', ()
   const layer = createBregafunkBackground(),
     { barSeconds } = meterOf(BREGAFUNK);
   const geometry = { width: 400, height: 800, centreX: 200, centreY: 330, scopeRadius: RADIUS, dpr: 1, shapes: [] };
-  for (const id of ['tamborzao', 'drop']) {
+  for (const id of ['passinho', 'drop']) {
     const scene = show.sceneById(id);
     for (let frame = 0; frame < scene.bars * barSeconds * FPS; frame++) {
       const time = scene.start * barSeconds + frame / FPS,

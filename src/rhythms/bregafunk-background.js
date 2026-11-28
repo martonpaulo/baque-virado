@@ -58,7 +58,7 @@ export function createBregafunkBackground() {
       if (h.voice === 'lata') emissions.push({ kind: 'rays', born, angle: angleAt(h.at) });
       else if (h.voice === 'metais') emissions.push({ kind: 'gold', born });
       else if (h.voice === 'tamborzao') emissions.push({ kind: 'leather', born });
-      else if (h.voice === 'chimbal' && sceneId === 'quebra') emissions.push({ kind: 'spark', born, angle: angleAt(h.at) });
+      else if (h.voice === 'chimbal' && sceneId === 'parada') emissions.push({ kind: 'spark', born, angle: angleAt(h.at) });
     }
     if (seen.size > recent.length * 2) for (const key of [...seen].slice(0, seen.size - recent.length)) seen.delete(key);
   }

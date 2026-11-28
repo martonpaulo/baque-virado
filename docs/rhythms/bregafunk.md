@@ -298,3 +298,37 @@ Read with `lab/sections.py pulse` and `map`
   its parts enter one at a time; it is 3 dB over the references under 250 Hz and 4 to 7 dB short
   from 500 Hz to 4 kHz, where the riff is. The first round measured the same from the stems: the
   flute about 13 dB under the bumbo.
+
+### The rewrite (2026-11-28, branch `wip/bregafunk`)
+
+Written from the accepted elements and form above; it is heard by the owner before it reaches
+`main`. What the script is now (`src/rhythms/bregafunk.js`):
+
+- **171 BPM**, 64 bars, 1:30.
+- **The riff**: three notes (lá, mi, si bemol: A Phrygian's tonic, fifth and flat second), two bars
+  long, on the flute. Its second bar leaves its last beat empty, where the lata and, on the drop,
+  the horns answer. The eight-bar tune of the first round is gone; the drop keeps one stuttered bar.
+- **The grave** plays the riff's notes two octaves down: five or six notes a bar, each one or two
+  sixteenths, with the bumbo on 1 and 9, and its last note slides back to the tonic.
+- **The harmony** is the riff's: the stab is the tonic's root, fifth and octave in the first bar and
+  the flat second's bare octave in the second. No chord adds a fourth note to the riff's three but
+  the horns' third.
+- **The form**, nine scenes, each entered as it declares (`leadIn`):
+
+  | Scene         | Bars | What plays                                                                 | How it is entered            |
+  | :------------ | :--- | :------------------------------------------------------------------------- | :--------------------------- |
+  | Tema          | 4    | the riff alone twice, then teased by a palma and the lata                  | the show's first bar         |
+  | Batida        | 4    | the beat whole, without the riff                                           | a pick-up: lata and bumbo    |
+  | Tema e batida | 8    | riff and beat; its last bar is a stop                                      | the beat's fill              |
+  | Grave         | 8    | the grave enters under riff and beat                                       | the drums drop out for a bar |
+  | Parada        | 4    | no bumbo, no grave: palmas, the stab, the rise, a stutter, one silent beat | the beat's fill              |
+  | Pancadão      | 16   | everything, with the horns; a stop in its eighth and its last bar          | the silent beat              |
+  | Respiro       | 4    | the riff and the grave, with one palma a bar                               | the drums drop out           |
+  | Passinho      | 12   | everything, the bumbo doubled; its last bar is a stop                      | a pick-up: lata and bumbo    |
+  | Final         | 4    | the riff alone, then everyone on 1                                         | the drums drop out           |
+
+- **Left out**: the Rio tamborzão scene and the one-instrument-at-a-time opening. The tamborzão's
+  voice, takes and pattern are still in the package, unused, until the owner approves the form.
+- **Not done on this branch**: the show's own graphics
+  ([#57](https://github.com/martonpaulo/batuque/issues/57)), and the mix: the first round measured
+  the flute about 13 dB under the bumbo, and no level was changed here.

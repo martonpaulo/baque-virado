@@ -106,7 +106,7 @@ const COLD_BOUNDARIES = {
   forro: ['triangulo>zabumba', 'zabumba>bacalhau', 'sanfona>baixo', 'rabeca>fole', 'fole>baiao'],
   manguebeat: ['introducao>celula', 'guitarra>dub', 'dub>retorno', 'conversa>corte', 'corte>segunda'],
   brega: ['introducao>base', 'base>baixo', 'guitarra>virada', 'virada>refrao'],
-  bregafunk: ['tema>bumbo', 'bumbo>lata', 'lata>palmas', 'batida>tamborzao', 'tamborzao>quebra', 'quebra>drop'],
+  bregafunk: [], // its round-two script declares every lead-in
 };
 
 test('no show but the maracatu gains a scene that arrives cold on the bar line', () => {
