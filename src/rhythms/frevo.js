@@ -8,6 +8,7 @@ import { label, row, stat, stats } from '../readout-markup.js';
 import { rollReadout } from '../roll.js';
 import { fgAlpha } from '../theme.js';
 import { createFrevoPainter, FREVO_PALETTE } from './frevo-background.js';
+import { createFrevoGraphics, FREVO_GRAPHICS } from './frevo-graphics.js';
 import { sceneStarts, straightMeter } from './meter.js';
 import { recordedChoices, studioSounds, takes } from './studio-kit.js';
 
@@ -66,10 +67,11 @@ const MELODIC = [...METAIS, ...PALHETAS];
 const PITCH_CLASS = { c: 0, d: 2, e: 4, f: 5, g: 7, a: 9, b: 11 };
 const ACCIDENTAL = { b: -1, s: 1, '': 0 };
 const OCTAVE_SEMITONES = 12;
+const NOTE_NAME = /^([a-g])(b|s)?(\d)$/; // a letter, a flat or a sharp, an octave
 const MIDI_OCTAVE_OFFSET = 1;
 /** MIDI number of a note name such as 'bb5', 'fs4' or 'c6'. */
 export function midiOf(name) {
-  const [, letter, accidental, octave] = name.match(/^([a-g])(b|s)?(\d)$/);
+  const [, letter, accidental, octave] = name.match(NOTE_NAME);
   return PITCH_CLASS[letter] + ACCIDENTAL[accidental || ''] + OCTAVE_SEMITONES * (Number(octave) + MIDI_OCTAVE_OFFSET);
 }
 const NAMES = ['c', 'cs', 'd', 'eb', 'e', 'f', 'fs', 'g', 'gs', 'a', 'bb', 'b'];
@@ -423,6 +425,32 @@ SCENE_LIST.forEach((scene, i) => {
   }
 });
 export const FREVO_LINES = LINES;
+
+// The lines as the score and the valves read them (frevo-graphics.js): the notes that sound in each
+// bar, a note held over a bar line in every bar it crosses. `degree`: its place among the seven
+// notes of each octave (C0 is 0), where a staff writes it; `alter`: its flat or sharp.
+const LETTERS = Object.keys(PITCH_CLASS);
+const SOUNDING = Object.fromEntries(MELODIC.map(voice => [voice, new Map()]));
+for (const voice of MELODIC)
+  for (const note of [...LINES[voice].values()].flat()) {
+    const [, letter, accidental = '', octave] = note.note.match(NOTE_NAME),
+      last = note.bar + Math.floor((note.step + note.steps - 1) / STEPS_PER_BAR);
+    for (let bar = note.bar; bar <= last; bar++)
+      SOUNDING[voice].set(bar, [
+        ...(SOUNDING[voice].get(bar) || []),
+        {
+          step: note.step - (bar - note.bar) * STEPS_PER_BAR,
+          steps: note.steps,
+          midi: note.midi,
+          pitch: letter + accidental,
+          degree: LETTERS.indexOf(letter) + LETTERS.length * Number(octave),
+          alter: ACCIDENTAL[accidental],
+        },
+      ]);
+  }
+/** The written notes of a melodic voice that sound in an absolute bar: each { step, steps, midi, pitch, degree, alter }, `step` negative for a note held from a bar before. */
+export const soundingIn = (voice, bar) => SOUNDING[voice].get(bar) || [];
+const KEY_FLATS = 2; // G minor and its relative, B flat major: si and mi
 
 // How each note sounds: its players' notes, which kind of take, how loud. A phrase is louder at its
 // top, an accent louder still, a staccato note and a pad softer; a note followed by another is legato.
@@ -785,6 +813,33 @@ const READ = {
 };
 const COPY = {
   name: 'frevo',
+  // the words of its own graphics (src/rhythms/frevo-graphics.js)
+  graphics: {
+    label:
+      'Partitura: a melodia do frevo em duas pautas de dois compassos, com a nota que soa em destaque e um cursor no ponto em que o show está. Pistos: os três pistos do trompete, abaixados conforme a nota que ele toca, com o nome da nota ao lado.',
+    score: 'melodia',
+    valves: 'trompete em si♭',
+    // each note as a line may write it, with a flat or a sharp
+    notes: {
+      c: 'dó',
+      cs: 'dó♯',
+      db: 'ré♭',
+      d: 'ré',
+      ds: 'ré♯',
+      eb: 'mi♭',
+      e: 'mi',
+      f: 'fá',
+      fs: 'fá♯',
+      gb: 'sol♭',
+      g: 'sol',
+      gs: 'sol♯',
+      ab: 'lá♭',
+      a: 'lá',
+      as: 'lá♯',
+      bb: 'si♭',
+      b: 'si',
+    },
+  },
   description:
     'Frevo lírico em tom menor: surdo, caixa, pandeiro, tuba, saxofones, clarinete, trombones e trompetes, um de cada vez e depois juntos, com som de instrumentos reais.', // the page's search and preview description
   themeColor: FREVO_PALETTE.ground, // the page's theme-color: the rhythm's own ground colour
@@ -931,4 +986,17 @@ export const FREVO = {
   waves: null,
   sounds: studioSounds(STUDIO, SOUND_CHOICES, 'final'), // every instrument plays its part in the final's first bars
   copy: COPY,
+  // its own graphics in the stage's main square: the tune's score and the trompete's valves (#55)
+  graphics: {
+    ids: FREVO_GRAPHICS,
+    create: (element, context) =>
+      createFrevoGraphics(element, {
+        ...context,
+        stepsPerBar: STEPS_PER_BAR,
+        beatsPerBar: BEATS_PER_BAR,
+        tuneIn: bar => soundingIn('sax', bar),
+        trumpetIn: bar => soundingIn('trompete', bar),
+        flats: KEY_FLATS,
+      }),
+  },
 };

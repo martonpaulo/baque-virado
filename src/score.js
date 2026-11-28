@@ -441,3 +441,7 @@ function svg(opts) {
 }
 
 export { svg as renderScore };
+
+/** The shapes another score of the site draws with (the frevo's, src/rhythms/frevo-graphics.js): each is markup around
+ * the staff line at y = `line`, for a staff space of `space`. */
+export const SCORE_SHAPES = { space: S, line: L, flag, rest: restFor, wholeRest };

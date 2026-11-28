@@ -129,7 +129,8 @@ The rules every rhythm package in `src/rhythms/` follows.
   its drum kit ([`rhythms/brega.md`](rhythms/brega.md#visuals)). The manguebeat draws the bass
   tablature on the neck and the echo's copies
   ([`rhythms/manguebeat.md`](rhythms/manguebeat.md#visuals)). The forró draws the sanfona's keys
-  and buttons and the zabumba's two heads ([`rhythms/forro.md`](rhythms/forro.md#visuals)).
+  and buttons and the zabumba's two heads ([`rhythms/forro.md`](rhythms/forro.md#visuals)). The frevo
+  draws the tune's score with a cursor and the trompete's valves ([`frevo.md`](frevo.md#visuals)).
   `tests/rhythms.test.js` lists the shows that still have none; the list only shrinks.
 - **Background.** Circular, coming out of the central wheel, in the rhythm's palette from section 5
   of [`colour-and-visuals.md`](research/colour-and-visuals.md): brega in desaturated blue

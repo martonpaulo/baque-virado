@@ -798,7 +798,10 @@ async function openStill(query) {
 const apart = (a, b) => a.right <= b.left || b.right <= a.left || a.bottom <= b.top || b.bottom <= a.top;
 /** Nothing of the graphic is drawn outside the main circle, the square's inscribed one. */
 async function assertInsideMainCircle(page) {
-  const { square, marks } = await drawnBoxes(page, '#graphic svg text, #graphic svg circle, #graphic svg ellipse, #graphic svg line, #graphic svg rect');
+  const { square, marks } = await drawnBoxes(
+    page,
+    '#graphic svg text, #graphic svg circle, #graphic svg ellipse, #graphic svg line, #graphic svg rect, #graphic svg path',
+  );
   const radius = (square.right - square.left) / 2,
     centre = [square.left + radius, square.top + radius];
   for (const mark of marks) {
@@ -957,8 +960,7 @@ for (const viewport of [PHONES[0], DESKTOP])
     await mangueAt(page, 'segunda', 3 + 13.5 * SIXTEENTH);
     const { marks: numbers } = await drawnBoxes(page, '#graphic [data-step] text');
     assert.ok(numbers.length >= 7, 'the bar of four sixteenths in a row');
-    for (const [i, a] of numbers.entries()) for (const b of numbers.slice(i + 1)) assert.ok(apart(a, b), 'two fret numbers overlap');
-    await assertInsideMainCircle(page);
+    await assertClear(page, numbers, 'fret numbers');
     assert.deepEqual(errors, []);
     await page.close();
   });
@@ -993,6 +995,20 @@ test('with reduced motion the manguebeat lights one copy at a time and nothing f
   await page.close();
 });
 
+/** No two of `boxes` overlap, and nothing of the graphic is outside the main circle. */
+async function assertClear(page, boxes, what) {
+  for (const [i, a] of boxes.entries()) for (const b of boxes.slice(i + 1)) assert.ok(apart(a, b), `two ${what} overlap: «${a.name}» and «${b.name}»`);
+  await assertInsideMainCircle(page);
+}
+/** Reload the page with only `instrument` muted, as the volume a desktop viewer stored; with none, every volume as it was. */
+async function reloadMuted(page, instrument) {
+  await page.evaluate(muted => {
+    for (const key of Object.keys(localStorage)) if (key.startsWith('baque-virado:volume-')) localStorage.removeItem(key);
+    if (muted) localStorage.setItem(`baque-virado:volume-${muted}`, 'mute');
+  }, instrument);
+  await page.reload({ waitUntil: 'load' });
+  await page.waitForFunction(() => window.baque && document.readyState === 'complete');
+}
 // ---------- the forró's own graphics (#54) ----------
 const FORRO_SCENES = scenesOf('forro');
 const STEP = 1 / 8; // a sixteenth of its 2/4 bar
@@ -1067,8 +1083,7 @@ for (const viewport of [PHONES[0], DESKTOP])
     assert.equal(await fillOf(page, '#graphic [data-button="menor-A"]'), '0.900');
     await assertLabelSizes(page);
     const { marks: names } = await drawnBoxes(page, '#graphic text');
-    for (const [i, a] of names.entries()) for (const b of names.slice(i + 1)) assert.ok(apart(a, b), `«${a.name}» and «${b.name}» overlap`);
-    await assertInsideMainCircle(page);
+    await assertClear(page, names, 'names');
     assert.deepEqual(errors, []);
     await page.close();
   });
@@ -1081,23 +1096,118 @@ test('with reduced motion the forró lights a button and a head whole and nothin
   assert.equal(await fillOf(page, '#graphic [data-head="grave"] ellipse'), '0.900');
   assert.deepEqual(await litButtons(page), []); // the bass button's sixteenth has passed: plain, not fading
   // the sanfona muted (the volume a desktop viewer stored): its keys and buttons are dimmed and none lights
-  await page.evaluate(() => localStorage.setItem('baque-virado:volume-sanfona', 'mute'));
-  await page.reload({ waitUntil: 'load' });
-  await page.waitForFunction(() => window.baque && document.readyState === 'complete');
+  await reloadMuted(page, 'sanfona');
   await forroAt(page, 'rabeca', 4 + 0.5 * STEP);
   assert.equal(await page.$eval('#graphic [data-graphic="sanfona"]', group => group.getAttribute('opacity')), '0.38');
   assert.deepEqual([await litKeys(page), await litButtons(page)], [[], []]);
   assert.deepEqual(await litHeads(page), ['grave:aberto']); // the zabumba still plays
-  await page.evaluate(() => localStorage.removeItem('baque-virado:volume-sanfona'));
   // the zabumba muted: its heads are dimmed and none lights
-  await page.evaluate(() => localStorage.setItem('baque-virado:volume-zabumba', 'mute'));
-  await page.reload({ waitUntil: 'load' });
-  await page.waitForFunction(() => window.baque && document.readyState === 'complete');
+  await reloadMuted(page, 'zabumba');
   await forroAt(page, 'trio', 0.2 * STEP);
   assert.equal(await page.$eval('#graphic [data-graphic="zabumba"]', group => group.getAttribute('opacity')), '0.38');
   assert.deepEqual(await litHeads(page), []);
   assert.deepEqual(await litButtons(page), ['baixo-A']);
-  await page.evaluate(() => localStorage.removeItem('baque-virado:volume-zabumba'));
+  assert.deepEqual(errors, []);
+  await page.close();
+});
+
+// ---------- the frevo's own graphics (#55) ----------
+const FREVO_SCENES = scenesOf('frevo');
+const frevoAt = (page, id, offset) => drawAt(page, FREVO_SCENES, id, offset);
+const frevoStart = id => FREVO_SCENES.find(scene => scene.id === id).start;
+const nowNotes = page =>
+  page.$$eval('#graphic [data-now="true"]', notes => notes.map(note => `${note.dataset.bar}:${note.dataset.step}:${note.dataset.degree}`));
+const pressedValves = page => page.$$eval('#graphic [data-valve][data-pressed="true"]', valves => valves.map(valve => Number(valve.dataset.valve)));
+const valveNote = page => page.$eval('#graphic [data-note]', name => name.textContent);
+const cursorOf = page => page.$eval('#graphic [data-cursor]', cursor => [cursor.dataset.staff, Number(cursor.getAttribute('x1'))]);
+const [F_SHARP_4, G4_DEGREE, D5_DEGREE] = [31, 32, 36]; // a note's place among the seven of each octave
+
+for (const viewport of [PHONES[0], DESKTOP])
+  test(`the frevo draws the tune's score and the trompete's valves in the main square, at ${viewport.width} px`, async () => {
+    const { page, errors } = await openPage(viewport, { query: '?ritmo=frevo' });
+    assert.equal(await page.$eval('#stage', stage => stage.classList.contains('has-graphic')), true);
+    assert.match(await page.$eval('#graphic svg', svg => `${svg.getAttribute('role')}: ${svg.getAttribute('aria-label')}`), /^img: Partitura: .*Pistos: /);
+    assert.deepEqual(await page.$$eval('#graphic [data-graphic]', groups => groups.map(group => group.dataset.graphic)), ['partitura', 'pistos']);
+    // a scene with no tune: its four bars are four whole rests, no note is lit and no valve is pressed
+    await frevoAt(page, 'caixa', 0.3);
+    assert.deepEqual(await page.$$eval('#graphic [data-rest]', rests => rests.map(rest => rest.dataset.rest)), ['8', '8', '8', '8']);
+    assert.deepEqual([await nowNotes(page), await pressedValves(page), await valveNote(page)], [[], [], '']);
+    // the tune: the note that sounds is lit, and the cursor is on its staff
+    const palhetas = frevoStart('palhetas');
+    await frevoAt(page, 'palhetas', 1 + 1.5 / 8);
+    assert.deepEqual(await nowNotes(page), [`${palhetas + 1}:0:${D5_DEGREE}`]);
+    assert.equal((await cursorOf(page))[0], '0');
+    // the second staff: a sharp the key lacks is written before its note
+    await frevoAt(page, 'palhetas', 3 + 6.5 / 8);
+    assert.deepEqual(await nowNotes(page), [`${palhetas + 3}:6:${F_SHARP_4}`]);
+    assert.equal(await page.$eval(`#graphic [data-bar="${palhetas + 3}"][data-step="6"]`, note => note.dataset.accidental), '1');
+    assert.equal((await cursorOf(page))[0], '1');
+    // the next page: a note held over the bar line lights on both sides of it
+    await frevoAt(page, 'palhetas', 7 + 1.5 / 8);
+    assert.deepEqual(await nowNotes(page), [`${palhetas + 6}:6:${G4_DEGREE}`, `${palhetas + 7}:0:${G4_DEGREE}`]);
+    assert.deepEqual(
+      await page.$$eval('#graphic [data-bar]', pieces => [...new Set(pieces.map(piece => Number(piece.dataset.bar)))]),
+      [4, 5, 6, 7].map(bar => palhetas + bar),
+    );
+    // the valves: an open note names itself with no valve down; then two valves, then one
+    await frevoAt(page, 'metais', 1 + 2.5 / 8);
+    assert.deepEqual([await pressedValves(page), await valveNote(page)], [[], 'SI♭']);
+    await frevoAt(page, 'metais', 1 + 5.5 / 8);
+    assert.deepEqual([await pressedValves(page), await valveNote(page)], [[1, 2], 'SOL']);
+    await frevoAt(page, 'metais', 3 + 2.5 / 8);
+    assert.deepEqual([await pressedValves(page), await valveNote(page)], [[2], 'LÁ']);
+    await frevoAt(page, 'metais', 3 + 5.5 / 8);
+    assert.deepEqual([await pressedValves(page), await valveNote(page)], [[2, 3], 'FÁ♯']);
+    await assertLabelSizes(page);
+    // the busiest bar of the tune (six notes, two accidentals): no notehead on another, and nothing outside the main circle
+    await frevoAt(page, 'palhetas', 13 + 0.5 / 8);
+    const { marks: heads } = await drawnBoxes(page, '#graphic [data-degree] > ellipse');
+    assert.equal(heads.length, 11); // three, six, and the half note tied to a quarter
+    await assertClear(page, heads, 'noteheads');
+    // no accidental and no rest stands on a sign of another note: on this page, on the one with a rest after a flag
+    // and on the one with a natural after a flag
+    for (const [bar, at] of [
+      [13, 0.5 / 8],
+      [3, 0.5 / 8],
+      [7, 0.5 / 8],
+    ]) {
+      await frevoAt(page, 'palhetas', bar + at);
+      const marks = await page.$$eval('#graphic [data-mark]:not([data-mark=""])', all =>
+        all.map(mark => {
+          const { left, right, top, bottom } = mark.getBoundingClientRect(),
+            piece = mark.closest('[data-step]');
+          return { left, right, top, bottom, kind: mark.dataset.mark, piece: `${piece.dataset.bar}:${piece.dataset.step}` };
+        }),
+      );
+      const signs = marks.filter(mark => mark.kind === 'accidental' || mark.kind === 'rest');
+      assert.ok(signs.length >= 2, `bar ${bar + 1}: only ${signs.length} accidentals and rests on its page`);
+      for (const sign of signs)
+        for (const other of marks.filter(mark => mark.piece !== sign.piece))
+          assert.ok(apart(sign, other), `bar ${bar + 1}: the ${sign.kind} of ${sign.piece} stands on the ${other.kind} of ${other.piece}`);
+    }
+    assert.deepEqual(errors, []);
+    await page.close();
+  });
+
+test('with reduced motion the frevo cursor stands on the note that holds the show, and a muted saxofone or trompete shows disabled', async () => {
+  const { page, errors } = await openStill('?ritmo=frevo');
+  // inside a dotted quarter the cursor does not move
+  await frevoAt(page, 'palhetas', 1 + 0.5 / 8);
+  const [, early] = await cursorOf(page);
+  await frevoAt(page, 'palhetas', 1 + 4.5 / 8);
+  assert.equal((await cursorOf(page))[1], early);
+  await frevoAt(page, 'palhetas', 1 + 6.5 / 8); // the next note
+  assert.ok((await cursorOf(page))[1] > early);
+  // the saxofone muted (the volume a desktop viewer stored): the score is dimmed and no note lights
+  await reloadMuted(page, 'sax');
+  await frevoAt(page, 'palhetas', 1 + 1.5 / 8);
+  assert.equal(await page.$eval('#graphic [data-graphic="partitura"]', group => group.getAttribute('opacity')), '0.38');
+  assert.deepEqual(await nowNotes(page), []);
+  // the trompete muted: its valves are dimmed, none goes down and no name shows
+  await reloadMuted(page, 'trompete');
+  await frevoAt(page, 'metais', 1 + 5.5 / 8);
+  assert.equal(await page.$eval('#graphic [data-graphic="pistos"]', group => group.getAttribute('opacity')), '0.38');
+  assert.deepEqual([await pressedValves(page), await valveNote(page)], [[], '']);
   assert.deepEqual(errors, []);
   await page.close();
 });

@@ -5,8 +5,9 @@ import { existsSync, statSync } from 'node:fs';
 import { test } from 'node:test';
 import { fileURLToPath } from 'node:url';
 import { meterOf } from '../src/music.js';
-import { CAIXA_CELL, FREVO, FREVO_LINES, MAX_BORROW, midiOf, nearestSample, PANDEIRO_BAR } from '../src/rhythms/frevo.js';
+import { CAIXA_CELL, FREVO, FREVO_LINES, MAX_BORROW, midiOf, nearestSample, PANDEIRO_BAR, soundingIn } from '../src/rhythms/frevo.js';
 import { FREVO_PALETTE } from '../src/rhythms/frevo-background.js';
+import { BARS_PER_PAGE, barLayout, barPieces, FREVO_GRAPHICS, spell, valvesFor, withAccidentals } from '../src/rhythms/frevo-graphics.js';
 import { createShow } from '../src/show.js';
 import { planStudio } from '../src/studio.js';
 import { COLORS } from '../src/theme.js';
@@ -155,4 +156,130 @@ test('each voice reads at 3:1 on the wheel, and no red passes R/(R+G+B) 0.8', ()
     const [r, g, b] = [1, 3, 5].map(i => parseInt(hex.slice(i, i + 2), 16));
     assert.ok(r / (r + g + b) < 0.8, hex);
   }
+});
+
+// ---------- its own graphics: the tune's score and the trompete's valves (#55) ----------
+const STEPS_PER_BAR = 8;
+const startOf = id => show.sceneById(id).start;
+const [G4, B4, D5] = [32, 34, 36]; // degrees: a note's place among the seven of each octave, as a staff writes it
+/** A bar's pieces as short text: `34b:1` a B flat of one sixteenth, `r4` a rest, `~` a tie on that side. */
+const written = bar =>
+  barPieces(soundingIn('sax', bar), STEPS_PER_BAR).map(piece =>
+    piece.rest
+      ? `r${piece.steps}`
+      : `${piece.tiedFrom ? '~' : ''}${piece.degree}${{ '-1': 'b', 0: '', 1: 's' }[piece.alter]}:${piece.steps}${piece.tiedTo ? '~' : ''}`,
+  );
+
+test('a length is written with the fewest note values, and a bar as its notes, ties and rests', () => {
+  assert.deepEqual(FREVO.graphics.ids, FREVO_GRAPHICS);
+  assert.deepEqual(
+    [1, 2, 3, 4, 5, 6, 7, 8].map(steps => spell(steps)),
+    [[1], [2], [3], [4], [4, 1], [6], [6, 1], [8]],
+  );
+  // a bar with nothing is one rest of the whole bar; a gap inside a bar is never a dotted rest
+  assert.deepEqual(barPieces([], STEPS_PER_BAR), [{ step: 0, steps: STEPS_PER_BAR, rest: true }]);
+  assert.deepEqual(
+    barPieces([{ step: 7, steps: 1, degree: G4, alter: 0 }], STEPS_PER_BAR).map(piece => [piece.step, piece.steps, piece.rest]),
+    [
+      [0, 4, true],
+      [4, 2, true],
+      [6, 1, true],
+      [7, 1, false],
+    ],
+  );
+  // five sixteenths are a quarter tied to a sixteenth, and both light as the one note they write
+  const five = barPieces([{ step: 0, steps: 5, degree: D5, alter: 0 }], STEPS_PER_BAR);
+  assert.deepEqual(
+    five.map(piece => [piece.steps, piece.rest, piece.tiedFrom ?? null, piece.tiedTo ?? null]),
+    [
+      [4, false, false, true],
+      [1, false, true, false],
+      [2, true, null, null],
+      [1, true, null, null],
+    ],
+  );
+  assert.deepEqual(
+    [five[0].sounds, five[1].sounds],
+    [
+      [0, 5],
+      [0, 5],
+    ],
+  );
+});
+
+test('the score writes the tune as the package wrote it: values, accidentals and notes held over a bar line', () => {
+  const palhetas = startOf('palhetas');
+  // «d5 - - - - - c5 bb4»: a dotted quarter and two sixteenths; the B is flat, as the key has it
+  assert.deepEqual(written(palhetas + 1), ['36:6', '35:1', '34b:1']);
+  // «bb4 - - a4 - - g4 -» then «- - - - . g4 b4 d5»: 3 + 3 + 2, the last note tied over the bar line,
+  // a sixteenth's rest, and a B natural the key lacks
+  assert.deepEqual(written(palhetas + 6), ['34b:3', '33:3', '32:2~']);
+  assert.deepEqual(written(palhetas + 7), ['~32:4', 'r1', '32:1', '34:1', '36:1']);
+  assert.equal(B4, 34);
+  // the part's last note: a half, tied to a quarter in the bar after it, then a quarter's rest
+  assert.deepEqual(written(palhetas + 14), ['32:8~']);
+  assert.deepEqual(written(palhetas + 15), ['~32:4', 'r4']);
+  // a scene with no tune: every bar is one whole rest
+  assert.deepEqual(written(startOf('caixa')), ['r8']);
+  // every bar of the show fills its bar, piece after piece, and pages of four bars fill every scene
+  for (let bar = 0; bar < show.TOTAL_BARS; bar++) {
+    let at = 0;
+    for (const piece of barPieces(soundingIn('sax', bar), STEPS_PER_BAR)) {
+      assert.equal(piece.step, at, `bar ${bar}: a piece at ${piece.step}, after ${at}`);
+      at += piece.steps;
+    }
+    assert.equal(at, STEPS_PER_BAR, `bar ${bar} holds ${at} sixteenths`);
+  }
+  for (const scene of show.SCENES) assert.equal(scene.bars % BARS_PER_PAGE, 0, `${scene.id}: ${scene.bars} bars`);
+});
+
+test('every note of the tune and of the trompete sounds where it is written, and every trompete note has its valves', () => {
+  let blown = 0;
+  for (let bar = 0; bar < show.TOTAL_BARS; bar++) {
+    for (const voice of ['sax', 'trompete'])
+      assert.deepEqual(
+        soundingIn(voice, bar)
+          .filter(note => note.step >= 0)
+          .map(note => note.step),
+        show
+          .hitsInBar(bar)
+          .filter(h => h.voice === voice)
+          .map(h => h.hit.step),
+        `${voice} in bar ${bar}`,
+      );
+    for (const note of soundingIn('trompete', bar)) {
+      blown++;
+      assert.ok(valvesFor(note.midi) !== null, `bar ${bar}: no fingering for MIDI ${note.midi}`);
+      assert.ok(FREVO.copy.graphics.notes[note.pitch], `bar ${bar}: no name for «${note.pitch}»`);
+    }
+  }
+  assert.ok(blown > 60, `the trompete plays only ${blown} notes`);
+  // a B flat trumpet sounds a tone under its written note: a sounding B flat is its open C
+  assert.deepEqual(valvesFor(midiOf('bb4')), []);
+  assert.deepEqual(valvesFor(midiOf('a4')), [2]); // written B
+  assert.deepEqual(valvesFor(midiOf('g5')), [1, 2]); // written A
+  assert.deepEqual(valvesFor(midiOf('fs5')), [2, 3]); // written G sharp
+  assert.deepEqual(valvesFor(midiOf('c6')), [1]); // written D
+  assert.deepEqual(valvesFor(midiOf('e3')), [1, 2, 3]); // written F sharp, its lowest note
+  assert.equal(valvesFor(midiOf('eb3')), null);
+});
+
+test('a note shows its accidental where it leaves the key or returns to it, and a bar gives a sign the room it needs', () => {
+  const FLATS = [6, 2], // the key's si and mi, as letters from dó
+    palhetas = startOf('palhetas'),
+    shown = bar => withAccidentals(barPieces(soundingIn('sax', bar), STEPS_PER_BAR), FLATS);
+  const signs = bar => shown(bar).map(piece => (piece.rest ? 'r' : piece.accidental));
+  // «a4 - cs5 e5 d5 - c5 a4»: a sharp, the natural the key's mi flat needs, and the natural that takes the sharp back
+  assert.deepEqual(signs(palhetas + 13), [null, 1, 0, null, 0, null]);
+  // a note tied over the bar line shows no sign again; the si natural after it does
+  assert.deepEqual(signs(palhetas + 7), [null, 'r', null, 0, null]);
+  // a bar with no sign next to a neighbour, and no flag before its bar line, is spaced evenly
+  const even = barLayout(shown(palhetas + 1), STEPS_PER_BAR);
+  for (const [step, middle] of even.entries()) assert.ok(Math.abs(middle - (step + 1 / 2) / STEPS_PER_BAR) < 1e-9, `step ${step} at ${middle}`);
+  // «- - - - . g4 b4 d5»: the natural stands after a sixteenth whose flags reach right, so its sixteenth is wider
+  const wide = barLayout(shown(palhetas + 7), STEPS_PER_BAR),
+    gaps = wide.slice(1).map((middle, step) => middle - wide[step]);
+  assert.ok(gaps[5] > 1.7 * gaps[0] && gaps[5] < 1.8 * gaps[0], `the natural's sixteenth is ${(gaps[5] / gaps[0]).toFixed(2)} of a plain one`);
+  for (const step of [0, 1, 2, 3, 4, 6]) assert.ok(Math.abs(gaps[step] - gaps[0]) < 1e-9, `step ${step}`);
+  assert.ok(wide[STEPS_PER_BAR - 1] < 1, 'the last note stands inside its bar');
 });

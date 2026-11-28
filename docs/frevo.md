@@ -138,6 +138,38 @@ The bambeando and the Alto da Sé stay, inside the tune; the fotografia stays as
   R/(R+G+B) 0.8.
 - The engine change this needed: a rhythm may give `background.create`; the maracatu keeps its
   kaleidoscope and feedback tunnel unchanged.
+- **Graphics of its own** ([#55](https://github.com/martonpaulo/batuque/issues/55),
+  [`frevo-graphics.js`](../src/rhythms/frevo-graphics.js)), in the stage's main square, with the
+  wheel smaller beside the readout:
+  - **Partitura.** The tune, the saxofones' line, as a score: four bars a page on two staves of
+    two bars, each with the treble clef and the key's two flats, the first with the 2/4. A note is
+    written with its value (half, dotted quarter, quarter, dotted eighth, eighth, sixteenth, with
+    flags and no beams), a tie where it is held over a bar line or needs two values (five
+    sixteenths are a quarter tied to a sixteenth), its accidental where it leaves the key or
+    returns to it inside a bar, and rests where the tune breathes; a rest is never dotted, and a
+    bar with no note is one whole rest. The 3 + 3 + 2 is written as two dotted eighths and an
+    eighth. A bar is spaced by its sixteenths, and a sixteenth is wider where the sign on it needs
+    room before it: an accidental or a rest right after a sixteenth, more after one whose flags
+    reach right, and a flag before the bar line (`barLayout`); the cursor and the band follow the
+    same places. The note that sounds is at full strength over a band of the saxofone's green as long
+    as the note, with every piece it is tied to; a cursor in the interface's accent stands at the
+    show's place. A scene where the tune does not play shows its bars as rests. A page starts at
+    a scene's first bar; every scene is a whole number of pages (`tests/frevo.test.js`).
+  - **Pistos.** The trompete's three valves, each a casing with its number and its button, under
+    the label «trompete em si♭», which says why the name and the fingering differ. For
+    the note the trompete plays now, the valves of a B flat trumpet's fingering go down and their
+    casings fill with its gold, and the note's name stands beside them as it sounds (a sounding
+    si bemol is the open trumpet, since the instrument sounds a tone under its written note).
+    With no note the three are up and no name shows.
+  - Both read the show position alone, from the package's written lines (`soundingIn`). With
+    reduced motion the cursor stands on the note or rest that holds the position and moves only
+    when the next one starts. A muted saxofone dims the score and lights no note; a muted
+    trompete dims the valves and presses none.
+  - The score stands across the middle of the square, within about 42 units of its centre, inside
+    the ring the sombrinhas turn on. Its flag and rests are the percussion score's own shapes
+    (`SCORE_SHAPES` in [`score.js`](../src/score.js)); the clef, the accidentals and the ties are
+    drawn here. Every text is at least the stage's label size, no notehead stands on another and
+    nothing is drawn outside the main circle (`tests/page.test.js`).
 
 ## Widgets per scene
 
