@@ -4,7 +4,7 @@
 import { visualOf } from './audio.js';
 import { COPY } from './copy.js';
 import { BAR_SECONDS, isHand, isOffbeat, STEPS_PER_BAR, STEPS_PER_BEAT, VOICE_ORDER, VOICES } from './music.js';
-import { barTimeline, blendAt, hitsInBar, sceneAt } from './show.js';
+import { barTimeline, blendAt, hitsInBar, sceneAt, TOTAL_BARS } from './show.js';
 import { COLORS, fgAlpha, MONO_FONT } from './theme.js';
 import { lerp } from './util.js';
 
@@ -59,6 +59,7 @@ const MUTED_LABEL_ALPHA = 0.45, // a silent voice keeps its colour, fainter, so 
 const COUNT_COLOR = fgAlpha(COUNT_ALPHA);
 const INSTRUMENT_LINE = 0.6; // a hand's label: the instrument ("ALFAIA") over the hand, this many font sizes up and down
 const NO_COUNT = '—'; // count shown for a silent voice
+const HALF_PIXEL = 0.5; // CSS px: a canvas shorter than its whole height by more than this gave a line to the key
 const PLAYHEAD_WIDTH = 1.6; // CSS px
 const PLAYHEAD_OVERHANG = 4; // CSS px above and below the rows
 
@@ -95,23 +96,41 @@ export function keyVoices(bar, volume = {}) {
   return VOICE_ORDER.filter(voice => VOICES[voice].ring && voices[voice].length > 0 && !rows.has(voice) && visualOf(volume, voice) > 0);
 }
 
-/** The key line: one `● name` per voice from `keyVoices`, in the voice's colour. */
+/**
+ * The key: one `● name` per voice from `keyVoices`, in the voice's colour, on the lines its names
+ * need. Every key of the show is laid out unseen in the same box (styles.css `.key`), so the box is
+ * always as tall as the show's tallest key and the lanes under it keep their height from scene to
+ * scene (#61).
+ */
 export function createKey(element, volume = {}) {
-  let shown = null;
+  /** One key's names; `levelOf` gives a voice's strength, so a muted voice's name shows disabled. */
+  const line = (voices, levelOf) => {
+    const names = document.createElement('span');
+    for (const voice of voices) {
+      const name = document.createElement('span');
+      name.style.color = VOICES[voice].color;
+      name.style.opacity = levelOf(voice);
+      name.textContent = `● ${COPY.voices[voice]}`;
+      if (names.firstChild) names.append(' '); // where a line may break
+      names.append(name);
+    }
+    return names;
+  };
+  // every voice at full strength: a volume can only take a name out of a key
+  const keys = new Map(Array.from({ length: TOTAL_BARS }, (_, bar) => keyVoices(bar)).map(voices => [voices.join(), voices]));
+  element.textContent = '';
+  for (const voices of keys.values()) element.appendChild(line(voices, () => 1)).setAttribute('aria-hidden', 'true');
+  let inView = element.appendChild(line([])),
+    shown = '';
   return {
     update(bar) {
       const voices = keyVoices(bar, volume),
         id = voices.map(voice => `${voice}:${visualOf(volume, voice)}`).join();
       if (id === shown) return;
       shown = id;
-      element.textContent = '';
-      for (const voice of voices) {
-        const item = document.createElement('span');
-        item.style.color = VOICES[voice].color;
-        item.style.opacity = visualOf(volume, voice); // a muted voice's name shows disabled
-        item.textContent = `● ${COPY.voices[voice]}`;
-        element.appendChild(item);
-      }
+      const next = line(voices, voice => visualOf(volume, voice));
+      inView.replaceWith(next);
+      inView = next;
     },
   };
 }
@@ -121,6 +140,7 @@ export function createLanes(canvas, volume = {}) {
   const ctx = canvas.getContext('2d');
   let width = 0,
     height = 0,
+    labelHeight = 0, // the height the names are sized for
     dpr = 1;
 
   function drawGrid(start, toX, plotLeft, plotRight, sixteenthWidth, top, bottom) {
@@ -187,7 +207,7 @@ export function createLanes(canvas, volume = {}) {
       toX = bars => plotLeft + ((bars - start) / WINDOW_BARS) * plotWidth;
 
     ctx.clearRect(0, 0, width, height);
-    const fontSize = Math.round(Math.min(lerp(layoutFrom.rowHeight, layoutTo.rowHeight, amount) * LABEL_SIZE, height * LABEL_MAX_SIZE));
+    const fontSize = Math.round(Math.min(lerp(layoutFrom.rowHeight, layoutTo.rowHeight, amount) * LABEL_SIZE, labelHeight * LABEL_MAX_SIZE));
     ctx.font = `${fontSize}px ${MONO_FONT}`;
     ctx.textBaseline = 'middle';
     drawGrid(start, toX, plotLeft, plotRight, sixteenthWidth, top, bottom);
@@ -234,9 +254,15 @@ export function createLanes(canvas, volume = {}) {
     draw,
     resize(pixelRatio) {
       dpr = pixelRatio;
-      const box = canvas.getBoundingClientRect();
+      const box = canvas.getBoundingClientRect(),
+        style = getComputedStyle(canvas);
       width = canvas.width = Math.round(box.width * dpr);
       height = canvas.height = Math.round(box.height * dpr);
+      // Where the stage has no room for a second line of the colour key, the canvas gives that line
+      // up (styles.css .lanes): the names keep the size of its whole height, its flex basis, here in
+      // the box's own pixels whatever the stage's zoom (#61).
+      const whole = (parseFloat(style.flexBasis) * box.width) / parseFloat(style.width);
+      labelHeight = whole - box.height > HALF_PIXEL ? Math.round(whole * dpr) : height;
     },
   };
 }

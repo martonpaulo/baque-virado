@@ -49,7 +49,8 @@ $('scope').setAttribute('aria-label', COPY.wheel); // the rhythm's own number of
 const readout = createReadout($('read'), volume);
 const title = createTitle($('head'));
 const background = createBackground($('fx'), $('bg'));
-const lanes = createLanes($('lanes'), volume);
+const lanesCanvas = $('lanes');
+const lanes = createLanes(lanesCanvas, volume);
 // A rhythm's own graphic takes the main square, and the wheel sits smaller beside the readout (#49).
 // It reads what sounds from the engine's timeline (`hitsInBar`), the one source of hit timing.
 const labelPixels = () => parseFloat(getComputedStyle($('hBar').parentElement.parentElement).fontSize); // the HUD's: the stage's label size
@@ -60,10 +61,21 @@ const key = createKey($('key'), volume);
 
 // ---------- sizes ----------
 let measuredSize = ''; // the stage size and the wheel's place the canvases were last sized for
-// The wheel's place is part of the key: on a phone the column's padding follows the safe-area inset,
-// which changes when the browser's bars hide, and that moves the wheel without resizing the stage.
-const sizeKey = (box, wheel) =>
-  [box.width, box.height, wheel.left - box.left + wheel.width / 2, wheel.top - box.top + wheel.height / 2].map(value => value.toFixed(2)).join('x');
+// The main square's place is part of the key: on a phone the column's padding follows the safe-area
+// inset, which changes when the browser's bars hide, and that moves the square without resizing the
+// stage. So is the lanes' height: the colour key over them is as tall as its text needs (#61).
+const sizeKey = box => {
+  const square = mainSquare.getBoundingClientRect();
+  return [
+    box.width,
+    box.height,
+    square.left - box.left + square.width / 2,
+    square.top - box.top + square.height / 2,
+    lanesCanvas.getBoundingClientRect().height,
+  ]
+    .map(value => value.toFixed(2))
+    .join('x');
+};
 function measure() {
   const device = window.devicePixelRatio || 1,
     dpr = Math.min(MAX_DPR, device);
@@ -72,7 +84,7 @@ function measure() {
   const feedback = clock.exporting ? dpr : device * FEEDBACK_DEVICE_SCALE;
   const box = stage.getBoundingClientRect(),
     wheel = mainSquare.getBoundingClientRect();
-  measuredSize = sizeKey(box, wheel);
+  measuredSize = sizeKey(box);
   background.resize({
     width: Math.round(box.width * feedback),
     height: Math.round(box.height * feedback),
@@ -363,13 +375,14 @@ const stageColumn = stage.querySelector('.inner');
 const stageObserver = new ResizeObserver(() => {
   fitStage();
   const box = stage.getBoundingClientRect();
-  if (!box.width || !box.height || sizeKey(box, $('scopeBox').getBoundingClientRect()) === measuredSize) return;
+  if (!box.width || !box.height || sizeKey(box) === measuredSize) return;
   measure();
   title.fit();
   render(position, true);
 });
 stageObserver.observe(stage.parentElement);
 stageObserver.observe(stageColumn); // its content box changes with its padding
+stageObserver.observe(lanesCanvas); // its height changes with the colour key's lines
 document.fonts?.ready.then(() => title.fit());
 measure();
 render(0, true);

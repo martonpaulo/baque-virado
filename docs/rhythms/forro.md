@@ -141,7 +141,8 @@ The zabumba leads the timing; the triângulo's off-beat sixteenths sit about 10 
   eighth of the screen's width and height is 0.004 per frame, far below the 0.10 of a flash.
 - **Only what sounds.** The wheel draws only the voices the scene plays, with no ghost of the ones
   to come (the maracatu draws them faint): the parts enter one by one on the wheel too, and the key
-  over the lanes, one line, names at most six voices; nine names did not fit a phone's width.
+  over the lanes names at most six voices, on two lines at most
+  ([#61](https://github.com/martonpaulo/batuque/issues/61)).
 - **Graphics of its own** ([#54](https://github.com/martonpaulo/batuque/issues/54),
   [`forro-graphics.js`](../../src/rhythms/forro-graphics.js)), in the stage's main square, with
   the wheel smaller beside the readout:

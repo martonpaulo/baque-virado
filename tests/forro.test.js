@@ -190,9 +190,9 @@ test('the sanfona plays recorded notes at most two semitones away, and the cavaq
   assert.ok(down.strum > 0 && up.strum > 0);
 });
 
-// The key over the lanes names, on one line, each wheel voice the lanes do not show (src/lanes.js
-// keyVoices); at 393 px six names fit. A voice the scene does not play draws nothing.
-test('only the voices a scene plays reach the wheel, so the key fits one line', () => {
+// The key over the lanes names each wheel voice the lanes do not show (src/lanes.js keyVoices): at
+// most six in this show, on two lines at most. A voice the scene does not play draws nothing.
+test('only the voices a scene plays reach the wheel, so the key names six voices at most', () => {
   const MAX_KEY_NAMES = 6;
   for (let bar = 0; bar < show.TOTAL_BARS; bar++) {
     const { scene, playing, voices } = show.barTimeline(bar);

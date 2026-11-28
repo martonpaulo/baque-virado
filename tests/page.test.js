@@ -49,10 +49,20 @@ after(async () => {
 /**
  * A fresh page on the site. Every request must stay on the local server. `errors` collects page
  * errors and console errors; `contexts()` counts the audio contexts the page opened. `videoExport`
- * sets the class tools/export-video.mjs sets.
+ * sets the class tools/export-video.mjs sets. `still` gives a page that draws only when asked: reduced
+ * motion, and no WebGL, as on a device without it. For a test that measures the layout of many pages:
+ * the software renderer takes seconds to compile the kaleidoscope and to draw a moving background at
+ * a desktop's size.
  */
-async function openPage(viewport, { delaySounds = false, videoExport = false, query = '', registry = null } = {}) {
+async function openPage(viewport, { delaySounds = false, videoExport = false, query = '', registry = null, still = false } = {}) {
   const page = await session.browser.newPage();
+  if (still)
+    await page.evaluateOnNewDocument(() => {
+      const getContext = HTMLCanvasElement.prototype.getContext;
+      HTMLCanvasElement.prototype.getContext = function (kind, ...rest) {
+        return kind === 'webgl' ? null : getContext.call(this, kind, ...rest);
+      };
+    });
   // the same hook tools/export-video.mjs installs
   if (videoExport) await page.evaluateOnNewDocument(() => addEventListener('DOMContentLoaded', () => document.documentElement.classList.add('video-export')));
   const errors = [];
@@ -89,7 +99,7 @@ async function openPage(viewport, { delaySounds = false, videoExport = false, qu
   await page.setViewport(viewport);
   // Headless Chrome takes the machine's own Reduce Motion setting, which the owner's Mac has on and
   // CI has off: every page test states the setting, so both run the same page.
-  await page.emulateMediaFeatures([{ name: 'prefers-reduced-motion', value: 'no-preference' }]);
+  await page.emulateMediaFeatures([{ name: 'prefers-reduced-motion', value: still ? 'reduce' : 'no-preference' }]);
   await page.goto(session.server.url + query, { waitUntil: 'load' });
   // `?ritmo=<id>` of a rhythm path reloads the page there: wait for the page at the final address
   const path = redirectFor(query, REGISTRY_ROUTES[registry]) ?? '/';
@@ -384,27 +394,173 @@ test('the colour key fits on one line and the lanes name the alfaia hands', asyn
   }
 });
 
-// #15: a resize blip (0x0, then the same size) during an export must not re-measure: that clears
-// the canvases and drops the background trail.
-test('a resize blip during an export leaves the background unchanged', async () => {
-  const { page, errors } = await openPage(DESKTOP);
-  const [before, after] = await page.evaluate(async () => {
-    const frame = () => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
-    const step = 1 / 30 / window.baque.BAR;
-    for (let i = 0; i < 30; i++) window.baque.render(20 + i * step); // a trail builds up
-    const bg = document.getElementById('bg');
-    const snapshot = bg.toDataURL();
-    const stage = document.getElementById('stage');
-    stage.style.display = 'none';
-    await frame();
-    stage.style.display = '';
-    await frame();
-    return [snapshot, bg.toDataURL()];
-  });
-  assert.ok(before === after, 'the background canvas changed after the blip');
+// ---------- every show, at a phone's, a desktop's and a large desktop's size (#59, #61, #62) ----------
+const STAGE_SIZES = [PHONES[0], DESKTOP, { width: 1920, height: 1200 }];
+
+/** In the page: every key of the show, each measured once. */
+function keyInPage(scenes) {
+  const key = document.getElementById('key'),
+    canvas = document.getElementById('lanes'),
+    inner = document.querySelector('.inner');
+  const problems = new Set(),
+    heights = new Set(),
+    measured = new Set();
+  let most = 0,
+    nameSize = 0; // the largest the lanes' names are drawn, in the canvas's pixels
+  for (const scene of scenes)
+    for (let bar = scene.start; bar < scene.start + scene.bars; bar++) {
+      window.baque.render(bar + 0.5);
+      nameSize = Math.max(nameSize, parseFloat(canvas.getContext('2d').font));
+      // reading a box lays the page out, and a show has a hundred bars: a key is measured once
+      if (measured.has(key.textContent)) continue;
+      measured.add(key.textContent);
+      const box = key.getBoundingClientRect();
+      // a name: a part of the key with text of its own, in view
+      const names = [...key.querySelectorAll('span')].filter(
+        part => part.textContent && !part.firstElementChild && getComputedStyle(part).visibility === 'visible',
+      );
+      most = Math.max(most, names.length);
+      for (const name of names) {
+        const at = name.getBoundingClientRect();
+        if (at.right > box.right + 0.5 || at.bottom > box.bottom + 0.5) problems.add(`${scene.id}: «${name.textContent}» is cut`);
+      }
+      if (key.scrollWidth > key.clientWidth) problems.add(`${scene.id}: the key is wider than its box`);
+      if (inner.scrollHeight > inner.clientHeight) problems.add(`${scene.id}: the stage content overflows`);
+      heights.add(canvas.getBoundingClientRect().height.toFixed(1));
+    }
+  if (heights.size > 1) problems.add(`the lanes change height through the show: ${[...heights].join(', ')} px`);
+  const lines = Math.round(key.offsetHeight / parseFloat(getComputedStyle(key).lineHeight)); // both before the desktop zoom
+  return { problems: [...problems], most, lines, nameSize };
+}
+
+// One pass serves every test under it that measures each show, on one page a show: opening a page is
+// what takes the time, and a window that changes size lays the stage out as a fresh load does (the
+// test of the desktop breakpoint, below). Each page is still (openPage): a test asks for the positions it measures.
+const STAGE_CHECKS = { key: keyInPage };
+let everyStage;
+/** What each check of STAGE_CHECKS found in every show's page at every size of STAGE_SIZES, as `{ where, found }`. */
+async function measureEveryStage() {
+  const results = [];
+  for (const rhythm of RHYTHMS) {
+    const scenes = createShow(rhythm).SCENES.map(({ id, start, bars }) => ({ id, start, bars }));
+    const { page, errors } = await openPage(STAGE_SIZES[0], { query: `?ritmo=${rhythm.id}`, still: true });
+    for (const viewport of STAGE_SIZES) {
+      await page.setViewport(viewport);
+      // two frames: the stage is laid out and its canvases are measured for the new size
+      await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
+      const found = { stage: await page.$eval('#stage', stage => Math.round(stage.getBoundingClientRect().width)) };
+      for (const [check, inPage] of Object.entries(STAGE_CHECKS)) found[check] = await page.evaluate(inPage, scenes);
+      results.push({ where: `${rhythm.id} ${viewport.width}x${viewport.height}`, found });
+    }
+    assert.deepEqual(errors, []);
+    await page.close();
+  }
+  // the three sizes gave three stages: a phone's width, and a desktop's column at two zooms
+  for (let i = 0; i < results.length; i += STAGE_SIZES.length)
+    assert.equal(new Set(results.slice(i, i + STAGE_SIZES.length).map(({ found }) => found.stage)).size, STAGE_SIZES.length, results[i].where);
+  return results;
+}
+/** One check's findings in every show and size, and its problems as lines that name the show and the size. */
+async function stageCheck(check) {
+  everyStage ??= measureEveryStage();
+  const results = (await everyStage).map(({ where, found }) => ({ where, ...found[check] }));
+  return { results, problems: results.flatMap(({ where, problems }) => problems.map(problem => `${where} ${problem}`)) };
+}
+
+// #61: a scene names up to ten voices in the key (the coco), more than one line holds, and the last
+// names were cut at the stage's right edge. The key takes the lines its names need, and its box is as
+// tall as the show's tallest key in every scene, so the lanes under it keep one height.
+test('no name of the colour key is cut in any scene of any show, and the lanes keep their height', async () => {
+  const { results, problems } = await stageCheck('key');
+  assert.deepEqual(problems, []);
+  assert.ok(Math.max(...results.map(({ most }) => most)) >= 10, 'a show names ten voices in its key'); // the coco: the test reads the names
+  // two lines hold the longest key; a third would take the lanes' own room
+  assert.deepEqual(
+    results.filter(({ lines }) => lines > 2).map(({ where, lines }) => `${where}: ${lines} lines`),
+    [],
+  );
+  // a key of two lines takes nothing from the lanes' names: at each size they are as large in every
+  // show as in the maracatu, whose key is one line
+  const sizes = Object.groupBy(results, ({ where }) => where.split(' ')[1]);
+  for (const [size, shows] of Object.entries(sizes)) {
+    const maracatu = shows.find(({ where }) => where.startsWith('maracatu '));
+    assert.equal(maracatu.lines, 1, `${size}: the maracatu's key is one line`);
+    assert.deepEqual(
+      shows.filter(({ nameSize }) => nameSize !== maracatu.nameSize).map(({ where, nameSize }) => `${where}: ${nameSize} px, not ${maracatu.nameSize}`),
+      [],
+    );
+  }
+});
+
+// #61: the video export has the reel's own layout, with less room between the key's names; the
+// coco's ten names take two lines there too.
+test('the video export cuts no name of the colour key', async () => {
+  const coco = RHYTHMS.find(rhythm => rhythm.id === 'coco');
+  const { page, errors } = await openPage(EXPORT_FRAME, { query: '?ritmo=coco', videoExport: true, still: true });
+  const scenes = createShow(coco).SCENES.map(({ id, start, bars }) => ({ id, start, bars }));
+  const { problems, most, lines } = await page.evaluate(keyInPage, scenes);
+  assert.deepEqual(problems, []);
+  assert.deepEqual([most, lines], [10, 2]); // its ten names, on two lines
   assert.deepEqual(errors, []);
   await page.close();
 });
+
+// #61: the key's height follows its text, so the lanes canvas can change height with no stage resize
+// (a font that arrives late, on a stage with no room for the key's second line): the canvas is then
+// measured again, never drawn stretched.
+test('a lanes canvas that changes height is measured again', async () => {
+  const { page, errors } = await openPage(PHONES[0], { query: '?ritmo=coco' });
+  const sizes = () =>
+    page.evaluate(async () => {
+      for (let i = 0; i < 3; i++) await new Promise(resolve => requestAnimationFrame(resolve));
+      const canvas = document.getElementById('lanes');
+      return [canvas.height, Math.round(canvas.getBoundingClientRect().height * Math.min(2, devicePixelRatio))]; // MAX_DPR in src/main.js
+    });
+  const [before, boxBefore] = await sizes();
+  assert.equal(before, boxBefore);
+  await page.evaluate(() => {
+    document.getElementById('lanes').style.flexBasis = '40px'; // the canvas gives height up, as it does to a second line of the key
+  });
+  const [after, boxAfter] = await sizes();
+  assert.ok(boxAfter < boxBefore, 'the canvas is shorter');
+  assert.equal(after, boxAfter);
+  assert.deepEqual(errors, []);
+  await page.close();
+});
+
+// #15: a resize blip (0x0, then the same size) during an export must not re-measure: that clears
+// the canvases and drops the background trail. In a show with a graphic of its own too, where the
+// main square the canvases are measured for is the graphic, not the wheel: its backdrop draws the
+// same picture again, so a mark on the lanes canvas shows whether the canvases were sized again.
+for (const [show, query] of [
+  ['the maracatu', ''],
+  ['a show with its own graphic', '?ritmo=forro'],
+])
+  test(`a resize blip during an export leaves the background unchanged, in ${show}`, async () => {
+    const { page, errors } = await openPage(DESKTOP, { query });
+    const { before, after, mark } = await page.evaluate(async () => {
+      const frame = () => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+      const step = 1 / 30 / window.baque.BAR;
+      for (let i = 0; i < 30; i++) window.baque.render(20 + i * step); // a trail builds up
+      const bg = document.getElementById('bg'),
+        lanes = document.getElementById('lanes').getContext('2d');
+      lanes.save();
+      lanes.fillStyle = '#010203';
+      lanes.fillRect(0, 0, 1, 1);
+      lanes.restore();
+      const snapshot = bg.toDataURL();
+      const stage = document.getElementById('stage');
+      stage.style.display = 'none';
+      await frame();
+      stage.style.display = '';
+      await frame();
+      return { before: snapshot, after: bg.toDataURL(), mark: [...lanes.getImageData(0, 0, 1, 1).data].join() };
+    });
+    assert.ok(before === after, 'the background canvas changed after the blip');
+    assert.equal(mark, '1,2,3,255', 'the lanes canvas was sized again after the blip');
+    assert.deepEqual(errors, []);
+    await page.close();
+  });
 
 test('a real stage resize still re-measures the canvases', async () => {
   const { page, errors } = await openPage(DESKTOP);
