@@ -5,7 +5,7 @@ import { existsSync, readFileSync, statSync } from 'node:fs';
 import { test } from 'node:test';
 import { fileURLToPath } from 'node:url';
 import { meterOf } from '../src/music.js';
-import { ATABAQUES, CLEAR, COCO_PALETTE, COCO_XAMBA, createCocoPainter, GOLPE, MIN_FLASH_GAP, RUFADA } from '../src/rhythms/coco-xamba.js';
+import { ATABAQUES, CANDLES, CLEAR, COCO_PALETTE, COCO_XAMBA, createCocoPainter, GOLPE, MIN_FLASH_GAP, RUFADA } from '../src/rhythms/coco-xamba.js';
 import { createShow } from '../src/show.js';
 import { planStudio } from '../src/studio.js';
 import { COLORS, TINTS } from '../src/theme.js';
@@ -191,13 +191,13 @@ const channel = c => {
 const luminance = ([r, g, b]) => 0.2126 * channel(r) + 0.7152 * channel(g) + 0.0722 * channel(b);
 const contrast = (a, b) => (Math.max(luminance(a), luminance(b)) + 0.05) / (Math.min(luminance(a), luminance(b)) + 0.05);
 const FACE_ALPHA = Number(/[\d.]+\)$/.exec(TINTS.scopeFace)[0].slice(0, -1)); // the wheel's dark disc
+const SMALLEST_FLAME = 0.7; // of CANDLES.flame: under it an arc is a speck of the floor or a flame's heart
+const NARROW_STAGE_SIDE = 1.43; // wheel radii from the wheel's centre to the side of a desktop stage, measured at 1440 and 1920 px
+const fromCentre = (x, y) => Math.hypot(x - GEOMETRY.centreX, y - GEOMETRY.centreY);
 /** Draw every frame of `bars` (all the show by default) at 30 fps on a recording context. */
 function paint(record = {}, bars = [0, show.TOTAL_BARS]) {
   const painter = createCocoPainter({
-    stepsPerBar,
-    angleOf: step => (step / stepsPerBar) * Math.PI * 2 - Math.PI / 2,
     barSeconds: meterOf(COCO_XAMBA).barSeconds,
-    beatsPerBar: COCO_XAMBA.beatsPerBar,
     rufada: RUFADA,
     golpe: GOLPE,
   });
@@ -215,7 +215,7 @@ function paint(record = {}, bars = [0, show.TOTAL_BARS]) {
 
 test('the background flashes at most 3 times in any second (WCAG 2.3.1), on the golpes only', () => {
   const flashes = paint().flashTimes();
-  assert.ok(flashes.length >= show.SCENES.length, `${flashes.length} golpe blooms`);
+  assert.ok(flashes.length >= show.SCENES.length, `${flashes.length} golpe flares`);
   for (const start of flashes) assert.ok(flashes.filter(t => t >= start && t < start + 1).length <= 3, `flashes from ${start.toFixed(2)} s`);
   for (let i = 1; i < flashes.length; i++) assert.ok(flashes[i] - flashes[i - 1] >= MIN_FLASH_GAP - 1e-9, `blooms ${flashes[i - 1]} and ${flashes[i]}`);
 });
@@ -225,16 +225,20 @@ test('nothing is drawn under the wheel, so every wheel colour keeps 3:1 there; n
   const under = [];
   const record = {
     arc: (x, y, radius) => {
-      // a ring round the centre lies at its radius; a spark elsewhere comes as near as its edge
-      const away = Math.hypot(x - GEOMETRY.centreX, y - GEOMETRY.centreY);
+      // a ring round the centre lies at its radius; a flame or a speck elsewhere comes as near as its edge
+      const away = fromCentre(x, y);
       innermost = Math.min(innermost, away < 1e-9 ? radius : away - radius);
     },
-    createRadialGradient: (_x0, _y0, r0, _x1, _y1, r1) => ({
-      addColorStop: (offset, colour) => {
-        const at = r0 + offset * (r1 - r0);
-        if (at <= RADIUS || offset === 0) under.push({ at, colour }); // the first stop also paints inside r0
-      },
-    }),
+    createRadialGradient: (x0, y0, r0, _x1, _y1, r1) => {
+      const away = fromCentre(x0, y0);
+      if (away > 1e-9) innermost = Math.min(innermost, away - r1); // a candle's halo comes as near as its edge
+      return {
+        addColorStop: (offset, colour) => {
+          const at = r0 + offset * (r1 - r0);
+          if (away < 1e-9 && (at <= RADIUS || offset === 0)) under.push({ at, colour }); // the first stop also paints inside r0
+        },
+      };
+    },
   };
   paint(record);
   assert.ok(innermost >= CLEAR * RADIUS - 1e-9, `a shape reaches ${(innermost / RADIUS).toFixed(2)} wheel radii`);
@@ -255,22 +259,72 @@ test('nothing is drawn under the wheel, so every wheel colour keeps 3:1 there; n
   }
 });
 
-test('with reduced motion the background drops every pulse and turns at half speed', () => {
+/** What each frame of `bars` draws: every arc and every radial gradient with its colour stops. */
+function framesOf(bars) {
+  const frames = [];
+  const record = {
+    save: () => frames.push([]),
+    arc: (...shape) => frames.at(-1).push(shape),
+    createRadialGradient: (...shape) => {
+      const stops = [];
+      frames.at(-1).push([shape, stops]);
+      return { addColorStop: (offset, colour) => stops.push([offset, colour]) };
+    },
+  };
+  return { frames, painter: paint(record, bars) };
+}
+
+test('with reduced motion the background holds still: no flare, no dust, every flame steady', () => {
+  const MID_SCENE = [8, 9]; // a bar of the Alfaia scene, far from a scene change
+  const moving = framesOf(MID_SCENE).frames;
+  assert.ok(
+    moving.some(frame => JSON.stringify(frame) !== JSON.stringify(moving[0])),
+    'without it the flames waver and the dust drifts',
+  );
   const saved = globalThis.matchMedia;
   globalThis.matchMedia = () => ({ matches: true });
   try {
-    let strokes = 0;
-    const angles = [];
-    const record = {
-      stroke: () => strokes++,
-      arc: (_x, _y, _r, from) => angles.push(from),
-    };
-    const painter = paint(record, [8, 9]);
-    assert.deepEqual(painter.flashTimes(), [], 'no golpe bloom');
-    assert.equal(strokes, 0, 'no ring');
-    assert.ok(angles.length > 0, 'the skirts still turn');
+    const { frames, painter } = framesOf(MID_SCENE);
+    assert.deepEqual(painter.flashTimes(), [], 'no golpe flare');
+    assert.ok(frames.length > 1);
+    for (const frame of frames) assert.deepEqual(frame, frames[0], 'every frame draws the same picture');
   } finally {
     globalThis.matchMedia = saved;
+  }
+});
+
+// The owner saw a casino game in a ring of wedges turning round the numbered wheel (#27), and lights
+// on one circle round that wheel still read as one.
+test('nothing circles the wheel: no wedge, the candles keep their places, off one circle, and one side stays dark', () => {
+  const TURN = Math.PI * 2;
+  const flames = new Set();
+  let wedges = 0;
+  const record = {
+    arc: (x, y, radius, from, to) => {
+      if (to - from < TURN - 1e-9) wedges++;
+      if (radius >= CANDLES.flame * RADIUS * SMALLEST_FLAME)
+        flames.add(`${((x - GEOMETRY.centreX) / RADIUS).toFixed(3)} ${((y - GEOMETRY.centreY) / RADIUS).toFixed(3)}`);
+    },
+  };
+  paint(record);
+  assert.equal(wedges, 0, 'no wedge and no part of a ring');
+  assert.deepEqual(
+    [...flames].sort(),
+    CANDLES.spots.map(([right, down]) => `${right.toFixed(3)} ${down.toFixed(3)}`).sort(),
+    'each candle keeps its place for the whole show',
+  );
+  const away = CANDLES.spots.map(([right, down]) => Math.hypot(right, down));
+  assert.ok(Math.max(...away) >= 1.2 * Math.min(...away), `the candles are not on one circle: ${away.map(d => d.toFixed(2))} wheel radii`);
+  const angles = CANDLES.spots.map(([right, down]) => Math.atan2(down, right)).sort((a, b) => a - b);
+  const gaps = angles.map((angle, i) => (i ? angle - angles[i - 1] : angle + TURN - angles.at(-1)));
+  assert.ok(Math.max(...gaps) >= TURN / 3, `one side of the wheel stays dark: the widest gap is ${(Math.max(...gaps) / TURN).toFixed(2)} of a turn`);
+});
+
+test('every candle halo stays clear of the wheel, and inside the narrowest stage', () => {
+  for (const [right, down, size] of CANDLES.spots) {
+    const halo = CANDLES.halo * size;
+    assert.ok(Math.hypot(right, down) - halo >= CLEAR, `the halo of the candle at ${right}, ${down} reaches under the wheel`);
+    assert.ok(Math.abs(right) + halo <= NARROW_STAGE_SIDE, `the halo of the candle at ${right}, ${down} is cut by the side of a desktop stage`);
   }
 });
 

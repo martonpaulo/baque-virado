@@ -7,41 +7,75 @@
 // Choices and reasons: docs/rhythms/coco.md. Its background painter is the section below the imports.
 import { label, row, stat, stats } from '../readout-markup.js';
 import { alphaOf, COLORS, REDUCED_MOTION_QUERY } from '../theme.js';
+import { hash } from '../util.js';
 import { lilt, recordedChoices, studioFiles, studioSounds, takes } from './studio-kit.js';
 
 // ---------- the background ----------
-// The coco background: a roda in the terreiro yard at night, seen from above the wheel. Everything
-// comes out of the wheel and stays circular: a burgundy glow of the beaten earth, the skirts of the
-// dancers turning steadily around the wheel (one turn every 16 beats, the trance of repetition),
-// copper rings thrown outward by the alfaia and the atabaques, copper sparks on the rufadas, and a
-// bright cloth-white bloom on each golpe, the stroke a rufada lands on.
-// Safety (docs/research/colour-and-visuals.md, rule 6; WCAG 2.3.1): the golpe blooms are the only
-// bright changes, never closer than MIN_FLASH_GAP, so at most three in any second; reduced motion
-// drops every pulse and halves the turn. Nothing is drawn under the wheel, so its dots keep their
-// contrast. Palette and reasons: docs/rhythms/coco.md.
+// The coco background: the beaten-earth floor of the terreiro at night, in candlelight, seen from
+// above the wheel (docs/research/expansion-decisions.md). Everything comes out of the wheel and
+// stays circular: the candles' copper light pooled on the floor and the burgundy of the earth
+// further out; candles standing on the floor around the roda, one more lit as the roda fills, each
+// with its own slow flicker; the dust the pisada raises on the low head's strokes; and, on each
+// golpe, the stroke a rufada lands on, the candlelight flaring once. Nothing turns and nothing
+// sparkles: trance is repetition, with tones close together. A ring of wedges turning around the
+// numbered wheel read as a roulette (the owner, 2026-11-28, #27), so no shape here circles the wheel.
+// No orixá imagery (docs/research/pernambuco-rhythms-feeling.md, Coco da Xambá, Avoid).
+// Safety (docs/research/colour-and-visuals.md, rule 6; WCAG 2.3.1): the golpe flares are the only
+// changes of the whole picture, never closer than MIN_FLASH_GAP, so at most three in any second;
+// reduced motion drops the flares and the dust and holds every flame still. Nothing is drawn under
+// the wheel, so its dots keep their contrast. Palette and reasons: docs/rhythms/coco.md.
 
 /** Coco da Xambá, trance and devotion: ground, earth, burgundy, copper and cloth, from section 5. */
 export const COCO_PALETTE = {
   ground: '#140b08', // the beaten-earth floor at night
   earth: '#5a3523',
-  burgundy: '#9e2b25', // the wine red of the skirts
-  copper: '#c7793a', // the alfaia's leather and the yard's lamps
-  cloth: '#efe6d6', // the initiates' white cloth
+  burgundy: '#9e2b25', // the wine red of the house
+  copper: '#c7793a', // the alfaia's leather and the candlelight
+  cloth: '#efe6d6', // the initiates' white cloth, and the white heart of each flame
 };
 
 const TAU = Math.PI * 2;
 
 export const CLEAR = 1.12; // wheel radii: nothing is drawn inside, where the wheel and its numbers sit
 const TRAIL_ALPHA = 0.32; // how much of the last frame each frame paints over
-const GLOW = { outer: 3.2, alpha: 0.42, rise: 0.15 }; // full strength `rise` of the way out // the burgundy glow of the earth, in wheel radii
-const SKIRTS = { inner: 1.3, outer: 1.72, beatsPerTurn: 16, alpha: 0.55, folds: 2 }; // each skirt: burgundy, then earth
-const RINGS = { life: 1.4, from: CLEAR + 0.04, travel: 1.7, width: 2.2, alpha: 0.5 }; // copper, in wheel radii and CSS px
-const SPARK = { life: 0.18, radius: 1.2, size: 1.6, alpha: 0.7 };
-export const BLOOM = { life: 0.28, from: CLEAR, to: 2.3, alpha: 0.85, white: 0.1, copper: 0.45 }; // where its cloth white peaks, then copper
-export const MIN_FLASH_GAP = 0.34; // seconds between golpe blooms: under three a second
-const CALM_TURN = 0.5; // reduced motion halves the turn
-const RINGING = new Set(['low', 'rum']); // the drums whose strokes throw a ring
-const ROLL_SPARKING = new Set(['low', 'high']);
+const GLOW = { outer: 3.2, alpha: 0.42, rise: 0.15 }; // full strength `rise` of the way out // the burgundy of the earth, in wheel radii
+const LIGHT = { outer: 2.2, alpha: 0.1, rise: 0.1 }; // the candles' copper light pooled on the floor
+// Specks of the beaten earth, still: where each lies, its size in CSS px and how much it shows.
+const GRAIN = { count: 150, from: 1.16, reach: 1.7, size: 0.5, sizes: 0.9, alpha: 0.12, alphas: 0.25 };
+// The candles on the floor. Each spot: where it stands, in wheel radii right of and below the wheel's
+// centre, and how tall its flame burns, in the order they are lit as the roda fills. They are set
+// down by hand in three groups at different distances, and one side of the wheel stays dark: lights
+// on one circle round a numbered wheel read as a game's. Every halo stays clear of the wheel, of the
+// title above, of the readout below and of the stage's sides, which are 1.43 wheel radii away on a
+// desktop (`tests/coco.test.js` keeps the three rules). Then, in wheel radii for a flame of size 1:
+// the halo it throws on the floor, the flame and its white heart; how far the heart sways and the
+// light wavers, and how fast (two slow waves, in turns a second).
+export const CANDLES = {
+  spots: [
+    [1.16, 0.72, 1.1],
+    [-1.12, -0.8, 1],
+    [0.86, 1.06, 1],
+    [1.21, -0.9, 0.9],
+    [-0.88, -1.03, 0.8],
+    [1.22, 1.1, 0.85],
+  ],
+  halo: 0.21,
+  haloAlpha: 0.6,
+  flame: 0.06,
+  flameAlpha: 0.9,
+  core: 0.011,
+  coreAlpha: 0.85,
+  sway: 0.008,
+  flicker: 0.14,
+  rates: [1.3, 2.9],
+};
+const TREMBLE = { window: 0.2, full: 4, gain: 1.2 }; // a rufada makes the flames tremble: strokes in the window for full strength
+const DUST = { life: 1.1, from: CLEAR + 0.02, travel: 0.7, width: 0.4, alpha: 0.18 }; // raised by the pisada, in wheel radii
+export const BLOOM = { life: 0.45, from: CLEAR, to: 2.3, alpha: 0.34, peak: 0.14, halo: 0.25 }; // a golpe's flare: where the earth's burgundy peaks, and how much the halos gain
+export const MIN_FLASH_GAP = 0.34; // seconds between golpe flares: under three a second
+const DUSTING = { low: 'earth', rum: 'burgundy' }; // the drums whose strokes raise dust, and its colour
+const ROLLING = new Set(['low', 'high']);
+const SEEDS = { phase: 37, grain: 101 }; // one stream of `hash` per random choice
 const VIGNETTE_STOPS = [
   [0, 0.85],
   [0.12, 0.45],
@@ -52,17 +86,23 @@ const VIGNETTE_STOPS = [
 ];
 
 /**
- * The background of the coco show. `angleOf(step)`: a step's angle on the wheel; `barSeconds`: one
- * bar; `beatsPerBar`; `rufada` and `golpe`: the tones of the alfaia's rolls and of their landing.
+ * The background of the coco show. `barSeconds`: one bar; `rufada` and `golpe`: the tones of the
+ * alfaia's rolls and of their landing.
  */
-export function createCocoPainter({ stepsPerBar, angleOf, barSeconds, beatsPerBar, rufada, golpe }) {
+export function createCocoPainter({ barSeconds, rufada, golpe }) {
   const reduced = globalThis.matchMedia?.(REDUCED_MOTION_QUERY);
   const calm = () => Boolean(reduced?.matches);
-  const flashes = new Set(); // the start (seconds of the show) of every bloom drawn, for the flash limit's test
-  const angleAt = h => angleOf((h.at % 1) * stepsPerBar);
+  const flashes = new Set(); // the start (seconds of the show) of every flare drawn, for the flash limit's test
   const secondsOf = h => h.at * barSeconds;
+  const candles = CANDLES.spots.map(([right, down, size], i) => ({ right, down, size, phase: hash(SEEDS.phase + i) * TAU }));
+  const grain = [...Array(GRAIN.count).keys()].map(i => ({
+    angle: hash(SEEDS.grain + i * 3) * TAU,
+    ring: GRAIN.from + hash(SEEDS.grain + i * 3 + 1) ** 2 * GRAIN.reach, // denser near the wheel, where the light is
+    size: GRAIN.size + hash(SEEDS.grain + i * 3 + 2) * GRAIN.sizes,
+    alpha: GRAIN.alpha + hash(SEEDS.grain + i * 3 + 2) * GRAIN.alphas,
+  }));
 
-  /** The golpes that bloom: one per moment, none within MIN_FLASH_GAP after the one before. */
+  /** The golpes that flare: one per moment, none within MIN_FLASH_GAP after the one before. */
   function blooms(recent) {
     const golpes = [...new Set(recent.filter(h => h.hit.tone === golpe).map(secondsOf))].sort((a, b) => a - b);
     const kept = [];
@@ -70,12 +110,22 @@ export function createCocoPainter({ stepsPerBar, angleOf, barSeconds, beatsPerBa
     return kept;
   }
 
-  function annulus(ctx, g, inner, outer, from, to) {
+  /** A soft ring round the wheel, from `inner` to `outer` wheel radii, strongest at `peak` of the way. */
+  function softRing(ctx, g, inner, outer, peak, colour, alpha, edge = colour) {
     const { centreX: x, centreY: y, scopeRadius: r } = g;
+    const ring = ctx.createRadialGradient(x, y, inner * r, x, y, outer * r);
+    ring.addColorStop(0, alphaOf(colour, 0));
+    ring.addColorStop(peak, alphaOf(colour, alpha));
+    ring.addColorStop(1, alphaOf(edge, 0));
+    ctx.fillStyle = ring;
+    ctx.fillRect(0, 0, g.width, g.height);
+  }
+
+  function disc(ctx, x, y, radius, colour, alpha) {
+    ctx.globalAlpha = alpha;
+    ctx.fillStyle = colour;
     ctx.beginPath();
-    ctx.arc(x, y, outer * r, from, to);
-    ctx.arc(x, y, inner * r, to, from, true);
-    ctx.closePath();
+    ctx.arc(x, y, radius, 0, TAU);
     ctx.fill();
   }
 
@@ -85,71 +135,68 @@ export function createCocoPainter({ stepsPerBar, angleOf, barSeconds, beatsPerBa
       { position, params, recent } = frame,
       { centreX: x, centreY: y, scopeRadius: r } = g;
     const look = key => params.from[key] + (params.to[key] - params.from[key]) * params.mix;
+    const now = position * barSeconds,
+      still = calm();
     ctx.save();
     ctx.globalAlpha = frame.fresh ? 1 : TRAIL_ALPHA;
     ctx.fillStyle = COCO_PALETTE.ground;
     ctx.fillRect(0, 0, g.width, g.height);
     ctx.globalAlpha = 1;
 
-    // the earth's glow, from the wheel's edge outward
-    const glow = ctx.createRadialGradient(x, y, CLEAR * r, x, y, GLOW.outer * r);
-    glow.addColorStop(0, alphaOf(COCO_PALETTE.burgundy, 0));
-    glow.addColorStop(GLOW.rise, alphaOf(COCO_PALETTE.burgundy, GLOW.alpha * look('glow')));
-    glow.addColorStop(1, alphaOf(COCO_PALETTE.ground, 0));
-    ctx.fillStyle = glow;
-    ctx.fillRect(0, 0, g.width, g.height);
-
-    // the skirts turn steadily, one turn every 16 beats; `skirts` of them, fading in one by one
-    const turn = ((position * beatsPerBar) / SKIRTS.beatsPerTurn) * TAU * (calm() ? CALM_TURN : 1),
-      count = look('skirts'),
-      shown = Math.ceil(count);
-    for (let i = 0; i < shown; i++) {
-      const start = turn + (i / Math.max(1, shown)) * TAU,
-        width = TAU / Math.max(1, shown) / SKIRTS.folds;
-      ctx.globalAlpha = SKIRTS.alpha * Math.min(1, count - i);
-      ctx.fillStyle = COCO_PALETTE.burgundy;
-      annulus(ctx, g, SKIRTS.inner, SKIRTS.outer, start, start + width);
-      ctx.fillStyle = COCO_PALETTE.earth;
-      annulus(ctx, g, SKIRTS.inner, SKIRTS.outer, start + width, start + 2 * width);
-    }
-    ctx.globalAlpha = 1;
-
-    if (!calm()) {
-      ctx.lineWidth = RINGS.width * g.dpr;
-      for (const h of recent) {
-        // copper rings from the low head and the rum; a rufada stroke throws a spark instead
-        if (h.hit.tone === rufada && ROLL_SPARKING.has(h.voice) && h.age < SPARK.life) {
-          const a = angleAt(h);
-          ctx.globalAlpha = SPARK.alpha * (1 - h.age / SPARK.life) * h.hit.velocity;
-          ctx.fillStyle = COCO_PALETTE.copper;
-          ctx.beginPath();
-          ctx.arc(x + Math.cos(a) * SPARK.radius * r, y + Math.sin(a) * SPARK.radius * r, SPARK.size * g.dpr, 0, TAU);
-          ctx.fill();
-        } else if (RINGING.has(h.voice) && h.hit.tone !== rufada && h.age < RINGS.life) {
-          const life = 1 - h.age / RINGS.life;
-          ctx.globalAlpha = RINGS.alpha * life * Math.min(1, h.hit.velocity);
-          ctx.strokeStyle = h.voice === 'rum' ? COCO_PALETTE.burgundy : COCO_PALETTE.copper;
-          ctx.beginPath();
-          ctx.arc(x, y, (RINGS.from + RINGS.travel * (1 - life * life)) * r, 0, TAU);
-          ctx.stroke();
-        }
-      }
-      // a golpe: the one bright bloom, born at the wheel's edge
-      const now = position * barSeconds;
+    // a golpe: the candlelight flares once, then settles
+    let flare = 0;
+    if (!still)
       for (const at of blooms(recent)) {
         const age = now - at;
         if (age < 0 || age >= BLOOM.life) continue;
         flashes.add(at);
-        const bloom = ctx.createRadialGradient(x, y, BLOOM.from * r, x, y, BLOOM.to * r);
-        const strength = BLOOM.alpha * (1 - age / BLOOM.life);
-        bloom.addColorStop(0, alphaOf(COCO_PALETTE.cloth, 0));
-        bloom.addColorStop(BLOOM.white, alphaOf(COCO_PALETTE.cloth, strength));
-        bloom.addColorStop(BLOOM.copper, alphaOf(COCO_PALETTE.copper, strength / 2));
-        bloom.addColorStop(1, alphaOf(COCO_PALETTE.burgundy, 0));
-        ctx.globalAlpha = 1;
-        ctx.fillStyle = bloom;
-        ctx.fillRect(0, 0, g.width, g.height);
+        flare = Math.max(flare, 1 - age / BLOOM.life);
       }
+
+    // the floor: the burgundy of the earth, the candles' copper light near the wheel, and its grain
+    softRing(ctx, g, CLEAR, GLOW.outer, GLOW.rise, COCO_PALETTE.burgundy, GLOW.alpha * look('glow'), COCO_PALETTE.ground);
+    softRing(ctx, g, CLEAR, LIGHT.outer, LIGHT.rise, COCO_PALETTE.copper, LIGHT.alpha * look('glow'), COCO_PALETTE.burgundy);
+    for (const speck of grain)
+      disc(ctx, x + Math.cos(speck.angle) * speck.ring * r, y + Math.sin(speck.angle) * speck.ring * r, speck.size * g.dpr, COCO_PALETTE.earth, speck.alpha);
+    ctx.globalAlpha = 1;
+
+    if (!still) {
+      // the pisada: each stroke of the low head, and of the rum, raises dust that drifts outward
+      for (const h of recent) {
+        const colour = DUSTING[h.voice];
+        if (!colour || h.hit.tone === rufada || h.age >= DUST.life) continue;
+        const life = 1 - h.age / DUST.life,
+          inner = DUST.from + DUST.travel * (1 - life * life);
+        softRing(ctx, g, inner, inner + DUST.width, 1 / 2, COCO_PALETTE[colour], DUST.alpha * life * Math.min(1, h.hit.velocity));
+      }
+      if (flare) softRing(ctx, g, BLOOM.from, BLOOM.to, BLOOM.peak, COCO_PALETTE.burgundy, BLOOM.alpha * flare, COCO_PALETTE.ground);
+    }
+
+    // the candles: `candles` of them lit, the newest fading in; a rufada makes the flames tremble
+    const rolling = recent.filter(h => h.hit.tone === rufada && ROLLING.has(h.voice) && h.age < TREMBLE.window).length,
+      tremble = 1 + TREMBLE.gain * Math.min(1, rolling / TREMBLE.full),
+      lit = look('candles');
+    for (let i = 0; i < Math.min(candles.length, Math.ceil(lit)); i++) {
+      const candle = candles[i],
+        strength = Math.min(1, lit - i),
+        waver = still ? 0 : ((Math.sin(now * TAU * CANDLES.rates[0] + candle.phase) + Math.sin(now * TAU * CANDLES.rates[1] + candle.phase * 2)) / 2) * tremble,
+        cx = x + candle.right * r,
+        cy = y + candle.down * r,
+        reach = CANDLES.halo * candle.size * r,
+        light = CANDLES.haloAlpha * strength * (1 + CANDLES.flicker * waver + BLOOM.halo * flare);
+      const halo = ctx.createRadialGradient(cx, cy, 0, cx, cy, reach);
+      halo.addColorStop(0, alphaOf(COCO_PALETTE.copper, Math.min(1, light)));
+      halo.addColorStop(1 / 2, alphaOf(COCO_PALETTE.copper, Math.min(1, light) / 3));
+      halo.addColorStop(1, alphaOf(COCO_PALETTE.copper, 0));
+      ctx.globalAlpha = 1;
+      ctx.fillStyle = halo;
+      ctx.fillRect(cx - reach, cy - reach, 2 * reach, 2 * reach);
+      // the flame, soft at its edge, and its white heart
+      const flame = ctx.createRadialGradient(cx, cy, 0, cx, cy, CANDLES.flame * candle.size * r);
+      flame.addColorStop(0, alphaOf(COCO_PALETTE.copper, CANDLES.flameAlpha * strength));
+      flame.addColorStop(1, alphaOf(COCO_PALETTE.copper, 0));
+      disc(ctx, cx, cy, CANDLES.flame * candle.size * r, flame, 1);
+      disc(ctx, cx + waver * CANDLES.sway * r, cy, CANDLES.core * candle.size * r, COCO_PALETTE.cloth, CANDLES.coreAlpha * strength);
     }
     ctx.restore();
   }
@@ -164,7 +211,7 @@ export function createCocoPainter({ stepsPerBar, angleOf, barSeconds, beatsPerBa
   return {
     draw,
     vignette,
-    /** The start (seconds of the show) of every golpe bloom drawn so far, in order. */
+    /** The start (seconds of the show) of every golpe flare drawn so far, in order. */
     flashTimes: () => [...flashes].sort((a, b) => a - b),
   };
 }
@@ -367,24 +414,24 @@ const SCENE_LIST = [
   { id: 'finale', bars: 8, mode: bar => (bar === 7 ? 'cut' : 'normal'), lanes: ALFAIA, isEnd: true, landsOnGolpe: true },
 ];
 
-// How the background behaves in each scene (createCocoPainter above): how many skirts turn around the
+// How the background behaves in each scene (createCocoPainter above): how many candles burn around the
 // wheel (a fraction fades one in), one more as the roda fills, and the glow of the earth. The engine
 // reads `speed` for the visual clock and blends zoom, rot, hue and keep, which this painter does not use.
 const LOOK = { zoom: 0, rot: 0, hue: 0, keep: 0, speed: 1 };
 const SCENE_LOOKS = {
-  intro: { ...LOOK, skirts: 1, glow: 0.35 },
-  alfaia: { ...LOOK, skirts: 2, glow: 0.4 },
-  heads: { ...LOOK, skirts: 2, glow: 0.45 },
-  ganza: { ...LOOK, skirts: 3, glow: 0.5 },
-  pandeiro: { ...LOOK, skirts: 4, glow: 0.55 },
-  palmas: { ...LOOK, skirts: 5, glow: 0.6 },
-  agogoAbe: { ...LOOK, skirts: 6, glow: 0.65 },
-  caixa: { ...LOOK, skirts: 6, glow: 0.7 },
-  atabaques: { ...LOOK, skirts: 8, glow: 0.8 },
-  phrases: { ...LOOK, skirts: 8, glow: 0.85 },
-  toque: { ...LOOK, skirts: 8, glow: 1 },
-  rufo: { ...LOOK, skirts: 8, glow: 1 },
-  finale: { ...LOOK, skirts: 8, glow: 0.8 },
+  intro: { ...LOOK, candles: 1, glow: 0.35 },
+  alfaia: { ...LOOK, candles: 1, glow: 0.4 },
+  heads: { ...LOOK, candles: 2, glow: 0.45 },
+  ganza: { ...LOOK, candles: 2, glow: 0.5 },
+  pandeiro: { ...LOOK, candles: 3, glow: 0.55 },
+  palmas: { ...LOOK, candles: 3, glow: 0.6 },
+  agogoAbe: { ...LOOK, candles: 4, glow: 0.65 },
+  caixa: { ...LOOK, candles: 4, glow: 0.7 },
+  atabaques: { ...LOOK, candles: 5, glow: 0.8 },
+  phrases: { ...LOOK, candles: 6, glow: 0.85 },
+  toque: { ...LOOK, candles: 6, glow: 1 },
+  rufo: { ...LOOK, candles: 6, glow: 1 },
+  finale: { ...LOOK, candles: 6, glow: 0.8 },
 };
 
 // ---------- sound: recorded instruments in the studio (src/studio.js) ----------
@@ -697,7 +744,7 @@ export const COCO_XAMBA = {
   scenes: SCENE_LIST,
   looks: SCENE_LOOKS,
   background: {
-    create: options => createCocoPainter({ ...options, barSeconds: BAR_SECONDS, beatsPerBar: BEATS_PER_BAR, rufada: RUFADA, golpe: GOLPE }),
+    create: options => createCocoPainter({ ...options, barSeconds: BAR_SECONDS, rufada: RUFADA, golpe: GOLPE }),
   },
   readout,
   waves: null,

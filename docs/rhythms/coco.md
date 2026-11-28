@@ -74,21 +74,38 @@ test measures the low head's beat-to-beat correlation (pink, not white) and its 
   palmas the white cloth, the agogô iron, and the atabaques three burgundies, deepest for the rum.
   Each is lifted until it keeps 3:1 against the wheel's face over the ground; no red passes
   R/(R+G+B) 0.8.
-- **Background.** Its own, through `background.create`: a burgundy glow of the earth from the
-  wheel's edge outward; the dancers' skirts, burgundy and earth, turning steadily around the wheel,
-  one turn every 16 beats, one more skirt as the roda fills (1 to 8); copper rings thrown out by the
-  low head and burgundy rings by the rum; copper sparks at the angle of each rufada stroke; and one
-  bright bloom, cloth white into copper, from the wheel's edge on each golpe.
+- **Background.** Its own, through `background.create`: the beaten-earth floor of the terreiro at
+  night, in candlelight, seen from above the wheel, as
+  [`expansion-decisions.md`](../research/expansion-decisions.md) names the coco's picture. The
+  burgundy of the earth glows from the wheel's edge outward, with the candles' copper light nearest
+  the wheel and the still grain of the floor. Six candles stand on the floor near the roda, one
+  more lit as the roda fills, each with its own slow flicker; a rufada makes the flames tremble.
+  Each stroke of the low head and of the rum raises dust that drifts outward and fades: the
+  pisada. On each golpe the earth's glow lifts once and the halos gain a little.
+- **Nothing circles the wheel.** The first background turned a ring of burgundy and earth wedges
+  (the dancers' skirts) around the numbered wheel and threw sparks and rings; the owner saw a
+  casino game in it, while the colours were right
+  ([#27](https://github.com/martonpaulo/batuque/issues/27), D41). So no shape turns and no light
+  chases another. The candles are set down by hand in three groups at different distances, and one
+  side of the wheel stays dark: an independent look at the first candle layout still saw a game's
+  wheel in eight lights on one circle round the numbers. Every halo stays inside a desktop stage,
+  whose sides are 1.43 wheel radii from the wheel's centre. `tests/coco.test.js` keeps each of these
+  rules. No orixá imagery is drawn
+  ([`pernambuco-rhythms-feeling.md`](../research/pernambuco-rhythms-feeling.md#design-notes)).
 - **Under the wheel.** Nothing is drawn inside 1.12 wheel radii: the wheel and its numbers sit on
   the ground colour, under the wheel's own dark face.
-- **Flashes (WCAG 2.3.1).** The golpe blooms are the only bright changes, never closer than 0.34 s,
-  so at most three in any second. The test draws every frame at 30 fps and counts them: 14 blooms
-  in the show, at most 2 in any second, the closest 0.46 s apart. Measured in headless Chromium at
-  1440 x 900, 30 frames a second over the whole show: no quarter of the screen's width and height
-  changes its mean relative luminance by 0.10 (the largest change in one frame is 0.034).
+- **Flashes (WCAG 2.3.1).** The golpe flares are the only changes of the whole picture, never
+  closer than 0.34 s, so at most three in any second; the test draws every frame at 30 fps and
+  counts them. A flare is the earth's burgundy at 34 % at its strongest, where the first
+  background's bloom was cloth white at 85 %. Measured in headless Chromium at 1440 x 900 with
+  motion on, 30 frames a second, over the opening, the Atabaques scene and the Rufo into the
+  Final: no quarter of the stage (half its width by half its height) changes its mean relative
+  luminance by more than 0.003 between two frames, against the 0.10 of a flash, and the brightest
+  quarter stays at 0.02. A render or a measurement states the motion setting: headless Chrome
+  takes the machine's own, and the owner's Mac has Reduce Motion on.
 - **Mix.** The whole show rendered offline with the default choices peaks at −0.18 dBFS, with no
   clipping; its RMS is −12.4 dBFS.
-- **Reduced motion** drops the rings, sparks and blooms and halves the skirts' turn.
+- **Reduced motion** drops the dust and the flares and holds every flame still.
 - **Widgets.** The wheel, the lanes and the readout; no score (the score renderer is written for
   4/4). The Atabaques readout shows the three parts on the 8 steps; the Introdução and the Rufo
   name the rufada.
@@ -99,3 +116,9 @@ test measures the low head's beat-to-beat correlation (pink, not white) and its 
   tuned by ear.
 - A batuqueiro of the Xambá should check the atabaque parts, the rufadas between scenes and the
   pandeiro and palmas picks.
+- The owner heard the show whole on 2026-11-28
+  ([#27](https://github.com/martonpaulo/batuque/issues/27)): several instruments sound loose or
+  artificial, the palmas do not sound natural, and the rufo does not sound natural yet. These are
+  the first inputs of the coco's round two
+  ([#47](https://github.com/martonpaulo/batuque/issues/47)), which reads its references whole
+  before its script changes ([`round-two.md`](../research/round-two.md#order-of-work)).
