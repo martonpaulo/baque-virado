@@ -1,13 +1,13 @@
 // The deployed site has one page per rhythm path (tools/build-site.mjs), and the local server answers
 // `/<id>` with `<id>.html` as GitHub Pages does.
 import assert from 'node:assert/strict';
-import { existsSync, mkdtempSync, readFileSync, rmSync } from 'node:fs';
+import { existsSync, mkdtempSync, readdirSync, readFileSync, rmSync } from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { test } from 'node:test';
 import { MOVED, RHYTHMS, ROUTES } from '../src/rhythms/index.js';
 import { PREPARING } from '../src/rhythms/preparing.js';
-import { buildSite, preparingPage } from '../tools/build-site.mjs';
+import { buildSite, DEVELOPMENT_MODULES, PUBLISHED_MARK, preparingPage, published } from '../tools/build-site.mjs';
 import { startStaticServer } from '../tools/static-server.mjs';
 
 test('every rhythm path answers 200 from the built site; a shipped one is the show, one being prepared says so', async () => {
@@ -130,6 +130,36 @@ test('each rhythm path has its own description and structured data, and the site
     );
     for (const from of Object.keys(MOVED)) assert.doesNotMatch(sitemap, new RegExp(`/${from}<`));
     assert.equal(readFileSync(path.join(out, 'robots.txt'), 'utf8'), 'User-agent: *\nAllow: /\n\nSitemap: https://batuque.martonpaulo.com/sitemap.xml\n');
+  } finally {
+    rmSync(parent, { recursive: true, force: true });
+  }
+});
+
+// #72: the video export is a tool of the development page. The published site marks every page, which
+// src/main.js reads to build no export control, and holds neither the export's modules nor vendor/.
+test('the built site marks every page as published and holds no part of the video export', () => {
+  const parent = mkdtempSync(path.join(os.tmpdir(), 'baque-site-'));
+  try {
+    for (const version of ['', 'aaaaaaa']) {
+      const out = path.join(parent, version || 'plain');
+      buildSite(out, undefined, version);
+      for (const id of ['index', ...ROUTES]) {
+        const html = readFileSync(path.join(out, `${id}.html`), 'utf8');
+        assert.match(html, new RegExp(`<html [^>]*${PUBLISHED_MARK}>`), id);
+        assert.doesNotMatch(html, /export\.js|stage-capture|vendor\//, id);
+      }
+      assert.equal(existsSync(path.join(out, 'vendor')), false);
+      for (const module of DEVELOPMENT_MODULES) assert.equal(existsSync(path.join(out, module)), false, module);
+      // no module of the site loads a development module with the page: every static import is a file of the site
+      for (const name of readdirSync(path.join(out, 'src'), { recursive: true }).filter(file => file.endsWith('.js'))) {
+        const source = readFileSync(path.join(out, 'src', name), 'utf8');
+        for (const [, spec] of source.matchAll(/^(?:import|export)\b[^'\n]*\bfrom '(\.[^']+)'/gm))
+          assert.ok(existsSync(path.join(out, 'src', path.dirname(name), spec)), `src/${name} imports ${spec}`);
+      }
+    }
+    // the repository's own page, the development page, carries no mark; a page with nothing to mark fails the build
+    assert.doesNotMatch(readFileSync(new URL('../index.html', import.meta.url), 'utf8'), new RegExp(PUBLISHED_MARK));
+    assert.throws(() => published('<html><body></body></html>'), /no <html> tag/);
   } finally {
     rmSync(parent, { recursive: true, force: true });
   }

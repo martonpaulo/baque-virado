@@ -5,7 +5,6 @@ import { createPlayer, createSampleBank, filesFor, isHeard, renderShowWav } from
 import { backgroundAt, createBackground, SCENE_LOOKS } from './background.js';
 import { bindKeyboard, createSceneList, createSoundPickers, exportControl, initialChoices, initialVolumes, rhythmSelector } from './controls.js';
 import { COPY } from './copy.js';
-import { canExportVideo, download, exportVideo } from './export.js';
 import { createKey, createLanes } from './lanes.js';
 import { BAR_SECONDS, BPM, STEPS_PER_BAR, VOICES } from './music.js';
 import { createReadout } from './readout.js';
@@ -14,7 +13,7 @@ import { createScope, SCOPE_GEOMETRY } from './scope.js';
 import { hitsInBar, RECENT_WINDOW, recentHits, SCENES, sceneAt, sceneIndexAt, TOTAL_BARS, TOTAL_SECONDS } from './show.js';
 import { REDUCED_MOTION_QUERY } from './theme.js';
 import { createTitle } from './title.js';
-import { formatClock, formatPrecise, pad2, pauseWhileHidden, setText } from './util.js';
+import { canExportVideo, formatClock, formatPrecise, pad2, pauseWhileHidden, setText } from './util.js';
 
 // `?ritmo=<id>` names a rhythm that has its own path, or the path moved (#37): move there, so each
 // rhythm has one address
@@ -43,6 +42,8 @@ const EXPORT_SHADER_SCALE = 1,
 const stage = $('stage');
 // The video exports (tools/export-video.mjs, src/export.js) set .video-export: the 9:16 reel alone.
 const isVideoExport = () => document.documentElement.classList.contains('video-export');
+// tools/build-site.mjs marks every page of the published site (`PUBLISHED_MARK` there)
+const isPublished = () => document.documentElement.hasAttribute('data-published');
 const volume = initialVolumes(DESKTOP); // each instrument's level: the player, the wheel and the lanes read it
 const scope = createScope($('scope'), volume);
 $('scope').setAttribute('aria-label', COPY.wheel); // the rhythm's own number of steps
@@ -249,13 +250,16 @@ if (rhythms.length) {
   $('scenes').parentElement.after(rhythmSelector(rhythms, 'block rhythms-side'));
   tapButton.after(rhythmSelector(rhythms, 'rhythms-stage'));
 }
-// Desktop: «Exportar vídeo» in the middle of the left column, between the Roteiro and the selector
-// (owner, 2026-11-17, #19). The export runs in a hidden copy of this page (src/export.js).
-if (DESKTOP && !isVideoExport()) {
+// A development page on desktop: «Exportar vídeo» in the middle of the left column, between the
+// Roteiro and the selector. The published site has no export: tools/build-site.mjs marks its pages
+// and leaves the export's modules out, so they load here only when an export starts (#19, #72).
+// The export runs in a hidden copy of this page (src/export.js).
+if (DESKTOP && !isVideoExport() && !isPublished()) {
   $('scenes').parentElement.after(
     exportControl({
       supported: canExportVideo(),
       run: async ({ onProgress, signal }) => {
+        const { download, exportVideo } = await import('./export.js');
         const { blob, format } = await exportVideo({ onProgress, signal });
         const name = `${RHYTHM.id}.${format.id}`;
         download(blob, name);

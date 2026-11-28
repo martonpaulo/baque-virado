@@ -26,9 +26,6 @@ const FORMATS = [
 const loadMediabunny = () => import('../vendor/mediabunny.min.mjs');
 const nextFrame = win => new Promise(resolve => win.requestAnimationFrame(() => win.requestAnimationFrame(resolve)));
 
-/** Whether this browser has the encoders the export needs at all (a quick check, no download). */
-export const canExportVideo = () => typeof VideoEncoder === 'function' && typeof AudioEncoder === 'function';
-
 /** The first format whose video and audio codecs this browser encodes, or null. */
 export async function pickFormat(mediabunny = null) {
   const { getFirstEncodableVideoCodec, getFirstEncodableAudioCodec } = mediabunny ?? (await loadMediabunny());

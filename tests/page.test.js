@@ -3,12 +3,16 @@
 // layout of #4 hold.
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
-import { readFileSync } from 'node:fs';
+import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
 import { after, before, test } from 'node:test';
 import { COPY } from '../src/copy.js';
 import { RHYTHMS, redirectFor } from '../src/rhythms/index.js';
 import { createShow, SCENES } from '../src/show.js';
 import { REDUCED_MOTION_QUERY } from '../src/theme.js';
+import { buildSite } from '../tools/build-site.mjs';
+import { startStaticServer } from '../tools/static-server.mjs';
 import { openBrowser } from './support/browser.js';
 
 // The shipped rhythm registry with its list replaced, served in its place: maracatu and the
@@ -961,6 +965,46 @@ test('desktop shows «Exportar vídeo» in the middle of the left column, betwee
   assert.equal(await page.evaluate(() => document.activeElement.closest('.rhythms-side') !== null), true);
   assert.deepEqual(errors, []);
   await page.close();
+});
+
+// #72: «Exportar vídeo» showed on the public site. The site the deploy builds has no export, at a
+// desktop's size or a phone's, in any rhythm, and loads none of its code.
+test('the published site shows no video export and loads none of its code', async () => {
+  const parent = mkdtempSync(path.join(os.tmpdir(), 'baque-site-'));
+  const out = path.join(parent, 'site');
+  buildSite(out, undefined, 'aaaaaaa'); // as the Deploy workflow builds it, with a commit
+  const site = await startStaticServer(out, 0);
+  try {
+    for (const viewport of [DESKTOP, PHONES[0]]) {
+      const page = await session.browser.newPage();
+      const errors = [],
+        requests = [];
+      page.on('pageerror', error => errors.push(`page error: ${error.message}`));
+      page.on('console', message => {
+        if (message.type() === 'error') errors.push(`console error: ${message.text()}`);
+      });
+      page.on('request', request => requests.push(request.url()));
+      await page.setViewport(viewport);
+      for (const rhythm of RHYTHMS) {
+        const where = `${rhythm.id} ${viewport.width}x${viewport.height}`;
+        await page.goto(site.url + rhythm.id, { waitUntil: 'load' });
+        await page.waitForFunction(() => window.baque && document.documentElement.classList.contains('ready'));
+        assert.equal(await page.$('.export-video, .export-start, .export-status'), null, where);
+        assert.equal(await page.evaluate(words => document.body.textContent.includes(words), COPY.exportVideo.start), false, where);
+        if (viewport === DESKTOP)
+          assert.ok(await page.$eval('.rhythms-side', nav => nav.checkVisibility()), `${where}: the left column still ends with the selector`);
+      }
+      assert.deepEqual(
+        requests.filter(url => /export\.js|stage-capture|vendor\//.test(url)),
+        [],
+      );
+      assert.deepEqual(errors, []);
+      await page.close();
+    }
+  } finally {
+    await site.close();
+    rmSync(parent, { recursive: true, force: true });
+  }
 });
 
 test('phones have no video export', async () => {

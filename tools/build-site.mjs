@@ -7,8 +7,11 @@
 //   node tools/build-site.mjs <out> <commit>  → also versions every module, the stylesheet and the
 // sounds with `?v=<commit>` and writes build.txt, so a page never runs assets cached from another
 // build (#35). The repository's own pages stay unversioned for the dev server.
+// The video export is a tool of the development page (`pnpm serve`), never of the published site:
+// every page written here is marked, which `src/main.js` reads, and the export's modules and
+// `vendor/` stay out of the site (#72).
 
-import { cpSync, existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { cpSync, existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { COPY } from '../src/copy.js';
@@ -17,20 +20,18 @@ import { PREPARING, preparingLine } from '../src/rhythms/preparing.js';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const SITE_NAME = 'Batuque';
-const COPIED = [
-  'index.html',
-  '404.html',
-  'styles.css',
-  'src',
-  'vendor',
-  'social.png',
-  'social',
-  'apple-touch-icon.png',
-  'icon.svg',
-  'icons',
-  'CNAME',
-  '.nojekyll',
-];
+const COPIED = ['index.html', '404.html', 'styles.css', 'src', 'social.png', 'social', 'apple-touch-icon.png', 'icon.svg', 'icons', 'CNAME', '.nojekyll'];
+
+// What only a development page loads: the in-page video export and the stage capture it draws with.
+export const DEVELOPMENT_MODULES = ['src/export.js', 'src/stage-capture.js'];
+export const PUBLISHED_MARK = 'data-published'; // on <html>; `isPublished` in src/main.js reads it
+
+/** The page as the published site serves it: marked, and with no link to a development module. */
+export function published(html) {
+  if (!/<html [^>]*>/.test(html)) throw new Error('the page has no <html> tag with attributes to mark');
+  const marked = html.replace(/<html ([^>]*)>/, `<html $1 ${PUBLISHED_MARK}>`);
+  return DEVELOPMENT_MODULES.reduce((page, module) => page.replace(`<link rel="modulepreload" href="${module}">\n`, ''), marked);
+}
 
 const escapeHtml = text => text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 const LD_JSON = /<script type="application\/ld\+json">(.*)<\/script>/;
@@ -154,13 +155,13 @@ export function buildSite(out, root = ROOT, version = '') {
   for (const file of readdirSync(path.join(root, 'fonts')).filter(name => name.endsWith('.woff2') || /^OFL-.*\.txt$/.test(name)))
     cpSync(path.join(root, 'fonts', file), path.join(out, 'fonts', file));
 
-  const modules = listModules(path.join(root, 'src'), 'src/');
+  for (const module of DEVELOPMENT_MODULES) rmSync(path.join(out, module));
+
+  const modules = listModules(path.join(out, 'src'), 'src/');
   const finish = page => (version ? versioned(page, version, modules) : page);
-  const html = readFileSync(path.join(root, 'index.html'), 'utf8');
-  if (version) {
-    writeFileSync(path.join(out, 'index.html'), finish(html));
-    writeFileSync(path.join(out, 'build.txt'), `${version}\n`);
-  }
+  const html = published(readFileSync(path.join(root, 'index.html'), 'utf8'));
+  writeFileSync(path.join(out, 'index.html'), finish(html));
+  if (version) writeFileSync(path.join(out, 'build.txt'), `${version}\n`);
   const origin = new URL(html.match(/<link rel="canonical" href="([^"]+)"/)[1]).origin; // the live address, which index.html owns
   for (const id of ROUTES) {
     const rhythm = RHYTHMS.find(candidate => candidate.id === id);

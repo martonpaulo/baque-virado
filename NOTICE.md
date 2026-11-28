@@ -7,4 +7,5 @@
 - Copyright (c) 2026-present, Vanilagy and contributors.
 - License: Mozilla Public License 2.0. The source code form is at
   <https://github.com/Vanilagy/mediabunny> and in the npm package.
-- Use: the in-page video export (`src/export.js`) writes MP4 and WebM files with it.
+- Use: the video export of the development page (`src/export.js`) writes MP4 and WebM files with
+  it. The published site does not serve it.

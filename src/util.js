@@ -112,3 +112,6 @@ export function pauseWhileHidden(doc, show) {
   doc.addEventListener('visibilitychange', onChange);
   return () => doc.removeEventListener('visibilitychange', onChange);
 }
+
+/** Whether this browser has the encoders the video export needs at all (a quick check, no download). */
+export const canExportVideo = () => typeof VideoEncoder === 'function' && typeof AudioEncoder === 'function';

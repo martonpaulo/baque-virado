@@ -27,12 +27,6 @@ Endereço: <https://batuque.martonpaulo.com>
 6. No computador, a coluna da direita tem o volume de cada instrumento e a escolha de som de
    alguns deles. O site guarda essas escolhas no seu navegador.
 
-## Exportar vídeo
-
-No computador, o botão «Exportar vídeo», no meio da coluna da esquerda, grava o show do ritmo
-aberto num vídeo vertical, com som. O vídeo é feito no próprio navegador e nada é enviado para
-um servidor. O arquivo sai em MP4 quando o navegador consegue, ou em WebM.
-
 ## De onde vêm os sons
 
 Os sons são gravações de instrumentos de verdade, em domínio público (CC0). Quem gravou cada som
@@ -70,6 +64,9 @@ Depois abra <http://127.0.0.1:8000>.
 - `node tools/build-site.mjs <pasta> <commit>` monta o site publicado, com uma página por ritmo
   e cada arquivo marcado com o commit, para que uma página nunca misture duas versões.
 - `node tools/encode-sounds.mjs` converte cada WAV de `sounds/` para AAC (precisa do `ffmpeg`).
+- O site publicado não exporta vídeo. Na página que o `pnpm serve` abre, no computador, o botão
+  «Exportar vídeo», no meio da coluna da esquerda, grava o show do ritmo aberto num vídeo vertical,
+  com som, no próprio navegador: em MP4 quando o navegador consegue, ou em WebM.
 - `pnpm export index.html out/maracatu.mp4` exporta o vídeo pela linha de comando, com o Chrome
   sem janela e o `ffmpeg`. `--from` e `--to` escolhem o trecho em segundos; `--loudnorm`
   normaliza o volume para -14 LUFS. Como root, numa sessão na nuvem, o Chrome abre sem sandbox.
