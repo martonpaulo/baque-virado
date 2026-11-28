@@ -133,7 +133,7 @@ test('the coco declares the rufada that leads into each scene but the Rufo', () 
 // Each show's musical graphics belong to its own instruments (docs/product.md, Rhythm shows; #49):
 // no two shows share a graphic, and the shows that still draw only the maracatu's set are listed
 // here. The list only shrinks: each show leaves it with its own issue.
-const WITHOUT_GRAPHICS = ['coco', 'frevo', 'forro', 'manguebeat', 'bregafunk'];
+const WITHOUT_GRAPHICS = ['coco', 'frevo', 'forro', 'bregafunk'];
 
 test('no two shows share a graphic of their own, and no show joins the ones without any', () => {
   const others = RHYTHMS.filter(rhythm => rhythm !== MARACATU);

@@ -9,12 +9,14 @@ import {
   ANSWER,
   BASS_A,
   BASS_B,
+  bassNotesIn,
   CAIXA,
   GANZA,
   isEcho,
   isThrown,
   LICK,
   LICK_B,
+  lastThrow,
   MAIN,
   MANGUEBEAT,
   MAX_DOUBLE_RETUNE,
@@ -24,6 +26,7 @@ import {
   RIFF_B,
 } from '../src/rhythms/manguebeat.js';
 import { MANGUE_PALETTE } from '../src/rhythms/manguebeat-background.js';
+import { copyLight, copyPlaces, FRETS, fretShare, MANGUEBEAT_GRAPHICS, placeOf, STRINGS } from '../src/rhythms/manguebeat-graphics.js';
 import { midiOf } from '../src/rhythms/studio-kit.js';
 import { createShow } from '../src/show.js';
 import { planStudio } from '../src/studio.js';
@@ -350,4 +353,107 @@ test('under the wheel the background stays dark: the wheel colours keep 3:1, and
   });
   assert.ok(darkest >= 3, `a wheel colour at ${darkest.toFixed(2)}:1`);
   assert.ok(nearest > RADIUS, `a shape drawn ${nearest.toFixed(1)} px from the centre, inside the wheel`);
+});
+
+// ---------- its own graphics: the bass tablature on the neck and the echo's copies (#56) ----------
+const SHOW = createShow(MANGUEBEAT);
+const startOf = id => SHOW.SCENES.find(scene => scene.id === id).start;
+const stringOf = midi => STRINGS[placeOf(midi).string].name;
+
+test('every bass note of the show has a place on the neck, at its lowest fret', () => {
+  assert.deepEqual(MANGUEBEAT.graphics.ids, MANGUEBEAT_GRAPHICS);
+  const played = new Set();
+  for (let bar = 0; bar < SHOW.TOTAL_BARS; bar++) for (const note of bassNotesIn(bar)) played.add(note.midi);
+  assert.ok(played.size >= 5, `the bass plays only ${played.size} pitches`);
+  for (const midi of played) assert.ok(placeOf(midi) !== null, `no place on the neck for MIDI ${midi}`);
+  // E1 and A1 are open strings; G1 is the third fret of the E string; E2 the second of the D string, not the seventh of the A
+  assert.deepEqual([stringOf(midiOf('E1')), placeOf(midiOf('E1')).fret], ['E', 0]);
+  assert.deepEqual([stringOf(midiOf('A1')), placeOf(midiOf('A1')).fret], ['A', 0]);
+  assert.deepEqual([stringOf(midiOf('G1')), placeOf(midiOf('G1')).fret], ['E', 3]);
+  assert.deepEqual([stringOf(midiOf('E2')), placeOf(midiOf('E2')).fret], ['D', 2]);
+  assert.deepEqual([stringOf(midiOf('C3')), placeOf(midiOf('C3')).fret], ['G', FRETS]);
+  assert.equal(placeOf(midiOf('E1') - 1), null); // under the lowest string
+  assert.equal(placeOf(midiOf('C3') + 1), null); // past the last fret drawn
+  // the frets stand nearer each other towards the bridge, and the last is inside the neck drawn
+  const widths = Array.from({ length: FRETS }, (_, n) => fretShare(n + 1) - fretShare(n));
+  assert.equal(fretShare(0), 0);
+  for (const [n, width] of widths.slice(1).entries()) assert.ok(width < widths[n], `fret ${n + 2} is not narrower than fret ${n + 1}`);
+  assert.ok(fretShare(FRETS) < 1);
+});
+
+test("a bar's tablature is the bass line the script wrote, and a bar where the bass rests has none", () => {
+  const first = bassNotesIn(startOf('baixo'));
+  assert.deepEqual(
+    first.map(note => [note.step, note.steps, note.midi]),
+    [
+      [0, 3, midiOf('E1')],
+      [5, 1, midiOf('E2')],
+      [7, 1, midiOf('D2')],
+      [11, 1, midiOf('B1')],
+      [14, 1, midiOf('D2')],
+    ],
+  );
+  assert.equal(BASS_A[0], 'E1 - - . . E2 . D2 . . . B1 . . D2 .'); // the line those notes are read from
+  assert.deepEqual(bassNotesIn(startOf('introducao')), []);
+  for (let bar = 0; bar < SHOW.TOTAL_BARS; bar++)
+    assert.deepEqual(
+      bassNotesIn(bar).map(note => note.step),
+      SHOW.hitsInBar(bar)
+        .filter(h => h.voice === 'baixo')
+        .map(h => h.hit.step),
+      `bar ${bar + 1}`,
+    );
+});
+
+test('the echo shows the newest stroke thrown into it, inside its own scene', () => {
+  assert.deepEqual(lastThrow(0.5), { voice: 'main', at: 0, repeats: 4 }); // the introduction's one stroke
+  assert.equal(lastThrow(startOf('celula') + 1.5), null); // a scene with no echo
+  assert.equal(lastThrow(startOf('retorno') + 0.01), null); // the dub's strokes do not follow into the scene after it
+  const end = lastThrow(startOf('final') + 1.5);
+  assert.equal(end.repeats, 7);
+  assert.equal(end.at, startOf('final') + 1);
+  // each throw is a written accent the wheel marks as thrown, and none is missed
+  for (let step = 0; step < SHOW.TOTAL_BARS * 16; step++) {
+    const bar = Math.floor(step / 16),
+      thrown = Object.keys(MANGUEBEAT.voices).filter(voice => isThrown(voice, bar, step % 16)),
+      found = lastThrow(step / 16);
+    if (thrown.length)
+      assert.ok(found !== null && found.at === step / 16 && thrown.includes(found.voice), `step ${step}: ${thrown} thrown, ${JSON.stringify(found)} shown`);
+    else assert.ok(found === null || found.at < step / 16, `step ${step}: a throw nobody played`);
+  }
+});
+
+test('a copy lights as it sounds and fades over two repeats; with reduced motion it is lit until the next one sounds', () => {
+  const EVERY = 3;
+  assert.equal(copyLight(1, 2.9, EVERY, false), 0); // not sounded yet
+  assert.equal(copyLight(1, 3, EVERY, false), 1);
+  assert.equal(copyLight(1, 6, EVERY, false), 0.5);
+  assert.equal(copyLight(1, 9, EVERY, false), 0);
+  assert.equal(copyLight(0, 0, EVERY, false), 1); // the stroke itself
+  assert.equal(copyLight(1, 3, EVERY, true), 1);
+  assert.equal(copyLight(1, 5.9, EVERY, true), 1); // no fade
+  assert.equal(copyLight(1, 6, EVERY, true), 0);
+  assert.equal(copyLight(2, 5.9, EVERY, true), 0);
+});
+
+test('the copies stand clear of each other inside the main circle, none larger than the one before, the row centred', () => {
+  const ROW_Y = 76.5,
+    RADIUS = 50;
+  for (const repeats of [4, 7]) {
+    const places = copyPlaces(repeats, 0.55);
+    assert.equal(places.length, repeats + 1);
+    for (const [n, [x, radius]] of places.entries()) {
+      if (n > 0) {
+        const [before, beforeRadius] = places[n - 1];
+        assert.ok(radius <= beforeRadius, `copy ${n} is larger than copy ${n - 1}`);
+        assert.ok(x - radius - (before + beforeRadius) > 1, `copies ${n - 1} and ${n} touch`);
+      }
+      const farthest = Math.hypot(Math.abs(x - RADIUS) + radius, Math.abs(ROW_Y - RADIUS) + radius);
+      assert.ok(farthest <= RADIUS, `copy ${n} reaches ${farthest.toFixed(1)} from the centre, outside the main circle`);
+      assert.ok(radius >= 1, `copy ${n} is too small to see`);
+    }
+    const left = places[0][0] - places[0][1],
+      right = places.at(-1)[0] + places.at(-1)[1];
+    assert.ok(Math.abs(left + right - 2 * RADIUS) < 1e-9, 'the row is centred');
+  }
 });

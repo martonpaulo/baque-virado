@@ -12,6 +12,7 @@ import { label, row, stat, stats } from '../readout-markup.js';
 import { rollReadout } from '../roll.js';
 import { fgAlpha } from '../theme.js';
 import { createManguebeatPainter, MANGUE_PALETTE } from './manguebeat-background.js';
+import { createManguebeatGraphics, MANGUEBEAT_GRAPHICS } from './manguebeat-graphics.js';
 import { sceneStarts, straightMeter } from './meter.js';
 import { midiOf, recordedChoices, studioSounds, takes } from './studio-kit.js';
 
@@ -435,6 +436,35 @@ function echoesInto(bar) {
   return out;
 }
 
+/** The bass notes written in an absolute bar, for its tablature: each { step, steps, midi }. */
+export const bassNotesIn = bar =>
+  sourceHits(bar).baixo.map(h => {
+    const { note, steps } = parseTone(h.tone);
+    return { step: h.step, steps, midi: midiOf(note) };
+  });
+
+/**
+ * The newest accent thrown into the echo at or before `position` (bars on the timeline), inside its
+ * own scene and no further back than a long tail reaches: { voice, at, repeats }, or null.
+ */
+export function lastThrow(position) {
+  const bar = Math.floor(position),
+    first = Math.max(SCENE_STARTS[sceneOfBar(bar)], bar - ECHO_BARS_BACK);
+  for (let from = bar; from >= first; from--) {
+    let newest = null;
+    for (const voice of VOICE_ORDER) {
+      const echo = echoOf(voice, from);
+      if (!echo) continue;
+      for (const source of sourceHits(from)[voice]) {
+        const at = from + source.step / STEPS_PER_BAR;
+        if (source.velocity >= ECHO_ACCENT && at <= position && (newest === null || at > newest.at)) newest = { voice, at, repeats: echo.repeats };
+      }
+    }
+    if (newest) return newest; // a stroke of this bar is newer than any of the bar before
+  }
+  return null;
+}
+
 function barHits(scene, barInScene) {
   const bar = scene.start + barInScene,
     written = sourceHits(bar),
@@ -757,6 +787,13 @@ const READ = {
 };
 const COPY = {
   name: 'manguebeat',
+  // the words of its own graphics (src/rhythms/manguebeat-graphics.js)
+  graphics: {
+    label:
+      'Tablatura do baixo: o braço com a casa da nota que soa em destaque e, embaixo, as notas do compasso como números de casa nas quatro cordas. Eco: a batida jogada no eco e as suas repetições, cada uma menor e mais fraca.',
+    tab: 'baixo',
+    echo: 'eco',
+  },
   description: 'Manguebeat do Recife: alfaias na célula do coco, caixa, ganzá, baixo, guitarra distorcida e eco de dub, um de cada vez e depois juntos.', // the page's search and preview description
   themeColor: MANGUE_PALETTE.ground, // the page's theme-color: the rhythm's own ground colour
   feminineInstruments: ['alfaia', 'caixa', 'guitarra'],
@@ -895,4 +932,16 @@ export const MANGUEBEAT = {
   waves: null,
   sounds: studioSounds(STUDIO, SOUND_CHOICES, 'banda'), // every instrument plays its part in the full band
   copy: COPY,
+  // its own graphics in the stage's main square: the bass tablature on the neck and the echo's repeats (#56)
+  graphics: {
+    ids: MANGUEBEAT_GRAPHICS,
+    create: (element, context) =>
+      createManguebeatGraphics(element, {
+        ...context,
+        stepsPerBar: STEPS_PER_BAR,
+        notesIn: bassNotesIn,
+        lastThrow,
+        echo: { steps: ECHO_STEPS, feedback: ECHO_FEEDBACK },
+      }),
+  },
 };

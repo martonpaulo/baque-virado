@@ -868,3 +868,132 @@ test('with reduced motion the brega kit lights without growing, and a muted piec
   assert.deepEqual([...errors, ...plain.errors], []);
   await plain.page.close();
 });
+
+// ---------- the manguebeat's own graphics (#56) ----------
+const MANGUE_SCENES = createShow(RHYTHMS.find(rhythm => rhythm.id === 'manguebeat')).SCENES;
+const SIXTEENTH = 1 / 16;
+/** Draw the manguebeat's scene `id` at `offset` bars into it. */
+const mangueAt = (page, id, offset) =>
+  page.evaluate(
+    async start => {
+      window.baque.render(start);
+      await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+    },
+    MANGUE_SCENES.find(scene => scene.id === id).start + offset,
+  );
+const tabNow = page => page.$eval('#graphic [data-graphic="tablatura"]', tab => [tab.dataset.string, tab.dataset.fret]);
+const litCopies = page => page.$$eval('#graphic [data-copy][data-lit="true"]', copies => copies.map(copy => Number(copy.dataset.copy)));
+
+for (const viewport of [PHONES[0], DESKTOP])
+  test(`the manguebeat draws the bass tablature on the neck and the echo's copies in the main square, at ${viewport.width} px`, async () => {
+    const { page, errors } = await openPage(viewport, { query: '?ritmo=manguebeat' });
+    assert.equal(await page.$eval('#stage', stage => stage.classList.contains('has-graphic')), true);
+    assert.match(
+      await page.$eval('#graphic svg', svg => `${svg.getAttribute('role')}: ${svg.getAttribute('aria-label')}`),
+      /^img: Tablatura do baixo: .*Eco: /,
+    );
+    assert.deepEqual(await page.$$eval('#graphic [data-graphic]', groups => groups.map(group => group.dataset.graphic)), ['tablatura', 'eco']);
+    // the introduction: the bass rests, and the alfaia's one stroke is in the echo, a copy more every three sixteenths
+    await mangueAt(page, 'introducao', 1.6 * SIXTEENTH);
+    assert.equal(await page.$$eval('#graphic [data-step]', notes => notes.length), 0);
+    assert.deepEqual(await tabNow(page), ['', '']);
+    assert.equal(await page.$$eval('#graphic [data-copy]', copies => copies.length), 5); // the stroke and four repeats
+    assert.deepEqual(await litCopies(page), [0]);
+    await mangueAt(page, 'introducao', 4 * SIXTEENTH);
+    assert.deepEqual(await litCopies(page), [0, 1]);
+    assert.equal(await page.$eval('#graphic [data-graphic="eco"]', trail => trail.dataset.voice), 'main');
+    assert.equal(
+      await page.$eval('#graphic svg > text:last-of-type', name => `${name.textContent}|${getComputedStyle(name).display !== 'none'}`),
+      'ALFAIA|true', // the instrument, as the sound controls name it, not one of its hands
+    );
+    // a scene with no echo: the copies are at rest and no name stands under them
+    await mangueAt(page, 'celula', 1.5);
+    assert.deepEqual(await litCopies(page), []);
+    assert.equal(await page.$eval('#graphic svg > text:last-of-type', name => getComputedStyle(name).display), 'none');
+    // the bass scene: the bar's notes as fret numbers, the one that sounds lit on the staff and on the neck
+    await mangueAt(page, 'baixo', 0.3 * SIXTEENTH);
+    assert.deepEqual(await page.$$eval('#graphic [data-step]', notes => notes.map(note => `${note.dataset.string}${note.textContent}`)), [
+      'E0',
+      'D2',
+      'D0',
+      'A2',
+      'D0',
+    ]);
+    assert.deepEqual(await page.$$eval('#graphic [data-now="true"]', notes => notes.map(note => note.dataset.step)), ['0']);
+    assert.deepEqual(await tabNow(page), ['E', '0']);
+    await mangueAt(page, 'baixo', 2.5 * SIXTEENTH); // the first note is held three sixteenths
+    assert.deepEqual(await tabNow(page), ['E', '0']);
+    await mangueAt(page, 'baixo', 3.5 * SIXTEENTH); // a rest
+    assert.deepEqual(await tabNow(page), ['', '']);
+    await mangueAt(page, 'baixo', 5.5 * SIXTEENTH);
+    assert.deepEqual(await tabNow(page), ['D', '2']);
+    // every text is at least the stage's own label size, in the same CSS px
+    const sizes = await page.evaluate(() => {
+      const unit = document.querySelector('#graphic').clientWidth / 100;
+      return {
+        label: parseFloat(getComputedStyle(document.querySelector('.hud')).fontSize),
+        texts: [...document.querySelectorAll('#graphic text')].map(text => [text.textContent, Number(text.getAttribute('font-size')) * unit]),
+      };
+    });
+    for (const [text, size] of sizes.texts)
+      assert.ok(size >= sizes.label * 0.99, `«${text}» at ${size.toFixed(2)}px is under the stage's label of ${sizes.label}px`);
+    // no two numbers of a bar overlap (the last bar of the second part plays four sixteenths in a row), and
+    // nothing of the graphic leaves the main circle
+    await mangueAt(page, 'segunda', 3 + 13.5 * SIXTEENTH);
+    const drawn = await page.evaluate(() => {
+      const box = element => {
+        const { left, right, top, bottom } = element.getBoundingClientRect();
+        return { left, right, top, bottom };
+      };
+      const square = box(document.querySelector('#graphic svg'));
+      return {
+        square,
+        numbers: [...document.querySelectorAll('#graphic [data-step] text')].map(box),
+        marks: [...document.querySelectorAll('#graphic svg text, #graphic svg circle, #graphic svg line, #graphic svg rect')]
+          .filter(element => getComputedStyle(element).display !== 'none' && element.getAttribute('stroke-opacity') !== '0')
+          .map(element => ({ ...box(element), name: `${element.tagName} ${element.textContent}` })),
+      };
+    });
+    assert.ok(drawn.numbers.length >= 7, 'the bar of four sixteenths in a row');
+    for (const [i, a] of drawn.numbers.entries())
+      for (const b of drawn.numbers.slice(i + 1))
+        assert.ok(a.right <= b.left || b.right <= a.left || a.bottom <= b.top || b.bottom <= a.top, 'two fret numbers overlap');
+    const radius = (drawn.square.right - drawn.square.left) / 2,
+      centre = [drawn.square.left + radius, drawn.square.top + radius];
+    for (const mark of drawn.marks) {
+      const reach = Math.hypot(Math.max(centre[0] - mark.left, mark.right - centre[0]), Math.max(centre[1] - mark.top, mark.bottom - centre[1]));
+      assert.ok(reach <= radius + 1, `«${mark.name}» reaches ${reach.toFixed(1)}px from the centre of a main circle of ${radius.toFixed(1)}px`);
+    }
+    assert.deepEqual(errors, []);
+    await page.close();
+  });
+
+test('with reduced motion the manguebeat lights one copy at a time and nothing fades, and a muted bass shows disabled', async () => {
+  const { page, errors } = await openPage(DESKTOP, { query: '?ritmo=manguebeat' });
+  await page.emulateMediaFeatures([{ name: 'prefers-reduced-motion', value: 'reduce' }]);
+  await mangueAt(page, 'introducao', 4 * SIXTEENTH);
+  assert.deepEqual(await litCopies(page), [1]); // the copy that sounds now, alone
+  assert.equal(await page.$eval('#graphic [data-copy="1"]', copy => Number(copy.getAttribute('fill-opacity'))), 0.9);
+  await mangueAt(page, 'baixo', 5.9 * SIXTEENTH); // the end of a fretted note: its dot is as lit as at its start
+  assert.equal(await page.$eval('#graphic [data-graphic="tablatura"] > circle', finger => Number(finger.getAttribute('fill-opacity'))), 0.9);
+  // the bass muted (the volume a desktop viewer stored): its tablature is dimmed and no note lights
+  await page.evaluate(() => localStorage.setItem('baque-virado:volume-baixo', 'mute'));
+  await page.reload({ waitUntil: 'load' });
+  await page.waitForFunction(() => window.baque && document.readyState === 'complete');
+  await mangueAt(page, 'baixo', 0.3 * SIXTEENTH);
+  assert.equal(await page.$eval('#graphic [data-graphic="tablatura"]', tab => tab.getAttribute('opacity')), '0.38');
+  assert.equal(await page.$$eval('#graphic [data-now="true"]', notes => notes.length), 0);
+  assert.deepEqual(await tabNow(page), ['', '']);
+  await page.evaluate(() => localStorage.removeItem('baque-virado:volume-baixo'));
+  // the alfaia muted: its stroke is still named under the echo, disabled, and no copy lights
+  await page.evaluate(() => localStorage.setItem('baque-virado:volume-alfaia', 'mute'));
+  await page.reload({ waitUntil: 'load' });
+  await page.waitForFunction(() => window.baque && document.readyState === 'complete');
+  await mangueAt(page, 'introducao', 4 * SIXTEENTH);
+  assert.deepEqual(await litCopies(page), []);
+  assert.deepEqual(await page.$eval('#graphic [data-graphic="eco"]', trail => [trail.dataset.voice, trail.getAttribute('opacity')]), ['main', '0.38']);
+  assert.equal(await page.$eval('#graphic svg > text:last-of-type', name => `${name.textContent}|${getComputedStyle(name).display !== 'none'}`), 'ALFAIA|true');
+  await page.evaluate(() => localStorage.removeItem('baque-virado:volume-alfaia'));
+  assert.deepEqual(errors, []);
+  await page.close();
+});

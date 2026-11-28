@@ -1160,6 +1160,12 @@ html:not(.video-export) .read .row .k {
   flex: 1;
   min-width: 0;
 }
+/* a value that wraps in the narrower readout ends at the right edge, as a one-line value does, and
+   leaves no word alone on its last line */
+.has-graphic .below .read .row > span:last-child {
+  text-align: right;
+  text-wrap: balance;
+}
 /* with a graphic: it takes the wheel's place in the column, and the smaller wheel and the readout
    share the readout's place and height */
 html:not(.video-export) .has-graphic .graphic {

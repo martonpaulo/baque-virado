@@ -122,9 +122,11 @@ The rules every rhythm package in `src/rhythms/` follows.
   A package gives its graphics as `graphics` (their ids and a `create`); the stage then draws them
   in the main square, where the wheel is in the other shows, and the wheel sits beside the readout.
   A graphic is built once a scene and updated from the show position alone; with reduced motion a
-  part is lit or not, and nothing grows or fades. The brega is the first: its chord chart and its
-  drum kit ([`rhythms/brega.md`](rhythms/brega.md#visuals)). `tests/rhythms.test.js` lists the shows
-  that still have none; the list only shrinks.
+  part is lit or not, and nothing grows or fades. The brega was the first: its chord chart and its
+  drum kit ([`rhythms/brega.md`](rhythms/brega.md#visuals)). The manguebeat draws the bass
+  tablature on the neck and the echo's copies
+  ([`rhythms/manguebeat.md`](rhythms/manguebeat.md#visuals)). `tests/rhythms.test.js` lists the
+  shows that still have none; the list only shrinks.
 - **Background.** Circular, coming out of the central wheel, in the rhythm's palette from section 5
   of [`colour-and-visuals.md`](research/colour-and-visuals.md): brega in desaturated blue
   and muted rose, bregafunk in purple, magenta and gold. The approved backgrounds are a sketch to

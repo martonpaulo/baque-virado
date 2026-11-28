@@ -210,6 +210,25 @@ What the numbers do not show: whether it grooves. No number here replaces the ow
   the whole show at 30 frames a second and counts them. It starts outside the wheel. No red passes
   R/(R+G+B) 0.8.
 - Reduced motion: no bloom, no jitter, the grain stops changing, the rings travel half as far.
+- **Graphics of its own** ([#56](https://github.com/martonpaulo/batuque/issues/56),
+  [`manguebeat-graphics.js`](../../src/rhythms/manguebeat-graphics.js)), in the stage's main square,
+  with the wheel smaller beside the readout:
+  - **Tablatura do baixo.** The neck of the bass: the nut, five frets at the instrument's spacing
+    and the four strings. The note that sounds lights its string and its place: a dot behind its
+    fret, or a ring left of the nut for an open string. Each note sits at its lowest fret, so the
+    whole show stays in the first position. Under the neck, the bar's tablature: one line a
+    string, a fret number where each note starts and a line for as long as it is held; the note
+    that sounds is lit. A bar where the bass rests keeps its four empty lines.
+  - **Eco.** The stroke a scene throws into the echo and one circle for each repeat the scene
+    marks, four or seven. Each copy has 0.55 of the level of the one before, the delay's feedback,
+    and its area follows; a copy lights as it sounds, every three sixteenths, and fades over two
+    repeats, in the colour of the instrument whose stroke it is, named under the row. A scene
+    with no echo shows the copies at rest, and a scene's copies do not follow into the next.
+  - With reduced motion a note or a copy is lit while it sounds and plain otherwise: nothing
+    fades or grows. A muted bass dims the tablature and lights nothing, and a muted instrument's
+    stroke lights no copy.
+  - Every label is the stage's label size as the page renders it, and nothing is drawn outside
+    the main circle (`tests/page.test.js`).
 
 ## Widgets per scene
 
