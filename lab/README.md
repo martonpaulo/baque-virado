@@ -65,7 +65,7 @@ names), so it needs nothing beyond `pnpm install`.
 ```sh
 node lab/render.mjs out/tutti.wav forro --from 60 --to 76               # a bar range: seconds
 node lab/render.mjs out/solo.wav forro --from 60 --to 76 --only sanfona
-node lab/render.mjs out/full.wav forro                                  # the whole show: two to five minutes
+node lab/render.mjs out/full.wav forro                                  # the whole show: 5 to 15 seconds
 lab/.data/venv/bin/python lab/sections.py map out/full.wav              # the show in the same facts as a reference's map
 lab/.data/venv/bin/python lab/sections.py pulse out/full.wav            # and its pulse periods and level shape
 python lab/analyze.py one out/full.wav forro   # similarity, bands, stems, width, density, aesthetics

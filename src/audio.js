@@ -367,8 +367,23 @@ export function createPlayer(bank, choice, volume = {}) {
 
 const RENDER_TAIL_SECONDS = 1.2; // the last hit rings out
 /**
+ * The first step of each span the offline render schedules after it has started, with the bar it
+ * schedules it at: one bar a span, each a bar before its own first step, so no hit is ever
+ * scheduled late. The first two bars are scheduled before the render starts.
+ */
+export function renderSpans(fromBar, toBar, stepsPerBar = STEPS_PER_BAR) {
+  const spans = [];
+  for (let bar = fromBar + 2; bar < toBar; bar++) spans.push({ atBar: bar - 1, fromStep: bar * stepsPerBar, toStep: (bar + 1) * stepsPerBar });
+  return spans;
+}
+/**
  * The show rendered offline as a 16-bit stereo WAV (for the video exporter): the whole show, or only
  * the bars from `fromBar` to `toBar`, with the instrument volumes `volume` (all normal when empty).
+ *
+ * The hits are scheduled a bar at a time while the render runs (#58): the browser works on every
+ * source it holds in each block of samples, also on one that starts a minute later, so a show
+ * scheduled whole before the render costs its hits times its length. A browser whose offline
+ * context cannot be suspended schedules the whole show first, as before, for the same sound.
  */
 export async function renderShowWav(bank, choice, leadIn, { fromBar = 0, toBar = TOTAL_BARS, volume = {} } = {}) {
   const sampleRate = 44100,
@@ -376,9 +391,28 @@ export async function renderShowWav(bank, choice, leadIn, { fromBar = 0, toBar =
   const context = new OfflineAudioContext(2, length, sampleRate);
   const buffers = await bank.load(context, filesFor(choice)),
     master = masterChain(context);
-  for (let step = fromBar * STEPS_PER_BAR; step < toBar * STEPS_PER_BAR; step++)
-    scheduleStep(context, buffers, master, step, leadIn + (step / STEPS_PER_BAR - fromBar) * BAR_SECONDS, choice, volume);
-  return encodeWav(await context.startRendering());
+  const timeOf = bar => leadIn + (bar - fromBar) * BAR_SECONDS;
+  const schedule = (fromStep, toStep) => {
+    for (let step = fromStep; step < toStep; step++) scheduleStep(context, buffers, master, step, timeOf(step / STEPS_PER_BAR), choice, volume);
+  };
+  const spans = typeof context.suspend === 'function' ? renderSpans(fromBar, toBar) : [];
+  schedule(fromBar * STEPS_PER_BAR, spans.length ? spans[0].fromStep : toBar * STEPS_PER_BAR);
+  let failure = null; // a span that could not be scheduled: the render still ends, and this error is its result
+  const failed = error => {
+    failure = failure || error;
+  };
+  for (const span of spans)
+    context.suspend(timeOf(span.atBar)).then(() => {
+      try {
+        if (!failure) schedule(span.fromStep, span.toStep);
+      } catch (error) {
+        failed(error);
+      }
+      return context.resume().catch(failed);
+    }, failed); // a refused suspension stopped nothing, so there is nothing to resume
+  const audio = await context.startRendering();
+  if (failure) throw failure;
+  return encodeWav(audio);
 }
 
 function encodeWav(audio) {

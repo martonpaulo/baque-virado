@@ -1,6 +1,8 @@
 // A fake OfflineAudioContext that records every sample the show starts: its name, start time,
-// playback rate and level. Enough of the Web Audio API for renderShowWav, for tests in Node.
-export function installRecordingContext() {
+// playback rate and level, and the render time it was scheduled at. Enough of the Web Audio API for
+// renderShowWav, for tests in Node. Like a browser's, it can be suspended at a time of its render
+// and resumed; `suspendable: false` is a browser whose offline context cannot.
+export function installRecordingContext({ suspendable = true } = {}) {
   const log = [];
   const param = () => ({
     value: 1,
@@ -17,6 +19,15 @@ export function installRecordingContext() {
       this.length = length;
       this.currentTime = 0;
       this.destination = node();
+      this.suspensions = [];
+      if (!suspendable) this.suspend = undefined;
+    }
+    /** Stop the render at `time`: the promise resolves when `startRendering` reaches it. */
+    suspend(time) {
+      return new Promise(resolve => this.suspensions.push({ time, resolve }));
+    }
+    async resume() {
+      this.resumed();
     }
     createGain = () => node();
     createDynamicsCompressor = () => node({ threshold: param(), ratio: param(), attack: param(), release: param(), knee: param() });
@@ -38,6 +49,7 @@ export function installRecordingContext() {
           entry.time = time;
           entry.rate = source.playbackRate.value;
           entry.level = level.gain.value;
+          entry.scheduledAt = this.currentTime;
           log.push(entry);
         },
         stop() {
@@ -53,6 +65,15 @@ export function installRecordingContext() {
     }
     createBuffer = (_channels, length) => ({ length, copyToChannel() {}, getChannelData: () => new Float32Array(length), name: 'synth' });
     async startRendering() {
+      for (const stop of this.suspensions.sort((a, b) => a.time - b.time)) {
+        this.currentTime = stop.time;
+        const resumed = new Promise(resolve => {
+          this.resumed = resolve;
+        });
+        stop.resolve();
+        await resumed;
+      }
+      this.currentTime = this.length / this.sampleRate;
       const empty = new Float32Array(1);
       return { length: 1, sampleRate: this.sampleRate, getChannelData: () => empty };
     }

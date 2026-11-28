@@ -26,7 +26,7 @@ export function chromePath() {
 }
 
 /** Start the static server and a headless browser; `close()` stops both. `launch` adds to the
- * browser's launch options (the lab's renderer lifts the protocol limit, as a whole show takes minutes). */
+ * browser's launch options (the lab's renderer lifts the protocol limit, for a machine where a whole show takes minutes). */
 export async function openBrowser(launch = {}) {
   const server = await startStaticServer(undefined, 0, { routes: [...ROUTES, 'dois-por-quatro'] }); // and the 2/4 fixture's path
   const browser = await puppeteer.launch({

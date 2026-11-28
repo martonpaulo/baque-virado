@@ -142,7 +142,7 @@ async function main() {
     browser = await puppeteer.launch({
       executablePath: CHROME,
       headless: true,
-      protocolTimeout: 0, // rendering the whole show's audio takes minutes; the default 180 s cuts it off
+      protocolTimeout: 0, // one call renders the whole show's audio: seconds (#58), minutes on a slow machine, where the default 180 s cut it off
       defaultViewport: VIEWPORT,
       // WebGL for the background through a software GPU, so it works headless on any machine
       args: [

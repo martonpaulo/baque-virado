@@ -121,6 +121,10 @@ Options to weigh when the code is written (none chosen yet):
 The owner chose: in the background a show pauses, as a video does
 ([#45](https://github.com/martonpaulo/baque-virado/issues/45), D35).
 
+Since [#58](https://github.com/martonpaulo/batuque/issues/58) a whole show renders in 3 to 15 s on
+the owner's Mac, where it took 23 to 150 s, so the last option's first cost is smaller than this
+table says; a phone's time is not measured.
+
 ## Scene transitions
 
 Reported: abrupt at the start, more fluid from the middle on.

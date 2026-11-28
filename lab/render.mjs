@@ -30,7 +30,8 @@ async function main() {
     console.error('usage: node lab/render.mjs <out.wav> <id> [--from BAR] [--to BAR] [--mute a,b] [--only a,b]');
     process.exit(2);
   }
-  // a whole show renders offline in minutes: no protocol limit, as tools/export-video.mjs sets (the default 180 s cuts it off)
+  // no protocol limit, as tools/export-video.mjs sets: a whole show renders in seconds (#58), but in minutes on a
+  // browser that cannot suspend an offline render, where the default 180 s would cut it off
   const { server, browser, close } = await openBrowser({ protocolTimeout: 0 });
   try {
     const page = await browser.newPage();
