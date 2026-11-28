@@ -82,7 +82,7 @@
   --tap-time-size: 3.56cqw; /* its time: 14px on a 393px stage */
   --figure-grow: 4cqw; /* how much a baque's numbers grow on a tall phone */
   --page-max: 100rem; /* 1600px: the widest the three columns get */
-  --side-min: 12rem; /* 192px: the longest sound option, «chocalho de platinela», on one line */
+  --side-min: 12rem; /* 192px: «chocalho de platinela» on one line; a longer sound option takes two (#74) */
 }
 html,
 body {
@@ -1030,6 +1030,29 @@ a:focus-visible {
   }
   .side.right .chips {
     justify-content: flex-end;
+  }
+  /* a name wider than the column is never cut at the column's left edge (#74): an option's name
+     takes a second line, broken between words and still against the right edge, and a heading's
+     volume slider goes under its name. A name that fits keeps one line, and no text is smaller */
+  .side.right .sound,
+  .side.right .chips,
+  .side.right .sound-head {
+    max-width: 100%;
+  }
+  .side.right .chip {
+    max-width: 100%;
+    white-space: normal;
+    text-wrap: balance;
+    text-align: right;
+  }
+  .side.right .sound-head {
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+  /* a heading of several words still breaks between them beside its slider, as before; the slider
+     leaves the line only when one word and the slider are wider than the column */
+  .side.right .sound-head > .lbl {
+    flex: 1 1 min-content;
   }
   .side.right {
     order: 3;

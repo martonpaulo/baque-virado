@@ -946,24 +946,67 @@ test('crossing the desktop breakpoint fits the stage as a fresh load does', asyn
   }
 });
 
-test('no window is wider than its page, and side options stay on one line', async () => {
-  for (const viewport of [...PHONES, { width: 1000, height: 700 }, { width: 1146, height: 1330 }, DESKTOP]) {
-    const { page, errors } = await openPage(viewport);
-    const found = await page.evaluate(() => {
-      const problems = [];
-      if (document.documentElement.scrollWidth > innerWidth) problems.push(`page is ${document.documentElement.scrollWidth}px wide`);
-      for (const option of document.querySelectorAll('.side .chip, .side .step')) {
-        const box = option.getBoundingClientRect();
-        if (box.height === 0) continue; // a phone hides them
-        if (box.right > option.closest('.side').getBoundingClientRect().right + 0.5) problems.push(`${option.textContent} is cut`);
-        if (option.matches('.chip') && option.scrollHeight > option.clientHeight + 1) problems.push(`${option.textContent} wraps`);
-      }
-      return problems;
-    });
-    assert.deepEqual(found, [], `${viewport.width}x${viewport.height}`);
+// #74: the right column's contents stand against its right edge, so a name wider than the column left
+// it on the left and was cut there: «guitarra distorcida e guitarra com eco» in the manguebeat, two
+// options and the headings «cavaquinho» and «triângulo» in the forró, «clarinete» in the frevo. The
+// rule: a name that fits the column keeps one line; a longer option takes a second line, and a
+// heading's slider goes under it; no text is smaller for it.
+test('no window is wider than its page, and every name of the side columns is whole, on one line when it fits, in every show', async () => {
+  const windows = [
+    ...PHONES,
+    { width: 1000, height: 700 },
+    { width: 1024, height: 1366 },
+    { width: 1146, height: 1330 },
+    { width: 1280, height: 1400 },
+    DESKTOP,
+  ];
+  const wrapped = [];
+  for (const rhythm of RHYTHMS) {
+    // opened on a desktop: a page that loads on a phone builds no sound options
+    const { page, errors } = await openPage(DESKTOP, { query: `?ritmo=${rhythm.id}`, still: true });
+    for (const viewport of windows) {
+      await page.setViewport(viewport);
+      const found = await page.evaluate(async () => {
+        await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+        const problems = [],
+          wrapped = [];
+        /** How many lines the text of `part` takes. */
+        const lines = part => {
+          const range = document.createRange();
+          range.selectNodeContents(part);
+          return new Set([...range.getClientRects()].filter(line => line.width > 0).map(line => Math.round(line.top))).size;
+        };
+        if (document.documentElement.scrollWidth > innerWidth) problems.push(`page is ${document.documentElement.scrollWidth}px wide`);
+        const sizes = new Set();
+        for (const part of document.querySelectorAll('.side .chip, .side .step, .side.right .sound-head, .side.right .sound-head > .lbl')) {
+          const box = part.getBoundingClientRect();
+          if (box.height === 0) continue; // a phone hides them
+          const column = part.closest('.side').getBoundingClientRect(),
+            name = part.textContent;
+          if (box.right > column.right + 0.5) problems.push(`${name} is cut on the right`);
+          if (box.left < column.left - 0.5) problems.push(`${name} is cut by ${(column.left - box.left).toFixed(0)} px on the left`);
+          if (!part.matches('.chip')) continue;
+          sizes.add(getComputedStyle(part).fontSize);
+          if (lines(part) < 2) continue;
+          // an option on two lines: only in the right column, and only a name one line of the column cannot hold
+          part.style.cssText = 'white-space: nowrap; max-width: none';
+          const oneLine = part.getBoundingClientRect().width;
+          part.style.cssText = '';
+          if (!part.closest('.side.right') || oneLine <= column.width) problems.push(`${name} wraps, and fits its column on one line`);
+          else wrapped.push(name);
+        }
+        if (sizes.size > 1) problems.push(`the options have ${sizes.size} text sizes: ${[...sizes].join(', ')}`);
+        return { problems, wrapped };
+      });
+      assert.deepEqual(found.problems, [], `${rhythm.id} ${viewport.width}x${viewport.height}`);
+      wrapped.push(...found.wrapped.map(name => `${rhythm.id} ${viewport.width}: ${name}`));
+    }
     assert.deepEqual(errors, []);
     await page.close();
   }
+  // the test saw the long names: the manguebeat's guitar takes two lines in the narrow windows, and one at 1440
+  assert.ok(wrapped.includes('manguebeat 1146: guitarra distorcida e guitarra com eco'), wrapped.join('; '));
+  assert.ok(!wrapped.some(name => name.startsWith('manguebeat 1440')), wrapped.join('; '));
 });
 
 test('on phones only the stage shows, and a tap on it plays and pauses', async () => {
