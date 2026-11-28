@@ -20,6 +20,14 @@ export const CALM_PACE = 0.2;
 export const FULL_ENERGY_SHARE = 0.9;
 /** Seconds a hit takes to count in full: the energy rises to it and never jumps, so nothing a background counts by it appears at once. */
 export const ENERGY_RISE = 0.15;
+/**
+ * How the sounding strokes read as energy: the root of their share of the full band's. A thin passage
+ * is far nearer the full band to the ear than its count of strokes says. Measured in the sound lab on
+ * 2026-11-28 (`lab/show-sections.txt`, `lab/reference-sections.txt`): where a show or a reference plays
+ * thin, its level sits 2 to 10 dB under its body (a half to nine tenths of its loudness) and its
+ * onsets come at a third of the body's rate or more, where a count of strokes gave a tenth.
+ */
+export const ENERGY_CURVE = 0.5;
 
 /** The show of one rhythm package: its scenes on the timeline, and every hit of every bar. */
 export function createShow(rhythm) {
@@ -129,13 +137,22 @@ export function createShow(rhythm) {
   }
 
   // ---------- the music's energy ----------
-  // How busy the music is, read from the timeline alone, so the backgrounds can follow it (#63):
-  // each hit of the last RECENT_WINDOW seconds counts its velocity, a newer hit more.
-  const loadOf = recent =>
-    recent.reduce(
-      (sum, h) => sum + (h.age < RECENT_WINDOW ? Math.min(1, h.hit.velocity) * Math.min(1, h.age / ENERGY_RISE) * (1 - h.age / RECENT_WINDOW) : 0),
-      0,
-    );
+  // How busy the music is, read from the timeline alone, so the backgrounds can follow it (#63).
+  // Strokes written on one step are one sound: their strengths add as the powers of sounds do (the
+  // root of the sum of the squares), so nine voices on one stroke count three times one, never nine.
+  // Each stroke of the last RECENT_WINDOW seconds counts its velocity, a newer one more.
+  const loadOf = recent => {
+    const moments = new Map(); // a step of the straight grid, to the power that sounds there
+    for (const h of recent) {
+      if (h.age >= RECENT_WINDOW) continue;
+      const moment = h.grid ?? h.at,
+        strength = Math.min(1, h.hit.velocity) * Math.min(1, h.age / ENERGY_RISE) * (1 - h.age / RECENT_WINDOW);
+      moments.set(moment, (moments.get(moment) ?? 0) + strength ** 2);
+    }
+    let load = 0;
+    for (const power of moments.values()) load += Math.sqrt(power);
+    return load;
+  };
   let peakLoad = null; // the load that counts as full energy, read once from every step of the show
   function peak() {
     if (peakLoad === null) {
@@ -147,7 +164,7 @@ export function createShow(rhythm) {
     return peakLoad;
   }
   /** The energy of a list of recent hits (`recentHits(position, RECENT_WINDOW)`, or the heard ones among them): 0 in silence, 1 at the show's busiest moments. */
-  const energyOf = recent => (peak() > 0 ? Math.min(1, loadOf(recent) / peak()) : 0);
+  const energyOf = recent => (peak() > 0 ? Math.min(1, (loadOf(recent) / peak()) ** ENERGY_CURVE) : 0);
   /** The energy of every voice written at a position. */
   const energyAt = position => energyOf(recentHits(position, RECENT_WINDOW));
 

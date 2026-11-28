@@ -185,15 +185,40 @@ test('the energy is 0 in silence, 1 at the busiest moment of each show, and lowe
       highest = Math.max(highest, energy);
     }
     assert.equal(highest, 1, rhythm.id);
-    const busiest = [...Array(show.TOTAL_BARS * stepsPerBar).keys()].map(step => step / stepsPerBar).find(position => show.energyAt(position) === 1),
-      recent = show.recentHits(busiest, RECENT_WINDOW),
-      muted = recent.filter(h => h.voice !== recent[0].voice);
-    assert.ok(show.energyOf(muted) < 1, `${rhythm.id}: muting ${recent[0].voice} calms it`);
+    // a moment under the full band, where the energy is not held at 1: muting the voice with the most strokes there calms it
+    const under = [...Array(show.TOTAL_BARS * stepsPerBar).keys()]
+        .map(step => step / stepsPerBar)
+        .find(position => show.energyAt(position) > 0.5 && show.energyAt(position) < 1),
+      recent = show.recentHits(under, RECENT_WINDOW),
+      strokes = Object.groupBy(recent, h => h.voice),
+      most = Object.keys(strokes).reduce((a, b) => (strokes[b].length > strokes[a].length ? b : a));
+    assert.ok(show.energyOf(recent.filter(h => h.voice !== most)) < show.energyOf(recent), `${rhythm.id}: muting ${most} calms it`);
+  }
+});
+
+// The energy counted every stroke of every voice, so a passage of one or two instruments read as
+// near silence: 0.05 for the coco's alfaia alone and 0.1 for its rufadas, the fastest playing of the
+// show, where the sound lab hears a level 2 dB under the full band (lab/show-sections.txt).
+test('strokes that sound together count as one sound, and a thin passage reads as a good part of the full band', () => {
+  for (const rhythm of RHYTHMS) {
+    const show = createShow(rhythm),
+      { barSeconds, stepsPerBar } = meterOf(rhythm),
+      stepSeconds = barSeconds / stepsPerBar;
+    const stroke = (voice, steps) => ({ voice, grid: -steps / stepsPerBar, at: -steps / stepsPerBar, age: steps * stepSeconds, hit: { velocity: 1 } });
+    // one stroke, and nine voices on that same stroke
+    const one = show.energyOf([stroke('a', 2)]),
+      nine = show.energyOf([...'abcdefghi'].map(voice => stroke(voice, 2)));
+    assert.ok(one > 0 && nine > one, `${rhythm.id}: more voices, more energy`);
+    assert.ok(nine < 2 * one, `${rhythm.id}: nine voices on one stroke read ${(nine / one).toFixed(2)} times one`);
+    // one instrument alone, a stroke on every step, at full strength
+    const alone = show.energyOf([...Array(Math.floor(RECENT_WINDOW / stepSeconds)).keys()].map(steps => stroke('a', steps + 1)));
+    assert.ok(alone >= 1 / 3, `${rhythm.id}: one instrument on every step reads ${alone.toFixed(2)}`);
   }
 });
 
 test('each show has calm and busy scenes for the background to follow', () => {
-  for (const rhythm of RHYTHMS) {
+  // the shows whose background reads the energy: the maracatu's has its own speed for each scene
+  for (const rhythm of RHYTHMS.filter(candidate => candidate.background)) {
     const show = createShow(rhythm);
     const mean = scene => [...Array(scene.bars * 4).keys()].reduce((sum, i) => sum + show.energyAt(scene.start + i / 4), 0) / (scene.bars * 4);
     const means = show.SCENES.map(mean);
