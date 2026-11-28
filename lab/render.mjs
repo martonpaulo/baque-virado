@@ -1,52 +1,67 @@
 // Render a show's audio through the real page (window.baque.renderAudio) to a WAV.
-// usage: node render.mjs <repoRoot> <out.wav> <id> [--from BAR] [--to BAR] [--mute a,b] [--only a,b]
+// usage: node lab/render.mjs <out.wav> <id> [--from BAR] [--to BAR] [--mute a,b] [--only a,b]
 //   --mute / --only take instrument ids (the `instrument` of the rhythm's VOICES).
-// Starts its own static server on a free port, so several can run at once.
+// It opens the browser the page tests use (tests/support/browser.js: the pinned Chrome, or the one
+// CHROME_PATH names) on its own static server and a free port, so several can run at once, and it
+// serves the checkout this file is in.
 
-import { spawn } from 'node:child_process';
 import { writeFileSync } from 'node:fs';
-import { createRequire } from 'node:module';
-import net from 'node:net';
+import { fileURLToPath } from 'node:url';
+import { openBrowser } from '../tests/support/browser.js';
 
-const { chromium } = createRequire(import.meta.url)('playwright');
-const [root, out, id, ...rest] = process.argv.slice(2);
-const opt = {};
-for (let i = 0; i < rest.length; i += 2) opt[rest[i].slice(2)] = rest[i + 1];
-const port = await new Promise(r => {
-  const s = net.createServer();
-  s.listen(0, () => {
-    const p = s.address().port;
-    s.close(() => r(p));
-  });
-});
-const server = spawn('node', ['tools/static-server.mjs', String(port)], { cwd: root, stdio: 'ignore' });
-await new Promise(r => setTimeout(r, 700));
-const browser = await chromium.launch();
-try {
-  const page = await browser.newPage({ viewport: { width: 1400, height: 900 } });
-  page.on('pageerror', e => console.error('pageerror', e.message));
-  page.on('console', m => m.type() === 'error' && console.error('console', m.text()));
-  await page.goto(`http://127.0.0.1:${port}/?ritmo=${id}`);
-  await page.waitForFunction(() => window.baque && typeof window.baque.renderAudio === 'function', null, { timeout: 60000 });
-  const t = Date.now();
-  const b64 = await page.evaluate(async o => {
-    const { VOICES } = await import('/src/music.js');
-    const instruments = [...new Set(Object.values(VOICES).map(v => v.instrument))];
-    const volume = {};
-    if (o.only) for (const i of instruments) if (!o.only.split(',').includes(i)) volume[i] = 'mute';
-    if (o.mute) for (const i of o.mute.split(',')) volume[i] = 'mute';
-    const options = { volume };
-    if (o.from !== undefined) options.fromBar = Number(o.from);
-    if (o.to !== undefined) options.toBar = Number(o.to);
-    const bytes = new Uint8Array(await window.baque.renderAudio(options));
-    let s = '';
-    const C = 0x8000;
-    for (let i = 0; i < bytes.length; i += C) s += String.fromCharCode.apply(null, bytes.subarray(i, i + C));
-    return btoa(s);
-  }, opt);
-  writeFileSync(out, Buffer.from(b64, 'base64'));
-  console.log(`${id} -> ${out} in ${((Date.now() - t) / 1000).toFixed(1)} s`);
-} finally {
-  await browser.close();
-  server.kill();
+const READY_MS = 60000; // the page fetches and decodes every sample before it can render
+const CHUNK = 0x8000; // bytes per String.fromCharCode call, under the engine's argument limit
+
+/** The command line as { out, id, options }: `--name value` pairs after the two positional words. */
+export function parseArguments(words) {
+  const [out, id, ...rest] = words;
+  if (!out || !id || out.startsWith('--') || id.startsWith('--') || rest.length % 2) return null;
+  const options = {};
+  for (let i = 0; i < rest.length; i += 2) {
+    if (!['--from', '--to', '--mute', '--only'].includes(rest[i])) return null;
+    options[rest[i].slice(2)] = rest[i + 1];
+  }
+  return { out, id, options };
 }
+
+async function main() {
+  const parsed = parseArguments(process.argv.slice(2));
+  if (!parsed) {
+    console.error('usage: node lab/render.mjs <out.wav> <id> [--from BAR] [--to BAR] [--mute a,b] [--only a,b]');
+    process.exit(2);
+  }
+  // a whole show renders offline in minutes: no protocol limit, as tools/export-video.mjs sets (the default 180 s cuts it off)
+  const { server, browser, close } = await openBrowser({ protocolTimeout: 0 });
+  try {
+    const page = await browser.newPage();
+    page.on('pageerror', error => console.error('pageerror', error.message));
+    page.on('console', message => message.type() === 'error' && console.error('console', message.text()));
+    await page.goto(`${server.url}${parsed.id}`); // the rhythm's own path: `?ritmo=` would redirect there mid-load
+    await page.waitForFunction(() => window.baque && typeof window.baque.renderAudio === 'function', { timeout: READY_MS });
+    const started = Date.now();
+    const base64 = await page.evaluate(
+      async (wanted, chunk) => {
+        const { VOICES } = await import('/src/music.js');
+        const instruments = [...new Set(Object.values(VOICES).map(voice => voice.instrument))];
+        const volume = {};
+        if (wanted.only) for (const instrument of instruments) if (!wanted.only.split(',').includes(instrument)) volume[instrument] = 'mute';
+        if (wanted.mute) for (const instrument of wanted.mute.split(',')) volume[instrument] = 'mute';
+        const options = { volume };
+        if (wanted.from !== undefined) options.fromBar = Number(wanted.from);
+        if (wanted.to !== undefined) options.toBar = Number(wanted.to);
+        const bytes = new Uint8Array(await window.baque.renderAudio(options));
+        let text = '';
+        for (let i = 0; i < bytes.length; i += chunk) text += String.fromCharCode.apply(null, bytes.subarray(i, i + chunk));
+        return btoa(text);
+      },
+      parsed.options,
+      CHUNK,
+    );
+    writeFileSync(parsed.out, Buffer.from(base64, 'base64'));
+    console.log(`${parsed.id} -> ${parsed.out} in ${((Date.now() - started) / 1000).toFixed(1)} s`);
+  } finally {
+    await close();
+  }
+}
+
+if (process.argv[1] === fileURLToPath(import.meta.url)) await main();

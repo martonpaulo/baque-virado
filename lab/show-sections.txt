@@ -1,0 +1,73 @@
+# Each show rendered through the page (lab/render.mjs) and read with sections.py map and pulse, as measured on 2026-11-28
+# at commit 7d4657b: the same facts as reference-sections.txt and reference-pulse.txt give for the references, so a show
+# and its references are compared band for band. The bands line is the dB share of 9 bands from 20 Hz.
+# The coco is in two halves (bars 0 to 56 and 56 to 112): its whole show did not finish rendering in one piece in headless
+# Chrome on this Mac, where each half does.
+
+# coco show, bars 0 to 56
+  sec  start    end  beats    bpm    rms  crest  onsets/s  perc  pulse  key   low cell (16 sixteenths)
+    A      0     18     14  136.0  -11.9   13.5      3.82  0.10   0.34  C     @.=:#.+=@:*=*.*:
+    B     18     52     69  129.2  -10.7   13.3      7.08  0.19   0.56  C     -*#+:+@+-+@+:=#+
+  coco show, bars 0 to 56 [AB]                                  bpm 131.6  rms -11.1  crest 13.4  onsets/s 5.92  perc 0.16  pulse 0.48  bands -24.2  -2.7  -4.9 -17.8 -21.2 -19.9 -20.5 -19.7 -27.0
+# coco show, bars 0 to 56
+  periods, ms:strength  226:0.66 453:0.63 679:0.55 911:0.63 1138:0.60 1364:0.66 1591:0.56 1817:0.57 2270:0.55
+  body -11.7 dB, held from 0.5 s of 52 s; dips: none
+
+# coco show, bars 56 to 112
+  sec  start    end  beats    bpm    rms  crest  onsets/s  perc  pulse  key   low cell (16 sixteenths)
+    A      0     40     85  129.2   -8.2   11.2      6.70  0.17   0.71  F     #+@**=@#*+@**+@#
+    B     40     52     19  129.2   -9.2   12.1      6.12  0.14   0.66  F     *-@++*@@=-*+===*
+  coco show, bars 56 to 112 [AB]                                bpm 129.2  rms  -8.4  crest 11.4  onsets/s 6.57  perc 0.16  pulse 0.70  bands -24.5  -3.4  -4.3 -15.3 -18.5 -16.4 -14.6 -13.2 -20.2
+# coco show, bars 56 to 112
+  periods, ms:strength  226:0.61 453:0.76 685:0.57 911:0.72 1138:0.53 1364:0.67 1591:0.49 1817:0.62 2276:0.56
+  body -8.6 dB, held from 0.5 s of 52 s; dips: none
+
+# frevo show
+  sec  start    end  beats    bpm    rms  crest  onsets/s  perc  pulse  key   low cell (16 sixteenths)
+    A      0     16     27  123.0  -18.8   18.6      4.29  0.25   0.33  Dm    @.-=+:.**  =*..+
+    B     16     26     18  123.0  -16.4   15.5      7.76  0.29   0.64  A     *.-==-:+*.:==--@
+    C     26    101    149  123.0  -13.9   14.8      6.44  0.20   0.54  Gm    @:=#*=-@#:=*=--@
+  frevo show [ABC]                                            bpm 123.0  rms -14.9  crest 15.5  onsets/s 6.24  perc 0.22  pulse 0.52  bands -19.3  -5.6  -6.5  -7.0  -8.9 -12.7 -15.9 -18.8 -26.8
+# frevo show
+  periods, ms:strength  238:0.36 482:0.60 720:0.30 958:0.58 1202:0.30 1440:0.57 1678:0.28 1921:0.61 2397:0.55
+  body -14.4 dB, held from 18.5 s of 101 s; dips: 81 s (0.5 s, -36 dB), 82 s (0.5 s, -29 dB), 84 s (0.5 s, -9 dB)
+
+# forro show
+  sec  start    end  beats    bpm    rms  crest  onsets/s  perc  pulse  key   low cell (16 sixteenths)
+    A      0     24     23   99.4  -14.6   16.4      6.62  0.25   0.82  Am    =++..@*.=#*.=*= 
+    B     24     64     62   99.4  -12.4   14.5      5.95  0.25   0.72  G     +**:-@+:-@*:-*=-
+    C     64     74     13   99.4  -13.3   14.9      6.27  0.22   0.68  Am    **#.+#+:+#=..@-=
+    D     74    104     46   99.4  -12.4   13.9      5.63  0.21   0.70  Am    ==+::+-:-=*.-@--
+  forro show [ABCD]                                           bpm  99.4  rms -13.0  crest 14.8  onsets/s 6.04  perc 0.23  pulse 0.74  bands -17.4  -4.4  -4.4 -11.3 -15.0 -17.3 -16.9 -16.3 -23.7
+# forro show
+  periods, ms:strength  157:0.13 302:0.53 598:0.69 900:0.53 1202:0.70 1498:0.51 1800:0.67 2101:0.49 2397:0.65
+  body -12.8 dB, held from 5.0 s of 104 s; dips: 93 s (0.5 s, -13 dB)
+
+# manguebeat show
+  sec  start    end  beats    bpm    rms  crest  onsets/s  perc  pulse  key   low cell (16 sixteenths)
+    A      0     52    107  136.0  -10.4   12.3      5.52  0.15   0.61  Dm    *@##+#@*=*##+@*#
+    B     52     64     22  136.0  -13.1   13.2      4.30  0.18   0.37  A     *@--:#-:.+-***=+
+    C     64    120    118  136.0  -11.0   12.7      5.28  0.16   0.63  Bm    +*@#+@#@+##@+#@*
+  manguebeat show [ABC]                                       bpm 136.0  rms -11.0  crest 12.6  onsets/s 5.28  perc 0.16  pulse 0.60  bands  -8.6  -2.4  -7.7 -13.0 -16.6 -17.9 -20.2 -21.1 -28.6
+# manguebeat show
+  periods, ms:strength  290:0.39 430:0.61 714:0.57 853:0.38 1144:0.72 1434:0.35 1573:0.54 1858:0.53 2287:0.66
+  body -10.8 dB, held from 4.0 s of 120 s; dips: 54 s (1.0 s, -24 dB), 56 s (0.5 s, -9 dB), 58 s (1.0 s, -9 dB), 79 s (1.0 s, -12 dB)
+
+# brega show
+  sec  start    end  beats    bpm    rms  crest  onsets/s  perc  pulse  key   low cell (16 sixteenths)
+    A      0     21     43  136.0   -9.8   12.5      5.00  0.28   0.89  Am    =    =@...+::.--
+    B     21     98    164  136.0   -9.6   12.4      4.64  0.25   0.89  Am    +. ..+@..:=:::--
+  brega show [AB]                                             bpm 136.0  rms  -9.6  crest 12.4  onsets/s 4.72  perc 0.26  pulse 0.89  bands  -6.6  -5.6  -6.0  -9.1 -12.7 -16.5 -18.4 -18.1 -21.1
+# brega show
+  periods, ms:strength  221:0.83 441:0.85 662:0.81 882:0.80 1103:0.77 1324:0.78 1544:0.74 1765:0.79 2206:0.75
+  body -9.6 dB, held from 2.5 s of 98 s; dips: 59 s (1.0 s, -40 dB)
+
+# bregafunk show
+  sec  start    end  beats    bpm    rms  crest  onsets/s  perc  pulse  key   low cell (16 sixteenths)
+    A      0     16     18  112.3  -12.6   13.2      1.45  0.18   0.39  Am    @.  :@.   @-  .-
+    B     16     58     74  112.3   -8.7   11.5      4.63  0.30   0.46  Am    @*::=#@:-:@*+:-+
+    C     58     93     59  112.3   -8.5   11.2      4.88  0.28   0.45  Am    @.:::@.::.@::::+
+  bregafunk show [ABC]                                        bpm 112.3  rms  -9.3  crest 11.7  onsets/s 4.16  perc 0.27  pulse 0.45  bands  -5.3  -4.3  -7.5 -13.6 -12.8 -16.9 -18.3 -19.2 -24.2
+# bregafunk show
+  periods, ms:strength  354:0.34 528:0.39 882:0.38 1057:0.33 1411:0.87 1765:0.33 1939:0.36 2293:0.36 2473:0.31
+  body -8.9 dB, held from 15.5 s of 93 s; dips: 56 s (2.0 s, -15 dB), 60 s (0.5 s, -8 dB), 60 s (0.5 s, -9 dB)
