@@ -771,7 +771,7 @@ const READ = {
   voices: 'vozes',
   open: 'aberto',
   muted: 'abafado',
-  cell: 'célula de 2 compassos',
+  cell: 'célula de\u00a02 compassos', // no-break space: a line never ends between «de» and its number
   accent: 'acento',
   soft: 'nota fraca',
   rufo: 'rufo',

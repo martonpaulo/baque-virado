@@ -257,9 +257,13 @@ body {
 [data-entry].muted .row {
   opacity: 0.2;
 }
+/* rows of strokes: a part's name, its strokes, its count. The name column is 13cqw, or as wide as
+   the longest word of its names when that is wider: a name wraps between its words and never runs
+   under its strokes (#59). The count column is as wide as its counts, which end at the right edge,
+   so rows with no count leave that room to the strokes */
 .notation {
   display: grid;
-  grid-template-columns: 13cqw 1fr 12cqw;
+  grid-template-columns: minmax(min-content, 13cqw) 1fr auto;
   gap: 0.4cqw 2cqw;
   align-items: center;
 }

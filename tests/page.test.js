@@ -477,10 +477,36 @@ function laneTextsInPage(scenes) {
   return { problems: [...problems.values()], most };
 }
 
+/** In the page: every row of strokes of every scene's readout, against its name and the readout's edge. */
+function notationInPage(scenes) {
+  /** The box of an element's own text, whatever its lines. */
+  const textBox = element => {
+    const range = document.createRange();
+    range.selectNodeContents(element);
+    const lines = [...range.getClientRects()].filter(line => line.width > 0);
+    return lines.length ? { left: Math.min(...lines.map(line => line.left)), right: Math.max(...lines.map(line => line.right)) } : null;
+  };
+  const problems = new Set();
+  let rows = 0;
+  for (const scene of scenes) {
+    window.baque.render(scene.start + 0.5);
+    const read = document.getElementById('read').getBoundingClientRect();
+    for (const strokes of document.querySelectorAll('#read .notation .seq')) {
+      const part = strokes.previousElementSibling,
+        name = textBox(part),
+        marks = textBox(strokes);
+      rows++;
+      if (name && name.right > marks.left) problems.add(`${scene.id}: «${part.textContent}» runs ${(name.right - marks.left).toFixed(1)} px under its strokes`);
+      if (marks.right > read.right + 0.5) problems.add(`${scene.id}: the strokes of «${part.textContent}» leave the readout`);
+    }
+  }
+  return { problems: [...problems], rows };
+}
+
 // One pass serves every test under it that measures each show, on one page a show: opening a page is
 // what takes the time, and a window that changes size lays the stage out as a fresh load does (the
 // test of the desktop breakpoint, below). Each page is still (openPage): a test asks for the positions it measures.
-const STAGE_CHECKS = { key: keyInPage, laneTexts: laneTextsInPage };
+const STAGE_CHECKS = { key: keyInPage, laneTexts: laneTextsInPage, notation: notationInPage };
 let everyStage;
 /** What each check of STAGE_CHECKS found in every show's page at every size of STAGE_SIZES, as `{ where, found }`. */
 async function measureEveryStage() {
@@ -556,6 +582,14 @@ test('no two lane names overlap at any position of any show, at a scene’s star
   const { results, problems } = await stageCheck('laneTexts');
   assert.deepEqual(problems, []);
   for (const { where, most } of results) assert.ok(most >= 2, `${where}: the lanes drew ${most} texts at most`); // a name and its count
+});
+
+// #59: the name column was one width in every show, and a longer word («PRINCIPAL» in the
+// manguebeat, «CAVAQUINHO» in the forró) ran under the first strokes of its row.
+test('no part name runs under its row of strokes in any show’s notation, and no row of strokes leaves the readout', async () => {
+  const { results, problems } = await stageCheck('notation');
+  assert.deepEqual(problems, []);
+  for (const { where, rows } of results) assert.ok(rows > 0, `${where}: no notation row was measured`); // every show draws some
 });
 
 // #61: the key's height follows its text, so the lanes canvas can change height with no stage resize
