@@ -129,3 +129,24 @@ test('the coco declares the rufada that leads into each scene but the Rufo', () 
     ['fill', 'fill', 'fill', 'fill', 'fill', 'fill', 'fill', 'fill', 'fill', 'fill', null, 'fill'],
   );
 });
+
+// Each show's musical graphics belong to its own instruments (docs/product.md, Rhythm shows; #49):
+// no two shows share a graphic, and the shows that still draw only the maracatu's set are listed
+// here. The list only shrinks: each show leaves it with its own issue.
+const WITHOUT_GRAPHICS = ['coco', 'frevo', 'forro', 'manguebeat', 'bregafunk'];
+
+test('no two shows share a graphic of their own, and no show joins the ones without any', () => {
+  const others = RHYTHMS.filter(rhythm => rhythm !== MARACATU);
+  assert.deepEqual(
+    others.filter(rhythm => !rhythm.graphics).map(rhythm => rhythm.id),
+    WITHOUT_GRAPHICS,
+  );
+  const ids = others.flatMap(rhythm => rhythm.graphics?.ids ?? []);
+  assert.deepEqual([...new Set(ids)], ids, 'a graphic id is used twice');
+  for (const rhythm of others.filter(rhythm => rhythm.graphics)) {
+    assert.ok(rhythm.graphics.ids.length >= 2, `${rhythm.id} has at least two graphics of its own`);
+    assert.equal(typeof rhythm.graphics.create, 'function');
+    assert.ok(rhythm.copy.graphics.label.length > 0, `${rhythm.id} names what its graphics show`);
+  }
+  assert.equal(MARACATU.graphics, undefined); // the wheel, the lanes and the score are its own set
+});

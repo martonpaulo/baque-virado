@@ -5,8 +5,9 @@ import { existsSync, statSync } from 'node:fs';
 import { test } from 'node:test';
 import { fileURLToPath } from 'node:url';
 import { meterOf } from '../src/music.js';
-import { ACCENT_BARS, BEAT, BREGA, BREGA_LINES, COMP, HEARTBEAT, parseBar, THEME, thirdBelow } from '../src/rhythms/brega.js';
+import { ACCENT_BARS, BEAT, BREGA, BREGA_LINES, COMP, chordSymbolAt, HEARTBEAT, parseBar, THEME, thirdBelow } from '../src/rhythms/brega.js';
 import { BREGA_PALETTE, createBregaPainter } from '../src/rhythms/brega-background.js';
+import { BREGA_GRAPHICS, cellPlaces, KIT_PIECES, lightOf, pieceOf } from '../src/rhythms/brega-graphics.js';
 import { midiOf } from '../src/rhythms/studio-kit.js';
 import { createShow } from '../src/show.js';
 import { planStudio } from '../src/studio.js';
@@ -347,4 +348,80 @@ test('every scene renders its readout; the rolls keep a cursor', () => {
     assert.ok(markup.length > 0, scene.id);
     if (score) assert.equal(score.slotX.length, scene.bars * meter.stepsPerBar, scene.id);
   }
+});
+
+// ---------- its own graphics (#49): the chord chart and the drum kit's map ----------
+const sceneOf = id => show.SCENES.find(scene => scene.id === id);
+const MAIN_SQUARE = 100; // the graphic's SVG square; its drawings stay inside the inscribed circle
+const insideCircle = (x, y) => Math.hypot(x - MAIN_SQUARE / 2, y - MAIN_SQUARE / 2) <= MAIN_SQUARE / 2;
+
+test('the chart shows the chord that sounds in each bar: a rest where there is none, and the last chorus a whole tone up', () => {
+  assert.deepEqual(BREGA.graphics.ids, BREGA_GRAPHICS);
+  assert.deepEqual(BREGA_GRAPHICS, ['cifras', 'bateria']);
+  const symbols = id => Array.from({ length: sceneOf(id).bars }, (_, bar) => chordSymbolAt(sceneOf(id), bar));
+  assert.deepEqual(symbols('introducao'), ['Am', 'Dm', 'E7', 'Am']);
+  assert.deepEqual(symbols('refrao'), ['Am', 'Dm', 'G', 'C', 'F', 'Dm', 'E7', 'Am']);
+  assert.deepEqual(symbols('breque'), ['Am', null]); // the bar of silence holds no chord, not the one before it
+  assert.deepEqual(symbols('virada'), [null]); // toms and bumbo alone
+  // what sounds, not what is written: B minor, with F sharp as its dominant
+  assert.deepEqual(symbols('refrao-final'), ['Bm', 'Em', 'A', 'D', 'G', 'Em', 'F#7', 'Bm']);
+  for (const scene of show.SCENES)
+    for (let bar = 0; bar < scene.bars; bar++) {
+      const symbol = chordSymbolAt(scene, bar);
+      assert.ok(symbol === null || /^[A-G][#b]?(m|7)?$/.test(symbol), `${scene.id} bar ${bar}: ${symbol}`);
+    }
+});
+
+test('every cell of the chart and every piece of the kit sits inside the main circle, and no two overlap', () => {
+  const CELL = { width: 15.5, height: 11 };
+  for (const count of [1, 2, 4, 8]) {
+    const places = cellPlaces(count);
+    assert.equal(places.length, count);
+    for (const [x, y] of places)
+      for (const [cornerX, cornerY] of [
+        [x, y],
+        [x + CELL.width, y],
+        [x, y + CELL.height],
+        [x + CELL.width, y + CELL.height],
+      ])
+        assert.ok(insideCircle(cornerX, cornerY), `${count} cells: a corner at ${cornerX}, ${cornerY}`);
+    // a row is centred on the square
+    const row = places.filter(([, y]) => y === places[0][1]);
+    assert.ok(Math.abs(row[0][0] + (row.at(-1)[0] + CELL.width) - MAIN_SQUARE) < 1e-9, `${count} cells: the first row is centred`);
+  }
+  assert.deepEqual(cellPlaces(0), []);
+  const chartBottom = Math.max(...cellPlaces(8).map(([, y]) => y + CELL.height));
+  for (const piece of KIT_PIECES) {
+    assert.ok(Math.hypot(piece.x - MAIN_SQUARE / 2, piece.y - MAIN_SQUARE / 2) + piece.radius <= MAIN_SQUARE / 2, `${piece.id} is inside the circle`);
+    assert.ok(piece.y - piece.radius > chartBottom, `${piece.id} is under the chart`);
+    for (const other of KIT_PIECES)
+      if (other !== piece) assert.ok(Math.hypot(piece.x - other.x, piece.y - other.y) > piece.radius + other.radius, `${piece.id} and ${other.id} overlap`);
+  }
+});
+
+test('a stroke lights its own piece of the kit for as long as it rings, and no longer', () => {
+  // every drum stroke of the show has a piece; no melodic voice lights the kit
+  for (let bar = 0; bar < show.TOTAL_BARS; bar++)
+    for (const h of show.hitsInBar(bar)) {
+      const piece = pieceOf(h.voice, h.hit.tone);
+      if (['bumbo', 'caixa', 'chimbal', 'tom'].includes(h.voice)) assert.ok(piece, `bar ${bar}: ${h.voice} ${h.hit.tone ?? ''} has no piece`);
+      else assert.equal(piece, null, `bar ${bar}: ${h.voice} lights the kit`);
+    }
+  assert.equal(pieceOf('tom', 'agudo'), 'tom-agudo');
+  assert.equal(pieceOf('tom', 'medio'), 'tom-medio');
+  assert.equal(pieceOf('tom', 'grave'), 'tom-grave');
+  assert.equal(pieceOf('chimbal', 'aberto'), 'chimbal');
+  assert.equal(pieceOf('bumbo', undefined), 'bumbo');
+  // with motion on the light decays over the ring; with reduced motion it is on, then off
+  assert.equal(lightOf(0, 0.3, false), 1);
+  assert.ok(Math.abs(lightOf(0.15, 0.3, false) - 0.5) < 1e-9);
+  assert.equal(lightOf(0.3, 0.3, false), 0);
+  assert.equal(lightOf(-0.01, 0.3, false), 0); // a stroke still to come
+  assert.equal(lightOf(0.29, 0.3, true), 1);
+  assert.equal(lightOf(0.3, 0.3, true), 0);
+  // nothing in the kit can flash: the fastest piece, the chimbal in eighths, is under one hundredth of the stage
+  const eighthSeconds = meter.barSeconds / 8;
+  assert.ok(eighthSeconds > 0.2, 'the chimbal plays under five strokes a second');
+  const STAGE_AREA = (100 / 0.74) * ((100 / 0.74) * (16 / 9)); // the 9:16 stage in the graphic's units (the square is 74 % of its width)
+  for (const piece of KIT_PIECES) assert.ok((Math.PI * piece.radius ** 2) / STAGE_AREA < 0.02, `${piece.id} is a small part of the stage`);
 });

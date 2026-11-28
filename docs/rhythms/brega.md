@@ -203,6 +203,19 @@ Tried and measured on the chorus, not kept:
   wheel but the ground. No red passes R/(R+G+B) 0.8. Reduced motion stops the rings and petals
   moving, the halo breathing and the blooms.
 
+- **Graphics of its own** ([#49](https://github.com/martonpaulo/batuque/issues/49),
+  [`brega-graphics.js`](../../src/rhythms/brega-graphics.js)), in the stage's main square, with
+  the wheel smaller beside the readout:
+  - **Cifras.** One cell a bar of the scene, each with the chord that sounds there, the bar that
+    plays lit in the interface's amber. A bar of silence shows a rest; a scene with no harmony (the
+    Virada) shows no cell; the last chorus shows the chords a whole tone up, as they sound.
+  - **Bateria.** The kit seen from above: chimbal, caixa, bumbo and the three toms. A piece fills
+    with its colour while its stroke rings (0.14 s for the closed chimbal, 0.3 s for the bumbo) and
+    grows by 7 %; the open chimbal shows a second ring. With reduced motion a piece is lit or not
+    and never grows. A muted instrument's piece is dimmed and stays dark.
+  - Both are drawn from the show position and the strokes that just sounded, so the video export
+    matches playback. No piece is over 2 % of the stage, so the chimbal's eighths cannot flash.
+
 ## Widgets per scene
 
 | Scene        | Widget                                     | Why                         |

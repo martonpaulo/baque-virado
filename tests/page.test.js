@@ -749,3 +749,100 @@ test('the export makes a short 9:16 video with sound, cancels on request, and le
   assert.deepEqual(errors, []);
   await page.close();
 });
+
+// ---------- a rhythm's own graphics (#49) ----------
+const boxOf = (page, selector) =>
+  page.$eval(selector, element => {
+    const box = element.getBoundingClientRect();
+    return { x: box.x, y: box.y, width: box.width, height: box.height, shown: getComputedStyle(element).display !== 'none' };
+  });
+const BREGA_SCENES = createShow(RHYTHMS.find(rhythm => rhythm.id === 'brega')).SCENES;
+const bregaAt = (page, id, offset) =>
+  page.evaluate(
+    async start => {
+      window.baque.render(start);
+      await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+    },
+    BREGA_SCENES.find(scene => scene.id === id).start + offset,
+  );
+
+for (const viewport of [PHONES[0], DESKTOP])
+  test(`the brega draws its chords and its drum kit in the main square, with the wheel smaller beside the readout, at ${viewport.width} px`, async () => {
+    const { page, errors } = await openPage(viewport, { query: '?ritmo=brega' });
+    assert.equal(await page.$eval('#stage', stage => stage.classList.contains('has-graphic')), true);
+    const [stage, graphic, wheel, read, lanes] = await Promise.all(
+      ['#stage', '#graphic', '#scopeBox', '#read', '.lanes'].map(selector => boxOf(page, selector)),
+    );
+    assert.ok(graphic.shown && Math.abs(graphic.width - graphic.height) < 1, 'the main square is square');
+    assert.ok(graphic.width > 0.6 * stage.width, 'the graphic takes the main space'); // the wheel's own box in the other shows: 250 of 375 px on a short phone
+    assert.ok(wheel.width < 0.35 * stage.width && wheel.width > 0.2 * stage.width, `the wheel is the smaller mark: ${wheel.width} of ${stage.width}`);
+    // nothing leaves the stage, and the row under the graphic holds the wheel and the readout side by side
+    for (const box of [graphic, wheel, read, lanes]) assert.ok(box.x >= stage.x - 0.5 && box.x + box.width <= stage.x + stage.width + 0.5, 'inside the stage');
+    assert.ok(
+      wheel.y >= graphic.y + graphic.height - 0.02 * stage.width && wheel.y + wheel.height <= lanes.y + 0.5,
+      'the wheel sits between the graphic and the lanes',
+    );
+    assert.ok(read.x >= wheel.x + wheel.width, 'the readout is beside the wheel');
+    assert.match(await page.$eval('#scope', svg => svg.getAttribute('aria-label')), /^Roda de 16 semicolcheias/);
+    assert.match(await page.$eval('#graphic svg', svg => `${svg.getAttribute('role')}: ${svg.getAttribute('aria-label')}`), /^img: Cifras: .*Bateria/);
+    assert.deepEqual(await page.$$eval('#graphic [data-graphic]', groups => groups.map(group => group.dataset.graphic)), ['cifras', 'bateria']);
+    // the last chorus, a whole tone up: the seventh bar's cell is the one lit, and it reads what sounds
+    await bregaAt(page, 'refrao-final', 6.02);
+    assert.deepEqual(await page.$$eval('#graphic [data-bar]', cells => cells.map(cell => cell.textContent)), ['Bm', 'Em', 'A', 'D', 'G', 'Em', 'F#7', 'Bm']);
+    assert.deepEqual(await page.$$eval('#graphic [data-now="true"]', cells => cells.map(cell => cell.textContent)), ['F#7']);
+    assert.deepEqual(await page.$$eval('#graphic [data-lit="true"]', pieces => pieces.map(piece => piece.dataset.piece).sort()), ['bumbo', 'chimbal']); // the bar's first stroke
+    // the bar of silence: a rest in its cell, and only the bumbo's heartbeat lights the kit
+    await bregaAt(page, 'breque', 1.02);
+    assert.deepEqual(await page.$$eval('#graphic [data-bar]', cells => cells.map(cell => cell.textContent)), ['Am', '–']);
+    assert.deepEqual(await page.$$eval('#graphic [data-lit="true"]', pieces => pieces.map(piece => piece.dataset.piece)), ['bumbo']);
+    // the Virada has no chord: the chart is empty and the toms light
+    await bregaAt(page, 'virada', 0.02);
+    assert.equal(await page.$$eval('#graphic [data-bar]', cells => cells.length), 0);
+    assert.ok((await page.$$eval('#graphic [data-lit="true"]', pieces => pieces.map(piece => piece.dataset.piece))).includes('tom-agudo'));
+    // every label of the graphic is at least the stage's own label size
+    const sizes = await page.evaluate(() => {
+      const label = parseFloat(getComputedStyle(document.querySelector('.hud')).fontSize);
+      return { label, texts: [...document.querySelectorAll('#graphic text')].map(text => text.getBoundingClientRect().height) };
+    });
+    for (const height of sizes.texts) assert.ok(height >= sizes.label * 0.95, `a graphic's text of ${height}px is under the stage's label of ${sizes.label}px`);
+    assert.deepEqual(errors, []);
+    await page.close();
+  });
+
+test('with reduced motion the brega kit lights without growing, and a muted piece shows disabled and stays dark', async () => {
+  const { page, errors } = await openPage(DESKTOP, { query: '?ritmo=brega' });
+  await page.emulateMediaFeatures([{ name: 'prefers-reduced-motion', value: 'reduce' }]);
+  await bregaAt(page, 'refrao', 0.02);
+  const lit = await page.$$eval('#graphic [data-lit="true"]', pieces =>
+    pieces.map(piece => [
+      piece.dataset.piece,
+      piece.firstElementChild.getAttribute('transform') || '',
+      piece.querySelector('circle:last-of-type').getAttribute('fill-opacity'),
+    ]),
+  );
+  assert.ok(lit.length > 0);
+  for (const [id, transform, fill] of lit) {
+    assert.equal(transform, '', `${id} does not grow`);
+    assert.equal(Number(fill), 0.9, `${id} is fully lit, not fading`);
+  }
+  // the bumbo muted (the volume a desktop viewer stored): its piece is dimmed and its strokes light nothing
+  await page.evaluate(() => localStorage.setItem('baque-virado:volume-bumbo', 'mute'));
+  await page.reload({ waitUntil: 'load' });
+  await page.waitForFunction(() => window.baque && document.readyState === 'complete');
+  await bregaAt(page, 'refrao', 0.02);
+  const pieces = await page.$$eval('#graphic [data-piece]', all =>
+    Object.fromEntries(all.map(piece => [piece.dataset.piece, [piece.dataset.lit, piece.getAttribute('opacity')]])),
+  );
+  assert.deepEqual(pieces.bumbo, ['false', '0.38']);
+  assert.deepEqual(pieces.chimbal, ['true', '1']);
+  await page.evaluate(() => localStorage.removeItem('baque-virado:volume-bumbo'));
+  await page.close();
+  // a show without graphics keeps the wheel in the main square
+  const plain = await openPage(DESKTOP);
+  assert.equal(await plain.page.$eval('#stage', stage => stage.classList.contains('has-graphic')), false);
+  const [stage, graphic, wheel] = await Promise.all(['#stage', '#graphic', '#scopeBox'].map(selector => boxOf(plain.page, selector)));
+  assert.equal(graphic.shown, false);
+  assert.ok(wheel.width > 0.7 * stage.width, 'the maracatu keeps its wheel at full size');
+  assert.deepEqual([...errors, ...plain.errors], []);
+  await plain.page.close();
+});

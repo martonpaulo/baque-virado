@@ -9,6 +9,7 @@ import { label, row, stat, stats } from '../readout-markup.js';
 import { rollReadout } from '../roll.js';
 import { fgAlpha } from '../theme.js';
 import { BREGA_PALETTE, createBregaPainter } from './brega-background.js';
+import { BREGA_GRAPHICS, createBregaGraphics } from './brega-graphics.js';
 import { sceneStarts, straightMeter } from './meter.js';
 import { midiOf, recordedChoices, studioSounds, takes } from './studio-kit.js';
 
@@ -270,6 +271,18 @@ const SCENE_LIST = [
 ];
 const { starts: SCENE_STARTS, total: TOTAL_BARS } = sceneStarts(SCENE_LIST);
 const sceneIndexOf = bar => SCENE_LIST.findLastIndex((_, i) => SCENE_STARTS[i] <= bar);
+
+// A chord's root as a cifra writes it, by semitone from C.
+const ROOT_NAMES = ['C', 'C#', 'D', 'Eb', 'E', 'F', 'F#', 'G', 'Ab', 'A', 'Bb', 'B'];
+const SYMBOL = /^([A-G][#b]?)(.*)$/; // a chord symbol: its root, then its quality
+/** The symbol of the chord that sounds in a bar of a scene, its root moved by the scene's
+ * transposition (`F#7` where the last chorus plays E7 a whole tone up); null for a bar with no chord. */
+export function chordSymbolAt(scene, barInScene) {
+  const written = scene.chords?.[barInScene];
+  if (!written) return null;
+  const [, root, quality] = SYMBOL.exec(CHORDS[written].symbol);
+  return ROOT_NAMES[(ROOT_NAMES.indexOf(root) + (scene.transpose || 0)) % ROOT_NAMES.length] + quality;
+}
 
 /** The chord of an absolute bar, with the transposition of its scene, or null. */
 function chordAt(bar) {
@@ -755,6 +768,13 @@ const READ = {
 };
 const COPY = {
   name: 'brega',
+  // the words of its own graphics (src/rhythms/brega-graphics.js)
+  graphics: {
+    label: 'Cifras: o acorde de cada compasso da cena, o que soa agora em destaque. Bateria vista de cima: cada peça acende quando é tocada.',
+    chords: 'cifras',
+    kit: 'bateria',
+    toms: { agudo: 'tom 1', medio: 'tom 2', grave: 'tom 3' },
+  },
   description: 'Brega do Recife: o xacumbum da bateria, baixo, teclado, cordas, guitarra em terças e metais, um de cada vez e depois juntos, em lá menor.', // the page's search and preview description
   themeColor: BREGA_PALETTE.ground, // the page's theme-color: the rhythm's own ground colour
   feminineInstruments: ['caixa', 'guitarra'], // "som da caixa", "som do bumbo"
@@ -911,6 +931,8 @@ export const BREGA = {
     create: options => createBregaPainter({ ...options, beatsPerBar: BEATS_PER_BAR, barSeconds: BAR_SECONDS, petalBars, accentBars: ACCENT_BARS }),
   },
   readout,
+  // its own graphics in the stage's main square: the chord chart and the drum kit's map (#49)
+  graphics: { ids: BREGA_GRAPHICS, create: (element, context) => createBregaGraphics(element, { ...context, symbolAt: chordSymbolAt }) },
   waves: null,
   sounds: studioSounds(STUDIO, SOUND_CHOICES, 'refrao-final'), // every instrument but the tom plays its part there
   copy: COPY,

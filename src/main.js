@@ -7,7 +7,7 @@ import { bindKeyboard, createSceneList, createSoundPickers, exportControl, initi
 import { COPY } from './copy.js';
 import { canExportVideo, download, exportVideo } from './export.js';
 import { createKey, createLanes } from './lanes.js';
-import { BAR_SECONDS, BPM, STEPS_PER_BAR } from './music.js';
+import { BAR_SECONDS, BPM, STEPS_PER_BAR, VOICES } from './music.js';
 import { createReadout } from './readout.js';
 import { RHYTHM, ROUTES, redirectFor, rhythmChoices } from './rhythms/index.js';
 import { createScope, SCOPE_GEOMETRY } from './scope.js';
@@ -51,6 +51,10 @@ const readout = createReadout($('read'), volume);
 const title = createTitle($('head'));
 const background = createBackground($('fx'), $('bg'));
 const lanes = createLanes($('lanes'), volume);
+// A rhythm's own graphic takes the main square, and the wheel sits smaller beside the readout (#49).
+const graphic = RHYTHM.graphics ? RHYTHM.graphics.create($('graphic'), { voices: VOICES, copy: COPY, volume }) : null;
+stage.classList.toggle('has-graphic', graphic !== null);
+const mainSquare = graphic ? $('graphic') : $('scopeBox'); // what the background is centred on
 const key = createKey($('key'), volume);
 
 // ---------- sizes ----------
@@ -66,7 +70,7 @@ function measure() {
   // up; the export keeps full resolution, so its frames do not change.
   const feedback = clock.exporting ? dpr : device * FEEDBACK_DEVICE_SCALE;
   const box = stage.getBoundingClientRect(),
-    wheel = $('scopeBox').getBoundingClientRect();
+    wheel = mainSquare.getBoundingClientRect();
   measuredSize = sizeKey(box, wheel);
   background.resize({
     width: Math.round(box.width * feedback),
@@ -141,6 +145,7 @@ function render(at, force = false) {
     currentScene = scene;
     title.build(scene);
     readout.build(scene);
+    graphic?.build(scene);
     sceneList.setCurrent(SCENES.indexOf(scene));
   }
   if (bar !== currentBar || force) {
@@ -150,6 +155,7 @@ function render(at, force = false) {
     key.update(bar);
   }
   readout.update(sixteenth, barInScene);
+  graphic?.update(p, heard);
   shapes = scope.update(p, scene, barInScene);
   title.update(p, scene, !player.playing && !clock.exporting);
   setText($('hBar'), COPY.hud.bar(pad2(bar + 1), TOTAL_BARS));

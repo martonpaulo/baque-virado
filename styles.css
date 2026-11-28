@@ -1114,6 +1114,66 @@ html:not(.video-export) .read .row .k {
     gap: 0;
   }
 }
+/* ---------- a rhythm's own graphic (#49) ----------
+   A show with graphics of its own (.has-graphic) draws them in the main square, where the wheel is
+   in the other shows; the wheel then sits smaller beside the readout, as the site's mark. A show
+   without them keeps the wheel there: .below is not a box then. */
+.below {
+  display: contents;
+}
+.graphic {
+  display: none;
+}
+.has-graphic .graphic {
+  display: block;
+  position: relative;
+  width: 74cqw;
+  aspect-ratio: 1;
+  align-self: center;
+  max-width: 100%;
+  flex: none;
+  margin-block: -1cqw;
+}
+.has-graphic .graphic svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+  overflow: visible;
+}
+.has-graphic .below {
+  display: flex;
+  align-items: center;
+  gap: 3cqw;
+  flex: 1;
+  min-height: 0;
+}
+.has-graphic .below .scope {
+  width: 23cqw;
+  margin-block: 0;
+}
+.has-graphic .below .read {
+  flex: 1;
+  min-width: 0;
+}
+/* with a graphic: it takes the wheel's place in the column, and the smaller wheel and the readout
+   share the readout's place and height */
+html:not(.video-export) .has-graphic .graphic {
+  order: 2;
+  width: calc(74cqw + min(10cqw, var(--room) * 0.25)); /* the wheel's own size and place in the other shows */
+  margin-top: calc(-1cqw + min(12cqw, var(--room) * 0.25));
+}
+html:not(.video-export) .has-graphic .below {
+  order: 4;
+  flex: none;
+  height: calc(36cqw + min(8cqw, var(--room) * 0.35));
+}
+html:not(.video-export) .has-graphic .below .scope {
+  width: 30cqw;
+  margin-top: 0;
+}
+html:not(.video-export) .has-graphic .below .read {
+  height: auto;
+}
 @media (prefers-reduced-motion: reduce) {
   .fade {
     animation: none;

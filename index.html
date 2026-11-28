@@ -50,6 +50,7 @@
 <link rel="modulepreload" href="src/rhythms/preparing.js">
 <link rel="modulepreload" href="src/rhythms/brega.js">
 <link rel="modulepreload" href="src/rhythms/brega-background.js">
+<link rel="modulepreload" href="src/rhythms/brega-graphics.js">
 <link rel="modulepreload" href="src/rhythms/bregafunk.js">
 <link rel="modulepreload" href="src/rhythms/bregafunk-background.js">
 <link rel="modulepreload" href="src/rhythms/bregafunk-synth.js">
@@ -77,8 +78,12 @@
     <div class="inner">
       <div class="hud"><div><b id="hBar"></b><br><b id="hStep"></b></div><div class="r">♩ = <b id="hBpm"></b> bpm<br><b id="hTime"></b></div></div>
       <header class="head" id="head"></header>
-      <div class="scope" id="scopeBox"><svg id="scope" role="img" aria-label="Roda de 16 semicolcheias com um anel por instrumento"></svg></div>
-      <section class="read" id="read"></section>
+      <!-- a rhythm's own graphic takes the main square; the wheel then sits smaller beside the readout (.has-graphic) -->
+      <div class="graphic" id="graphic"></div>
+      <div class="below">
+        <div class="scope" id="scopeBox"><svg id="scope" role="img" aria-label="Roda de 16 semicolcheias com um anel por instrumento"></svg></div>
+        <section class="read" id="read"></section>
+      </div>
       <div class="lanes"><p class="key" id="key"></p><canvas id="lanes"></canvas></div>
     </div>
     <!-- phones: the whole stage is the Play and Pause button -->
