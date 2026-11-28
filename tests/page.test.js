@@ -775,7 +775,9 @@ for (const viewport of [PHONES[0], DESKTOP])
     );
     assert.ok(graphic.shown && Math.abs(graphic.width - graphic.height) < 1, 'the main square is square');
     assert.ok(graphic.width > 0.6 * stage.width, 'the graphic takes the main space'); // the wheel's own box in the other shows: 250 of 375 px on a short phone
-    assert.ok(wheel.width < 0.35 * stage.width && wheel.width > 0.2 * stage.width, `the wheel is the smaller mark: ${wheel.width} of ${stage.width}`);
+    assert.ok(wheel.width < 0.3 * stage.width && wheel.width > 0.15 * stage.width, `the wheel is the smaller mark: ${wheel.width} of ${stage.width}`);
+    // the mark draws no text: its numbers would render under the stage's label size
+    assert.equal(await page.$$eval('#scope text', texts => texts.filter(text => getComputedStyle(text).display !== 'none').length), 0);
     // nothing leaves the stage, and the row under the graphic holds the wheel and the readout side by side
     for (const box of [graphic, wheel, read, lanes]) assert.ok(box.x >= stage.x - 0.5 && box.x + box.width <= stage.x + stage.width + 0.5, 'inside the stage');
     assert.ok(
@@ -798,13 +800,33 @@ for (const viewport of [PHONES[0], DESKTOP])
     // the Virada has no chord: the chart is empty and the toms light
     await bregaAt(page, 'virada', 0.02);
     assert.equal(await page.$$eval('#graphic [data-bar]', cells => cells.length), 0);
+    assert.equal(await page.$eval('#graphic svg > text', label => getComputedStyle(label).display), 'none'); // and no «cifras» over an empty chart
     assert.ok((await page.$$eval('#graphic [data-lit="true"]', pieces => pieces.map(piece => piece.dataset.piece))).includes('tom-agudo'));
-    // every label of the graphic is at least the stage's own label size
+    // every text of the graphic is at least the stage's own label size (the HUD's), font size against
+    // font size in the same CSS px: an SVG unit is a hundredth of the square's layout width
     const sizes = await page.evaluate(() => {
-      const label = parseFloat(getComputedStyle(document.querySelector('.hud')).fontSize);
-      return { label, texts: [...document.querySelectorAll('#graphic text')].map(text => text.getBoundingClientRect().height) };
+      const unit = document.querySelector('#graphic').clientWidth / 100;
+      return {
+        label: parseFloat(getComputedStyle(document.querySelector('.hud')).fontSize),
+        texts: [...document.querySelectorAll('#graphic text')].map(text => [text.textContent, Number(text.getAttribute('font-size')) * unit]),
+      };
     });
-    for (const height of sizes.texts) assert.ok(height >= sizes.label * 0.95, `a graphic's text of ${height}px is under the stage's label of ${sizes.label}px`);
+    for (const [text, size] of sizes.texts)
+      assert.ok(size >= sizes.label * 0.99, `«${text}» at ${size.toFixed(2)}px is under the stage's label of ${sizes.label}px`);
+    // each name fits inside its piece, and no row of the readout is wider than its box (the Base: a notation row with its count)
+    const fits = await page.$$eval('#graphic [data-piece]', pieces =>
+      pieces.map(piece => [
+        piece.dataset.piece,
+        piece.querySelector('text').getBBox().width,
+        2 * Number(piece.querySelector('circle:last-of-type').getAttribute('r')),
+      ]),
+    );
+    for (const [id, width, diameter] of fits) assert.ok(width < diameter, `${id}: its name of ${width.toFixed(1)} is wider than its piece of ${diameter}`);
+    for (const id of ['base', 'breque', 'virada']) {
+      await bregaAt(page, id, 0.5);
+      const read = await page.$eval('#read', element => [element.scrollWidth, element.clientWidth]);
+      assert.ok(read[0] <= read[1] + 1, `${id}: the readout's content of ${read[0]}px is wider than its box of ${read[1]}px`);
+    }
     assert.deepEqual(errors, []);
     await page.close();
   });

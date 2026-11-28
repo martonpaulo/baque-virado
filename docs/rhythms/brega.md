@@ -213,6 +213,11 @@ Tried and measured on the chorus, not kept:
     with its colour while its stroke rings (0.14 s for the closed chimbal, 0.3 s for the bumbo) and
     grows by 7 %; the open chimbal shows a second ring. With reduced motion a piece is lit or not
     and never grows. A muted instrument's piece is dimmed and stays dark.
+  - Every label is the stage's label size as the page renders it (the HUD's), and a piece's name
+    keeps a dark rim, so it reads on the fill at rest, lit and between. The wheel beside the
+    readout is 21 % of the stage's width and draws no text: its numbers would be under that size.
+    The readout keeps the width its widest row needs. An independent interface audit found these
+    four points in the first layout; all were fixed.
   - Both are drawn from the show position and the strokes that just sounded, so the video export
     matches playback. No piece is over 2 % of the stage, so the chimbal's eighths cannot flash.
 

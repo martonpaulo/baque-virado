@@ -52,7 +52,8 @@ const title = createTitle($('head'));
 const background = createBackground($('fx'), $('bg'));
 const lanes = createLanes($('lanes'), volume);
 // A rhythm's own graphic takes the main square, and the wheel sits smaller beside the readout (#49).
-const graphic = RHYTHM.graphics ? RHYTHM.graphics.create($('graphic'), { voices: VOICES, copy: COPY, volume }) : null;
+const labelPixels = () => parseFloat(getComputedStyle($('hBar').parentElement.parentElement).fontSize); // the HUD's: the stage's label size
+const graphic = RHYTHM.graphics ? RHYTHM.graphics.create($('graphic'), { voices: VOICES, copy: COPY, volume, labelPixels }) : null;
 stage.classList.toggle('has-graphic', graphic !== null);
 const mainSquare = graphic ? $('graphic') : $('scopeBox'); // what the background is centred on
 const key = createKey($('key'), volume);
@@ -82,6 +83,7 @@ function measure() {
     scopeRadius: (wheel.width / 2) * feedback * (SCOPE_GEOMETRY.radius / SCOPE_GEOMETRY.viewBoxRadius),
   });
   lanes.resize(dpr);
+  graphic?.resize();
   clock.reset();
 }
 

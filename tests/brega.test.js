@@ -424,4 +424,5 @@ test('a stroke lights its own piece of the kit for as long as it rings, and no l
   assert.ok(eighthSeconds > 0.2, 'the chimbal plays under five strokes a second');
   const STAGE_AREA = (100 / 0.74) * ((100 / 0.74) * (16 / 9)); // the 9:16 stage in the graphic's units (the square is 74 % of its width)
   for (const piece of KIT_PIECES) assert.ok((Math.PI * piece.radius ** 2) / STAGE_AREA < 0.02, `${piece.id} is a small part of the stage`);
+  assert.deepEqual(BREGA.copy.graphics.toms, { agudo: 'agudo', medio: 'médio', grave: 'grave' }); // one name a tom, the readout's
 });

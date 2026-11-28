@@ -1143,13 +1143,18 @@ html:not(.video-export) .read .row .k {
 .has-graphic .below {
   display: flex;
   align-items: center;
-  gap: 3cqw;
+  gap: 2.5cqw;
   flex: 1;
   min-height: 0;
 }
+/* the wheel as the mark: 21cqw leaves the readout the 64.6cqw its widest row needs, in every
+   layout; its numbers and words would render under the stage's label size, so it draws none */
 .has-graphic .below .scope {
-  width: 23cqw;
+  width: 21cqw;
   margin-block: 0;
+}
+.has-graphic .below .scope text {
+  display: none;
 }
 .has-graphic .below .read {
   flex: 1;
@@ -1168,7 +1173,7 @@ html:not(.video-export) .has-graphic .below {
   height: calc(36cqw + min(8cqw, var(--room) * 0.35));
 }
 html:not(.video-export) .has-graphic .below .scope {
-  width: 30cqw;
+  width: 21cqw;
   margin-top: 0;
 }
 html:not(.video-export) .has-graphic .below .read {

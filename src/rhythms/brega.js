@@ -773,7 +773,7 @@ const COPY = {
     label: 'Cifras: o acorde de cada compasso da cena, o que soa agora em destaque. Bateria vista de cima: cada peça acende quando é tocada.',
     chords: 'cifras',
     kit: 'bateria',
-    toms: { agudo: 'tom 1', medio: 'tom 2', grave: 'tom 3' },
+    toms: { agudo: READ.high, medio: READ.middle, grave: READ.low }, // the names the Virada's readout gives them
   },
   description: 'Brega do Recife: o xacumbum da bateria, baixo, teclado, cordas, guitarra em terças e metais, um de cada vez e depois juntos, em lá menor.', // the page's search and preview description
   themeColor: BREGA_PALETTE.ground, // the page's theme-color: the rhythm's own ground colour
